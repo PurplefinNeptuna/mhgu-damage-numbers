@@ -2,8 +2,10 @@
 
 Development targets the preserved MHGU 1.4.0 Switch executable and local patched
 Forge. Phase 1 combat-binding research is in progress. The host display core and
-selected native routines have passed fixture checks. No damage-number NRO has
-been built or installed, and no in-game behavior is validated yet.
+selected native routines have passed fixture checks. An ARM32 diagnostic capture
+NRO has been built and inspected. Its required opt-in flag is absent, it is not
+installed, and no in-game behavior is validated yet. The capture trial procedure
+is in [CAPTURE_TRIAL.md](CAPTURE_TRIAL.md).
 
 ## Accepted behavior
 
@@ -78,23 +80,42 @@ object pointers in the render list.
 ```bash
 python3 scripts/test_damage_numbers.py
 tools/mwc-analysis-venv/bin/python scripts/damage_numbers_arm_probe.py
+python3 scripts/build_damage_numbers_gateway.py
+tools/mwc-analysis-venv/bin/python scripts/damage_numbers_gateway_probe.py
+python3 scripts/build_damage_numbers_capture.py
+tools/mwc-analysis-venv/bin/python scripts/damage_numbers_capture_probe.py
 ```
 
 The first command passed 416 host checks with AddressSanitizer and UBSan.
 LeakSanitizer is disabled because thread enumeration fails in the ptraced
 sandbox; the tested core uses fixed storage.
+The mailbox also passed overflow/wrap checks and eight-producer stress with
+160,000 published packets under AddressSanitizer/UBSan and ThreadSanitizer.
+Each native thread has its own mailbox; the render side has one enforced
+consumer. Overwritten records are counted and never combined.
 
 The second passed 438 original ARM32 damage-normalization checks, 144 camera
-checks, 92 ownership checks and 502 critical-outcome checks. It uses Unicorn
+checks, 92 ownership checks, 502 critical-outcome checks and 10,464 weapon-feedback
+checks across 3,488 native getter calls. It uses Unicorn
 2.1.4's ARM_MAX CPU model for ARMv8 AArch32 floating-point instructions and
 validates selected copied native routines
 against explicit fixtures and the actual C++ helpers. It stubs the named
 scene/quest services and tangent import documented in its report. These checks
 do not establish collision capture, active viewport selection, hook safety,
-multiplayer attribution or Eden acceptance.
+multiplayer attribution or Eden acceptance. The feedback getter combines both
+active attacks; its aggregate result is not assigned as a bounce flag to every
+individual hit.
 
-Generated research inputs and logs stay in `work/damage-numbers/`; the native
-fixture report is `build/damage-numbers/native-probe.json`. Originals, saves,
+The compiled gateway passed 9,031 checks across 1,769 calls. These include 1,440
+original melee-HZV queries with a mid-routine tap, complete register/float/flag
+preservation, nested scopes and scope-capacity bypass. The capture NRO probe
+passed 186 checks using explicit SDK/kernel fixtures and a synthetic collision
+body that calls the original HZV and damage routines. The actual collision
+traversal, raw/element assembly, live SDK/TLS behavior, camera selection and
+Eden acceptance remain unvalidated.
+
+Generated research inputs and logs stay in `work/damage-numbers/`; native reports
+and the capture candidate stay in `build/damage-numbers/`. Originals, saves,
 installed packages and emulator settings remain untouched by these commands.
 The saved DTI results are reused; the dumper must remain removed.
 

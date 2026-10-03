@@ -86,6 +86,80 @@ the matrices actually sent to rendering, identify the gameplay viewport and
 map its rectangle to Forge's display coordinates. Reading only camera FOV or
 an unblended matrix is insufficient.
 
+Final upload routine `0x885844` receives distance in `s0`, render context in
+`r0`, final view/projection pointers in `r1/r2`, and the integer rectangle
+pointer in `r3`. Its first eight original bytes are a register push and frame
+pointer adjustment. The capture candidate copies these matrices only inside
+the viewport-render scope when the camera has the saved `uQuestCamera` vtable
+`main+0x1730d0c`. This is a camera candidate, pending live selection and render
+scale checks.
+
+## Hitzone and bounce capture
+
+The melee routine's tap at `0x16dd7c`, immediately before the selected-type
+store, exposes cut/blunt selection in `r0` and adjusted cut/blunt HZVs in
+`s20/s22`. Weighted cut/blunt ties select cut. The native fixture verifies the
+tap and C++ extraction through 1,440 combinations of hitzones, attack weights,
+monster state, player adjustment and part modifiers. Using its returned damage
+factor times 100 would lose the unweighted HZV for mixed attacks.
+
+The candidate scopes the tap within `0x16dc6c` and the matching monster impact.
+The shot helper `0x178660` supplies its physical-factor output pointer as the
+second stack argument; only attacks with native flag `+0x30 & 1` have a shot
+HZV. The compiled capture fixture covers 44/45/80 and the no-physical-HZV case.
+
+Getter `0x2a87a8` resolves weapon feedback from attacks at `player+0x3020` and
+`player+0x30d8`. Each has active byte `+5`, raw effect `+6` and flags `+0x30`.
+The getter selects the higher valid effect; it merges flags from the second
+attack only when that effect is selected. It then applies Mind's Eye,
+Steady Hand/Nightcloak variants, Blind Eye's native attack counter and status,
+stance and move-specific exceptions. Native skill arguments match the imported
+`/skills.h/SkillType` annotations. The read-only enum exporter does not establish
+other imported annotations as correct.
+
+The getter and `feedback.h` agree across 3,488 calls, with unchanged fixture
+player memory and preserved callee-saved registers. Its aggregate return is
+insufficient for assigning per-hit bounce. The candidate records the native
+return, both attack identities, active/effect/critical bytes, flags and attack
+counter for live correlation. No temporary player-buffer edits or repeat RNG
+rolls are used.
+
+## Capture candidate and ABI
+
+`gateway.S` preserves all `r0-r12`, `d0-d31`, APSR flags and FPSCR in a
+328-byte frame. Native stack arguments stay at their original address. Around
+hooks redirect the saved caller LR through an owned native TLS scope; before-only
+taps return directly to their trampoline. Leaf return LR is restored, while
+LR values computed by native callees are retained. Native and compiled fixtures
+cover nested scopes and bounded-capacity failures.
+
+The candidate uses a private 4 KiB CodeMemory arena and one SDK TLS slot;
+Forge's shared context slot and legacy arena are not reused. Six additional
+exact displaced-instruction words extend the project's transaction whitelist.
+The installer checks the original 64-byte windows, title ID and GNU build note,
+then prepares every trampoline before publishing any hook. It runs only from
+Forge's boot callback before `original_sApp_run`; no hot install/remove is
+provided. Existing Forge, Better Input and modern-controls sites are excluded.
+
+Each of 16 TLS contexts has 64 scopes and a 256-record mailbox. Scope overflow
+quarantines capture until the outermost accepted scope returns. Pool exhaustion
+stores a per-thread bypass sentinel. Payload words and tickets are lock-free
+32-bit atomics; producer and consumer never wait or retry. The render consumer
+rejects a competing thread. External hook changes disable capture while retaining
+callable originals; restart is required.
+Shared diagnostic increments use one weak compare-and-swap attempt and are
+best-effort under contention. Context allocation tries each of 16 slots once;
+it never spins on a contested slot. Mailbox payloads and per-thread serials
+remain independent of these approximate counters.
+
+The compiled NRO fixture uses explicit SDK/kernel bridges and a synthetic
+collision body. It executes original normalization, melee/shot HZV and feedback
+code with the real compiled capture adapter, checks local ownership in all
+four session slots, rejects healing/nonpositive contributions, preserves
+individual hits and exercises overflow/bypass and patch monitoring. Camera
+copying is tested with supplied scope/input values. These fixtures do not execute
+the original collision traversal, SDK or renderer.
+
 ## Open gates
 
 - Actual collision-to-normalization correlation, distinct hit identity,
@@ -102,8 +176,9 @@ an unblended matrix is insufficient.
 - ABI-preserving hooks, private arena transaction/rollback, thread ownership,
   imports, ARM32 build and runtime capture trial.
 
-No hook site is approved for runtime use yet. The Phase 1 runtime gate remains
-open, and the host core is a foundation for subsequent integration.
+The candidate is prepared for review and a separately authorized diagnostic
+trial. The Phase 1 runtime gate remains open. No floating-number renderer or
+optional-source acceptance is claimed.
 
 ## Reproduce research
 
@@ -111,6 +186,7 @@ open, and the host core is a foundation for subsequent integration.
 python3 scripts/damage_numbers_research.py inspect
 python3 scripts/damage_numbers_research.py export 0x170968 0x9d6f8 0x97ddc
 python3 scripts/damage_numbers_research.py scan 0x3ac4 0x3ad1
+python3 scripts/damage_numbers_research.py enum /skills.h/SkillType
 ```
 
 Exports preserve original bytes beside imported instruction bytes and caller

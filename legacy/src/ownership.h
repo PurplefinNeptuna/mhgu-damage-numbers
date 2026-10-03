@@ -8,7 +8,7 @@ template<class Memory> class Ownership {
     Memory& m;
     uint32_t players() const { return m.cell(0x1885b58); }
 public:
-    explicit Ownership(Memory& memory):m(memory) {}
+    constexpr explicit Ownership(Memory& memory):m(memory) {}
     uint32_t local_player() const {
         const uint32_t session=m.cell(0x188ca48), table=players();
         if(!m.readable(session,0x34)||!m.readable(table,0x2c))return 0;
