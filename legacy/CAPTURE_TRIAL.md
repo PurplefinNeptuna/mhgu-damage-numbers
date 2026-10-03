@@ -6,7 +6,7 @@ The prepared package is
 `build/damage-numbers/capture/candidate-manifest.json` records its hash, native
 signatures, imports, source hashes and preserved Forge/SDK inputs.
 
-R8 starts automatically when Forge loads the enabled package in Eden. Both
+R9 starts automatically when Forge loads the enabled package in Eden. Both
 combat and camera hooks start together; no `.enabled` files are needed. Old
 capture/camera flags are ignored and may be removed while Eden is closed.
 The builder stages the NRO without installing it or creating activation files.
@@ -78,7 +78,7 @@ bounded. The SDK clock frequency is checked before hooks/TLS are allocated.
 ## Small manual check
 
 With Eden closed, replace only the installed damage-number NRO with the staged
-r8 candidate. The two old activation files are unnecessary. Keep the current
+r9 candidate. The two old activation files are unnecessary. Keep the current
 Forge, Better Input and emulator settings.
 
 Start normally and land one hit to confirm automatic startup. For the untested
@@ -112,6 +112,6 @@ Its collision body, SDK services and kernel bridges are explicit fixtures;
 live per-hit accuracy and untested attack cases remain pending. R4 presentation,
 r5 palico projectiles and white physical-HZV damage passed the user's trial.
 
-R8 keeps the same eight hook sites and one private CodeMemory arena. Player-save
-INI persistence, conservative gray bounce and optional-source runtime acceptance
+R9 keeps the same eight hook sites and one private CodeMemory arena. Player-save
+INI persistence, compact plugin-row appearance, conservative gray bounce and optional-source runtime acceptance
 remain pending.

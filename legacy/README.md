@@ -81,7 +81,9 @@ events. Context changes clear the queue and visible list.
 
 Open **Damage numbers** in Forge. Changes apply immediately. **Save settings**
 keeps them after restart; **Restore defaults** returns the accepted size,
-duration and source switches. Diagnostics are collapsed by default. Settings
+duration and source switches. R9 uses a compact, unframed tree row matching
+**Better Inputs Config**, closed by default, with a nested compact diagnostics
+row. Floating numbers continue while the settings row is closed. Settings
 use `savedata:/damage_numbers.ini`, beside `better_inputs.ini` in the current
 player's save container. `damage_numbers_backup.ini` retains the previous valid
 configuration for recovery from a partial write. Both are readable INI files,

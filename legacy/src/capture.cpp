@@ -318,7 +318,7 @@ void capture_install() {
     }
     __atomic_store_n(&active,1,__ATOMIC_RELEASE);
     status = "Damage numbers ready";
-    forge_log_info("[damage-numbers] Capture r8: %u hooks; automatic startup; one private arena/TLS slot; hit log limit 256",hook_count);
+    forge_log_info("[damage-numbers] Capture r9: %u hooks; automatic startup; one private arena/TLS slot; hit log limit 256",hook_count);
 }
 void capture_monitor() {
     if (!load(active)) return;
@@ -488,8 +488,10 @@ void capture_render() {
     }
     ImDrawList_PopClipRect(draw);
 }
+struct PanelTreeScope { ~PanelTreeScope() { igTreePop(); } };
 void capture_panel() {
-    if (!igCollapsingHeader_TreeNodeFlags("Damage numbers",ImGuiTreeNodeFlags_DefaultOpen)) return;
+    if (!igTreeNode_Str("Damage numbers##damage-numbers")) return;
+    const PanelTreeScope panel_tree;
     igTextUnformatted(load(patch_error) ? "Capture disabled: external code change; restart required" : status,nullptr);
     if (!load(active)) return;
     capture_consume();
@@ -509,8 +511,9 @@ void capture_panel() {
     if (changed && display_model.configure(next)) settings_changed();
     if (igButton("Save settings",{0,0})) settings_save(display_model.config());
     igTextUnformatted(settings_status(),nullptr);
-    if (!igCollapsingHeader_TreeNodeFlags("Diagnostics##damage-numbers",0)) return;
-    igTextUnformatted("Capture r8: automatic startup; camera and combat hooks active.",nullptr);
+    if (!igTreeNode_Str("Diagnostics##damage-numbers")) return;
+    const PanelTreeScope diagnostics_tree;
+    igTextUnformatted("Capture r9: automatic startup; camera and combat hooks active.",nullptr);
     igTextUnformatted("Shared counters are best-effort under contention; per-hit records remain separate.",nullptr);
     igText("Collision %u; normalization %u; feedback %u; viewport %u",load(calls[0]),load(calls[1]),load(calls[2]),load(calls[3]));
     igText("Camera uploads %u; HZV taps %u; melee queries %u; shot queries %u",load(calls[4]),load(calls[5]),load(calls[6]),load(calls[7]));

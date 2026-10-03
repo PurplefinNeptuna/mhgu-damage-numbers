@@ -322,3 +322,29 @@ With Eden closed, replace only the damage-number NRO with r8. In Forge, save
 a small size change and restart once to check that it remains and creates
 `damage_numbers.ini` beside `better_inputs.ini`. Restore defaults and save
 afterward. No existing SD settings need to be copied.
+
+## 2026-10-04: r9 compact plugin rows staged
+
+The user clarified that the plugin should match the small Better Inputs Config
+row under Forge's Plugin UI. R9 replaces both framed collapsing headers with
+compact, unframed `igTreeNode_Str` rows, closed by default. The inspected Better
+Input binary imports this same API and `igTreePop`; the pinned cimgui wrapper
+forwards it to `ImGui::TreeNode`. The outer row and nested diagnostics use
+plugin-specific IDs and scoped TreePop guards, including early-return paths.
+
+292 compiled NRO checks passed with explicit SDK/kernel/Forge/ImGui fixtures.
+The added UI checks cover the compact API imports, a closed row omitting controls
+and save actions, floating numbers while closed, nested tree balancing, inactive
+capture and a different render-consumer thread. Actual Eden row appearance
+remains a manual check. No gameplay hook, settings format/path or accepted
+floating-number appearance changed.
+
+Staged NRO SHA-256:
+`58914dd47c797356c892696cc6bdc9bd60543afeb5958f31e91bc40bb0f524fe`.
+The installed r8 NRO remains
+`aa29f54586068b1b2fdb895beb91cb61b48198df792d585ecafe93e4b79bb0f1`.
+Replace only the NRO while Eden is closed, then check that Damage numbers uses
+the same small row as Better Input and opens/closes normally.
+
+The workspace rules in AGENTS.md and FORGE_PLUGIN_GUIDELINES.md now specify
+compact unframed tree rows, paired pops and independent gameplay callbacks.
