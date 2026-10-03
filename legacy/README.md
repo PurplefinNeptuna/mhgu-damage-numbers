@@ -7,11 +7,14 @@ show 23 separate records with zero capture drops or read failures.
 
 R4 adds a floating-number preview through Forge's free-render callback, using
 captured final camera matrices, outlined digits, HZV colors, native critical
-lines, pop/drift/fade and separate multi-hit lanes. It is built and fixture-tested;
-its live projection check is pending. The default candidate keeps camera hooks
-and the preview off. A separate nonempty camera flag enables both. Bounce gray,
-secondary source classification, optional sources and settings persistence remain
-pending. Earlier startup failures and the nonempty-flag correction are recorded in
+lines, pop/drift/fade and separate multi-hit lanes. The user accepts player/palico
+melee placement, animation and size; those values are unchanged in r5. The r4 log
+captured 51 hits, including 18 palico child attacks omitted by the preview filter.
+R5 admits their observed source tags only with resolved local-palico ownership.
+Its boomerang/barrel popup check is pending. The default candidate keeps camera
+hooks and the preview off. A separate nonempty camera flag enables both. Bounce
+gray, other source classification, optional sources and settings persistence
+remain pending. Earlier startup failures and the nonempty-flag correction are recorded in
 [RUNTIME.md](RUNTIME.md) and [CAPTURE_TRIAL.md](CAPTURE_TRIAL.md).
 
 ## Accepted behavior
@@ -75,8 +78,8 @@ reads, the native local-session index and a palico's current work pointer.
 `camera.h` converts copied native view/projection matrices into the display's
 matrix convention. Neither helper identifies an active gameplay context by
 itself; those runtime gates remain required. `presentation.h` emits layout
-commands. The r4 preview renders outlined text through Forge; camera selection
-and placement still need the user's in-game check.
+commands. The preview renders outlined text through Forge; the user accepted
+camera projection and melee impact placement in the r4 trial.
 
 Research evidence and open bindings are listed in [RESEARCH.md](RESEARCH.md).
 The runtime adapter must serialize model access without taking game locks or
@@ -96,7 +99,7 @@ tools/mwc-analysis-venv/bin/python scripts/damage_numbers_sdk_tls_probe.py
 python3 scripts/test_damage_numbers_romfs_flag.py
 ```
 
-The first command passed 435 host checks with AddressSanitizer and UBSan.
+The first command passed 441 host checks with AddressSanitizer and UBSan.
 LeakSanitizer is disabled because thread enumeration fails in the ptraced
 sandbox; the tested core uses fixed storage.
 The mailbox also passed overflow/wrap checks and eight-producer stress with
@@ -119,10 +122,11 @@ individual hit.
 The compiled gateway passed 9,031 checks across 1,769 calls. These include 1,440
 original melee-HZV queries with a mid-routine tap, complete register/float/flag
 preservation, nested scopes and scope-capacity bypass. The capture NRO probe
-passed 238 checks using explicit SDK/kernel fixtures and a synthetic collision
+passed 248 checks using explicit SDK/kernel fixtures and a synthetic collision
 body that calls the original HZV and damage routines. The actual collision
 traversal, raw/element assembly and camera selection remain unvalidated by these
-fixtures. The user confirmed that r2 starts and captures damage; individual hit
+fixtures. R4's camera projection, animation and size passed the user's melee
+trial. The user confirmed that r2 starts and captures damage; individual hit
 accuracy still needs independent comparison. R3 history retention and hit logging
 are confirmed by the user's village screenshot and retained Eden log.
 

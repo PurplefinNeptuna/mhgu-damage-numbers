@@ -116,7 +116,25 @@ callback, which runs even when the Forge window is closed. The inspected ImGui
 font cache rounds requested sizes, and Forge's NVN backend advertises dynamic
 texture support. Outlined digits use eight black offset passes plus the color
 pass; critical lines have an outline and reserved vertical lane space. Actual
-font rasterization, GPU output and impact alignment still need the r4 trial.
+font rasterization, GPU output and impact alignment subsequently passed the
+user's r4 melee visual check at a logged 1920x1080 viewport/display.
+
+The r4 log has 51 finalized hits: 18 local hunter hits and 33 local-palico hits.
+Of the palico hits, 15 have tags `0x030403`, 15 have `0x030402` and three have
+`0x030802`. The last two families were rejected by r4's direct-primary filter;
+their total equals the panel's 18 rejected hits. The user reports missing
+boomerang and thrown-barrel popups while melee works. Tags pack primary kind
+`+0x10`, source subtype `+0x6d` and secondary owner kind `+0x6e`, so the rejected
+families have primary kind 2 and secondary palico kind 3. Ownership was already
+resolved through the secondary pointer and current palico master work.
+
+R5 admits just those two observed families with `Owner::LocalPalico`, retaining
+the producer ownership and healing gates. This fixes the known display exclusion
+without generalizing to all projectile/object sources. Boomerang-versus-barrel
+subtype labels are inferred from the observed actions and HZV/effect patterns;
+the next manual check covers both attacks. Unknown physical HZV remains white.
+Saved DTI `cOtWeaponBase` separately exposes boomerang attack, element and affinity
+properties; no equipment or damage data was edited for this fix.
 
 ## Hitzone and bounce capture
 
@@ -245,8 +263,8 @@ needed for this packaging correction.
 
 R3's local hunter/palico capture, logging and diagnostic retention passed the
 user's trial. The Phase 1 binding gate remains open for the other cases above.
-R4's camera/renderer preview is prepared for a short visual trial; live
-projection, optional sources and per-hit bounce are not yet accepted.
+R4's melee projection, animation and size passed the user's visual trial. R5's
+palico child projectile popups, optional sources and per-hit bounce remain open.
 
 ## Reproduce research
 

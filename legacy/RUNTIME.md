@@ -161,3 +161,41 @@ ARM32 draw arguments; they do not execute ImGui font rasterization or GPU work.
 One short normal solo quest is the pending live check: hit placement while
 turning the camera and normal disappearance after the quest. No installation,
 activation, save edit or emulator-setting change was performed to prepare r4.
+
+## 2026-10-03: r4 melee visuals accepted; palico projectile exclusion
+
+The user reports that player and palico melee popups work well, with accepted
+impact positioning, animation and size. They report no popup for palico
+boomerangs or thrown barrels and have not encountered positive/negative critical
+outcomes. The village screenshot retains 51 hits, 18 preview rejections and zero
+scope/pool drops, orphan contributions, overwritten records or read failures.
+
+The retained log contains 18 hunter and 33 local-palico records. Source tag
+counts are `000100`: 18, `030403`: 15, `030402`: 15 and `030802`: 3. The latter
+18 records are captured correctly as local palico but rejected by r4's preview
+source filter. HZVs are -1, 75 and 80; critical bytes are all zero. The camera
+log records a 1920x1080 native rectangle and matching Forge display, with four
+distinct projected hits. Back in the village, the panel shows no active camera
+rectangle and zero visible numbers. The screenshot is diagnostic evidence;
+the user's report establishes the actual in-combat visual result.
+
+Evidence is retained in
+`backups/damage-numbers/capture-r4-visual-20261003-105730/`: log, supplied screenshot,
+installed package snapshot and `runtime-evidence.json`. Log SHA-256:
+`67b2eb0c39efa5bad82967e32e7aae4f3da1165a1db2eab877c91b9e90d84ddf`.
+Installed r4 NRO SHA-256:
+`4e4e1ff78c884f574aa8e5e8d9ac31ffe59d01e4eb6e424fa2e3908d4d89e218`.
+Both activation flags are two-byte `1` plus newline files.
+
+R5 admits only tags `0x030402` and `0x030802` when the resolved owner is the
+local palico. Camera mapping, size, position, animation, lifetime and all combat
+hooks remain unchanged. Compiled fixtures exercise secondary palico ownership,
+white unknown-HZV barrel-like damage, physical-HZV projectile color, remote-palico
+exclusion, unknown-source omission and healing rejection. Host checks: 441;
+compiled NRO checks: 248. Its projectile display check is pending.
+
+The next manual check is only palico boomerang and thrown-barrel popups during
+ordinary play. A 100% save or save modification is unnecessary for this check;
+critical-marker runtime acceptance remains pending until suitable equipment is
+available. No installed package, setting, save or presentation value was changed
+while preparing the fix.

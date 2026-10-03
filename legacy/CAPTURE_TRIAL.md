@@ -6,7 +6,7 @@ The prepared package is
 `build/damage-numbers/capture/candidate-manifest.json` records its hash, native
 signatures, imports, source hashes and preserved Forge/SDK inputs.
 
-This is capture/preview r4, prepared after the successful r3 retention trial. The build
+This is capture/preview r5, prepared after the successful r4 melee visual trial. The build
 command only stages files and does not install them. Its candidate-package opt-in file,
 `romfs/nativeNX/forge/damage-numbers-capture.enabled`, is absent. Without that
 file the candidate stays inactive and allocates no capture hooks, arena or TLS
@@ -25,7 +25,7 @@ See [RUNTIME.md](RUNTIME.md) for the reproduced layout and startup failure.
   It allocates one SDK TLS slot, separate from Forge's context facilities.
 - Camera hooks and floating numbers are off by default. The separate nonempty
   `damage-numbers-camera.enabled` flag adds the viewport/upload hooks and enables
-  the r4 projection preview. Its prepared template is under `activation/`.
+  the projection preview. Its prepared template is under `activation/`.
 - Captures positive native monster-damage contributions for the local
   hunter/Prowler and their palicoes. Healing type `0x1d`, nonpositive values and
   other hunters/palicoes are excluded. Values include accompanying elemental
@@ -46,9 +46,10 @@ See [RUNTIME.md](RUNTIME.md) for the reproduced layout and startup failure.
   Physical HZV selects white below 45 or orange-yellow at least 45; unknown HZV
   stays white. Native positive/negative critical outcomes add an outlined line
   above/below. Multi-hit lanes reserve space for those lines.
-- The first preview displays directly owned hunter/Prowler/palico attack kinds
-  0 and 3. Secondary ownership stays in diagnostics pending source classification.
-  Gray bounce coloring and optional sources are not enabled in this preview.
+- Displays directly owned hunter/Prowler/palico attack kinds 0 and 3, plus the
+  observed palico child attack tags `0x030402` and `0x030802` when ownership
+  resolves to the local palico. Other secondary sources stay diagnostic. Gray
+  bounce coloring and optional sources are not enabled in this preview.
 - Uses only fresh (under 200 ms), scoped quest-camera matrices. A full-screen
   zero-origin native rectangle with matching display aspect maps to Forge's
   swapchain size. Unrecognized layouts hide the preview. Player/camera changes
@@ -76,14 +77,13 @@ bounded. The SDK clock frequency is checked before hooks/TLS are allocated.
 
 ## Proposed bounded procedure
 
-For the user, replace the capture NRO with r4 while Eden is closed. Keep the
-existing nonempty capture flag and copy the prepared nonempty camera flag into
-the same installed `romfs/nativeNX/forge/` folder. Play one short solo quest with
-Forge's menu closed. Observe whether numbers appear near impacts, stay aligned
-as the camera turns, and disappear normally after hits and on returning to the
-village. The retained panel/log provides diagnostics if numbers are absent or
-misplaced. Report that result before another restart. No special equipment,
-critical/bounce setup or exhaustive weapon checklist is needed for this check.
+For the user, replace only the capture NRO with r5 while Eden is closed. Keep
+both existing nonempty flags. In one ordinary short solo quest, watch whether
+palico boomerangs and thrown barrels now produce separate popups on impact.
+Position, animation and size were already accepted and are unchanged. No repeat
+of the melee visual test or 100% save is needed. Critical checks can wait until
+suitable equipment is available naturally. Report the projectile result before
+another restart so the current log can be preserved.
 
 The later development procedure below covers the remaining research cases; it
 is not an exhaustive checklist for this retention check.
@@ -134,4 +134,5 @@ These commands use the existing offline compiler container and pinned Unicorn
 environment. They do not install a package or create the opt-in flag. The compiled
 capture report is `build/damage-numbers/capture/compiled-capture-probe.json`.
 Its collision body, SDK services and kernel bridges are explicit fixtures;
-live hit correlation, camera selection and Eden success remain pending.
+live per-hit accuracy, r5 projectile display and untested attack cases remain
+pending. R4 melee projection and presentation passed the user's visual trial.

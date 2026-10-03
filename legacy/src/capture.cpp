@@ -309,7 +309,7 @@ void capture_install() {
     __atomic_store_n(&active,1,__ATOMIC_RELEASE);
     status = camera_enabled ? "Capture active; floating-number preview enabled (validation pending)" :
         "Diagnostic capture active; camera/number preview opt-in absent";
-    forge_log_info("[damage-numbers] Capture r4: %u hooks; camera/preview %s; one private arena/TLS slot; hit log limit 256",hook_count,camera_enabled ? "enabled" : "off");
+    forge_log_info("[damage-numbers] Capture r5: %u hooks; camera/preview %s; one private arena/TLS slot; hit log limit 256",hook_count,camera_enabled ? "enabled" : "off");
 }
 void capture_monitor() {
     if (!load(active)) return;
@@ -378,7 +378,7 @@ void capture_consume() {
             recent[recent_count++]=r;
             if (camera_enabled) {
                 float captured_at=0;
-                if (player && r.player==player && preview_source(r.source_tags) &&
+                if (player && r.player==player && preview_source(r.source_tags,Owner(r.actor)) &&
                     preview_fresh(r.tick,now,tick_frequency,display_model.config().lifetime) &&
                     preview_seconds(r.tick,tick_origin,tick_frequency,captured_at)) {
                     Critical critical=Critical::None;
@@ -472,8 +472,8 @@ void capture_panel() {
     igTextUnformatted(load(patch_error) ? "Capture disabled: external code change; restart required" : status,nullptr);
     igTextUnformatted("Projection preview; native damage processing is unchanged.",nullptr);
     if (!load(active)) return;
-    igTextUnformatted(camera_enabled ? "Capture r4: camera and floating-number preview enabled." :
-        "Capture r4: camera hooks off; combat capture only.",nullptr);
+    igTextUnformatted(camera_enabled ? "Capture r5: camera and floating-number preview enabled." :
+        "Capture r5: camera hooks off; combat capture only.",nullptr);
     capture_consume();
     Context* current=context();
     if (!current || load(consumer)!=uint32_t(current)) {
@@ -495,7 +495,7 @@ void capture_panel() {
     igText("Quest camera rectangle: %d %d %d %d",last_camera.rect[0],last_camera.rect[1],last_camera.rect[2],last_camera.rect[3]);
     igText("Preview: camera records %u; visible last frame %u; frames %u; rejected hits %u",
         camera_records,preview_drawn,preview_frames,preview_rejected);
-    igTextUnformatted("Preview uses direct owned attacks; per-hit bounce and other sources remain pending.",nullptr);
+    igTextUnformatted("Preview includes local-palico projectiles; per-hit bounce and other sources remain pending.",nullptr);
     igSeparator();
     igTextUnformatted("Last eight hits remain across quest/village transitions until restart.",nullptr);
     igText("Captured hits %u; first %u written to Eden log (maximum 256 per restart)",captured_hits,

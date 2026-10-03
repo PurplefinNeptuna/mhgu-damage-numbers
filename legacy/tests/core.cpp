@@ -140,8 +140,12 @@ static void preview() {
     check(!preview_fresh(origin,origin+3840000,19200000,.2f),"camera stale at 200ms is hidden");
     check(!preview_fresh(origin,origin-1,19200000,.2f),"future camera tick is hidden");
     check(!preview_fresh(0,origin,19200000,.2f),"absent camera is hidden");
-    check(preview_source(0x000100)&&preview_source(0x030403),"direct hunter and palico sources accepted");
-    check(!preview_source(0x000101)&&!preview_source(0x030402),"secondary ownership stays diagnostic in the first preview");
+    check(preview_source(0x000100,Owner::LocalPlayer)&&preview_source(0x030403,Owner::LocalPalico),"direct hunter and palico sources accepted");
+    check(!preview_source(0x000101,Owner::LocalPlayer),"unclassified hunter secondary ownership stays diagnostic");
+    check(preview_source(0x030402,Owner::LocalPalico)&&preview_source(0x030802,Owner::LocalPalico),"observed local-palico child projectile families accepted");
+    for (Owner owner:{Owner::LocalPlayer,Owner::RemotePlayer,Owner::RemotePalico,Owner::Unknown})
+        check(!preview_source(0x030402,owner)&&!preview_source(0x030802,owner),"palico projectile exception requires resolved local-palico ownership");
+    check(!preview_source(0x030902,Owner::LocalPalico),"unclassified palico objects stay diagnostic");
     check(imgui_color(0xffbf3f,1)==0xff3fbfff,"orange-yellow converts to ImGui ABGR");
     check(imgui_color(0xffffff,.5f)==0x80ffffff,"fade converts to rounded alpha");
     check(imgui_color(0x9a9a9a,-1)==0x009a9a9a&&imgui_color(0x9a9a9a,2)==0xff9a9a9a,"opacity bounds preserve RGB");

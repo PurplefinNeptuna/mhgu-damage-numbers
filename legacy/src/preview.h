@@ -25,11 +25,13 @@ inline bool preview_fresh(uint64_t tick, uint64_t now, uint32_t frequency, float
     float age=0;
     return tick && preview_seconds(now,tick,frequency,age) && age<limit;
 }
-// Direct hunter/Prowler/palico sources only in this first visual trial. Secondary
-// ownership capture remains diagnostic until projectiles/objects are classified.
-inline bool preview_source(uint32_t tags) {
+// Ownership is already resolved by the capture producer. Admit the two observed
+// local-palico child attack families without admitting other secondary objects.
+inline bool preview_source(uint32_t tags, Owner owner) {
     const uint8_t primary=uint8_t(tags);
-    return primary==0 || primary==3;
+    if (owner!=Owner::LocalPlayer && owner!=Owner::LocalPalico) return false;
+    return primary==0 || primary==3 ||
+        (owner==Owner::LocalPalico && (tags==0x030402 || tags==0x030802));
 }
 inline uint32_t imgui_color(uint32_t rgb, float opacity) {
     if (!finite(opacity)) return 0;
