@@ -5,8 +5,10 @@ Forge. Phase 1 combat-binding research is in progress. The host display core and
 selected native routines have passed fixture checks. An ARM32 diagnostic capture
 NRO has been built and inspected. The first enabled candidate caused Eden to
 exit before the main menu in the user's trial. Recovery r2 corrects the SDK TLS
-setter ABI and leaves camera hooks off by default. This rebuilt candidate is
-prepared but not installed; live capture is still unvalidated. See
+setter ABI and leaves camera hooks off by default. Its second startup trial also
+failed: the empty activation file can shadow Forge's font through Eden's RomFS
+layout. The prepared activation file now contains `1` and a newline. Live capture
+and startup with that correction remain unvalidated. See
 [RUNTIME.md](RUNTIME.md) and [CAPTURE_TRIAL.md](CAPTURE_TRIAL.md).
 
 ## Accepted behavior
@@ -87,6 +89,7 @@ tools/mwc-analysis-venv/bin/python scripts/damage_numbers_gateway_probe.py
 python3 scripts/build_damage_numbers_capture.py
 tools/mwc-analysis-venv/bin/python scripts/damage_numbers_capture_probe.py
 tools/mwc-analysis-venv/bin/python scripts/damage_numbers_sdk_tls_probe.py
+python3 scripts/test_damage_numbers_romfs_flag.py
 ```
 
 The first command passed 416 host checks with AddressSanitizer and UBSan.
@@ -120,6 +123,11 @@ Eden acceptance remain unvalidated.
 The original SDK getter/setter probe passed 256 ABI checks with synthetic thread
 storage. The compiled fixture uses a nonzero return register for the void setter
 and checks both the six-hook recovery default and the eight-hook camera opt-in.
+
+The RomFS model reproduces the zero-byte flag selecting padding at Forge's font
+offset using the inspected dump/listed-package metadata and Eden `d16735f5b6`
+layout logic. Absent and nonempty flags retain the font header. This is an offline
+layout check; the corrected activation file still needs a startup test.
 
 Generated research inputs and logs stay in `work/damage-numbers/`; native reports
 and the capture candidate stay in `build/damage-numbers/`. Originals, saves,

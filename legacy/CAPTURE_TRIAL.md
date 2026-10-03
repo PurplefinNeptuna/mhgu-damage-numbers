@@ -6,12 +6,18 @@ The prepared package is
 `build/damage-numbers/capture/candidate-manifest.json` records its hash, native
 signatures, imports, source hashes and preserved Forge/SDK inputs.
 
-This is recovery r2, rebuilt after the first enabled candidate made Eden exit
-before the main menu. The rebuilt package is not installed. Its opt-in file,
+This is recovery r2, installed manually for the second startup trial. The build
+command only stages files and does not install them. Its candidate-package opt-in file,
 `romfs/nativeNX/forge/damage-numbers-capture.enabled`, is absent. Without that
 file the candidate stays inactive and allocates no capture hooks, arena or TLS
 slot. Creating the flag and installing the package require the separately
 authorized runtime trial from the accepted plan.
+
+The activation file must contain text, such as `1` followed by a newline.
+Do not use an empty RomFS file: on Eden `d16735f5b6`, it can share the following
+font's offset and cause its data to be replaced by padding. A prepared nonempty
+file is at `build/damage-numbers/capture/activation/damage-numbers-capture.enabled`.
+See [RUNTIME.md](RUNTIME.md) for the reproduced layout and startup failure.
 
 ## What the enabled candidate does
 
@@ -46,18 +52,16 @@ one per slot, and do not retry a contested slot.
 
 ## Proposed bounded procedure
 
-For the user, the recovery check is just startup: replace the old installed NRO
-with this candidate while the game is closed, retain the capture opt-in file,
-leave the camera opt-in absent, then restart. Open Forge's **Plugin UI** and
-check the capture status. Report whether the main menu loads; a screenshot of
-the status panel is enough if it does. No quest is needed for this retry.
+For the user, the next check is just startup: keep the r2 NRO, put `1` in the
+installed capture opt-in file while the game is closed, leave the camera opt-in
+absent, then restart. Report whether the main menu loads. No quest is needed.
 
 The later development procedure below remains pending until startup works.
 
 1. After authorization, confirm Eden is closed and recheck its package list,
    activation configuration and the preserved Forge/Better Input hashes.
    Preserve saves and the current Eden log in workspace `backups/`.
-2. Stage a separate temporary package with the exact reviewed NRO and opt-in
+2. Stage a separate temporary package with the exact reviewed NRO and nonempty opt-in
    file. Keep rollback material outside Eden. Retain the existing emulator
    configuration for this capture trial.
 3. Start the game and inspect Forge's **Damage numbers - capture research**

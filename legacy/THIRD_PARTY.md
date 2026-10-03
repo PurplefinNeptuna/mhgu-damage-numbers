@@ -15,6 +15,12 @@ The private SVC assembly adapts selected pinned libnx ARM32 wrappers. Its MIT
 notice is reproduced below. Unicorn 2.1.4 is used only by workspace fixtures and
 is not linked into the candidate.
 
+`tests/romfs_flag.cpp` is a test-only model of the RomFS layout and concatenation
+logic in Eden revision `d16735f5b6`, derived from `fsmitm_romfsbuild.cpp` and
+`vfs/vfs_concat.cpp`. It retains the yuzu copyright notice and
+GPL-2.0-or-later license identifier. It is not compiled or linked into the NRO.
+Source URLs and fingerprints are in the generated RomFS probe report.
+
 Copyright (c) 2019 Hydrosphere Developers
 
 Permission is hereby granted, free of charge, to any person obtaining a copy

@@ -37,3 +37,31 @@ startup markers identify entry/completion of ImGui setup and the first render
 consumer's TLS setup. The candidate remains diagnostic-only and uninstalled.
 The next manual check is startup and the Forge status panel. A quest test can
 wait until startup works.
+
+## 2026-10-03: r2 startup failure and empty-file reproduction
+
+The user reported another crash. The installed r2 NRO matched SHA-256
+`fc81dad783daa93321aecc7748a65768d0697cd741123f95a3236e211bbcb9d1`.
+Its capture flag was zero bytes and the camera flag was absent. The log confirms
+six hooks and camera capture off. No ImGui setup or render-consumer marker runs.
+At 13.113296 seconds Forge logs a complete `stbtt_GetFontOffsetForIndex`
+assertion in `ImGui_ImplStbTrueType_FontSrcInit`, then the guest process exits.
+
+The log and installed package snapshot are retained in
+`backups/damage-numbers/startup-r2-failure-20261003-090155/`. Log SHA-256:
+`a6bef204de6f9cc3077a7e6d2700db7ee8658a1002a2fd0869f4d85e5131930d`.
+The font SHA-256 is
+`9d0d55a303bfd13b79a87721f65185e93f235e2d77fe398b2dca67ac519915f5`;
+it matches `tools/forge-local/data/fonts/Roboto-Medium.ttf` byte for byte.
+
+The empty capture flag and font receive the same RomFS offset. A model of Eden's
+exact reported revision reproduces its unstable ordering, backward concatenation
+end and padding covering the font. An absent flag and flags of 1, 2 and 8 bytes
+preserve the font header. Source fingerprints, cases and limits are in
+`build/damage-numbers/capture/romfs-flag-probe.json`; details and upstream links
+are in [RESEARCH.md](RESEARCH.md).
+
+The corrected activation template contains `1` and a newline. The r2 NRO is
+unchanged. No installed file, font, emulator setting or save was changed during
+this diagnosis. The next user check is to put text in the existing capture flag
+and confirm that startup reaches the main menu. Its live result remains pending.

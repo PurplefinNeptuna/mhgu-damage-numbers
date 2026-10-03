@@ -175,6 +175,34 @@ individual hits and exercises overflow/bypass and patch monitoring. Camera
 copying is tested with supplied scope/input values. These fixtures do not execute
 the original collision traversal, SDK or renderer.
 
+## Empty RomFS activation-file failure
+
+The second startup log identifies Eden revision `d16735f5b6` and a fatal
+`stbtt_GetFontOffsetForIndex` assertion before capture's ImGui initialization.
+The installed font matches the maintained Forge source byte for byte. The
+installed capture opt-in file was zero bytes.
+
+In that Eden revision, the [RomFS builder](https://github.com/eden-emulator/mirror/blob/d16735f5b6/src/core/file_sys/fsmitm_romfsbuild.cpp)
+aligns file data to 16 bytes, adds a file's length to the next offset, then uses
+an unstable sort comparing offsets only. An empty file and the next file share
+an offset. The [concatenation builder](https://github.com/eden-emulator/mirror/blob/d16735f5b6/src/core/file_sys/vfs/vfs_concat.cpp)
+sets its running end to each entry's offset plus length. When sorting places the
+empty file after the font, this moves the end backward and creates a padding
+entry covering the font. The reader's upper-bound lookup selects that padding.
+
+The offline test models these decisions with the dump and listed-package file
+metadata. It reproduces the capture flag shadowing `Roboto-Medium.ttf` at data
+offset `9203903232`. An absent flag preserves the font there. Giving the flag
+1, 2 or 8 bytes places the font at `9203903248` and preserves its header.
+Listed-package metadata is not proof of current activation; the full emulator
+and guest filesystem were not executed by this fixture. The symptom matches the
+retained startup log. Startup with a nonempty flag remains a manual gate.
+
+The capture build supplies a separate nonempty activation template and rejects
+empty candidate-package files. Both capture and future camera opt-in files must
+contain text. No emulator patch, font replacement or further NRO change is
+needed for this packaging correction.
+
 ## Open gates
 
 - Actual collision-to-normalization correlation, distinct hit identity,
