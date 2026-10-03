@@ -10,7 +10,10 @@ failed: the empty activation file can shadow Forge's font through Eden's RomFS
 layout. With the nonempty activation file, the user confirmed startup, damage
 capture and quest completion. The panel then cleared its records on the quest
 transition. Capture r3 retains the last eight hits across transitions and sends
-the first 256 hits per restart to Eden's log. Its live check is pending. See
+the first 256 hits per restart to Eden's log. The user confirmed r3 works; its
+village screenshot and retained log show 23 separate hunter/palico records with
+zero scope/pool drops, orphan contributions, overwritten records or read failures.
+Quest-to-village retention and live hit logging passed this trial. See
 [RUNTIME.md](RUNTIME.md) and [CAPTURE_TRIAL.md](CAPTURE_TRIAL.md).
 
 ## Accepted behavior
@@ -121,7 +124,8 @@ passed 213 checks using explicit SDK/kernel fixtures and a synthetic collision
 body that calls the original HZV and damage routines. The actual collision
 traversal, raw/element assembly and camera selection remain unvalidated by these
 fixtures. The user confirmed that r2 starts and captures damage; individual hit
-accuracy and r3 history/log retention still need live evidence.
+accuracy still needs independent comparison. R3 history retention and hit logging
+are confirmed by the user's village screenshot and retained Eden log.
 
 The original SDK getter/setter probe passed 256 ABI checks with synthetic thread
 storage. The compiled fixture uses a nonzero return register for the void setter

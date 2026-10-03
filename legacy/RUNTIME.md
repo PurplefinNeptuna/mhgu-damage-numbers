@@ -97,3 +97,34 @@ player, distinct log ordinals, copied values/positions, callback budgets, the
 single log-limit marker, continued panel updates and empty history on restart.
 R3's in-game retention check remains pending. No installed files, emulator
 settings or saves were changed to prepare it.
+
+## 2026-10-03: r3 retention check passed
+
+The user reports that r3 works and supplied a screenshot back in the village.
+It shows 23 captured hits, the last eight retained records, and zero scope drops,
+pool drops, orphan contributions, overwritten records and read failures. There
+were 26 collisions/normalizations, 23 melee HZV queries and three exclusions.
+The panel's 1,340 consumed records include 1,317 feedback records and 23 hits.
+Camera hooks remained off.
+
+The current Eden log contains all 23 hit lines, with consecutive log ordinals,
+distinct native record serials, damage, physical HZV and copied impact positions.
+The records identify 15 local hunter hits (`owner 0`) and eight local palico hits
+(`owner 1`). Damage ranges from 3 to 23. All records have HZV 80, critical byte 0
+and effect byte 4; this sample cannot validate the HZV color boundary, positive
+or negative critical markings, or bounce correlation.
+
+Evidence is retained in
+`backups/damage-numbers/capture-r3-retention-20261003-101333/`: the log, supplied
+village screenshot, installed package snapshot and `runtime-evidence.json`.
+Log SHA-256:
+`83e1dde7d67f16ee5661c9712f8ce1b3453511ea8ca00f1999415143e13eb542`.
+The installed NRO matches the reviewed r3 candidate, SHA-256
+`aaa5b873c786635881e49a5dcf65b4795c9c93683599b627cddb3a275c8a387f`.
+The capture flag remains nonempty and the camera flag is absent.
+
+Startup, local hunter/palico capture, hit logging and quest-to-village history
+retention passed this manual trial. Independent damage/HP comparison, elemental
+assembly, other attack/source cases, multiplayer exclusion and active-camera
+projection remain pending. No plugin code, installed package, emulator setting
+or save was changed while recording this result.

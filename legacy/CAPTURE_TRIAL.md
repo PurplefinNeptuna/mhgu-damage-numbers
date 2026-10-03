@@ -68,6 +68,11 @@ hits. Record that outcome before starting another game session.
 The later development procedure below covers the remaining research cases; it
 is not an exhaustive checklist for this retention check.
 
+The r3 retention check passed: the user's village screenshot and retained Eden
+log show 23 separate local hunter/palico hit records after the quest transition,
+with zero capture drops or read failures. Evidence and remaining validation
+limits are in [RUNTIME.md](RUNTIME.md). No repeat of this check is needed.
+
 1. After authorization, confirm Eden is closed and recheck its package list,
    activation configuration and the preserved Forge/Better Input hashes.
    Preserve saves and the current Eden log in workspace `backups/`.
