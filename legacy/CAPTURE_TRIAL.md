@@ -6,7 +6,8 @@ The prepared package is
 `build/damage-numbers/capture/candidate-manifest.json` records its hash, native
 signatures, imports, source hashes and preserved Forge/SDK inputs.
 
-The package is not installed. Its opt-in file,
+This is recovery r2, rebuilt after the first enabled candidate made Eden exit
+before the main menu. The rebuilt package is not installed. Its opt-in file,
 `romfs/nativeNX/forge/damage-numbers-capture.enabled`, is absent. Without that
 file the candidate stays inactive and allocates no capture hooks, arena or TLS
 slot. Creating the flag and installing the package require the separately
@@ -14,8 +15,10 @@ authorized runtime trial from the accepted plan.
 
 ## What the enabled candidate does
 
-- Installs eight fingerprinted capture hooks through one private 4 KiB arena.
+- Installs six fingerprinted combat hooks through one private 4 KiB arena.
   It allocates one SDK TLS slot, separate from Forge's context facilities.
+- Camera hooks are off. Leave `damage-numbers-camera.enabled` absent during
+  the recovery check. That separate opt-in adds the viewport/upload hooks.
 - Captures positive native monster-damage contributions for the local
   hunter/Prowler and their palicoes. Healing type `0x1d`, nonpositive values and
   other hunters/palicoes are excluded. Values include accompanying elemental
@@ -25,8 +28,8 @@ authorized runtime trial from the accepted plan.
   their final display policy are not implemented in the capture candidate.
 - Copies impact positions, physical HZV, native critical/effect bytes and part
   IDs. Each normalization application remains a distinct diagnostic record.
-- Copies scoped quest-camera upload matrices and rectangles, and records both
-  active weapon attacks when the native feedback getter runs.
+- Records both active weapon attacks when the native feedback getter runs.
+  Scoped quest-camera matrices and rectangles require the separate camera trial.
 - Shows counters and the latest eight local damage records in Forge's plugin
   panel. There are no floating numbers yet. Bounce decisions remain aggregate
   diagnostics until their individual-hit correlation is verified.
@@ -43,6 +46,14 @@ one per slot, and do not retry a contested slot.
 
 ## Proposed bounded procedure
 
+For the user, the recovery check is just startup: replace the old installed NRO
+with this candidate while the game is closed, retain the capture opt-in file,
+leave the camera opt-in absent, then restart. Open Forge's **Plugin UI** and
+check the capture status. Report whether the main menu loads; a screenshot of
+the status panel is enough if it does. No quest is needed for this retry.
+
+The later development procedure below remains pending until startup works.
+
 1. After authorization, confirm Eden is closed and recheck its package list,
    activation configuration and the preserved Forge/Better Input hashes.
    Preserve saves and the current Eden log in workspace `backups/`.
@@ -50,7 +61,7 @@ one per slot, and do not retry a contested slot.
    file. Keep rollback material outside Eden. Retain the existing emulator
    configuration for this capture trial.
 3. Start the game and inspect Forge's **Damage numbers - capture research**
-   panel. Confirm capture is active, eight hook counters advance, and no scope,
+   panel. Confirm capture is active, combat hook counters advance, and no scope,
    thread-pool or unexpected read failures appear.
 4. In one short solo quest, check isolated hits on large and small monsters,
    rapid multi-hits and palico attacks. Compare a raw weapon with an elemental

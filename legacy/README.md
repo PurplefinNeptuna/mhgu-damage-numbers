@@ -3,9 +3,11 @@
 Development targets the preserved MHGU 1.4.0 Switch executable and local patched
 Forge. Phase 1 combat-binding research is in progress. The host display core and
 selected native routines have passed fixture checks. An ARM32 diagnostic capture
-NRO has been built and inspected. Its required opt-in flag is absent, it is not
-installed, and no in-game behavior is validated yet. The capture trial procedure
-is in [CAPTURE_TRIAL.md](CAPTURE_TRIAL.md).
+NRO has been built and inspected. The first enabled candidate caused Eden to
+exit before the main menu in the user's trial. Recovery r2 corrects the SDK TLS
+setter ABI and leaves camera hooks off by default. This rebuilt candidate is
+prepared but not installed; live capture is still unvalidated. See
+[RUNTIME.md](RUNTIME.md) and [CAPTURE_TRIAL.md](CAPTURE_TRIAL.md).
 
 ## Accepted behavior
 
@@ -84,6 +86,7 @@ python3 scripts/build_damage_numbers_gateway.py
 tools/mwc-analysis-venv/bin/python scripts/damage_numbers_gateway_probe.py
 python3 scripts/build_damage_numbers_capture.py
 tools/mwc-analysis-venv/bin/python scripts/damage_numbers_capture_probe.py
+tools/mwc-analysis-venv/bin/python scripts/damage_numbers_sdk_tls_probe.py
 ```
 
 The first command passed 416 host checks with AddressSanitizer and UBSan.
@@ -109,10 +112,14 @@ individual hit.
 The compiled gateway passed 9,031 checks across 1,769 calls. These include 1,440
 original melee-HZV queries with a mid-routine tap, complete register/float/flag
 preservation, nested scopes and scope-capacity bypass. The capture NRO probe
-passed 186 checks using explicit SDK/kernel fixtures and a synthetic collision
+passed 197 checks using explicit SDK/kernel fixtures and a synthetic collision
 body that calls the original HZV and damage routines. The actual collision
 traversal, raw/element assembly, live SDK/TLS behavior, camera selection and
 Eden acceptance remain unvalidated.
+
+The original SDK getter/setter probe passed 256 ABI checks with synthetic thread
+storage. The compiled fixture uses a nonzero return register for the void setter
+and checks both the six-hook recovery default and the eight-hook camera opt-in.
 
 Generated research inputs and logs stay in `work/damage-numbers/`; native reports
 and the capture candidate stay in `build/damage-numbers/`. Originals, saves,

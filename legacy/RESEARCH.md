@@ -141,6 +141,21 @@ then prepares every trampoline before publishing any hook. It runs only from
 Forge's boot callback before `original_sApp_run`; no hot install/remove is
 provided. Existing Forge, Better Input and modern-controls sites are excluded.
 
+Recovery r2 installs six combat hooks by default. Viewport `0xb8909c` and camera
+upload `0x885844` remain untouched unless a separate camera opt-in file is present.
+This isolates renderer hooks after the first enabled runtime trial exited before
+the main menu; it does not establish which hook caused the exit.
+
+The fingerprinted SDK's `nnosSetTlsValue` wrapper branches through `0x43b7bc`
+to native `_ZN2nn2os11SetTlsValueENS0_7TlsSlotEj` at `0x9d80c`. This function
+returns void and leaves a computed thread/slot address in `r0`. Forge's supplied
+header declares a `Result` return. The capture plugin now uses its own verified
+void declaration and checks the stored value with `nnosGetTlsValue`. Executing
+the original getter/setter bytes passed 256 checks across 32 slots and two
+synthetic thread records. Allocation and the live scheduler were not executed.
+The compiled NRO fixture also retains a nonzero setter return register so it
+cannot mask the old declaration error by supplying zero.
+
 Each of 16 TLS contexts has 64 scopes and a 256-record mailbox. Scope overflow
 quarantines capture until the outermost accepted scope returns. Pool exhaustion
 stores a per-thread bypass sentinel. Payload words and tickets are lock-free

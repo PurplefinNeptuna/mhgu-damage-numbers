@@ -1,5 +1,6 @@
 #include "capture.h"
 #include <forge/hook.h>
+#include <forge/log.h>
 #include <stdarg.h>
 #define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
 #include <cimgui.h>
@@ -22,8 +23,10 @@ extern "C" void forge_onLoad(PluginInitParam* out) {
 extern "C" void forge_onInit() { damage_numbers::capture_install(); }
 extern "C" void forge_onUpdate(float) { damage_numbers::capture_monitor(); }
 extern "C" void forge_onImGuiInit(void* ctx,void* alloc,void* free_fn) {
+    forge_log_info("[damage-numbers] ImGui context setup entered");
     igSetCurrentContext(static_cast<ImGuiContext*>(ctx));
     igSetAllocatorFunctions(reinterpret_cast<ImGuiMemAllocFunc>(alloc),reinterpret_cast<ImGuiMemFreeFunc>(free_fn),nullptr);
+    forge_log_info("[damage-numbers] ImGui context setup complete");
 }
 extern "C" void forge_onImGuiRender() { damage_numbers::capture_panel(); }
 extern "C" void forge_onImGuiFreeRender() { damage_numbers::capture_consume(); }

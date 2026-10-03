@@ -8,7 +8,7 @@
 #include "signatures.h"
 #include "../../modern-weapon-controls/src/native_platform.h"
 #include <switch.h>
-#include <forge/nn/os.h>
+#include "sdk_tls.h"
 #include <forge/log.h>
 #include <stdarg.h>
 #define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
@@ -27,6 +27,8 @@ namespace damage_numbers {
 static mwc::NativePlatform platform;
 static Transaction<mwc::NativePlatform> transaction(platform);
 static uint32_t base, active, claimed, consumer, patch_error;
+static uint32_t camera_enabled, hook_count;
+static unsigned hook_slot[8]{};
 static uint32_t context_used[16]{};
 static TlsSlot tls_slot = -1;
 static const char* status = "Capture not initialized";
@@ -106,7 +108,8 @@ static Context* context() {
         nnosSetTlsValue(tls_slot, reinterpret_cast<void*>(1)); increment(pool_drops); return nullptr;
     }
     p = &contexts[i];
-    if (nnosSetTlsValue(tls_slot, p)) { increment(pool_drops); return nullptr; }
+    nnosSetTlsValue(tls_slot, p);
+    if (nnosGetTlsValue(tls_slot) != p) { increment(pool_drops); return nullptr; }
     return static_cast<Context*>(p);
 }
 static Scope* find(Context& c, unsigned kind) {
@@ -119,9 +122,12 @@ static void publish(Context& c, Record& r) {
 static uint32_t detours[] = {uint32_t(&dn_gateway_0),uint32_t(&dn_gateway_1),
     uint32_t(&dn_gateway_2),uint32_t(&dn_gateway_3),uint32_t(&dn_gateway_4),
     uint32_t(&dn_gateway_5),uint32_t(&dn_gateway_6),uint32_t(&dn_gateway_7)};
+static uint32_t original(unsigned kind) {
+    return kind < 8 && hook_slot[kind] < hook_count ? transaction.original(hook_slot[kind]) : 0;
+}
 
 extern "C" uint32_t dn_gateway_enter(uint32_t kind, RawFrame* frame) {
-    const uint32_t original = transaction.original(kind);
+    const uint32_t original = damage_numbers::original(kind);
     if (!load(active)) return original;
     increment(calls[kind]);
     Context* c = context();
@@ -208,7 +214,7 @@ extern "C" uint32_t dn_gateway_leave(RawFrame* frame) {
 }
 
 extern "C" uint32_t dn_gateway_tap(uint32_t kind, RawFrame* frame) {
-    const uint32_t original = transaction.original(kind);
+    const uint32_t original = damage_numbers::original(kind);
     if (!load(active)) return original;
     increment(calls[kind]);
     Context* c = context();
@@ -241,6 +247,9 @@ void capture_install() {
     if (mount[n]) { status = "Capture inactive: invalid mount name"; return; }
     std::memcpy(flag+n,suffix,sizeof(suffix));
     if (!forge_fs_fileExists(flag)) { status = "Capture inactive: opt-in flag absent"; return; }
+    const char camera_suffix[] = ":/nativeNX/forge/damage-numbers-camera.enabled";
+    std::memcpy(flag+n,camera_suffix,sizeof(camera_suffix));
+    camera_enabled = forge_fs_fileExists(flag);
     base = forge_mem_getMainTextAddr();
     uint64_t title=0;
     if (!base || base>0xfe000000u || mwc_svc_get_info(&title,18,CUR_PROCESS_HANDLE,0) ||
@@ -256,8 +265,12 @@ void capture_install() {
     }
     HookSpec recipe[8]{};
     for (unsigned i=0;i<8;++i) {
+        hook_slot[i] = 8;
+        // Leave both renderer entry points untouched in the recovery trial.
+        if (!camera_enabled && (i == 3 || i == 4)) continue;
         uint32_t expected[2]; std::memcpy(expected,signatures[i].bytes,8);
-        recipe[i] = {base+signatures[i].offset,detours[i],{expected[0],expected[1]}};
+        hook_slot[i] = hook_count;
+        recipe[hook_count++] = {base+signatures[i].offset,detours[i],{expected[0],expected[1]}};
     }
     constexpr uint32_t offsets[] = {0x3de064,0x3af5b4,0x388ee8,0x5e8130,0x3850b0,0x7a3480,
         0x3da8fc,0xb8692c,0x887810,0x88784c,0x27e774,0x27ca28,0x678894,0x285e2c};
@@ -265,7 +278,7 @@ void capture_install() {
     for (unsigned i=0;i<14;++i) occupied[i] = base+offsets[i];
     // Forge's boot callback runs before original_sApp_run. No hot installation
     // or removal is supported. Quest collision/viewport consumers start later.
-    const auto result = transaction.install(recipe,8,occupied,14,true);
+    const auto result = transaction.install(recipe,hook_count,occupied,14,true);
     if (result!=InstallResult::Active) {
         status = result==InstallResult::RestoreFailure ?
             "ERROR: hook restoration failed; arena retained; restart required" :
@@ -277,11 +290,12 @@ void capture_install() {
     }
     __atomic_store_n(&active,1,__ATOMIC_RELEASE);
     status = "Diagnostic capture active; floating numbers are pending validation";
-    forge_log_info("[damage-numbers] Opt-in capture: eight hooks, one private 4 KiB arena, one native TLS slot; no save writes");
+    forge_log_info("[damage-numbers] Recovery r2: %u hooks; camera capture %s; one private arena/TLS slot",hook_count,camera_enabled ? "enabled" : "off");
 }
 void capture_monitor() {
     if (!load(active)) return;
     for (unsigned i=0;i<8;++i) {
+        if (hook_slot[i] >= hook_count) continue;
         const auto& s=signatures[i];
         bool valid = word(base+s.offset)==0xe51ff004u && word(base+s.offset+4)==detours[i];
         for (unsigned j=8;j<sizeof(s.bytes);++j) valid=valid && byte(base+s.offset+j)==s.bytes[j];
@@ -298,8 +312,16 @@ static unsigned recent_count;
 static uint32_t consumed, shown_player;
 void capture_consume() {
     if (!load(active)) return;
+    static uint32_t first;
+    uint32_t unlogged=0;
+    if (__atomic_compare_exchange_n(&first,&unlogged,1,true,__ATOMIC_RELAXED,__ATOMIC_RELAXED))
+        forge_log_info("[damage-numbers] First render consumer entered");
     Context* current = context();
     if (!current) return;
+    static uint32_t ready;
+    unlogged=0;
+    if (__atomic_compare_exchange_n(&ready,&unlogged,1,true,__ATOMIC_RELAXED,__ATOMIC_RELAXED))
+        forge_log_info("[damage-numbers] Render TLS context ready");
     const uint32_t id=uint32_t(current), expected=0;
     uint32_t initial=expected;
     __atomic_compare_exchange_n(&consumer,&initial,id,true,__ATOMIC_SEQ_CST,__ATOMIC_SEQ_CST);
@@ -324,6 +346,8 @@ void capture_panel() {
     igTextUnformatted(load(patch_error) ? "Capture disabled: external code change; restart required" : status,nullptr);
     igTextUnformatted("Research capture: no world-space damage display or gameplay changes.",nullptr);
     if (!load(active)) return;
+    igTextUnformatted(camera_enabled ? "Recovery r2: camera capture enabled." :
+        "Recovery r2: camera hooks off; combat capture only.",nullptr);
     capture_consume();
     Context* current=context();
     if (!current || load(consumer)!=uint32_t(current)) {
