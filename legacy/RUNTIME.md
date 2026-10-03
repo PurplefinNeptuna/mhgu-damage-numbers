@@ -199,3 +199,56 @@ ordinary play. A 100% save or save modification is unnecessary for this check;
 critical-marker runtime acceptance remains pending until suitable equipment is
 available. No installed package, setting, save or presentation value was changed
 while preparing the fix.
+
+## 2026-10-03: r5 projectiles and white coloring accepted
+
+The user confirmed that palico boomerang and thrown-barrel numbers now show.
+After the color check, they also confirmed white melee damage. Their accepted
+impact position, animation and size remain the r6 defaults. The log's first
+256 recorded impacts contain known physical HZVs 47 through 80 and eight
+unknown-HZV contributions; the later white-color acceptance comes from the
+user's in-game observation, not an uncaptured log value.
+
+The installed r5 NRO still has SHA-256
+`81ed488cb38f13c7899e8cf7822b3b235df2d9c87d0fbeb12553e29fd2c244e0`.
+Its package snapshot, log and acceptance note are retained under
+`backups/damage-numbers/capture-r5-accepted-20261003-123254/`.
+The copied log SHA-256 is
+`55995b9d3d30328a6799bb622b036e4b4199d00f9fe785a0eef3e008b17e2cbc`.
+Critical markings and multiplayer exclusion still need manual evidence.
+
+## 2026-10-03: r6 settings, conservative bounce and optional sources staged
+
+R6 adds an enable switch, size/duration controls, default restoration, an
+explicit Save settings button and collapsed diagnostics. Preferences use two
+checksummed SD files; game saves are not mounted or written. SDK filesystem
+calls run inside a scoped thread-local abort disabler, restoring the previous
+context even on storage failure. The mount/persistence path awaits Eden testing.
+
+Gray bounce matches only the latest uniquely identified hunter contribution
+to native resolved feedback within 100 ms, on the same thread and attack
+counter. It leaves ambiguous, older, different-thread and earlier multi-hit
+contributions at their HZV color. Optional monster dispatch and generic
+hunter-owned object impacts have independent off-by-default switches. Other
+environmental families and recurring ticks remain hidden. Remote weapon and
+palico attacks do not become objects when the switches are enabled.
+
+Automated checks passed: 470 ASan/UBSan core/presentation checks, mailbox overflow
+and eight-producer stress with 160,000 published packets, 23 transaction cases,
+278 compiled NRO checks with explicit SDK/kernel/ImGui fixtures, and 36 checks
+executing the original SDK filesystem guard/context/abort-decision bodies.
+The compiled checks cover settings round trips, recovery from a partial write,
+source toggle cleanup, remote-source exclusion and constrained bounce matching
+through the original feedback getter. None of these checks is an Eden/GPU test.
+
+Staged NRO SHA-256:
+`20e2b7ed3133609b2cb625e76d24d394b82b63d3eca77c5ed5d81ef874be14c7`.
+R6 retains the same eight optional-preview hook sites, one private 4 KiB arena,
+one native TLS slot and 248-byte mailbox records. Both two-byte activation
+templates remain separate from the one-NRO candidate package. Installed
+Forge, Better Input, damage-number files, emulator configuration and saves
+were not changed while preparing it.
+
+The first manual check is small: toggle numbers off/on, save a slight size
+change and restart once. Restore defaults afterward. Bomb switch and actual
+recoil checks can follow during normal play; no completed save is needed.

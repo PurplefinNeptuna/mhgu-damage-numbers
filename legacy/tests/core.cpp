@@ -1,6 +1,8 @@
 #include "camera.h"
 #include "outcomes.h"
 #include "preview.h"
+#include "settings.h"
+#include "bounce.h"
 #include <cstdio>
 #include <cstring>
 #include <limits>
@@ -143,7 +145,8 @@ static void preview() {
     check(preview_source(0x000100,Owner::LocalPlayer)&&preview_source(0x030403,Owner::LocalPalico),"direct hunter and palico sources accepted");
     check(!preview_source(0x000101,Owner::LocalPlayer),"unclassified hunter secondary ownership stays diagnostic");
     check(preview_source(0x030402,Owner::LocalPalico)&&preview_source(0x030802,Owner::LocalPalico),"observed local-palico child projectile families accepted");
-    for (Owner owner:{Owner::LocalPlayer,Owner::RemotePlayer,Owner::RemotePalico,Owner::Unknown})
+    check(preview_source(0x030402,Owner::LocalPlayer)&&preview_source(0x030802,Owner::LocalPlayer),"local Prowler child attacks accepted");
+    for (Owner owner:{Owner::RemotePlayer,Owner::RemotePalico,Owner::Unknown})
         check(!preview_source(0x030402,owner)&&!preview_source(0x030802,owner),"palico projectile exception requires resolved local-palico ownership");
     check(!preview_source(0x030902,Owner::LocalPalico),"unclassified palico objects stay diagnostic");
     check(imgui_color(0xffbf3f,1)==0xff3fbfff,"orange-yellow converts to ImGui ABGR");
@@ -151,4 +154,46 @@ static void preview() {
     check(imgui_color(0x9a9a9a,-1)==0x009a9a9a&&imgui_color(0x9a9a9a,2)==0xff9a9a9a,"opacity bounds preserve RGB");
     check(imgui_color(0xffffff,NAN)==0,"invalid alpha is transparent");
 }
-int main() { policies();lifecycle();drawing();preview();std::printf("Passed %u core/presentation checks\n",cases); }
+static void settings_and_sources() {
+    Settings s{}; s.enabled=false; s.monsters=true; s.objects=true; s.bounce_gray=false;
+    s.scale=1.75f; s.lifetime=1.5f;
+    const auto saved=encode_settings(s,0xffffffffu);
+    Settings decoded{};
+    check(decode_settings(saved,decoded) && !decoded.enabled && decoded.monsters && decoded.objects &&
+          !decoded.bounce_gray && !decoded.ticks && decoded.scale==1.75f && decoded.lifetime==1.5f,"settings round trip");
+    for(unsigned i=0;i<8;++i) {
+        auto corrupt=saved; corrupt.words[i]^=1;
+        check(!decode_settings(corrupt,decoded),"corrupted settings rejected");
+    }
+    auto invalid=saved; invalid.words[4]=0x7fc00000; invalid.words[7]=settings_checksum(invalid);
+    check(!decode_settings(invalid,decoded),"NaN settings rejected even with correct checksum");
+    invalid=saved; invalid.words[3]|=8; invalid.words[7]=settings_checksum(invalid);
+    check(!decode_settings(invalid,decoded),"unimplemented tick option rejected");
+    check(newer_settings(0,0xffffffffu) && !newer_settings(0xffffffffu,0),"generation wrap preserves ordering");
+    Source source=Source::Attack;
+    check(source_outcome(0x000102,Owner::LocalPlayer,source) && source==Source::Attack,"hunter projectile remains owned attack");
+    check(source_outcome(0x030802,Owner::LocalPalico,source) && source==Source::Attack,"palico support barrel remains owned attack");
+    check(source_outcome(0x010202,Owner::Unknown,source) && source==Source::Monster,"secondary monster attack classified");
+    check(source_outcome(0x000201,Owner::Unknown,source) && source==Source::Monster,"direct monster attack classified");
+    check(source_outcome(0x000802,Owner::RemotePlayer,source) && source==Source::Object,"placed object accepts remote owner only under object switch");
+    check(source_outcome(0x000102,Owner::RemotePlayer,source) && source==Source::Attack,"remote ranged weapon cannot be relabeled an object");
+    check(!source_outcome(0x030902,Owner::LocalPalico,source),"unknown child source stays hidden");
+    BounceAttack attacks[2]={{100,0,1,0,0},{200,0,0,0xff,0}};
+    check(bounce_match(0,attacks,100,0,0,0,0x000100,Owner::LocalPlayer),"unique native bounce feedback matches latest owned melee hit");
+    check(!bounce_match(2,attacks,100,0,0,0,0x000100,Owner::LocalPlayer),"native prevention feedback suppresses gray");
+    attacks[1].active=1;
+    check(!bounce_match(0,attacks,100,0,0,0,0x000100,Owner::LocalPlayer),"two active attacks prevent bounce attribution");
+    attacks[1].active=0;
+    check(!bounce_match(0,attacks,101,0,0,0,0x000100,Owner::LocalPlayer),"reused or different attack identity rejected");
+    check(!bounce_match(0,attacks,100,1,0,0,0x000100,Owner::LocalPlayer),"changed flags rejected");
+    check(!bounce_match(0,attacks,100,0,0,0,0x030402,Owner::LocalPalico),"palico projectile cannot inherit hunter bounce");
+    Model model; model.reset(7); const Event first=hit(1), second=hit(2);
+    model.capture(first); model.capture(second);
+    check(model.bounce(second.key),"bounce resolution reaches queued hit");
+    model.update(1.05f,true);
+    check(!model.at(0).event.bounced && model.at(1).event.bounced,"bounce affects only its exact impact key");
+    check(model.bounce(first.key) && model.at(0).event.bounced,"bounce resolution reaches visible hit");
+    model.reset(8);
+    check(!model.bounce(first.key),"context transition rejects stale bounce resolution");
+}
+int main() { policies();lifecycle();drawing();preview();settings_and_sources();std::printf("Passed %u core/presentation checks\n",cases); }

@@ -7,6 +7,9 @@
 #include "preview.h"
 #include "transaction.h"
 #include "signatures.h"
+#include "settings.h"
+#include "sources.h"
+#include "bounce.h"
 #include "../../modern-weapon-controls/src/native_platform.h"
 #include <switch.h>
 #include "sdk_tls.h"
@@ -34,6 +37,7 @@ static uint32_t base, active, claimed, consumer, patch_error;
 static uint32_t camera_enabled, hook_count;
 static uint32_t tick_frequency;
 static uint64_t tick_origin;
+static Model display_model;
 static unsigned hook_slot[8]{};
 static uint32_t context_used[16]{};
 static TlsSlot tls_slot = -1;
@@ -98,6 +102,7 @@ struct Context {
     bool quarantine = false;
     Scope stack[64]{};
     Mailbox<Record,256> records;
+    Record last_damage{};
 };
 static Context contexts[16];
 static Context* context() {
@@ -151,6 +156,7 @@ extern "C" uint32_t dn_gateway_enter(uint32_t kind, RawFrame* frame) {
     Scope& s = c->stack[c->depth++];
     s = {}; s.kind = kind; s.caller = frame->r[13]; s.sp = frame->caller_sp(); s.hzv = -1;
     if (kind == 0) {
+        c->last_damage={}; // Every new collision invalidates prior feedback attribution.
         s.subject = frame->r[1]; s.monster = frame->r[2];
         s.owner = ownership.attack(s.subject);
         copy(frame->r[3], &s.position, sizeof(s.position));
@@ -185,9 +191,6 @@ extern "C" uint32_t dn_gateway_leave(RawFrame* frame) {
     if (s.kind == 1) {
         Scope* hit = find(*c,0);
         if (!hit || hit->monster != s.subject) { increment(orphan_calls); return s.caller; }
-        if (hit->owner != Owner::LocalPlayer && hit->owner != Owner::LocalPalico) {
-            increment(excluded); return s.caller;
-        }
         if (!readable(hit->subject,0xb8)) { increment(bad_memory); return s.caller; }
         const uint32_t type = byte(hit->subject+0x3a);
         const int32_t amount = int32_t(frame->r[0]);
@@ -199,8 +202,17 @@ extern "C" uint32_t dn_gateway_leave(RawFrame* frame) {
         r.critical = byte(hit->subject+0x54); r.effect = byte(hit->subject+6);
         r.source_tags=byte(hit->subject+0x10) | uint32_t(byte(hit->subject+0x6d))<<8 |
                       uint32_t(byte(hit->subject+0x6e))<<16;
+        Source source=Source::Attack;
+        const bool known=source_outcome(r.source_tags,hit->owner,source);
+        const bool owned=hit->owner==Owner::LocalPlayer || hit->owner==Owner::LocalPalico;
+        if (!owned && (!known || source==Source::Attack)) { increment(excluded); return s.caller; }
+        r.feedback[0].reserved=known ? uint8_t(source) : 255;
+        const uint32_t player=ownership.local_player();
+        if (readable(player+0x2522,2))
+            std::memcpy(&r.attack_counter,reinterpret_cast<const void*>(player+0x2522),2);
         r.position = hit->position;
         publish(*c,r);
+        c->last_damage=r;
     } else if (s.kind == 2 && s.subject == ownership.local_player()) {
         Record r{}; r.kind = 2; r.actor = s.subject; r.effect = frame->r[0]&0xff;
         for (unsigned i=0;i<2;++i) {
@@ -211,6 +223,17 @@ extern "C" uint32_t dn_gateway_leave(RawFrame* frame) {
         }
         if (readable(s.subject+0x2522,2))
             std::memcpy(&r.attack_counter,reinterpret_cast<const void*>(s.subject+0x2522),2);
+        const Record& last=c->last_damage;
+        const BounceAttack attacks[2]={{r.feedback[0].attack,r.feedback[0].flags,r.feedback[0].active,
+            r.feedback[0].effect,r.feedback[0].critical},{r.feedback[1].attack,r.feedback[1].flags,
+            r.feedback[1].active,r.feedback[1].effect,r.feedback[1].critical}};
+        if (last.serial && last.player==s.subject && last.attack_counter==r.attack_counter &&
+            bounce_match(uint8_t(r.effect),attacks,last.attack,last.flags,uint8_t(last.critical),
+                         uint8_t(last.effect),last.source_tags,Owner(last.actor))) {
+            r.attack=last.attack; r.monster=last.monster; r.damage=int32_t(last.serial);
+            r.player=last.player; r.tick=last.tick; r.hzv=1;
+        }
+        c->last_damage={}; // One feedback observation can resolve at most one hit.
         publish(*c,r);
     } else if (s.kind == 7) {
         Scope* hit = find(*c,0);
@@ -278,6 +301,9 @@ void capture_install() {
         status="Capture inactive: invalid clock frequency"; return;
     }
     tick_frequency=uint32_t(frequency); tick_origin=nnosGetSystemTick();
+    Settings settings{};
+    settings_load(settings);
+    display_model.configure(settings);
     if (nnosAllocateTlsSlot(&tls_slot,nullptr) || tls_slot<0) {
         status = "Capture inactive: native TLS allocation failed"; return;
     }
@@ -307,9 +333,9 @@ void capture_install() {
         return;
     }
     __atomic_store_n(&active,1,__ATOMIC_RELEASE);
-    status = camera_enabled ? "Capture active; floating-number preview enabled (validation pending)" :
+    status = camera_enabled ? "Damage numbers ready" :
         "Diagnostic capture active; camera/number preview opt-in absent";
-    forge_log_info("[damage-numbers] Capture r5: %u hooks; camera/preview %s; one private arena/TLS slot; hit log limit 256",hook_count,camera_enabled ? "enabled" : "off");
+    forge_log_info("[damage-numbers] Capture r6: %u hooks; camera/preview %s; one private arena/TLS slot; hit log limit 256",hook_count,camera_enabled ? "enabled" : "off");
 }
 void capture_monitor() {
     if (!load(active)) return;
@@ -330,8 +356,8 @@ static Record recent[8]{}, last_camera{}, last_feedback{};
 static unsigned recent_count, consume_cursor;
 static uint32_t consumed, shown_player, captured_hits;
 static constexpr unsigned log_limit=256, hits_per_consume=8, records_per_consume=64;
-static Model display_model;
 static uint32_t display_epoch, preview_rejected, camera_records, preview_drawn, preview_frames;
+static uint32_t bounce_matches;
 static unsigned camera_logs, projection_logs;
 static HitKey projected_keys[4]{};
 static void reset_display() {
@@ -378,14 +404,15 @@ void capture_consume() {
             recent[recent_count++]=r;
             if (camera_enabled) {
                 float captured_at=0;
-                if (player && r.player==player && preview_source(r.source_tags,Owner(r.actor)) &&
+                const uint8_t source=r.feedback[0].reserved;
+                if (player && r.player==player && source<=uint8_t(Source::Object) &&
                     preview_fresh(r.tick,now,tick_frequency,display_model.config().lifetime) &&
                     preview_seconds(r.tick,tick_origin,tick_frequency,captured_at)) {
                     Critical critical=Critical::None;
                     // An unknown native outcome never invents a critical marker.
                     critical_outcome(uint8_t(r.critical),critical);
                     const Event event={{display_epoch,r.serial,r.monster,i},r.position,r.damage,
-                        int16_t(r.hzv),Source::Attack,Owner(r.actor),critical,false,captured_at};
+                        int16_t(r.hzv),Source(source),Owner(r.actor),critical,false,captured_at};
                     if (!display_model.capture(event)) ++preview_rejected;
                 } else ++preview_rejected;
             }
@@ -397,7 +424,11 @@ void capture_consume() {
                 if (captured_hits==log_limit)
                     forge_log_info("[damage-numbers] Hit log limit reached (256); panel capture continues until restart");
             }
-        } else if (r.kind==2 && player) last_feedback=r;
+        } else if (r.kind==2 && player) {
+            last_feedback=r;
+            if (r.hzv==1 && r.player==player && preview_fresh(r.tick,now,tick_frequency,0.10f) &&
+                display_model.bounce({display_epoch,uint32_t(r.damage),r.monster,i})) ++bounce_matches;
+        }
         else if (r.kind==3 && player && r.player==player) {
             if (last_camera.actor && (last_camera.actor!=r.actor || last_camera.monster!=r.monster ||
                 std::memcmp(last_camera.rect,r.rect,sizeof(r.rect)))) reset_display();
@@ -469,17 +500,29 @@ void capture_render() {
     ImDrawList_PopClipRect(draw);
 }
 void capture_panel() {
+    if (!igCollapsingHeader_TreeNodeFlags("Damage numbers",ImGuiTreeNodeFlags_DefaultOpen)) return;
     igTextUnformatted(load(patch_error) ? "Capture disabled: external code change; restart required" : status,nullptr);
-    igTextUnformatted("Projection preview; native damage processing is unchanged.",nullptr);
     if (!load(active)) return;
-    igTextUnformatted(camera_enabled ? "Capture r5: camera and floating-number preview enabled." :
-        "Capture r5: camera hooks off; combat capture only.",nullptr);
     capture_consume();
     Context* current=context();
     if (!current || load(consumer)!=uint32_t(current)) {
         igTextUnformatted("Capture panel deferred: a different render thread owns the consumer.",nullptr);
         return;
     }
+    Settings next=display_model.config();
+    bool changed=igCheckbox("Show damage numbers",&next.enabled);
+    changed=igSliderFloat("Number size",&next.scale,0.5f,3.0f,"%.2fx",ImGuiSliderFlags_AlwaysClamp) || changed;
+    changed=igSliderFloat("Duration",&next.lifetime,0.4f,2.0f,"%.2f seconds",ImGuiSliderFlags_AlwaysClamp) || changed;
+    changed=igCheckbox("Gray bounced hits",&next.bounce_gray) || changed;
+    changed=igCheckbox("Monster-to-monster damage",&next.monsters) || changed;
+    changed=igCheckbox("Placed bombs and objects",&next.objects) || changed;
+    if (igButton("Restore defaults",{0,0})) { next=Settings{}; changed=true; }
+    if (changed && display_model.configure(next)) settings_changed();
+    if (igButton("Save settings",{0,0})) settings_save(display_model.config());
+    igTextUnformatted(settings_status(),nullptr);
+    if (!igCollapsingHeader_TreeNodeFlags("Diagnostics##damage-numbers",0)) return;
+    igTextUnformatted(camera_enabled ? "Capture r6: camera and numbers enabled." :
+        "Capture r6: camera hooks off; combat capture only.",nullptr);
     igTextUnformatted("Shared counters are best-effort under contention; per-hit records remain separate.",nullptr);
     igText("Collision %u; normalization %u; feedback %u; viewport %u",load(calls[0]),load(calls[1]),load(calls[2]),load(calls[3]));
     igText("Camera uploads %u; HZV taps %u; melee queries %u; shot queries %u",load(calls[4]),load(calls[5]),load(calls[6]),load(calls[7]));
@@ -495,7 +538,7 @@ void capture_panel() {
     igText("Quest camera rectangle: %d %d %d %d",last_camera.rect[0],last_camera.rect[1],last_camera.rect[2],last_camera.rect[3]);
     igText("Preview: camera records %u; visible last frame %u; frames %u; rejected hits %u",
         camera_records,preview_drawn,preview_frames,preview_rejected);
-    igTextUnformatted("Preview includes local-palico projectiles; per-hit bounce and other sources remain pending.",nullptr);
+    igText("Matched bounced hits %u; ambiguous feedback keeps the HZV color",bounce_matches);
     igSeparator();
     igTextUnformatted("Last eight hits remain across quest/village transitions until restart.",nullptr);
     igText("Captured hits %u; first %u written to Eden log (maximum 256 per restart)",captured_hits,

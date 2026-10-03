@@ -134,5 +134,12 @@ These commands use the existing offline compiler container and pinned Unicorn
 environment. They do not install a package or create the opt-in flag. The compiled
 capture report is `build/damage-numbers/capture/compiled-capture-probe.json`.
 Its collision body, SDK services and kernel bridges are explicit fixtures;
-live per-hit accuracy, r5 projectile display and untested attack cases remain
-pending. R4 melee projection and presentation passed the user's visual trial.
+live per-hit accuracy and untested attack cases remain pending. R4 presentation,
+r5 palico projectiles and white physical-HZV damage passed the user's trial.
+
+For r6, start with the small settings/restart check in [README.md](README.md).
+The installed r5 NRO and its two nonempty flags were preserved. Replace only
+the NRO with the staged candidate while Eden is closed, retaining both existing
+flags. R6 adds no hooks or extra CodeMemory arenas. Optional source and gray
+bounce acceptance can follow during normal play; ambiguous feedback keeps the
+HZV color. SD settings persistence is implemented but not yet tested in Eden.

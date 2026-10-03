@@ -132,7 +132,7 @@ R5 admits just those two observed families with `Owner::LocalPalico`, retaining
 the producer ownership and healing gates. This fixes the known display exclusion
 without generalizing to all projectile/object sources. Boomerang-versus-barrel
 subtype labels are inferred from the observed actions and HZV/effect patterns;
-the next manual check covers both attacks. Unknown physical HZV remains white.
+the user subsequently confirmed both attacks display. Unknown physical HZV remains white.
 Saved DTI `cOtWeaponBase` separately exposes boomerang attack, element and affinity
 properties; no equipment or damage data was edited for this fix.
 
@@ -264,7 +264,45 @@ needed for this packaging correction.
 R3's local hunter/palico capture, logging and diagnostic retention passed the
 user's trial. The Phase 1 binding gate remains open for the other cases above.
 R4's melee projection, animation and size passed the user's visual trial. R5's
-palico child projectile popups, optional sources and per-hit bounce remain open.
+palico child projectile popups and white physical-HZV coloring also passed.
+R6's optional sources, constrained bounce matching and SD preferences await
+runtime acceptance.
+
+## R6 source, bounce and storage bindings
+
+The original `0x170968` dispatch uses attack subtype `+0x6d`: 1 follows hunter
+processing, 2 monster processing and 4 palico processing. The monster branch
+resolves kind 1 through primary `+0xc` or secondary `+0x70`, with secondary kind
+`+0x6e == 1`. Other subtypes use `0x171350`'s generic impact path. R6 admits
+monster subtype 2 and the known generic subtype-8 child family with a resolved
+hunter owner as independent optional sources. The `0x030802` palico support
+family stays an owned attack. Unknown generic families are not generalized.
+These bindings use the saved exports and DTI ownership work; no dumper was run.
+
+R6 retains each thread's latest copied contribution until its next collision
+or local feedback observation. It requires one active embedded hunter attack,
+native resolved feedback zero, raw effect zero and identical attack pointer,
+flags, critical outcome and attack counter. It resolves only that contribution's
+epoch/serial/target/thread key, within 100 ms. Earlier multi-hits, other threads,
+two-active-attack feedback and native bounce-prevention results do not acquire
+gray. This is a conservative feedback correlation, pending in-game recoil
+acceptance; it does not edit player attacks or rerun damage/RNG.
+
+The ARM32 SDK filesystem declarations use 4-byte handles and aligned 64-bit
+offsets, checked against original SDK exports/instructions. The generic
+nnheaders copy's 8-byte handle describes a different ABI. Settings use a private
+`dnum` SD mount and alternate 32-byte versioned/checksummed slots. They are read
+at plugin initialization and written only by the Save settings button, outside
+native detours. A damaged newest slot falls back to the previous valid one.
+
+SDK filesystem failures can invoke its automatic-abort policy. Native scoped
+disabler constructor `SDK+0x4d004` saves the previous effective FS context in
+one word and installs `g_AllReturnContext` in the current thread's SDK TLS.
+`SetCurrentThreadFsContext` at `0x4d080` restores that word on every exit.
+The original all-return handler at `0x4cffc` returns AbortSpecifier 2; the native
+decision at `0x51b64` returns false. The 36 native guard checks use explicit
+initialized GOT/context/TLS fixtures and a previous Abort callback; they show
+isolation and restoration without performing a mount or storage trial.
 
 ## Reproduce research
 

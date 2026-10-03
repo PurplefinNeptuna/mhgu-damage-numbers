@@ -11,10 +11,11 @@ lines, pop/drift/fade and separate multi-hit lanes. The user accepts player/pali
 melee placement, animation and size; those values are unchanged in r5. The r4 log
 captured 51 hits, including 18 palico child attacks omitted by the preview filter.
 R5 admits their observed source tags only with resolved local-palico ownership.
-Its boomerang/barrel popup check is pending. The default candidate keeps camera
-hooks and the preview off. A separate nonempty camera flag enables both. Bounce
-gray, other source classification, optional sources and settings persistence
-remain pending. Earlier startup failures and the nonempty-flag correction are recorded in
+The user confirmed boomerang/barrel popups and white melee damage on a low-HZV
+part. R6 adds the settings panel, SD preferences, conservative gray bounce
+matching and independent optional-source switches. These additions need an
+in-game check. The default candidate keeps camera hooks and the preview off;
+a separate nonempty camera flag enables both. Earlier startup failures and the nonempty-flag correction are recorded in
 [RUNTIME.md](RUNTIME.md) and [CAPTURE_TRIAL.md](CAPTURE_TRIAL.md).
 
 ## Accepted behavior
@@ -72,6 +73,34 @@ events. Context changes clear the queue and visible list.
    multi-hits, elemental weapons, shells/phials, Prowler/Palico attacks,
    remote-player exclusion, crowded combat, save loading and repeated restarts.
    Multiplayer filtering requires an actual multiplayer test.
+
+## Settings and r6 trial
+
+Open **Damage numbers** in Forge. Changes apply immediately. **Save settings**
+keeps them after restart; **Restore defaults** returns the accepted size,
+duration and source switches. Diagnostics are collapsed by default. Settings
+use two checked 32-byte files in the emulated SD card's `forge/` folder,
+`mhgu-damage-numbers-a.cfg` and `mhgu-damage-numbers-b.cfg`. They contain only
+mod preferences. An unavailable SD card leaves settings active for the session
+and shows a storage message. The plugin does not mount or write game saves.
+
+Gray bounce uses native feedback only when one embedded hunter attack matches
+the latest finalized hit on the same thread, with unchanged flags, critical
+outcome and attack counter, within 100 ms. Another collision invalidates the
+match. Ambiguous or older feedback retains the physical-HZV color. Palico and
+projectile effect zero never qualifies by itself.
+
+Monster damage follows native dispatch subtype 2. The object switch covers
+generic subtype-8 shell impacts with a resolved hunter owner, including remote
+owners. Palico/Prowler support bombs remain ordinary owned attacks, and remote
+weapons/palicoes remain hidden even with both optional switches enabled.
+Other environmental families and recurring ticks remain unsupported. The new
+source families and bounce behavior are experimental until the user's trial.
+
+For the first r6 check, turn numbers off and back on, save a small size change,
+and restart once to confirm it remains. Restore defaults afterward. A placed
+bomb with its switch on/off and an ordinary weapon bounce can be checked later
+when convenient. No completed save or extensive test session is needed.
 
 The existing core is independent of game memory. `ownership.h` uses checked
 reads, the native local-session index and a palico's current work pointer.

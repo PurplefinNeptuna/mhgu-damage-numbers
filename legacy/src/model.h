@@ -93,6 +93,13 @@ public:
         if (!count) return false;
         e = items[head]; head = (head + 1) % Capacity; --count; return true;
     }
+    bool bounce(const HitKey& key) {
+        for (unsigned i=0;i<count;++i) {
+            Event& e=items[(head+i)%Capacity];
+            if (e.key==key) { e.bounced=true; return true; }
+        }
+        return false;
+    }
 };
 
 struct Number { Event event; };
@@ -137,6 +144,14 @@ public:
         recent_next = (recent_next+1)%512;
         if (recent_count<512) ++recent_count;
         queue.push(e); return true;
+    }
+    bool bounce(const HitKey& key) {
+        if (key.epoch!=current_epoch) return false;
+        if (queue.bounce(key)) return true;
+        for (unsigned i=0;i<count;++i) if (numbers[i].event.key==key) {
+            numbers[i].event.bounced=true; return true;
+        }
+        return false;
     }
     void update(float now, bool gameplay_valid) {
         if (!gameplay_valid || !finite(now) || !settings.enabled) {
