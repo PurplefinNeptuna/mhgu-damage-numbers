@@ -64,4 +64,36 @@ are in [RESEARCH.md](RESEARCH.md).
 The corrected activation template contains `1` and a newline. The r2 NRO is
 unchanged. No installed file, font, emulator setting or save was changed during
 this diagnosis. The next user check is to put text in the existing capture flag
-and confirm that startup reaches the main menu. Its live result remains pending.
+and confirm that startup reaches the main menu. That check subsequently passed.
+
+## 2026-10-03: successful capture and transition retention
+
+The user reports that r2 ran, showed damage records and completed a quest. After
+the quest, the diagnostics cleared before they could show the values. This
+confirms user-observed capture, but supplies no per-hit evidence for damage
+accuracy, HZV, ownership or critical/bounce correlation.
+
+The retained log is
+`backups/damage-numbers/capture-success-20261003-094534/eden_log.txt`, SHA-256
+`fa80bc224ef6732120c7d0b65e42ee36ad0eee9037f01035da2237a4a7ed0d6f`.
+It records six hooks with camera capture off, completed ImGui setup and a ready
+render TLS context. The installed NRO still matched r2 SHA-256
+`fc81dad783daa93321aecc7748a65768d0697cd741123f95a3236e211bbcb9d1`;
+the capture flag was two bytes (`1` followed by a newline), SHA-256
+`4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865`.
+The camera flag was absent. R2 did not log individual hits, so the lost values
+cannot be recovered from this log.
+
+Capture r3 keeps the last eight copied damage records across local-player
+changes. Camera and feedback snapshots still reset with the player context.
+Already queued owned hits are retained even if the player table disappears
+before consumption. The first 256 hits per restart are logged from the render
+consumer, with at most eight hits and 64 total records consumed per callback.
+Capture continues after the log cap. No combat hooks, damage calculation,
+ownership rules or final floating-number lifecycle changed.
+
+The compiled NRO fixture checks transition retention, queued hits without a
+player, distinct log ordinals, copied values/positions, callback budgets, the
+single log-limit marker, continued panel updates and empty history on restart.
+R3's in-game retention check remains pending. No installed files, emulator
+settings or saves were changed to prepare it.

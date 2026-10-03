@@ -6,7 +6,7 @@ The prepared package is
 `build/damage-numbers/capture/candidate-manifest.json` records its hash, native
 signatures, imports, source hashes and preserved Forge/SDK inputs.
 
-This is recovery r2, installed manually for the second startup trial. The build
+This is capture r3, prepared after the successful r2 quest trial. The build
 command only stages files and does not install them. Its candidate-package opt-in file,
 `romfs/nativeNX/forge/damage-numbers-capture.enabled`, is absent. Without that
 file the candidate stays inactive and allocates no capture hooks, arena or TLS
@@ -37,13 +37,20 @@ See [RUNTIME.md](RUNTIME.md) for the reproduced layout and startup failure.
 - Records both active weapon attacks when the native feedback getter runs.
   Scoped quest-camera matrices and rectangles require the separate camera trial.
 - Shows counters and the latest eight local damage records in Forge's plugin
-  panel. There are no floating numbers yet. Bounce decisions remain aggregate
+  panel. These copied records survive quest/village and local-player changes,
+  roll forward with new hits and clear on restart. There are no floating numbers
+  yet. Bounce decisions remain aggregate
   diagnostics until their individual-hit correlation is verified.
 
 The candidate does not mount or write save data, change gameplay values, reroll
 affinity, upgrade Forge or alter Eden settings. Normal gameplay still has its
-own save behavior. Captured data stays in bounded memory; routine hit logging
-and disk output are avoided. Scope, thread-pool and overwritten-record counters
+own save behavior. The first 256 consumed hits per process are sent to Eden's log
+through Forge, with damage, HZV, critical/effect bytes, owner, source tags, part,
+impact position and per-thread identity. Logging runs only in the render consumer,
+with at most eight hits and 64 total records consumed per callback. A round-robin
+cursor visits each thread mailbox. After one limit marker, the panel continues
+capturing without further hit logs. Eden can rotate its log on restart; preserve
+the current log before another launch. Scope, thread-pool and overwritten-record counters
 make capture loss visible.
 Shared diagnostic counters use one weak compare-and-swap attempt and can
 undercount concurrent calls. Individual record serials and damage values are
@@ -52,11 +59,14 @@ one per slot, and do not retry a contested slot.
 
 ## Proposed bounded procedure
 
-For the user, the next check is just startup: keep the r2 NRO, put `1` in the
-installed capture opt-in file while the game is closed, leave the camera opt-in
-absent, then restart. Report whether the main menu loads. No quest is needed.
+For the user, replace only the capture NRO with r3 while Eden is closed. Keep the
+existing nonempty capture flag and leave the camera flag absent. Play one short
+solo quest normally, then inspect the last-hit records after returning to the
+village. No mid-fight screenshot is needed; the log also retains the first 256
+hits. Record that outcome before starting another game session.
 
-The later development procedure below remains pending until startup works.
+The later development procedure below covers the remaining research cases; it
+is not an exhaustive checklist for this retention check.
 
 1. After authorization, confirm Eden is closed and recheck its package list,
    activation configuration and the preserved Forge/Better Input hashes.

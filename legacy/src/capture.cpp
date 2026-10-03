@@ -290,7 +290,7 @@ void capture_install() {
     }
     __atomic_store_n(&active,1,__ATOMIC_RELEASE);
     status = "Diagnostic capture active; floating numbers are pending validation";
-    forge_log_info("[damage-numbers] Recovery r2: %u hooks; camera capture %s; one private arena/TLS slot",hook_count,camera_enabled ? "enabled" : "off");
+    forge_log_info("[damage-numbers] Capture r3: %u hooks; camera capture %s; one private arena/TLS slot; hit log limit 256",hook_count,camera_enabled ? "enabled" : "off");
 }
 void capture_monitor() {
     if (!load(active)) return;
@@ -308,8 +308,9 @@ void capture_monitor() {
     }
 }
 static Record recent[8]{}, last_camera{}, last_feedback{};
-static unsigned recent_count;
-static uint32_t consumed, shown_player;
+static unsigned recent_count, consume_cursor;
+static uint32_t consumed, shown_player, captured_hits;
+static constexpr unsigned log_limit=256, hits_per_consume=8, records_per_consume=64;
 void capture_consume() {
     if (!load(active)) return;
     static uint32_t first;
@@ -327,27 +328,42 @@ void capture_consume() {
     __atomic_compare_exchange_n(&consumer,&initial,id,true,__ATOMIC_SEQ_CST,__ATOMIC_SEQ_CST);
     if (load(consumer)!=id) return; // single consumer enforced across callbacks
     const uint32_t player=ownership.local_player();
-    if (player!=shown_player) { recent_count=0; last_camera={}; last_feedback={}; shown_player=player; }
-    for (unsigned i=0;i<16;++i) for (unsigned j=0;j<256;++j) {
+    // Hit records own copied values only. Retain them across quest/village
+    // changes; camera and feedback still belong to the current player context.
+    if (player!=shown_player) { last_camera={}; last_feedback={}; shown_player=player; }
+    unsigned empty=0, hits=0, records=0;
+    while (empty<16 && hits<hits_per_consume && records<records_per_consume) {
+        const unsigned i=consume_cursor;
+        consume_cursor=(consume_cursor+1)%16;
         Record r{};
-        if (!contexts[i].records.read(r)) break;
-        ++consumed;
-        if (r.kind==1 && player) {
+        if (!contexts[i].records.read(r)) { ++empty; continue; }
+        empty=0; ++records; ++consumed;
+        // Ownership was resolved by the producer. A queued hit remains valid
+        // evidence even if the player disappears before the render callback.
+        if (r.kind==1) {
             if (recent_count==8) {
                 for (unsigned k=1;k<8;++k) recent[k-1]=recent[k];
                 --recent_count;
             }
             recent[recent_count++]=r;
-        } else if (r.kind==2) last_feedback=r;
-        else if (r.kind==3) last_camera=r;
+            ++hits; ++captured_hits;
+            if (captured_hits<=log_limit) {
+                forge_log_info("[damage-numbers] Hit %u: damage %d; HZV %d; crit %u; effect %u; part %u; owner %u; thread %u; serial %u; type %u; flags %08x; tags %06x; pos %.2f %.2f %.2f",
+                    captured_hits,r.damage,r.hzv,r.critical,r.effect,r.part,r.actor,i,r.serial,
+                    r.damage_type,r.flags,r.source_tags,double(r.position.x),double(r.position.y),double(r.position.z));
+                if (captured_hits==log_limit)
+                    forge_log_info("[damage-numbers] Hit log limit reached (256); panel capture continues until restart");
+            }
+        } else if (r.kind==2 && player) last_feedback=r;
+        else if (r.kind==3 && player) last_camera=r;
     }
 }
 void capture_panel() {
     igTextUnformatted(load(patch_error) ? "Capture disabled: external code change; restart required" : status,nullptr);
     igTextUnformatted("Research capture: no world-space damage display or gameplay changes.",nullptr);
     if (!load(active)) return;
-    igTextUnformatted(camera_enabled ? "Recovery r2: camera capture enabled." :
-        "Recovery r2: camera hooks off; combat capture only.",nullptr);
+    igTextUnformatted(camera_enabled ? "Capture r3: camera capture enabled." :
+        "Capture r3: camera hooks off; combat capture only.",nullptr);
     capture_consume();
     Context* current=context();
     if (!current || load(consumer)!=uint32_t(current)) {
@@ -368,6 +384,9 @@ void capture_panel() {
     igText("  Native attack counter: %u",last_feedback.attack_counter);
     igText("Quest camera rectangle: %d %d %d %d",last_camera.rect[0],last_camera.rect[1],last_camera.rect[2],last_camera.rect[3]);
     igSeparator();
+    igTextUnformatted("Last eight hits remain across quest/village transitions until restart.",nullptr);
+    igText("Captured hits %u; first %u written to Eden log (maximum 256 per restart)",captured_hits,
+        captured_hits<log_limit ? captured_hits : log_limit);
     for (unsigned i=0;i<recent_count;++i) {
         const auto& r=recent[i];
         igText("Hit %u: damage %d; HZV %d; crit %u; effect %u; part %u; owner %u",r.serial,r.damage,r.hzv,r.critical,r.effect,r.part,r.actor);

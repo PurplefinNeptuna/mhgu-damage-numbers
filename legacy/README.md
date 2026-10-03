@@ -7,8 +7,10 @@ NRO has been built and inspected. The first enabled candidate caused Eden to
 exit before the main menu in the user's trial. Recovery r2 corrects the SDK TLS
 setter ABI and leaves camera hooks off by default. Its second startup trial also
 failed: the empty activation file can shadow Forge's font through Eden's RomFS
-layout. The prepared activation file now contains `1` and a newline. Live capture
-and startup with that correction remain unvalidated. See
+layout. With the nonempty activation file, the user confirmed startup, damage
+capture and quest completion. The panel then cleared its records on the quest
+transition. Capture r3 retains the last eight hits across transitions and sends
+the first 256 hits per restart to Eden's log. Its live check is pending. See
 [RUNTIME.md](RUNTIME.md) and [CAPTURE_TRIAL.md](CAPTURE_TRIAL.md).
 
 ## Accepted behavior
@@ -115,10 +117,11 @@ individual hit.
 The compiled gateway passed 9,031 checks across 1,769 calls. These include 1,440
 original melee-HZV queries with a mid-routine tap, complete register/float/flag
 preservation, nested scopes and scope-capacity bypass. The capture NRO probe
-passed 197 checks using explicit SDK/kernel fixtures and a synthetic collision
+passed 213 checks using explicit SDK/kernel fixtures and a synthetic collision
 body that calls the original HZV and damage routines. The actual collision
-traversal, raw/element assembly, live SDK/TLS behavior, camera selection and
-Eden acceptance remain unvalidated.
+traversal, raw/element assembly and camera selection remain unvalidated by these
+fixtures. The user confirmed that r2 starts and captures damage; individual hit
+accuracy and r3 history/log retention still need live evidence.
 
 The original SDK getter/setter probe passed 256 ABI checks with synthetic thread
 storage. The compiled fixture uses a nonzero return register for the void setter
@@ -127,7 +130,7 @@ and checks both the six-hook recovery default and the eight-hook camera opt-in.
 The RomFS model reproduces the zero-byte flag selecting padding at Forge's font
 offset using the inspected dump/listed-package metadata and Eden `d16735f5b6`
 layout logic. Absent and nonempty flags retain the font header. This is an offline
-layout check; the corrected activation file still needs a startup test.
+layout check. The user subsequently confirmed startup with the nonempty flag.
 
 Generated research inputs and logs stay in `work/damage-numbers/`; native reports
 and the capture candidate stay in `build/damage-numbers/`. Originals, saves,
