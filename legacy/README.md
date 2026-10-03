@@ -1,5 +1,8 @@
 # Damage numbers
 
+Manual confirmation: [in-game checklist](TEST_CHECKLIST.md) and
+[results sheet](TEST_RESULTS.md), covering LS and bowguns.
+
 Development targets the preserved MHGU 1.4.0 Switch executable and local patched
 Forge. R3 startup, hunter/palico capture, hit logging and quest-to-village
 diagnostic retention passed the user's trial. Its screenshot and retained log
