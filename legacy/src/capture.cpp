@@ -20,7 +20,6 @@
 static_assert(sizeof(ImVec2_c)==8 && offsetof(ImGuiIO,DisplaySize)==8);
 extern "C" {
 #include <forge/mem.h>
-#include <forge/fs.h>
 Result mwc_svc_query(MemoryInfo*, uint32_t*, uint64_t);
 Result mwc_svc_get_info(uint64_t*, uint32_t, uint32_t, uint64_t);
 uint64_t nnosGetSystemTick();
@@ -34,7 +33,7 @@ namespace damage_numbers {
 static mwc::NativePlatform platform;
 static Transaction<mwc::NativePlatform> transaction(platform);
 static uint32_t base, active, claimed, consumer, patch_error;
-static uint32_t camera_enabled, hook_count;
+static uint32_t hook_count;
 static uint32_t tick_frequency;
 static uint64_t tick_origin;
 static Model display_model;
@@ -273,19 +272,6 @@ extern "C" uint32_t dn_gateway_tap(uint32_t kind, RawFrame* frame) {
 }
 
 void capture_install() {
-    // Separate opt-in, absent from the default candidate package. No save mount.
-    char flag[128]{};
-    const char* mount = forge_fs_getRomFsMountPoint();
-    unsigned n=0;
-    if (!mount) { status = "Capture inactive: no RomFS mount"; return; }
-    while (mount[n] && n<32) { flag[n]=mount[n]; ++n; }
-    const char suffix[] = ":/nativeNX/forge/damage-numbers-capture.enabled";
-    if (mount[n]) { status = "Capture inactive: invalid mount name"; return; }
-    std::memcpy(flag+n,suffix,sizeof(suffix));
-    if (!forge_fs_fileExists(flag)) { status = "Capture inactive: opt-in flag absent"; return; }
-    const char camera_suffix[] = ":/nativeNX/forge/damage-numbers-camera.enabled";
-    std::memcpy(flag+n,camera_suffix,sizeof(camera_suffix));
-    camera_enabled = forge_fs_fileExists(flag);
     base = forge_mem_getMainTextAddr();
     uint64_t title=0;
     if (!base || base>0xfe000000u || mwc_svc_get_info(&title,18,CUR_PROCESS_HANDLE,0) ||
@@ -310,8 +296,6 @@ void capture_install() {
     HookSpec recipe[8]{};
     for (unsigned i=0;i<8;++i) {
         hook_slot[i] = 8;
-        // Leave both renderer entry points untouched in the recovery trial.
-        if (!camera_enabled && (i == 3 || i == 4)) continue;
         uint32_t expected[2]; std::memcpy(expected,signatures[i].bytes,8);
         hook_slot[i] = hook_count;
         recipe[hook_count++] = {base+signatures[i].offset,detours[i],{expected[0],expected[1]}};
@@ -333,9 +317,8 @@ void capture_install() {
         return;
     }
     __atomic_store_n(&active,1,__ATOMIC_RELEASE);
-    status = camera_enabled ? "Damage numbers ready" :
-        "Diagnostic capture active; camera/number preview opt-in absent";
-    forge_log_info("[damage-numbers] Capture r6: %u hooks; camera/preview %s; one private arena/TLS slot; hit log limit 256",hook_count,camera_enabled ? "enabled" : "off");
+    status = "Damage numbers ready";
+    forge_log_info("[damage-numbers] Capture r7: %u hooks; automatic startup; one private arena/TLS slot; hit log limit 256",hook_count);
 }
 void capture_monitor() {
     if (!load(active)) return;
@@ -402,20 +385,18 @@ void capture_consume() {
                 --recent_count;
             }
             recent[recent_count++]=r;
-            if (camera_enabled) {
-                float captured_at=0;
-                const uint8_t source=r.feedback[0].reserved;
-                if (player && r.player==player && source<=uint8_t(Source::Object) &&
-                    preview_fresh(r.tick,now,tick_frequency,display_model.config().lifetime) &&
-                    preview_seconds(r.tick,tick_origin,tick_frequency,captured_at)) {
-                    Critical critical=Critical::None;
-                    // An unknown native outcome never invents a critical marker.
-                    critical_outcome(uint8_t(r.critical),critical);
-                    const Event event={{display_epoch,r.serial,r.monster,i},r.position,r.damage,
-                        int16_t(r.hzv),Source(source),Owner(r.actor),critical,false,captured_at};
-                    if (!display_model.capture(event)) ++preview_rejected;
-                } else ++preview_rejected;
-            }
+            float captured_at=0;
+            const uint8_t source=r.feedback[0].reserved;
+            if (player && r.player==player && source<=uint8_t(Source::Object) &&
+                preview_fresh(r.tick,now,tick_frequency,display_model.config().lifetime) &&
+                preview_seconds(r.tick,tick_origin,tick_frequency,captured_at)) {
+                Critical critical=Critical::None;
+                // An unknown native outcome never invents a critical marker.
+                critical_outcome(uint8_t(r.critical),critical);
+                const Event event={{display_epoch,r.serial,r.monster,i},r.position,r.damage,
+                    int16_t(r.hzv),Source(source),Owner(r.actor),critical,false,captured_at};
+                if (!display_model.capture(event)) ++preview_rejected;
+            } else ++preview_rejected;
             ++hits; ++captured_hits;
             if (captured_hits<=log_limit) {
                 forge_log_info("[damage-numbers] Hit %u: damage %d; HZV %d; crit %u; effect %u; part %u; owner %u; thread %u; serial %u; type %u; flags %08x; tags %06x; pos %.2f %.2f %.2f",
@@ -438,7 +419,7 @@ void capture_consume() {
 }
 void capture_render() {
     capture_consume();
-    if (!load(active) || !camera_enabled) return;
+    if (!load(active)) return;
     Context* current=context();
     if (!current || load(consumer)!=uint32_t(current)) return;
     preview_drawn=0; ++preview_frames;
@@ -521,8 +502,7 @@ void capture_panel() {
     if (igButton("Save settings",{0,0})) settings_save(display_model.config());
     igTextUnformatted(settings_status(),nullptr);
     if (!igCollapsingHeader_TreeNodeFlags("Diagnostics##damage-numbers",0)) return;
-    igTextUnformatted(camera_enabled ? "Capture r6: camera and numbers enabled." :
-        "Capture r6: camera hooks off; combat capture only.",nullptr);
+    igTextUnformatted("Capture r7: automatic startup; camera and combat hooks active.",nullptr);
     igTextUnformatted("Shared counters are best-effort under contention; per-hit records remain separate.",nullptr);
     igText("Collision %u; normalization %u; feedback %u; viewport %u",load(calls[0]),load(calls[1]),load(calls[2]),load(calls[3]));
     igText("Camera uploads %u; HZV taps %u; melee queries %u; shot queries %u",load(calls[4]),load(calls[5]),load(calls[6]),load(calls[7]));

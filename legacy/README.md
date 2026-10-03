@@ -14,8 +14,10 @@ R5 admits their observed source tags only with resolved local-palico ownership.
 The user confirmed boomerang/barrel popups and white melee damage on a low-HZV
 part. R6 adds the settings panel, SD preferences, conservative gray bounce
 matching and independent optional-source switches. These additions need an
-in-game check. The default candidate keeps camera hooks and the preview off;
-a separate nonempty camera flag enables both. Earlier startup failures and the nonempty-flag correction are recorded in
+in-game check. R7 starts combat and camera hooks automatically when Eden loads
+the enabled package. No activation files are required; existing `.enabled` files
+are ignored. Numbers are on by default, with an in-game switch and saved
+preferences. Earlier startup failures and the nonempty-flag correction are recorded in
 [RUNTIME.md](RUNTIME.md) and [CAPTURE_TRIAL.md](CAPTURE_TRIAL.md).
 
 ## Accepted behavior
@@ -74,7 +76,7 @@ events. Context changes clear the queue and visible list.
    remote-player exclusion, crowded combat, save loading and repeated restarts.
    Multiplayer filtering requires an actual multiplayer test.
 
-## Settings and r6 trial
+## Settings and current trial
 
 Open **Damage numbers** in Forge. Changes apply immediately. **Save settings**
 keeps them after restart; **Restore defaults** returns the accepted size,
@@ -97,7 +99,7 @@ weapons/palicoes remain hidden even with both optional switches enabled.
 Other environmental families and recurring ticks remain unsupported. The new
 source families and bounce behavior are experimental until the user's trial.
 
-For the first r6 check, turn numbers off and back on, save a small size change,
+For the settings check, turn numbers off and back on, save a small size change,
 and restart once to confirm it remains. Restore defaults afterward. A placed
 bomb with its switch on/off and an ordinary weapon bounce can be checked later
 when convenient. No completed save or extensive test session is needed.

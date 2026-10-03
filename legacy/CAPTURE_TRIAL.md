@@ -6,50 +6,48 @@ The prepared package is
 `build/damage-numbers/capture/candidate-manifest.json` records its hash, native
 signatures, imports, source hashes and preserved Forge/SDK inputs.
 
-This is capture/preview r5, prepared after the successful r4 melee visual trial. The build
-command only stages files and does not install them. Its candidate-package opt-in file,
-`romfs/nativeNX/forge/damage-numbers-capture.enabled`, is absent. Without that
-file the candidate stays inactive and allocates no capture hooks, arena or TLS
-slot. Creating the flag and installing the package require the separately
-authorized runtime trial from the accepted plan.
+R7 starts automatically when Forge loads the enabled package in Eden. Both
+combat and camera hooks start together; no `.enabled` files are needed. Old
+capture/camera flags are ignored and may be removed while Eden is closed.
+The builder stages the NRO without installing it or creating activation files.
+Numbers start on unless a saved preference turns them off; the in-game **Show
+damage numbers** switch controls visibility.
 
-The activation file must contain text, such as `1` followed by a newline.
-Do not use an empty RomFS file: on Eden `d16735f5b6`, it can share the following
-font's offset and cause its data to be replaced by padding. A prepared nonempty
-file is at `build/damage-numbers/capture/activation/damage-numbers-capture.enabled`.
-See [RUNTIME.md](RUNTIME.md) for the reproduced layout and startup failure.
+The old flags isolated startup failures during early trials. The retained SDK
+TLS and font-layout fixes remain in place. Empty RomFS files are still rejected:
+on Eden `d16735f5b6`, they can overlap the following font's data offset. See
+[RUNTIME.md](RUNTIME.md) for the historical failure evidence.
 
 ## What the enabled candidate does
 
-- Installs six fingerprinted combat hooks through one private 4 KiB arena.
-  It allocates one SDK TLS slot, separate from Forge's context facilities.
-- Camera hooks and floating numbers are off by default. The separate nonempty
-  `damage-numbers-camera.enabled` flag adds the viewport/upload hooks and enables
-  the projection preview. Its prepared template is under `activation/`.
+- Installs eight fingerprinted combat and camera hooks through one private
+  4 KiB arena. It allocates one SDK TLS slot, separate from Forge's context
+  facilities. Title/build checks and transactional installation still apply.
 - Captures positive native monster-damage contributions for the local
   hunter/Prowler and their palicoes. Healing type `0x1d`, nonpositive values and
   other hunters/palicoes are excluded. Values include accompanying elemental
   damage once the native collision path has combined it.
 - Retains raw source tags for later bomb/support-move classification. A locally
-  owned placed object can appear in these research records; source switches and
-  their final display policy are not implemented in the capture candidate.
+  owned placed object can appear in these research records. Optional monster
+  and placed-object display switches are independent and off by default.
 - Copies impact positions, physical HZV, native critical/effect bytes and part
   IDs. Each normalization application remains a distinct diagnostic record.
 - Records both active weapon attacks when the native feedback getter runs.
-  Scoped quest-camera matrices and rectangles require the separate camera trial.
+  Captures scoped quest-camera matrices and rectangles automatically.
 - Shows counters and the latest eight local damage records in Forge's plugin
   panel. These copied records survive quest/village and local-player changes,
-  roll forward with new hits and clear on restart. Bounce decisions remain
-  aggregate diagnostics until their individual-hit correlation is verified.
-- With the camera flag present, draws outlined numbers near copied impact
+  roll forward with new hits and clear on restart. Gray bounce coloring requires
+  uniquely matching feedback for the latest hit on the same thread and counter;
+  ambiguous feedback leaves its HZV color unchanged.
+- Draws outlined numbers near copied impact
   positions with a short size pop, upward drift, 0.9-second lifetime and fade.
   Physical HZV selects white below 45 or orange-yellow at least 45; unknown HZV
   stays white. Native positive/negative critical outcomes add an outlined line
   above/below. Multi-hit lanes reserve space for those lines.
 - Displays directly owned hunter/Prowler/palico attack kinds 0 and 3, plus the
   observed palico child attack tags `0x030402` and `0x030802` when ownership
-  resolves to the local palico. Other secondary sources stay diagnostic. Gray
-  bounce coloring and optional sources are not enabled in this preview.
+  resolves to the local palico. Other supported sources follow their individual
+  display switches; unknown source families remain hidden.
 - Uses only fresh (under 200 ms), scoped quest-camera matrices. A full-screen
   zero-origin native rectangle with matching display aspect maps to Forge's
   swapchain size. Unrecognized layouts hide the preview. Player/camera changes
@@ -75,47 +73,22 @@ R4 also logs one valid camera snapshot (rectangle, display size and matrices)
 and up to four distinct projected hits. These diagnostics are render-side and
 bounded. The SDK clock frequency is checked before hooks/TLS are allocated.
 
-## Proposed bounded procedure
+## Small manual check
 
-For the user, replace only the capture NRO with r5 while Eden is closed. Keep
-both existing nonempty flags. In one ordinary short solo quest, watch whether
-palico boomerangs and thrown barrels now produce separate popups on impact.
-Position, animation and size were already accepted and are unchanged. No repeat
-of the melee visual test or 100% save is needed. Critical checks can wait until
-suitable equipment is available naturally. Report the projectile result before
-another restart so the current log can be preserved.
+With Eden closed, replace only the installed damage-number NRO with the staged
+r7 candidate. The two old activation files are unnecessary. Keep the current
+Forge, Better Input and emulator settings.
 
-The later development procedure below covers the remaining research cases; it
-is not an exhaustive checklist for this retention check.
+Start normally and land one hit to confirm automatic startup. For the untested
+settings persistence, turn numbers off/on, save a small size change, restart
+once and check that it remains. Restore defaults and save afterward. Bounce
+and optional-source checks can follow during ordinary play. A completed save
+and a repeat of the accepted appearance tests are unnecessary.
 
-The r3 retention check passed: the user's village screenshot and retained Eden
-log show 23 separate local hunter/palico hit records after the quest transition,
-with zero capture drops or read failures. Evidence and remaining validation
-limits are in [RUNTIME.md](RUNTIME.md). No repeat of this check is needed.
-
-1. After authorization, confirm Eden is closed and recheck its package list,
-   activation configuration and the preserved Forge/Better Input hashes.
-   Preserve saves and the current Eden log in workspace `backups/`.
-2. Stage a separate temporary package with the exact reviewed NRO and nonempty opt-in
-   file. Keep rollback material outside Eden. Retain the existing emulator
-   configuration for this capture trial.
-3. Start the game and inspect Forge's **Damage numbers - projection preview**
-   panel. Confirm capture is active, combat hook counters advance, and no scope,
-   thread-pool or unexpected read failures appear.
-4. In one short solo quest, check isolated hits on large and small monsters,
-   rapid multi-hits and palico attacks. Compare a raw weapon with an elemental
-   weapon, and cover a known physical HZV on each side of 45. Record the panel's
-   values and impact positions alongside the attacks. Keep the trial to one
-   quest or 15 minutes, whichever comes first.
-5. Check low-sharpness bounces and a bounce-preventing move/skill. The two attack
-   snapshots and native feedback return must explain which impacts can be
-   colored gray. Do not accept raw effect zero alone as proof of a bounce.
-6. Cover Prowler, ranged attacks, shells/phials and a quest/village transition
-   in additional bounded runs as needed. Multiplayer exclusion needs its own
-   actual multiplayer run; solo fixtures do not establish it.
-7. Close Eden, preserve the new log and observations, remove the temporary
-   package/flag and restart before normal play. Recheck the original installed
-   hashes and controls. Keep the runtime outcome separate from fixture results.
+When collecting further runtime evidence, preserve the current Eden log before
+restarting and keep rollback material under workspace `backups/`. Critical
+markings, Prowler/ranged cases and multiplayer filtering still need suitable
+in-game evidence; the compiled fixtures do not establish those results.
 
 If initialization rejects a signature or allocation, stop the run and retain
 the evidence. If capture reports an external hook change, it stops collecting
@@ -131,15 +104,12 @@ tools/mwc-analysis-venv/bin/python scripts/damage_numbers_capture_probe.py
 ```
 
 These commands use the existing offline compiler container and pinned Unicorn
-environment. They do not install a package or create the opt-in flag. The compiled
+environment. They do not install a package or create activation files. The compiled
 capture report is `build/damage-numbers/capture/compiled-capture-probe.json`.
 Its collision body, SDK services and kernel bridges are explicit fixtures;
 live per-hit accuracy and untested attack cases remain pending. R4 presentation,
 r5 palico projectiles and white physical-HZV damage passed the user's trial.
 
-For r6, start with the small settings/restart check in [README.md](README.md).
-The installed r5 NRO and its two nonempty flags were preserved. Replace only
-the NRO with the staged candidate while Eden is closed, retaining both existing
-flags. R6 adds no hooks or extra CodeMemory arenas. Optional source and gray
-bounce acceptance can follow during normal play; ambiguous feedback keeps the
-HZV color. SD settings persistence is implemented but not yet tested in Eden.
+R7 keeps the same eight hook sites and one private CodeMemory arena. SD settings
+persistence, conservative gray bounce and optional-source runtime acceptance
+remain pending.

@@ -252,3 +252,33 @@ were not changed while preparing it.
 The first manual check is small: toggle numbers off/on, save a slight size
 change and restart once. Restore defaults afterward. Bomb switch and actual
 recoil checks can follow during normal play; no completed save is needed.
+
+## 2026-10-03: r7 automatic startup staged
+
+The user requested activation without extra flag files. R7 removes both RomFS
+flag checks and their generated templates. Forge initializes all eight combat
+and camera hooks automatically when the package is enabled in Eden. The
+default preference shows numbers; the in-game switch and any saved disabled
+preference still apply. Old `.enabled` files are ignored.
+
+Title/build signatures, native clock validation, SDK TLS and transactional
+installation checks remain. Hook sites, the private 4 KiB arena, mailbox
+layout, source policy and accepted appearance are unchanged from r6. The
+compiled NRO has no Forge filesystem imports for activation-file access.
+
+Automated checks passed: 276 compiled NRO checks with explicit SDK/kernel/ImGui
+fixtures, including automatic installation of all eight hooks without flag APIs,
+rendering after a camera snapshot, saved visibility preferences and detection
+of a modified camera hook. These are fixture results; r7 startup in Eden and
+the r6 settings/bounce/optional-source additions still await manual acceptance.
+
+Staged NRO SHA-256:
+`43c6dc8a105789e32e4d22b7e8e514f235e1226641600176ba31527960685021`.
+The candidate package contains only the 65,536-byte NRO. The installed r5 NRO
+retains SHA-256
+`81ed488cb38f13c7899e8cf7822b3b235df2d9c87d0fbeb12553e29fd2c244e0`.
+No installed package, activation configuration or save was changed.
+
+With Eden closed, replace only the damage-number NRO. The two old activation
+files may be removed. Start normally and land one hit to confirm automatic
+startup; the small settings/restart check can follow if it has not been done.

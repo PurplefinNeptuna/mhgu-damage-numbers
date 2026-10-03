@@ -183,9 +183,9 @@ then prepares every trampoline before publishing any hook. It runs only from
 Forge's boot callback before `original_sApp_run`; no hot install/remove is
 provided. Existing Forge, Better Input and modern-controls sites are excluded.
 
-Recovery r2 installs six combat hooks by default. Viewport `0xb8909c` and camera
-upload `0x885844` remain untouched unless a separate camera opt-in file is present.
-This isolates renderer hooks after the first enabled runtime trial exited before
+Recovery r2 installed six combat hooks by default. Viewport `0xb8909c` and camera
+upload `0x885844` remained untouched unless a separate camera opt-in file was present.
+This isolated renderer hooks after the first enabled runtime trial exited before
 the main menu; it does not establish which hook caused the exit.
 
 The fingerprinted SDK's `nnosSetTlsValue` wrapper branches through `0x43b7bc`
@@ -238,12 +238,14 @@ offset `9203903232`. An absent flag preserves the font there. Giving the flag
 1, 2 or 8 bytes places the font at `9203903248` and preserves its header.
 Listed-package metadata is not proof of current activation; the full emulator
 and guest filesystem were not executed by this fixture. The symptom matches the
-retained startup log. Startup with a nonempty flag remains a manual gate.
+retained startup log. Startup with a nonempty flag was later accepted in the
+r3 user trial; [RUNTIME.md](RUNTIME.md) records that result.
 
-The capture build supplies a separate nonempty activation template and rejects
-empty candidate-package files. Both capture and future camera opt-in files must
-contain text. No emulator patch, font replacement or further NRO change is
-needed for this packaging correction.
+Earlier capture builds supplied separate nonempty activation templates. R7
+removes both flag checks and templates: all eight hooks start at boot after
+the existing title/signature, clock, TLS and transaction checks. Existing flags
+are ignored. The candidate still rejects empty RomFS files, preserving the
+packaging correction without an emulator patch or font replacement.
 
 ## Open gates
 
