@@ -1,19 +1,17 @@
 # Damage numbers
 
 Development targets the preserved MHGU 1.4.0 Switch executable and local patched
-Forge. Phase 1 combat-binding research is in progress. The host display core and
-selected native routines have passed fixture checks. An ARM32 diagnostic capture
-NRO has been built and inspected. The first enabled candidate caused Eden to
-exit before the main menu in the user's trial. Recovery r2 corrects the SDK TLS
-setter ABI and leaves camera hooks off by default. Its second startup trial also
-failed: the empty activation file can shadow Forge's font through Eden's RomFS
-layout. With the nonempty activation file, the user confirmed startup, damage
-capture and quest completion. The panel then cleared its records on the quest
-transition. Capture r3 retains the last eight hits across transitions and sends
-the first 256 hits per restart to Eden's log. The user confirmed r3 works; its
-village screenshot and retained log show 23 separate hunter/palico records with
-zero scope/pool drops, orphan contributions, overwritten records or read failures.
-Quest-to-village retention and live hit logging passed this trial. See
+Forge. R3 startup, hunter/palico capture, hit logging and quest-to-village
+diagnostic retention passed the user's trial. Its screenshot and retained log
+show 23 separate records with zero capture drops or read failures.
+
+R4 adds a floating-number preview through Forge's free-render callback, using
+captured final camera matrices, outlined digits, HZV colors, native critical
+lines, pop/drift/fade and separate multi-hit lanes. It is built and fixture-tested;
+its live projection check is pending. The default candidate keeps camera hooks
+and the preview off. A separate nonempty camera flag enables both. Bounce gray,
+secondary source classification, optional sources and settings persistence remain
+pending. Earlier startup failures and the nonempty-flag correction are recorded in
 [RUNTIME.md](RUNTIME.md) and [CAPTURE_TRIAL.md](CAPTURE_TRIAL.md).
 
 ## Accepted behavior
@@ -77,7 +75,8 @@ reads, the native local-session index and a palico's current work pointer.
 `camera.h` converts copied native view/projection matrices into the display's
 matrix convention. Neither helper identifies an active gameplay context by
 itself; those runtime gates remain required. `presentation.h` emits layout
-commands. The native outlined-text renderer is pending.
+commands. The r4 preview renders outlined text through Forge; camera selection
+and placement still need the user's in-game check.
 
 Research evidence and open bindings are listed in [RESEARCH.md](RESEARCH.md).
 The runtime adapter must serialize model access without taking game locks or
@@ -97,7 +96,7 @@ tools/mwc-analysis-venv/bin/python scripts/damage_numbers_sdk_tls_probe.py
 python3 scripts/test_damage_numbers_romfs_flag.py
 ```
 
-The first command passed 416 host checks with AddressSanitizer and UBSan.
+The first command passed 435 host checks with AddressSanitizer and UBSan.
 LeakSanitizer is disabled because thread enumeration fails in the ptraced
 sandbox; the tested core uses fixed storage.
 The mailbox also passed overflow/wrap checks and eight-producer stress with
@@ -120,16 +119,24 @@ individual hit.
 The compiled gateway passed 9,031 checks across 1,769 calls. These include 1,440
 original melee-HZV queries with a mid-routine tap, complete register/float/flag
 preservation, nested scopes and scope-capacity bypass. The capture NRO probe
-passed 213 checks using explicit SDK/kernel fixtures and a synthetic collision
+passed 238 checks using explicit SDK/kernel fixtures and a synthetic collision
 body that calls the original HZV and damage routines. The actual collision
 traversal, raw/element assembly and camera selection remain unvalidated by these
 fixtures. The user confirmed that r2 starts and captures damage; individual hit
 accuracy still needs independent comparison. R3 history retention and hit logging
 are confirmed by the user's village screenshot and retained Eden log.
 
-The original SDK getter/setter probe passed 256 ABI checks with synthetic thread
-storage. The compiled fixture uses a nonzero return register for the void setter
-and checks both the six-hook recovery default and the eight-hook camera opt-in.
+The r4 compiled checks record actual ARM32 ImGui call arguments with explicit
+font/draw fixtures. They cover outlined glyphs, HZV colors, critical lines and
+spacing, native capture timestamps, fade/expiry, stale-camera suppression,
+viewport scaling and context cleanup. They do not execute Forge's GPU renderer.
+
+The original SDK getter/setter and clock probe passed 260 ABI checks with
+synthetic thread storage and a stubbed hardware counter. The native frequency
+routine returns 19,200,000 ticks per second; the original C clock wrapper returns
+a 64-bit integer in r0/r1. The compiled fixture uses a nonzero return register for
+the void setter and checks both the six-hook default and the eight-hook camera
+opt-in.
 
 The RomFS model reproduces the zero-byte flag selecting padding at Forge's font
 offset using the inspected dump/listed-package metadata and Eden `d16735f5b6`

@@ -94,6 +94,30 @@ the viewport-render scope when the camera has the saved `uQuestCamera` vtable
 `main+0x1730d0c`. This is a camera candidate, pending live selection and render
 scale checks.
 
+R4 uses this binding for an opt-in projection preview. Forge's inspected NVN
+backend obtains `ImGuiIO::DisplaySize` from its swapchain textures and sets
+framebuffer scale to one. The preview accepts only zero-origin full-screen
+native rectangles with a matching aspect, then maps normalized clip coordinates
+into that display size. Offset/split viewports remain unsupported. Camera data
+older than 200 ms is hidden, and copied camera/viewport identity changes clear
+the transient display. No camera pointer is dereferenced by the renderer.
+
+The preserved SDK C wrapper `nnosGetSystemTick` at SDK `0x9e640` converts the
+C++ Tick aggregate to a 64-bit r0/r1 return. The original frequency implementation
+at `0x9d840` returns 19,200,000. Original-wrapper fixtures check values beyond
+32 bits; the hardware-counter query is explicit fixture data. R4 records ticks
+with damage/camera payloads and subtracts them before converting to float, so
+mailbox delay does not extend a number's lifetime. Record size is now 248 bytes,
+with copied player identity at `+236` and the tick at `+240`; the earlier fields
+keep their offsets.
+
+The renderer uses the pinned cimgui font/draw API through Forge's free-render
+callback, which runs even when the Forge window is closed. The inspected ImGui
+font cache rounds requested sizes, and Forge's NVN backend advertises dynamic
+texture support. Outlined digits use eight black offset passes plus the color
+pass; critical lines have an outline and reserved vertical lane space. Actual
+font rasterization, GPU output and impact alignment still need the r4 trial.
+
 ## Hitzone and bounce capture
 
 The melee routine's tap at `0x16dd7c`, immediately before the selected-type
@@ -219,9 +243,10 @@ needed for this packaging correction.
 - ABI-preserving hooks, private arena transaction/rollback, thread ownership,
   imports, ARM32 build and runtime capture trial.
 
-The candidate is prepared for review and a separately authorized diagnostic
-trial. The Phase 1 runtime gate remains open. No floating-number renderer or
-optional-source acceptance is claimed.
+R3's local hunter/palico capture, logging and diagnostic retention passed the
+user's trial. The Phase 1 binding gate remains open for the other cases above.
+R4's camera/renderer preview is prepared for a short visual trial; live
+projection, optional sources and per-hit bounce are not yet accepted.
 
 ## Reproduce research
 

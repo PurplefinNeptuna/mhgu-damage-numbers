@@ -128,3 +128,36 @@ retention passed this manual trial. Independent damage/HP comparison, elemental
 assembly, other attack/source cases, multiplayer exclusion and active-camera
 projection remain pending. No plugin code, installed package, emulator setting
 or save was changed while recording this result.
+
+## Prepared r4 camera and floating-number preview
+
+R4 adds native capture timestamps and a renderer to the free-render callback.
+It retains the six-hook default and one private arena/TLS slot. The existing
+camera opt-in enables all eight hooks and the preview; both activation templates
+contain `1` and a newline. The candidate package itself contains only the NRO.
+The installed r3 package and emulator configuration remain unchanged.
+
+The preview uses the captured final view/projection matrices, a scoped
+`uQuestCamera` identity, a snapshot younger than 200 ms and a full-screen native
+rectangle whose aspect matches Forge's swapchain. It renders outlined digits,
+physical-HZV colors, native critical lines, pop/drift/fade and separate multi-hit
+lanes. Diagnostic history survives transitions; floating numbers clear on
+player/camera changes or stale/unsupported camera data. Hits delayed longer than
+their lifetime are retained in diagnostics but omitted from the display.
+
+This first visual trial accepts direct hunter/Prowler/palico kinds 0 and 3.
+Secondary ownership/source classification, bounce gray, optional sources and
+settings persistence remain pending. It does not infer a per-hit bounce from
+the aggregate feedback getter or change native damage/affinity processing.
+
+Automated checks: 435 host policy/presentation checks under ASan/UBSan, mailbox
+overflow and eight-producer stress with 160,000 published packets, 23 hook
+transaction scenarios, 238 compiled NRO checks with explicit SDK/kernel/font/
+draw fixtures, and 260 original SDK TLS/clock ABI checks. The SDK clock checks
+execute the original C return wrapper with a stubbed hardware counter and the
+original frequency routine (19,200,000 Hz). The compiled renderer checks inspect
+ARM32 draw arguments; they do not execute ImGui font rasterization or GPU work.
+
+One short normal solo quest is the pending live check: hit placement while
+turning the camera and normal disappearance after the quest. No installation,
+activation, save edit or emulator-setting change was performed to prepare r4.

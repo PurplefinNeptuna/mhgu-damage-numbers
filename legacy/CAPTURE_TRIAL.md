@@ -6,7 +6,7 @@ The prepared package is
 `build/damage-numbers/capture/candidate-manifest.json` records its hash, native
 signatures, imports, source hashes and preserved Forge/SDK inputs.
 
-This is capture r3, prepared after the successful r2 quest trial. The build
+This is capture/preview r4, prepared after the successful r3 retention trial. The build
 command only stages files and does not install them. Its candidate-package opt-in file,
 `romfs/nativeNX/forge/damage-numbers-capture.enabled`, is absent. Without that
 file the candidate stays inactive and allocates no capture hooks, arena or TLS
@@ -23,8 +23,9 @@ See [RUNTIME.md](RUNTIME.md) for the reproduced layout and startup failure.
 
 - Installs six fingerprinted combat hooks through one private 4 KiB arena.
   It allocates one SDK TLS slot, separate from Forge's context facilities.
-- Camera hooks are off. Leave `damage-numbers-camera.enabled` absent during
-  the recovery check. That separate opt-in adds the viewport/upload hooks.
+- Camera hooks and floating numbers are off by default. The separate nonempty
+  `damage-numbers-camera.enabled` flag adds the viewport/upload hooks and enables
+  the r4 projection preview. Its prepared template is under `activation/`.
 - Captures positive native monster-damage contributions for the local
   hunter/Prowler and their palicoes. Healing type `0x1d`, nonpositive values and
   other hunters/palicoes are excluded. Values include accompanying elemental
@@ -38,9 +39,21 @@ See [RUNTIME.md](RUNTIME.md) for the reproduced layout and startup failure.
   Scoped quest-camera matrices and rectangles require the separate camera trial.
 - Shows counters and the latest eight local damage records in Forge's plugin
   panel. These copied records survive quest/village and local-player changes,
-  roll forward with new hits and clear on restart. There are no floating numbers
-  yet. Bounce decisions remain aggregate
-  diagnostics until their individual-hit correlation is verified.
+  roll forward with new hits and clear on restart. Bounce decisions remain
+  aggregate diagnostics until their individual-hit correlation is verified.
+- With the camera flag present, draws outlined numbers near copied impact
+  positions with a short size pop, upward drift, 0.9-second lifetime and fade.
+  Physical HZV selects white below 45 or orange-yellow at least 45; unknown HZV
+  stays white. Native positive/negative critical outcomes add an outlined line
+  above/below. Multi-hit lanes reserve space for those lines.
+- The first preview displays directly owned hunter/Prowler/palico attack kinds
+  0 and 3. Secondary ownership stays in diagnostics pending source classification.
+  Gray bounce coloring and optional sources are not enabled in this preview.
+- Uses only fresh (under 200 ms), scoped quest-camera matrices. A full-screen
+  zero-origin native rectangle with matching display aspect maps to Forge's
+  swapchain size. Unrecognized layouts hide the preview. Player/camera changes
+  and stale cameras clear floating numbers without clearing diagnostic history.
+  Capture timestamps prevent delayed records from acquiring a new lifetime.
 
 The candidate does not mount or write save data, change gameplay values, reroll
 affinity, upgrade Forge or alter Eden settings. Normal gameplay still has its
@@ -57,13 +70,20 @@ undercount concurrent calls. Individual record serials and damage values are
 independent of those counters. Thread-context claims have at most 16 attempts,
 one per slot, and do not retry a contested slot.
 
+R4 also logs one valid camera snapshot (rectangle, display size and matrices)
+and up to four distinct projected hits. These diagnostics are render-side and
+bounded. The SDK clock frequency is checked before hooks/TLS are allocated.
+
 ## Proposed bounded procedure
 
-For the user, replace only the capture NRO with r3 while Eden is closed. Keep the
-existing nonempty capture flag and leave the camera flag absent. Play one short
-solo quest normally, then inspect the last-hit records after returning to the
-village. No mid-fight screenshot is needed; the log also retains the first 256
-hits. Record that outcome before starting another game session.
+For the user, replace the capture NRO with r4 while Eden is closed. Keep the
+existing nonempty capture flag and copy the prepared nonempty camera flag into
+the same installed `romfs/nativeNX/forge/` folder. Play one short solo quest with
+Forge's menu closed. Observe whether numbers appear near impacts, stay aligned
+as the camera turns, and disappear normally after hits and on returning to the
+village. The retained panel/log provides diagnostics if numbers are absent or
+misplaced. Report that result before another restart. No special equipment,
+critical/bounce setup or exhaustive weapon checklist is needed for this check.
 
 The later development procedure below covers the remaining research cases; it
 is not an exhaustive checklist for this retention check.
@@ -79,7 +99,7 @@ limits are in [RUNTIME.md](RUNTIME.md). No repeat of this check is needed.
 2. Stage a separate temporary package with the exact reviewed NRO and nonempty opt-in
    file. Keep rollback material outside Eden. Retain the existing emulator
    configuration for this capture trial.
-3. Start the game and inspect Forge's **Damage numbers - capture research**
+3. Start the game and inspect Forge's **Damage numbers - projection preview**
    panel. Confirm capture is active, combat hook counters advance, and no scope,
    thread-pool or unexpected read failures appear.
 4. In one short solo quest, check isolated hits on large and small monsters,

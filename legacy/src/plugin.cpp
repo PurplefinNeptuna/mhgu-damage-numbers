@@ -17,7 +17,7 @@ extern "C" void forge_onLoad(PluginInitParam* out) {
     auto* bytes=reinterpret_cast<volatile unsigned char*>(out);
     for (unsigned i=0;i<sizeof(*out);++i) bytes[i]=0;
     out->required_ver={1,4,1};
-    const char name[]="Damage numbers - capture research";
+    const char name[]="Damage numbers - projection preview";
     for (unsigned i=0;i<sizeof(name);++i) bytes[offsetof(PluginInitParam,name)+i]=name[i];
 }
 extern "C" void forge_onInit() { damage_numbers::capture_install(); }
@@ -29,4 +29,4 @@ extern "C" void forge_onImGuiInit(void* ctx,void* alloc,void* free_fn) {
     forge_log_info("[damage-numbers] ImGui context setup complete");
 }
 extern "C" void forge_onImGuiRender() { damage_numbers::capture_panel(); }
-extern "C" void forge_onImGuiFreeRender() { damage_numbers::capture_consume(); }
+extern "C" void forge_onImGuiFreeRender() { damage_numbers::capture_render(); }

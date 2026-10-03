@@ -62,6 +62,8 @@ inline unsigned layout(const Model& model, const View& view, float now,
         d.color=rgb(tint(e,s)); d.critical=marker(e); d.key=e.key;
         const unsigned n=digits(e.total_damage,d.text);
         const float width=float(n)*d.pixels*0.65f;
+        const float top_pad=d.critical==Critical::Positive ? 6*viewport_scale : 0;
+        const float bottom_pad=d.critical==Critical::Negative ? 6*viewport_scale : 0;
         d.position={anchor.x-width*0.5f,anchor.y-8*viewport_scale-age/s.lifetime*30*viewport_scale};
         // Place younger hits above nearby older numbers. Deterministic input
         // order preserves every impact and gives a stable multi-hit pattern.
@@ -71,18 +73,21 @@ inline unsigned layout(const Model& model, const View& view, float now,
                 const DrawNumber& other=out[j]; unsigned len=0;
                 while(other.text[len])++len;
                 const float other_width=float(len)*other.pixels*0.65f;
+                const float other_top=other.position.y-(other.critical==Critical::Positive ? 6*viewport_scale : 0);
+                const float other_bottom=other.position.y+other.pixels+
+                    (other.critical==Critical::Negative ? 6*viewport_scale : 0);
                 if (d.position.x < other.position.x+other_width+4*viewport_scale &&
                     other.position.x < d.position.x+width+4*viewport_scale &&
-                    d.position.y < other.position.y+other.pixels+4*viewport_scale &&
-                    other.position.y < d.position.y+d.pixels+4*viewport_scale) {
-                    d.position.y=other.position.y-d.pixels-4*viewport_scale;
+                    d.position.y-top_pad < other_bottom+4*viewport_scale &&
+                    other_top < d.position.y+d.pixels+bottom_pad+4*viewport_scale) {
+                    d.position.y=other_top-d.pixels-bottom_pad-4*viewport_scale;
                     moved=true; break;
                 }
             }
             if(!moved)break;
         }
-        if (d.position.x<view.x || d.position.y<view.y ||
-            d.position.x+width>view.x+view.width || d.position.y+d.pixels>view.y+view.height) continue;
+        if (d.position.x<view.x || d.position.y-top_pad<view.y ||
+            d.position.x+width>view.x+view.width || d.position.y+d.pixels+bottom_pad>view.y+view.height) continue;
         out[count++]=d;
     }
     return count;

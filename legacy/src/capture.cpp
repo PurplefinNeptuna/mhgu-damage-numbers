@@ -4,6 +4,7 @@
 #include "mailbox.h"
 #include "ownership.h"
 #include "outcomes.h"
+#include "preview.h"
 #include "transaction.h"
 #include "signatures.h"
 #include "../../modern-weapon-controls/src/native_platform.h"
@@ -13,11 +14,14 @@
 #include <stdarg.h>
 #define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
 #include <cimgui.h>
+static_assert(sizeof(ImVec2_c)==8 && offsetof(ImGuiIO,DisplaySize)==8);
 extern "C" {
 #include <forge/mem.h>
 #include <forge/fs.h>
 Result mwc_svc_query(MemoryInfo*, uint32_t*, uint64_t);
 Result mwc_svc_get_info(uint64_t*, uint32_t, uint32_t, uint64_t);
+uint64_t nnosGetSystemTick();
+int64_t nnosGetSystemTickFrequency();
 void dn_gateway_0(); void dn_gateway_1(); void dn_gateway_2(); void dn_gateway_3();
 void dn_gateway_4(); void dn_gateway_5(); void dn_gateway_6(); void dn_gateway_7();
 void dn_gateway_after();
@@ -28,6 +32,8 @@ static mwc::NativePlatform platform;
 static Transaction<mwc::NativePlatform> transaction(platform);
 static uint32_t base, active, claimed, consumer, patch_error;
 static uint32_t camera_enabled, hook_count;
+static uint32_t tick_frequency;
+static uint64_t tick_origin;
 static unsigned hook_slot[8]{};
 static uint32_t context_used[16]{};
 static TlsSlot tls_slot = -1;
@@ -73,11 +79,14 @@ struct Record {
     FeedbackSnapshot feedback[2];
     uint32_t attack_counter;
     uint32_t source_tags;
+    uint32_t player;
+    uint64_t tick;
 };
-static_assert(sizeof(Record)==236 && offsetof(Record,damage)==40 &&
+static_assert(sizeof(Record)==248 && offsetof(Record,damage)==40 &&
               offsetof(Record,position)==48 && offsetof(Record,view)==60 &&
               offsetof(Record,projection)==124 && offsetof(Record,rect)==188 &&
-              offsetof(Record,feedback)==204 && sizeof(FeedbackSnapshot)==12);
+              offsetof(Record,feedback)==204 && sizeof(FeedbackSnapshot)==12 &&
+              offsetof(Record,player)==236 && offsetof(Record,tick)==240);
 struct Scope {
     uint32_t kind, caller, sp, subject, monster, auxiliary;
     Owner owner;
@@ -117,6 +126,10 @@ static Scope* find(Context& c, unsigned kind) {
     return nullptr;
 }
 static void publish(Context& c, Record& r) {
+    if (r.kind==1 || r.kind==3) {
+        r.player=ownership.local_player();
+        r.tick=nnosGetSystemTick();
+    }
     r.serial = ++c.serial; c.records.publish(r);
 }
 static uint32_t detours[] = {uint32_t(&dn_gateway_0),uint32_t(&dn_gateway_1),
@@ -227,7 +240,7 @@ extern "C" uint32_t dn_gateway_tap(uint32_t kind, RawFrame* frame) {
         if (viewport && readable(viewport->subject,0x28)) {
             const uint32_t camera = word(viewport->subject+0x24);
             if (readable(camera,4) && word(camera) == base+0x1730d0c) {
-                Record r{}; r.kind = 3; r.actor = camera;
+                Record r{}; r.kind = 3; r.actor = camera; r.monster=viewport->subject;
                 if (copy(frame->r[1],r.view,64) && copy(frame->r[2],r.projection,64) &&
                     copy(frame->r[3],r.rect,16)) publish(*c,r);
             }
@@ -260,6 +273,11 @@ void capture_install() {
             status = "Capture inactive: build/code signature mismatch"; return;
         }
     }
+    const int64_t frequency=nnosGetSystemTickFrequency();
+    if (frequency<=0 || uint64_t(frequency)>0xffffffffu) {
+        status="Capture inactive: invalid clock frequency"; return;
+    }
+    tick_frequency=uint32_t(frequency); tick_origin=nnosGetSystemTick();
     if (nnosAllocateTlsSlot(&tls_slot,nullptr) || tls_slot<0) {
         status = "Capture inactive: native TLS allocation failed"; return;
     }
@@ -289,8 +307,9 @@ void capture_install() {
         return;
     }
     __atomic_store_n(&active,1,__ATOMIC_RELEASE);
-    status = "Diagnostic capture active; floating numbers are pending validation";
-    forge_log_info("[damage-numbers] Capture r3: %u hooks; camera capture %s; one private arena/TLS slot; hit log limit 256",hook_count,camera_enabled ? "enabled" : "off");
+    status = camera_enabled ? "Capture active; floating-number preview enabled (validation pending)" :
+        "Diagnostic capture active; camera/number preview opt-in absent";
+    forge_log_info("[damage-numbers] Capture r4: %u hooks; camera/preview %s; one private arena/TLS slot; hit log limit 256",hook_count,camera_enabled ? "enabled" : "off");
 }
 void capture_monitor() {
     if (!load(active)) return;
@@ -311,6 +330,14 @@ static Record recent[8]{}, last_camera{}, last_feedback{};
 static unsigned recent_count, consume_cursor;
 static uint32_t consumed, shown_player, captured_hits;
 static constexpr unsigned log_limit=256, hits_per_consume=8, records_per_consume=64;
+static Model display_model;
+static uint32_t display_epoch, preview_rejected, camera_records, preview_drawn, preview_frames;
+static unsigned camera_logs, projection_logs;
+static HitKey projected_keys[4]{};
+static void reset_display() {
+    ++display_epoch; if (!display_epoch) ++display_epoch;
+    display_model.reset(display_epoch);
+}
 void capture_consume() {
     if (!load(active)) return;
     static uint32_t first;
@@ -328,9 +355,12 @@ void capture_consume() {
     __atomic_compare_exchange_n(&consumer,&initial,id,true,__ATOMIC_SEQ_CST,__ATOMIC_SEQ_CST);
     if (load(consumer)!=id) return; // single consumer enforced across callbacks
     const uint32_t player=ownership.local_player();
+    const uint64_t now=nnosGetSystemTick();
     // Hit records own copied values only. Retain them across quest/village
     // changes; camera and feedback still belong to the current player context.
-    if (player!=shown_player) { last_camera={}; last_feedback={}; shown_player=player; }
+    if (player!=shown_player) {
+        last_camera={}; last_feedback={}; shown_player=player; reset_display();
+    }
     unsigned empty=0, hits=0, records=0;
     while (empty<16 && hits<hits_per_consume && records<records_per_consume) {
         const unsigned i=consume_cursor;
@@ -346,6 +376,19 @@ void capture_consume() {
                 --recent_count;
             }
             recent[recent_count++]=r;
+            if (camera_enabled) {
+                float captured_at=0;
+                if (player && r.player==player && preview_source(r.source_tags) &&
+                    preview_fresh(r.tick,now,tick_frequency,display_model.config().lifetime) &&
+                    preview_seconds(r.tick,tick_origin,tick_frequency,captured_at)) {
+                    Critical critical=Critical::None;
+                    // An unknown native outcome never invents a critical marker.
+                    critical_outcome(uint8_t(r.critical),critical);
+                    const Event event={{display_epoch,r.serial,r.monster,i},r.position,r.damage,
+                        int16_t(r.hzv),Source::Attack,Owner(r.actor),critical,false,captured_at};
+                    if (!display_model.capture(event)) ++preview_rejected;
+                } else ++preview_rejected;
+            }
             ++hits; ++captured_hits;
             if (captured_hits<=log_limit) {
                 forge_log_info("[damage-numbers] Hit %u: damage %d; HZV %d; crit %u; effect %u; part %u; owner %u; thread %u; serial %u; type %u; flags %08x; tags %06x; pos %.2f %.2f %.2f",
@@ -355,15 +398,82 @@ void capture_consume() {
                     forge_log_info("[damage-numbers] Hit log limit reached (256); panel capture continues until restart");
             }
         } else if (r.kind==2 && player) last_feedback=r;
-        else if (r.kind==3 && player) last_camera=r;
+        else if (r.kind==3 && player && r.player==player) {
+            if (last_camera.actor && (last_camera.actor!=r.actor || last_camera.monster!=r.monster ||
+                std::memcmp(last_camera.rect,r.rect,sizeof(r.rect)))) reset_display();
+            last_camera=r; ++camera_records;
+        }
     }
+}
+void capture_render() {
+    capture_consume();
+    if (!load(active) || !camera_enabled) return;
+    Context* current=context();
+    if (!current || load(consumer)!=uint32_t(current)) return;
+    preview_drawn=0; ++preview_frames;
+    const uint64_t now=nnosGetSystemTick();
+    float time=0;
+    ImGuiIO* io=igGetIO_Nil();
+    View view{};
+    const bool ready=io && shown_player && last_camera.player==shown_player &&
+        preview_fresh(last_camera.tick,now,tick_frequency,0.20f) &&
+        preview_seconds(now,tick_origin,tick_frequency,time) &&
+        preview_camera(last_camera.view,last_camera.projection,last_camera.rect,
+                       io->DisplaySize.x,io->DisplaySize.y,view);
+    display_model.update(time,ready);
+    if (!ready) return;
+    if (camera_logs<1) {
+        ++camera_logs;
+        forge_log_info("[damage-numbers] Preview camera: rect %d %d %d %d; display %.0f %.0f; tick frequency %u",
+            last_camera.rect[0],last_camera.rect[1],last_camera.rect[2],last_camera.rect[3],
+            double(io->DisplaySize.x),double(io->DisplaySize.y),tick_frequency);
+        for (unsigned k=0;k<2;++k) {
+            const float* v=last_camera.view+k*8; const float* p=last_camera.projection+k*8;
+            forge_log_info("[damage-numbers] View %u: %.6g %.6g %.6g %.6g %.6g %.6g %.6g %.6g",k,
+                double(v[0]),double(v[1]),double(v[2]),double(v[3]),double(v[4]),double(v[5]),double(v[6]),double(v[7]));
+            forge_log_info("[damage-numbers] Projection %u: %.6g %.6g %.6g %.6g %.6g %.6g %.6g %.6g",k,
+                double(p[0]),double(p[1]),double(p[2]),double(p[3]),double(p[4]),double(p[5]),double(p[6]),double(p[7]));
+        }
+    }
+    DrawNumber numbers[128]{};
+    const unsigned count=layout(display_model,view,time,numbers);
+    if (!count) return;
+    ImDrawList* draw=igGetBackgroundDrawList_Nil();
+    ImFont* font=igGetFont();
+    if (!draw || !font) return;
+    ImDrawList_PushClipRect(draw,{0,0},{view.width,view.height},true);
+    for (unsigned i=0;i<count;++i) {
+        const DrawNumber& n=numbers[i]; unsigned length=0; while(n.text[length])++length;
+        const ImVec2_c size=ImFont_CalcTextSizeA(font,n.pixels,1e10f,0,n.text,nullptr,nullptr);
+        if (!finite(size.x) || !finite(size.y) || size.x<=0 || size.y<=0) continue;
+        const ImVec2_c pos={n.position.x+(float(length)*n.pixels*0.65f-size.x)*0.5f,n.position.y};
+        const float stroke=1.25f*view.height/720.0f;
+        const uint32_t outline=imgui_color(0,n.opacity),color=imgui_color(n.color,n.opacity);
+        for (int x=-1;x<=1;++x) for (int y=-1;y<=1;++y) if(x || y)
+            ImDrawList_AddText_FontPtr(draw,font,n.pixels,{pos.x+x*stroke,pos.y+y*stroke},outline,n.text,nullptr,0,nullptr);
+        ImDrawList_AddText_FontPtr(draw,font,n.pixels,pos,color,n.text,nullptr,0,nullptr);
+        if (n.critical!=Critical::None) {
+            const float y=n.critical==Critical::Positive ? pos.y-2*stroke : pos.y+size.y+2*stroke;
+            ImDrawList_AddLine(draw,{pos.x,y},{pos.x+size.x,y},outline,4*stroke);
+            ImDrawList_AddLine(draw,{pos.x,y},{pos.x+size.x,y},color,2*stroke);
+        }
+        ++preview_drawn;
+        bool projected_before=false;
+        for (unsigned j=0;j<projection_logs;++j) projected_before=projected_before || projected_keys[j]==n.key;
+        if (!projected_before && projection_logs<4) {
+            projected_keys[projection_logs++]=n.key;
+            forge_log_info("[damage-numbers] Preview projection: thread %u serial %u damage %s at %.2f %.2f",
+                n.key.application,n.key.serial,n.text,double(pos.x+size.x*0.5f),double(pos.y));
+        }
+    }
+    ImDrawList_PopClipRect(draw);
 }
 void capture_panel() {
     igTextUnformatted(load(patch_error) ? "Capture disabled: external code change; restart required" : status,nullptr);
-    igTextUnformatted("Research capture: no world-space damage display or gameplay changes.",nullptr);
+    igTextUnformatted("Projection preview; native damage processing is unchanged.",nullptr);
     if (!load(active)) return;
-    igTextUnformatted(camera_enabled ? "Capture r3: camera capture enabled." :
-        "Capture r3: camera hooks off; combat capture only.",nullptr);
+    igTextUnformatted(camera_enabled ? "Capture r4: camera and floating-number preview enabled." :
+        "Capture r4: camera hooks off; combat capture only.",nullptr);
     capture_consume();
     Context* current=context();
     if (!current || load(consumer)!=uint32_t(current)) {
@@ -383,6 +493,9 @@ void capture_panel() {
         igText("  Attack %08x: active %u; effect %u; crit %u; flags %08x",f.attack,f.active,f.effect,f.critical,f.flags);
     igText("  Native attack counter: %u",last_feedback.attack_counter);
     igText("Quest camera rectangle: %d %d %d %d",last_camera.rect[0],last_camera.rect[1],last_camera.rect[2],last_camera.rect[3]);
+    igText("Preview: camera records %u; visible last frame %u; frames %u; rejected hits %u",
+        camera_records,preview_drawn,preview_frames,preview_rejected);
+    igTextUnformatted("Preview uses direct owned attacks; per-hit bounce and other sources remain pending.",nullptr);
     igSeparator();
     igTextUnformatted("Last eight hits remain across quest/village transitions until restart.",nullptr);
     igText("Captured hits %u; first %u written to Eden log (maximum 256 per restart)",captured_hits,

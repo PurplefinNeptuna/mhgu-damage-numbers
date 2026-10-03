@@ -1,5 +1,6 @@
 #include "camera.h"
 #include "outcomes.h"
+#include "preview.h"
 #include <cstdio>
 #include <cstring>
 #include <limits>
@@ -110,6 +111,8 @@ static void drawing() {
     e=hit(2);e.critical=Critical::Negative;m.capture(e);m.update(1,true);
     check(layout(m,view(),1,commands)==2,"same-position multi-hit preserved");
     check(commands[1].critical==Critical::Negative&&commands[1].position.y<commands[0].position.y,"separate lane and underscore");
+    check(commands[1].position.y+commands[1].pixels+6<=commands[0].position.y-6-4,
+          "multi-hit lanes reserve room for both outlined critical markers");
     v=view();v.height=1440;v.width=2560;
     check(layout(m,v,1.2f,commands)==2&&commands[0].pixels==48,"resolution-scaled text");
     const float native_view[16]={1,0,0,0,0,1,0,0,0,0,1,0,0,0,-10,1};
@@ -119,4 +122,29 @@ static void drawing() {
     check(!project({0,0,12},v,p),"native matrix rejects behind-eye position");
     check(!from_native_camera(native_view,native_projection,1280,0,0,720,v),"invalid native rectangle");
 }
-int main() { policies();lifecycle();drawing();std::printf("Passed %u core/presentation checks\n",cases); }
+static void preview() {
+    const float identity[16]={1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
+    int32_t rect[4]={0,0,1280,720};View v{};Point p{};
+    check(preview_camera(identity,identity,rect,2560,1440,v) &&
+          project({0,0,.5f},v,p) && p.x==1280 && p.y==720,"native render scale maps to Forge swapchain coordinates");
+    check(!preview_camera(identity,identity,rect,1024,768,v),"unknown aspect mapping is hidden");
+    rect[0]=10;check(!preview_camera(identity,identity,rect,1280,720,v),"offset viewport requires a verified framebuffer binding");
+    rect[0]=0;rect[2]=0;check(!preview_camera(identity,identity,rect,1280,720,v),"empty native framebuffer rectangle rejected");
+    rect[2]=1280;check(!preview_camera(identity,identity,rect,NAN,720,v),"invalid Forge display hidden");
+    float seconds=0;const uint64_t origin=0x1ffffffffull;
+    check(preview_seconds(origin+19200000,origin,19200000,seconds) && seconds==1,
+          "64-bit timestamp subtraction preserves elapsed time across low-word wrap");
+    check(!preview_seconds(origin-1,origin,19200000,seconds),"timestamp before origin is rejected");
+    check(!preview_seconds(origin,origin,0,seconds),"zero clock frequency is rejected");
+    check(preview_fresh(origin,origin+1920000,19200000,.2f),"fresh camera accepted");
+    check(!preview_fresh(origin,origin+3840000,19200000,.2f),"camera stale at 200ms is hidden");
+    check(!preview_fresh(origin,origin-1,19200000,.2f),"future camera tick is hidden");
+    check(!preview_fresh(0,origin,19200000,.2f),"absent camera is hidden");
+    check(preview_source(0x000100)&&preview_source(0x030403),"direct hunter and palico sources accepted");
+    check(!preview_source(0x000101)&&!preview_source(0x030402),"secondary ownership stays diagnostic in the first preview");
+    check(imgui_color(0xffbf3f,1)==0xff3fbfff,"orange-yellow converts to ImGui ABGR");
+    check(imgui_color(0xffffff,.5f)==0x80ffffff,"fade converts to rounded alpha");
+    check(imgui_color(0x9a9a9a,-1)==0x009a9a9a&&imgui_color(0x9a9a9a,2)==0xff9a9a9a,"opacity bounds preserve RGB");
+    check(imgui_color(0xffffff,NAN)==0,"invalid alpha is transparent");
+}
+int main() { policies();lifecycle();drawing();preview();std::printf("Passed %u core/presentation checks\n",cases); }
