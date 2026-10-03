@@ -157,19 +157,31 @@ static void preview() {
 static void settings_and_sources() {
     Settings s{}; s.enabled=false; s.monsters=true; s.objects=true; s.bounce_gray=false;
     s.scale=1.75f; s.lifetime=1.5f;
-    const auto saved=encode_settings(s,0xffffffffu);
+    const auto saved=encode_settings(s);
     Settings decoded{};
-    check(decode_settings(saved,decoded) && !decoded.enabled && decoded.monsters && decoded.objects &&
-          !decoded.bounce_gray && !decoded.ticks && decoded.scale==1.75f && decoded.lifetime==1.5f,"settings round trip");
-    for(unsigned i=0;i<8;++i) {
-        auto corrupt=saved; corrupt.words[i]^=1;
-        check(!decode_settings(corrupt,decoded),"corrupted settings rejected");
+    check(decode_settings(saved.bytes,saved.size,decoded) && !decoded.enabled && decoded.monsters && decoded.objects &&
+          !decoded.bounce_gray && !decoded.ticks && decoded.scale==1.75f && decoded.lifetime==1.5f,"INI settings round trip");
+    const char* invalid[]={"", "[DamageNumbers]\nversion=1\n", "garbage", "[Other]\nversion=1\n"};
+    for (const char* text:invalid) check(!decode_settings(text,unsigned(std::strlen(text)),decoded),"incomplete settings rejected");
+    const char* values[]={"NaN","inf","-1","4.0","1e0","1.1234567",".","1..2"};
+    for (const char* value:values) {
+        char text[256]; const int size=std::snprintf(text,sizeof(text),
+            "[DamageNumbers]\nversion=1\nenabled=1\nmonsters=0\nobjects=0\nbounce_gray=1\nscale=%s\nlifetime=0.9\n",value);
+        check(!decode_settings(text,unsigned(size),decoded),"invalid INI numeric value rejected");
     }
-    auto invalid=saved; invalid.words[4]=0x7fc00000; invalid.words[7]=settings_checksum(invalid);
-    check(!decode_settings(invalid,decoded),"NaN settings rejected even with correct checksum");
-    invalid=saved; invalid.words[3]|=8; invalid.words[7]=settings_checksum(invalid);
-    check(!decode_settings(invalid,decoded),"unimplemented tick option rejected");
-    check(newer_settings(0,0xffffffffu) && !newer_settings(0xffffffffu,0),"generation wrap preserves ordering");
+    auto corrupt=saved; corrupt.bytes[corrupt.size++]='\0';
+    check(!decode_settings(corrupt.bytes,corrupt.size,decoded),"embedded INI NUL rejected");
+    char duplicate[256]; std::memcpy(duplicate,saved.bytes,saved.size);
+    std::memcpy(duplicate+saved.size,"enabled=1\n",10);
+    check(!decode_settings(duplicate,saved.size+10,decoded),"duplicate config key rejected");
+    const char* edited="; user settings\r\n[DamageNumbers]\r\nversion = 1\r\nenabled = 0\r\nmonsters=1\r\nobjects=0\r\nbounce_gray=1\r\nscale=2.5\r\nlifetime=1\r\n";
+    check(decode_settings(edited,unsigned(std::strlen(edited)),decoded) && decoded.scale==2.5f && decoded.lifetime==1,
+          "INI whitespace and Windows line endings supported");
+    for (float scale:{0.5f,1.0f,1.751234f,3.0f}) for (float lifetime:{0.4f,0.9f,1.231234f,2.0f}) {
+        s.scale=scale;s.lifetime=lifetime;const auto record=encode_settings(s);
+        check(decode_settings(record.bytes,record.size,decoded) && std::fabs(decoded.scale-scale)<0.000001f &&
+              std::fabs(decoded.lifetime-lifetime)<0.000001f,"INI decimals preserve UI values to six places at range boundaries");
+    }
     Source source=Source::Attack;
     check(source_outcome(0x000102,Owner::LocalPlayer,source) && source==Source::Attack,"hunter projectile remains owned attack");
     check(source_outcome(0x030802,Owner::LocalPalico,source) && source==Source::Attack,"palico support barrel remains owned attack");

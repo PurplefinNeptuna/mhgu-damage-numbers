@@ -12,12 +12,13 @@ melee placement, animation and size; those values are unchanged in r5. The r4 lo
 captured 51 hits, including 18 palico child attacks omitted by the preview filter.
 R5 admits their observed source tags only with resolved local-palico ownership.
 The user confirmed boomerang/barrel popups and white melee damage on a low-HZV
-part. R6 adds the settings panel, SD preferences, conservative gray bounce
+part. R6 added the settings panel, SD preferences, conservative gray bounce
 matching and independent optional-source switches. These additions need an
 in-game check. R7 starts combat and camera hooks automatically when Eden loads
 the enabled package. No activation files are required; existing `.enabled` files
 are ignored. Numbers are on by default, with an in-game switch and saved
-preferences. Earlier startup failures and the nonempty-flag correction are recorded in
+preferences. R8 stores a separate INI beside Better Input in the current player's
+save container and ignores the old SD preferences. Earlier startup failures and the nonempty-flag correction are recorded in
 [RUNTIME.md](RUNTIME.md) and [CAPTURE_TRIAL.md](CAPTURE_TRIAL.md).
 
 ## Accepted behavior
@@ -81,10 +82,16 @@ events. Context changes clear the queue and visible list.
 Open **Damage numbers** in Forge. Changes apply immediately. **Save settings**
 keeps them after restart; **Restore defaults** returns the accepted size,
 duration and source switches. Diagnostics are collapsed by default. Settings
-use two checked 32-byte files in the emulated SD card's `forge/` folder,
-`mhgu-damage-numbers-a.cfg` and `mhgu-damage-numbers-b.cfg`. They contain only
-mod preferences. An unavailable SD card leaves settings active for the session
-and shows a storage message. The plugin does not mount or write game saves.
+use `savedata:/damage_numbers.ini`, beside `better_inputs.ini` in the current
+player's save container. `damage_numbers_backup.ini` retains the previous valid
+configuration for recovery from a partial write. Both are readable INI files,
+bounded to 255 bytes. The old SD files are ignored, without migration or deletion.
+
+Only these two config files are opened; the game save files and Better Input's
+INI are preserved. Preferences load at initialization or, if save storage is not
+ready, retry at most once per second on the render consumer. Editing a setting
+cancels that deferred load so it cannot overwrite a manual change. An unavailable
+mount leaves settings active for the session and shows a storage message.
 
 Gray bounce uses native feedback only when one embedded hunter attack matches
 the latest finalized hit on the same thread, with unchanged flags, critical

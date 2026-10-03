@@ -6,7 +6,7 @@ The prepared package is
 `build/damage-numbers/capture/candidate-manifest.json` records its hash, native
 signatures, imports, source hashes and preserved Forge/SDK inputs.
 
-R7 starts automatically when Forge loads the enabled package in Eden. Both
+R8 starts automatically when Forge loads the enabled package in Eden. Both
 combat and camera hooks start together; no `.enabled` files are needed. Old
 capture/camera flags are ignored and may be removed while Eden is closed.
 The builder stages the NRO without installing it or creating activation files.
@@ -54,9 +54,11 @@ on Eden `d16735f5b6`, they can overlap the following font's data offset. See
   and stale cameras clear floating numbers without clearing diagnostic history.
   Capture timestamps prevent delayed records from acquiring a new lifetime.
 
-The candidate does not mount or write save data, change gameplay values, reroll
-affinity, upgrade Forge or alter Eden settings. Normal gameplay still has its
-own save behavior. The first 256 consumed hits per process are sent to Eden's log
+The candidate uses Forge's counted `savedata` mount to read/write its own
+`damage_numbers.ini` and recovery copy beside Better Input. It ignores the old
+SD preferences. Game save files and Better Input's INI are preserved. Gameplay
+values, affinity, Forge and Eden settings are unchanged. Normal gameplay still
+has its own save behavior. The first 256 consumed hits per process are sent to Eden's log
 through Forge, with damage, HZV, critical/effect bytes, owner, source tags, part,
 impact position and per-thread identity. Logging runs only in the render consumer,
 with at most eight hits and 64 total records consumed per callback. A round-robin
@@ -76,7 +78,7 @@ bounded. The SDK clock frequency is checked before hooks/TLS are allocated.
 ## Small manual check
 
 With Eden closed, replace only the installed damage-number NRO with the staged
-r7 candidate. The two old activation files are unnecessary. Keep the current
+r8 candidate. The two old activation files are unnecessary. Keep the current
 Forge, Better Input and emulator settings.
 
 Start normally and land one hit to confirm automatic startup. For the untested
@@ -110,6 +112,6 @@ Its collision body, SDK services and kernel bridges are explicit fixtures;
 live per-hit accuracy and untested attack cases remain pending. R4 presentation,
 r5 palico projectiles and white physical-HZV damage passed the user's trial.
 
-R7 keeps the same eight hook sites and one private CodeMemory arena. SD settings
-persistence, conservative gray bounce and optional-source runtime acceptance
+R8 keeps the same eight hook sites and one private CodeMemory arena. Player-save
+INI persistence, conservative gray bounce and optional-source runtime acceptance
 remain pending.

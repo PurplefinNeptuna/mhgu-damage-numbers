@@ -267,7 +267,7 @@ R3's local hunter/palico capture, logging and diagnostic retention passed the
 user's trial. The Phase 1 binding gate remains open for the other cases above.
 R4's melee projection, animation and size passed the user's visual trial. R5's
 palico child projectile popups and white physical-HZV coloring also passed.
-R6's optional sources, constrained bounce matching and SD preferences await
+R6's optional sources and constrained bounce matching, and R8's player-save INI preferences await
 runtime acceptance.
 
 ## R6 source, bounce and storage bindings
@@ -292,10 +292,25 @@ acceptance; it does not edit player attacks or rerun damage/RNG.
 
 The ARM32 SDK filesystem declarations use 4-byte handles and aligned 64-bit
 offsets, checked against original SDK exports/instructions. The generic
-nnheaders copy's 8-byte handle describes a different ABI. Settings use a private
-`dnum` SD mount and alternate 32-byte versioned/checksummed slots. They are read
-at plugin initialization and written only by the Save settings button, outside
-native detours. A damaged newest slot falls back to the previous valid one.
+nnheaders copy's 8-byte handle describes a different ABI. R6 used a private SD
+mount with two binary records. R8 ignores those files and uses the maintained
+Forge's counted `savedata` mount, also imported by the inspected Better Input
+binary. Its helper resolves `sSavedata`, calls the native mount at main-relative
+`0x878da0` and releases the counted mount with a normal commit. The saved DTI
+index identifies `sSavedata` as a 4,000-byte `cSystem` descendant; no extraction
+was rerun. The SDK `CommitSaveData` export is checked by the builder.
+
+Only `savedata:/damage_numbers.ini` and `savedata:/damage_numbers_backup.ini`
+are opened. The text is bounded to 255 bytes, versioned and range-checked. Saving
+backs up a valid primary before replacing it, verifies the written bytes and
+checks an explicit SDK commit before releasing Forge's mount. Forge's release
+also performs its normal commit. A partial primary falls back to the backup.
+No game payload or Better Input config is opened, and no SD API is imported.
+
+Preferences load at initialization. If the player save mount is unavailable,
+the single render consumer retries at most once per second; a manual settings
+edit cancels the pending load. Writes remain exclusive to the Save settings
+button, outside native combat detours.
 
 SDK filesystem failures can invoke its automatic-abort policy. Native scoped
 disabler constructor `SDK+0x4d004` saves the previous effective FS context in

@@ -318,7 +318,7 @@ void capture_install() {
     }
     __atomic_store_n(&active,1,__ATOMIC_RELEASE);
     status = "Damage numbers ready";
-    forge_log_info("[damage-numbers] Capture r7: %u hooks; automatic startup; one private arena/TLS slot; hit log limit 256",hook_count);
+    forge_log_info("[damage-numbers] Capture r8: %u hooks; automatic startup; one private arena/TLS slot; hit log limit 256",hook_count);
 }
 void capture_monitor() {
     if (!load(active)) return;
@@ -365,6 +365,14 @@ void capture_consume() {
     if (load(consumer)!=id) return; // single consumer enforced across callbacks
     const uint32_t player=ownership.local_player();
     const uint64_t now=nnosGetSystemTick();
+    // The game may not have created sSavedata during Forge's boot callback.
+    // Retry pending preference loading at most once per second on this consumer.
+    static uint64_t settings_retry;
+    if (settings_pending() && now>=settings_retry) {
+        settings_retry=now+tick_frequency;
+        Settings settings=display_model.config();
+        if (settings_load(settings)) display_model.configure(settings);
+    }
     // Hit records own copied values only. Retain them across quest/village
     // changes; camera and feedback still belong to the current player context.
     if (player!=shown_player) {
@@ -502,7 +510,7 @@ void capture_panel() {
     if (igButton("Save settings",{0,0})) settings_save(display_model.config());
     igTextUnformatted(settings_status(),nullptr);
     if (!igCollapsingHeader_TreeNodeFlags("Diagnostics##damage-numbers",0)) return;
-    igTextUnformatted("Capture r7: automatic startup; camera and combat hooks active.",nullptr);
+    igTextUnformatted("Capture r8: automatic startup; camera and combat hooks active.",nullptr);
     igTextUnformatted("Shared counters are best-effort under contention; per-hit records remain separate.",nullptr);
     igText("Collision %u; normalization %u; feedback %u; viewport %u",load(calls[0]),load(calls[1]),load(calls[2]),load(calls[3]));
     igText("Camera uploads %u; HZV taps %u; melee queries %u; shot queries %u",load(calls[4]),load(calls[5]),load(calls[6]),load(calls[7]));

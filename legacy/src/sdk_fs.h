@@ -6,7 +6,7 @@
 extern "C" {
 void dn_fs_disable_abort(uint32_t*) asm("_ZN2nn2fs23ScopedAutoAbortDisablerC1Ev");
 void dn_fs_restore_context(uint32_t) asm("_ZN2nn2fs25SetCurrentThreadFsContextEPKNS0_9FsContextE");
-uint32_t dn_fs_mount_sd(const char*) asm("_ZN2nn2fs11MountSdCardEPKc");
+uint32_t dn_fs_commit(const char*) asm("_ZN2nn2fs14CommitSaveDataEPKc");
 uint32_t dn_fs_open(uint32_t*,const char*,int) asm("_ZN2nn2fs8OpenFileEPNS0_10FileHandleEPKci");
 void dn_fs_close(uint32_t) asm("_ZN2nn2fs9CloseFileENS0_10FileHandleE");
 uint32_t dn_fs_size(int64_t*,uint32_t) asm("_ZN2nn2fs11GetFileSizeEPxNS0_10FileHandleE");
@@ -15,8 +15,6 @@ uint32_t dn_fs_write(uint32_t,int64_t,const void*,uint32_t,const uint32_t*) asm(
 uint32_t dn_fs_flush(uint32_t) asm("_ZN2nn2fs9FlushFileENS0_10FileHandleE");
 uint32_t dn_fs_resize(uint32_t,int64_t) asm("_ZN2nn2fs11SetFileSizeENS0_10FileHandleEx");
 uint32_t dn_fs_create(const char*,int64_t) asm("_ZN2nn2fs10CreateFileEPKcx");
-uint32_t dn_fs_entry(int*,const char*) asm("_ZN2nn2fs12GetEntryTypeEPNS0_18DirectoryEntryTypeEPKc");
-uint32_t dn_fs_directory(const char*) asm("_ZN2nn2fs15CreateDirectoryEPKc");
 }
 namespace damage_numbers {
 class FsAbortGuard {

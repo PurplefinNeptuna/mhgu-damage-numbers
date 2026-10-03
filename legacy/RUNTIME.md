@@ -282,3 +282,43 @@ No installed package, activation configuration or save was changed.
 With Eden closed, replace only the damage-number NRO. The two old activation
 files may be removed. Start normally and land one hit to confirm automatic
 startup; the small settings/restart check can follow if it has not been done.
+
+## 2026-10-04: r8 preferences moved beside Better Input
+
+The user requested the same storage location as Better Input, ignoring existing
+SD preferences. R8 uses Forge's counted player-save mount and writes only
+`savedata:/damage_numbers.ini` plus `savedata:/damage_numbers_backup.ini`.
+The files are readable, versioned INI text bounded to 255 bytes. No SD mount
+API is imported, and the old SD records are neither migrated nor deleted.
+Without a valid new INI, the accepted defaults apply.
+
+A valid primary is backed up before replacement. Writes are flushed, read back
+and explicitly committed; Forge's release also performs its normal commit.
+Partial primaries recover from the prior valid backup. Every success/failure
+path closes its file handles and releases the counted mount before restoring
+the previous SDK filesystem error context. If player save storage is not ready
+at boot, the single render consumer retries preference loading at most once
+per second. Manual edits cancel the pending load.
+
+Automated checks passed: 490 ASan/UBSan core/presentation checks, mailbox
+overflow and eight-producer stress with 160,000 published packets, 23 hook
+transaction cases and 285 compiled NRO checks with explicit SDK/kernel/Forge
+mount/ImGui fixtures. The storage checks cover readable INI round trips,
+ignored legacy SD records, unchanged Better Input/game file fixtures, backup
+and primary write failures, explicit commit failure, mount/handle balancing,
+deferred loading and manual edits before storage availability. These fixtures
+do not execute the live game-save mount or an Eden persistence trial.
+
+Staged NRO SHA-256:
+`aa29f54586068b1b2fdb895beb91cb61b48198df792d585ecafe93e4b79bb0f1`.
+Its file size is 69632 bytes; BSS remains 1,089,536 bytes. Hook
+sites, arena/TLS allocation, source policy and accepted visuals are unchanged.
+The installed NRO currently matches r7 SHA-256
+`43c6dc8a105789e32e4d22b7e8e514f235e1226641600176ba31527960685021`;
+installation is observed, but no new user runtime acceptance is inferred.
+No installed package or actual save/config file was modified during preparation.
+
+With Eden closed, replace only the damage-number NRO with r8. In Forge, save
+a small size change and restart once to check that it remains and creates
+`damage_numbers.ini` beside `better_inputs.ini`. Restore defaults and save
+afterward. No existing SD settings need to be copied.
