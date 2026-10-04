@@ -348,3 +348,41 @@ the same small row as Better Input and opens/closes normally.
 
 The workspace rules in AGENTS.md and FORGE_PLUGIN_GUIDELINES.md now specify
 compact unframed tree rows, paired pops and independent gameplay callbacks.
+
+## 2026-10-05: r9 manual confirmation
+
+The user completed the LS/bowgun checklist and reported "ive done the tests".
+The edited [checklist](TEST_CHECKLIST.md) has all 24 boxes checked, and the
+[results sheet](TEST_RESULTS.md) identifies r9 and marks all 16 rows "good".
+These are user-run in-game results; no new automated game trial was performed.
+
+The report confirms:
+
+- Positive and negative LS critical lines, with ordinary hits unmarked.
+- HBG Normal S Lv2 impact numbers and positive critical lines.
+- Separate Pierce S Lv1 and Pellet S Lv2 impacts, delayed Slicing S Lv2 hits,
+  Crag S Lv1 explosions and separate Clust S Lv1 explosions.
+- Thunder S Lv1 display and increased total with Thunder Atk, with HZV color
+  unchanged. The recorded unmarked values are 133 without decorations and 143
+  with the skill. The detail labels it +2, whereas the recipe/result row says
+  +1; retain that discrepancy without inferring an exact damage formula.
+- Gray numbers for actual bounce with coloring enabled, normal HZV color when
+  disabled, and no bounce recoil or gray bounce number with Mind's Eye.
+- Diablastazooka Normal S Lv2 negative critical lines.
+- Avidya Eye Pierce S Lv1 rapid-fire impact separation.
+- Other hunters' and Palicoes' weapon damage hidden during multiplayer, while
+  the local hunter's attacks remain visible.
+
+The LBG row includes "separation kinda too spaced". Impact separation passed,
+but its visual spacing remains a cosmetic follow-up. This recording does not
+change the number placement, animation, size or separation logic.
+
+The sheet leaves the quest, monster/part, actual test date and other gameplay
+mods unspecified. Its r9 label is the user's report; this documentation update
+does not re-inspect the installed NRO hash. Settings persistence after restart,
+compact UI appearance, Prowler-specific coverage and the optional object and
+monster-to-monster switches are outside this checklist's confirmation scope.
+
+The user's completed checkboxes and original observations are retained in local
+Git along with this acceptance record. No plugin binary, emulator setting or
+save/config file was modified while recording the trial.

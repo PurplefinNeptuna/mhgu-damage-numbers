@@ -32,8 +32,8 @@ Sources: [Blademaster Neset](https://mhgu.kiranico.com/armor/59bb6),
 [Expert](https://mhgu.kiranico.com/skill/4ee04),
 [Skill +2](https://mhgu.kiranico.com/skill/4ea5e).
 
-- [ ] Prepare the positive setup using the decorations above.
-- [ ] Prepare a neutral setup with all decorations and the talisman removed.
+- [x] Prepare the positive setup using the decorations above.
+- [x] Prepare a neutral setup with all decorations and the talisman removed.
 
 Check the status screen's affinity before each quest. If it differs from the
 values below, record the actual value; gameplay mods can alter equipment.
@@ -54,10 +54,10 @@ If you already have Desperate Roar, it also works for the negative check at
 [Avidya Saber](https://mhgu.kiranico.com/weapon/49e70),
 [Tigrex LS progression](https://mhgu.kiranico.com/weapon/47a66).
 
-- [ ] Positive: a couple of critical hits show a line above the number.
-- [ ] Positive: an ordinary hit shows no critical line.
-- [ ] Negative: a couple of negative critical hits show a line below the number.
-- [ ] Negative: an ordinary hit shows no critical line.
+- [x] Positive: a couple of critical hits show a line above the number.
+- [x] Positive: an ordinary hit shows no critical line.
+- [x] Negative: a couple of negative critical hits show a line below the number.
+- [x] Negative: an ordinary hit shows no critical line.
 
 Color still follows physical HZV. A negative crit on a soft part can stay
 orange-yellow. Compare repeated instances of the same move and part if checking
@@ -72,18 +72,18 @@ a trap if it helps with aiming. Try the ammo below in one outing.
 Orcus Quarcus supports all these ammo types; Slicing S Lv2 is internal ammo.
 Source: [Orcus Quarcus](https://mhgu.kiranico.com/weapon/40965).
 
-- [ ] Normal S Lv2: fire a few shots into one part. Each impact has one number;
+- [x] Normal S Lv2: fire a few shots into one part. Each impact has one number;
   positive crits have an upper line, while ordinary hits have none.
-- [ ] Pierce S Lv1: fire 2 or 3 shots lengthwise through the body. Multiple
+- [x] Pierce S Lv1: fire 2 or 3 shots lengthwise through the body. Multiple
   impacts produce separate numbers along the projectile's path.
-- [ ] Pellet S Lv2: fire 2 or 3 close shots. Pellets that connect produce
+- [x] Pellet S Lv2: fire 2 or 3 close shots. Pellets that connect produce
   separate numbers, rather than one combined total.
-- [ ] Slicing S Lv2: fire 1 or 2 shots. The delayed cutting hits produce numbers.
-- [ ] Crag S Lv1: fire 1 or 2 shots. The delayed explosion produces numbers;
+- [x] Slicing S Lv2: fire 1 or 2 shots. The delayed cutting hits produce numbers.
+- [x] Crag S Lv1: fire 1 or 2 shots. The delayed explosion produces numbers;
   a small initial impact number can also appear.
-- [ ] Clust S Lv1: fire 1 or 2 shots. Explosions that connect produce separate
+- [x] Clust S Lv1: fire 1 or 2 shots. Explosions that connect produce separate
   numbers.
-- [ ] Thunder S Lv1: fire 2 or 3 shots. Elemental ammunition produces numbers
+- [x] Thunder S Lv1: fire 2 or 3 shots. Elemental ammunition produces numbers
   normally, with one combined damage value per resolved impact.
 
 For Pierce, Pellet and Cluster, look for separate hits without trying to count
@@ -105,11 +105,11 @@ Use Orcus Quarcus with neutral Gunner Neset. Keep the same quest, monster part
 and ammo for both runs, and compare unmarked hits before the part breaks or the
 monster changes state. A few examples from each setup are enough.
 
-- [ ] With no decorations, note a few unmarked Thunder S Lv1 damage values.
-- [ ] For the second run, add one Bolt Jwl 2 each to head, chest and waist.
+- [x] With no decorations, note a few unmarked Thunder S Lv1 damage values.
+- [x] For the second run, add one Bolt Jwl 2 each to head, chest and waist.
   Confirm Thunder Atk +1 is active; nine points plus Neset's Skill +2 gives 11.
-- [ ] Comparable unmarked Thunder S Lv1 hits show a higher total with the skill.
-- [ ] The corresponding hit's HZV color stays the same when only elemental
+- [x] Comparable unmarked Thunder S Lv1 hits show a higher total with the skill.
+- [x] The corresponding hit's HZV color stays the same when only elemental
   power changes.
 
 If the values overlap or the part/state changes, record "uncertain" and stop.
@@ -121,15 +121,15 @@ Use Tigrine Edge LV1 with neutral Blademaster Neset against Basarios or Gravios.
 Use an ordinary slash against a hard, unbroken part until the hunter visibly
 recoils. Spirit attacks can prevent bounce and are unsuitable for this comparison.
 
-- [ ] With bounce coloring enabled, a clear bounced hit shows a gray number.
-- [ ] Disable bounce coloring and repeat a clear bounce. The number uses its
+- [x] With bounce coloring enabled, a clear bounced hit shows a gray number.
+- [x] Disable bounce coloring and repeat a clear bounce. The number uses its
   normal physical-HZV color.
 
 For the prevention check, add one Fencer Jwl 3 to the arms and one to the legs.
 Eight Fencing points plus Neset's Skill +2 activates Mind's Eye. Confirm it in
 the active skill list before the next outing.
 
-- [ ] With Mind's Eye and bounce coloring enabled, an ordinary slash into the
+- [x] With Mind's Eye and bounce coloring enabled, an ordinary slash into the
   hard part has no bounce recoil and no gray bounce number.
 
 The mod conservatively matches native bounce feedback. If a clear recoil stays
@@ -148,7 +148,7 @@ Equip Diablastazooka HBG with neutral Gunner Neset (-30% affinity). Fire Normal
 S Lv2 into the same part until you see a couple of negative crits. Keep Bitter
 Affinity and affinity-boosting skills off for this check.
 
-- [ ] Negative bowgun crits have a line below the number; ordinary hits have none.
+- [x] Negative bowgun crits have a line below the number; ordinary hits have none.
 
 Source: [Diablastazooka](https://mhgu.kiranico.com/weapon/4663e).
 
@@ -157,7 +157,7 @@ Source: [Diablastazooka](https://mhgu.kiranico.com/weapon/4663e).
 Equip Avidya Eye with either Gunner setup. Fire two Pierce S Lv1 rapid-fire
 bursts through a large monster's body.
 
-- [ ] The burst's projectiles and their piercing impacts produce separate
+- [x] The burst's projectiles and their piercing impacts produce separate
   numbers, without combining the whole burst into one total.
 
 Source: [Avidya Eye](https://mhgu.kiranico.com/weapon/47ea5).
@@ -168,8 +168,8 @@ When an online session is available, stand back while another hunter and their
 Palico attack, then make a few attacks yourself. Keep optional source switches
 off to isolate weapon ownership.
 
-- [ ] Other hunters' and their Palicoes' weapon attacks produce no numbers.
-- [ ] Your own attacks still produce numbers.
+- [x] Other hunters' and their Palicoes' weapon attacks produce no numbers.
+- [x] Your own attacks still produce numbers.
 
 ## Reporting
 
