@@ -386,3 +386,15 @@ monster-to-monster switches are outside this checklist's confirmation scope.
 The user's completed checkboxes and original observations are retained in local
 Git along with this acceptance record. No plugin binary, emulator setting or
 save/config file was modified while recording the trial.
+
+## 2026-10-05: settings persistence confirmed
+
+The user clarified: "setting persistence is already tested and its working".
+Record settings persistence after restart as passed by the user, separately
+from the LS/bowgun checklist above. It is no longer a remaining manual check.
+The report does not specify which setting was saved or the exact test date.
+
+The remaining reported cosmetic issue is wide LBG rapid-fire number spacing.
+Prowler-specific attacks and the optional object and monster-to-monster switches
+still lack manual confirmation in this record. No plugin or save/config file
+was changed when recording the persistence result.

@@ -39,6 +39,12 @@ Other gameplay mods, if relevant:
 | Avidya Eye Pierce S Lv1: rapid-fire impacts remain separate |good|separation kinda too spaced|
 | Multiplayer: other hunter/Palico weapon hits hidden; yours visible |good| |
 
+## Additional confirmation: settings persistence
+
+Passed. On 2026-10-05 the user confirmed that settings persistence was already
+tested and works. This confirmation is separate from the 16 checklist rows;
+no repeat persistence test is needed.
+
 ## Elemental comparison values
 
 Weapon: Orcus Quarcus

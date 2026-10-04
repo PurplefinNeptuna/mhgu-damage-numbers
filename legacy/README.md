@@ -7,6 +7,7 @@ The user's 2026-10-05 r9 trial passed all 16 result rows: LS/bowgun critical
 markers, bowgun impact separation, elemental contribution, gray bounce and
 Mind's Eye behavior, LBG rapid fire and multiplayer filtering. LBG rapid-fire
 numbers were reported as too widely spaced; that cosmetic follow-up remains.
+The user also confirmed settings persistence works after restart.
 See [the runtime record](RUNTIME.md#2026-10-05-r9-manual-confirmation) for scope.
 
 Development targets the preserved MHGU 1.4.0 Switch executable and local patched
@@ -22,9 +23,10 @@ captured 51 hits, including 18 palico child attacks omitted by the preview filte
 R5 admits their observed source tags only with resolved local-palico ownership.
 The user confirmed boomerang/barrel popups and white melee damage on a low-HZV
 part. R6 added the settings panel, SD preferences, conservative gray bounce
-matching and independent optional-source switches. Bounce passed the r9 trial;
-settings persistence and the optional-source switches still need an in-game
-check. R7 starts combat and camera hooks automatically when Eden loads
+matching and independent optional-source switches. Bounce passed the r9 trial,
+and the user separately confirmed settings persistence. The optional-source
+switches still need an in-game check. R7 starts combat and camera hooks
+automatically when Eden loads
 the enabled package. No activation files are required; existing `.enabled` files
 are ignored. Numbers are on by default, with an in-game switch and saved
 preferences. R8 stores a separate INI beside Better Input in the current player's
@@ -119,10 +121,9 @@ Other environmental families and recurring ticks remain unsupported. The new
 optional source families still await a manual trial. Gray bounce, its off switch
 and Mind's Eye prevention passed the user's r9 checklist.
 
-For the settings check, turn numbers off and back on, save a small size change,
-and restart once to confirm it remains. Restore defaults afterward. A placed
-bomb with its switch on/off can be checked later when convenient. No completed
-save or extensive test session is needed.
+Settings persistence has passed the user's manual check and does not need a
+repeat trial. A placed bomb with its switch on/off can be checked later when
+convenient. No completed save or extensive test session is needed.
 
 The existing core is independent of game memory. `ownership.h` uses checked
 reads, the native local-session index and a palico's current work pointer.
