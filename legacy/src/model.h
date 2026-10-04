@@ -7,6 +7,7 @@ enum class Source : uint8_t { Attack, Monster, Object, Tick };
 enum class Owner : uint8_t { LocalPlayer, LocalPalico, RemotePlayer, RemotePalico, Unknown };
 enum class Critical : uint8_t { None, Positive, Negative };
 enum class Tint : uint8_t { White, Gray, Weak };
+enum class VisualStyle : uint8_t { Wilds, Classic };
 
 struct Vec3 { float x, y, z; };
 struct HitKey {
@@ -32,10 +33,7 @@ struct Event {
 
 struct Settings {
     bool enabled = true;
-    bool monsters = false;
-    bool objects = false;
-    bool ticks = false;
-    bool bounce_gray = true;
+    VisualStyle style = VisualStyle::Wilds;
     float scale = 1.0f;
     float lifetime = 0.9f;
 };
@@ -43,7 +41,8 @@ struct Settings {
 inline bool finite(float n) { return isfinite(n); }
 inline bool valid(Vec3 p) { return finite(p.x) && finite(p.y) && finite(p.z); }
 inline bool valid(const Settings& s) {
-    return finite(s.scale) && s.scale >= 0.5f && s.scale <= 3.0f &&
+    return unsigned(s.style)<=unsigned(VisualStyle::Classic) &&
+           finite(s.scale) && s.scale >= 0.5f && s.scale <= 3.0f &&
            finite(s.lifetime) && s.lifetime >= 0.4f && s.lifetime <= 2.0f;
 }
 inline bool visible(const Event& e, const Settings& s) {
@@ -53,20 +52,27 @@ inline bool visible(const Event& e, const Settings& s) {
         unsigned(e.critical)>unsigned(Critical::Negative)) return false;
     switch (e.source) {
     case Source::Attack: return e.owner == Owner::LocalPlayer || e.owner == Owner::LocalPalico;
-    case Source::Monster: return s.monsters;
-    case Source::Object: return s.objects;
-    case Source::Tick: return s.ticks;
+    case Source::Monster: return true;
+    case Source::Object: return true;
+    case Source::Tick: return false;
     }
     return false;
 }
-inline Tint tint(const Event& e, const Settings& s) {
-    if (e.source == Source::Tick || (e.bounced && s.bounce_gray)) return Tint::Gray;
+inline Tint tint(const Event& e, const Settings&) {
+    if (e.bounced) return Tint::Gray;
     return e.physical_hzv >= 45 ? Tint::Weak : Tint::White;
 }
 inline Critical marker(const Event& e) {
     return e.source == Source::Tick ? Critical::None : e.critical;
 }
-inline uint32_t rgb(Tint c) {
+inline uint32_t rgb(Tint c, VisualStyle style=VisualStyle::Classic) {
+    if (style==VisualStyle::Wilds) {
+        switch(c) {
+        case Tint::Gray: return 0x9a9a9a;
+        case Tint::Weak: return 0xf2c45b;
+        default: return 0xf4f1ec;
+        }
+    }
     switch (c) {
     case Tint::Gray: return 0x9a9a9a;
     case Tint::Weak: return 0xffbf3f;
@@ -123,7 +129,7 @@ public:
     bool configure(const Settings& next) {
         if (!valid(next)) return false;
         settings = next;
-        // A disabled option must not leave an already-visible source behind.
+        // Master disable removes visible and pending impacts immediately.
         for (unsigned i=0; i<count;) {
             if (visible(numbers[i].event, settings)) { ++i; continue; }
             for (unsigned j=i+1;j<count;++j) numbers[j-1]=numbers[j];

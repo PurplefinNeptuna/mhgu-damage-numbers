@@ -355,3 +355,51 @@ specified; this does not establish coverage of every environmental source.
 All requested damage display groups now have user confirmation. Wide LBG
 rapid-fire number spacing remains the only reported issue, a cosmetic follow-up.
 Recording changed no binary, emulator or save/config.
+
+## 2026-10-05: r10 staged cosmetics, static checks passed
+
+R10 adds the saved Wilds/Classic selector, embedded Roboto Condensed Semibold
+600 digits, warm-white/gold palette, independent red/blue glowing crit stars,
+and bounded stable placement. Confirmed bounce coloring, recognized monster
+impacts and recognized bomb/object impacts are always on under the master
+switch. Unsupported ticks and remote hunter/Palico weapons remain excluded.
+The tested eight capture hook sites are unchanged.
+
+Config version 2 requires five fields, rejecting version 1 and obsolete keys.
+No legacy preferences migrate; old files stay untouched until explicit Save
+settings. The existing counted save mount and transactional backup remain.
+
+Validation:
+
+- 891 host core/presentation checks passed under ASan/UBSan; mailbox
+  overflow/eight-producer stress and 23 transactional-hook scenarios passed.
+- 306 compiled ARM32 NRO checks passed with explicit SDK/kernel/font/draw
+  fixtures. These cover registration ownership/fallback, both styles,
+  independent colors, star dimensions/gap/glow/fade, measured different-width
+  digits, stable bounded dense placement and the 128-number cap. They also
+  check source/master filtering, v2 round trips/recovery, legacy rejection and
+  preservation of unrelated files.
+- Verified the static font's weight 600, complete digits/fallback glyphs,
+  embedded OFL notice, package license, pinned inputs and installed API exports.
+  Build uses no dynamic C++ initializers or new capture hooks/arena/TLS slots.
+- Python syntax and Git whitespace checks passed.
+
+Candidate NRO SHA-256: `4030d8c4d564b3f61f4b7c3a4b23421a30874be032cbf4d54ebdcf164a05bf6b`
+(90,112 file bytes; 1,093,632 BSS bytes).
+Package: `build/damage-numbers/capture/candidate-package/`.
+Full provenance/import/source manifest and fixture report:
+`build/damage-numbers/capture/candidate-manifest.json` and
+`build/damage-numbers/capture/compiled-capture-probe.json`.
+Font subset SHA-256: `892deb9800fa0261d2dc07fe58972746ee680a545540eed865e64e4e59c73c8d`
+(10,372 bytes). Source and license hashes are retained in
+`fonts/source.json`; the generated manifest also records height normalization.
+
+Installed r9 SHA-256 was rechecked unchanged:
+`58914dd47c797356c892696cc6bdc9bd60543afeb5958f31e91bc40bb0f524fe`.
+A matching rollback copy is retained under `backups/damage-numbers/r9/` outside
+Eden. No installation, emulator launch or real save write occurred.
+
+The fixtures inspect draw arguments and modeled storage; they do not prove
+Forge GPU output or Eden gameplay. R10 manual confirmation remains pending:
+three reference crit cases, two LBG bursts, style switching and one saved-style
+restart. Earlier accepted combat coverage is retained in TEST_RESULTS.md.

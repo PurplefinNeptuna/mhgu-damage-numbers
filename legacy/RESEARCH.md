@@ -264,3 +264,25 @@ python3 scripts/damage_numbers_research.py enum /skills.h/SkillType
 Serialized headless exports retain original/imported bytes, callers and selected
 decompilation without reanalysis. Generated inputs/exports/logs stay outside
 Git; no runtime dump.
+
+## R10 cosmetics: Forge APIs and bounds
+
+Rechecked the installed patched Forge export table and pinned cimgui 1.92.8
+headers. Font config/atlas registration, baked-font glyph lookup, filled
+triangles and the string-array combo are exported. `Graphics::initialize()`
+calls plugin ImGui initialization after adding its font and before NewFrame.
+The NVN backend supports atlas texture creation/updates. This adds no native
+capture hooks or private rendering backend.
+
+Font registration uses the same context/allocator setup as the existing plugin.
+ARM32 uses 16-bit ImWchar; glyph/config/baked-font offsets come from the pinned
+headers. Fixtures check compiled argument passing and disable atlas ownership
+of the module's static font data. Native measurement sums actual glyph advances
+and visible bounds. The star is concave, so it is drawn as eight triangles per
+layer instead of passing it to the convex-polygon API.
+
+The 17 fixed candidates minimize overlap then squared displacement, keeping
+input order for equal scores. Reservations include maximum-pop glyphs, solid
+markers and small shadows, excluding glow. New hits retain bounded offsets;
+existing hits retain theirs until expiry or context/style/size/viewport reset.
+Classic collision bounds include its existing straight outlined markers.

@@ -6,4 +6,5 @@ void capture_monitor();
 void capture_panel();
 void capture_consume();
 void capture_render();
+void capture_reset_placement();
 }

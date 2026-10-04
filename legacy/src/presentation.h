@@ -31,65 +31,132 @@ inline unsigned digits(int32_t value, char (&out)[12]) {
     for(unsigned i=0;i<n;++i) out[i]=reverse[n-1-i];
     out[n]=0; return n;
 }
+struct Rect { float left, top, right, bottom; };
+struct TextMetrics { float advance; Rect ink; };
+using Measure = bool (*)(const char*,float,VisualStyle,TextMetrics&);
+inline float low(float a,float b) { return a<b?a:b; }
+inline float high(float a,float b) { return a>b?a:b; }
+inline Rect shifted(Rect r,Point p) { return {r.left+p.x,r.top+p.y,r.right+p.x,r.bottom+p.y}; }
+inline Rect united(Rect a,Rect b) { return {low(a.left,b.left),low(a.top,b.top),high(a.right,b.right),high(a.bottom,b.bottom)}; }
+inline bool valid(Rect r) { return finite(r.left)&&finite(r.top)&&finite(r.right)&&finite(r.bottom)&&r.right>r.left&&r.bottom>r.top; }
+inline float overlap(Rect a,Rect b,float margin) {
+    return high(0,low(a.right,b.right)+margin-high(a.left,b.left))*
+           high(0,low(a.bottom,b.bottom)+margin-high(a.top,b.top));
+}
+inline bool inside(Rect r,const View& v) { return r.left>=v.x&&r.top>=v.y&&r.right<=v.x+v.width&&r.bottom<=v.y+v.height; }
+inline uint32_t star_rgb(Critical c) { return c==Critical::Positive?0xf1689b:0x68b9ff; }
 struct DrawNumber {
-    Point position;
-    float pixels, opacity;
+    Point position, offset, star;
+    float pixels, opacity, advance, unit, classic_stroke;
+    Rect ink, solid, reserve;
     uint32_t color;
     Critical critical;
+    VisualStyle style;
     HitKey key;
     char text[12];
 };
-
-// This produces layout commands only. Native rendering uses outlined text and
-// critical lines; host tests can verify the exact same projection/animation.
-inline unsigned layout(const Model& model, const View& view, float now,
-                       DrawNumber (&out)[128]) {
-    if (!finite(now)) return 0;
-    unsigned count=0;
+inline Rect marker_bounds(Rect ink,float pixels,float unit,Critical critical,VisualStyle style) {
+    if (critical==Critical::None) return ink;
+    const float cx=(ink.left+ink.right)*0.5f;
+    const float halfh=style==VisualStyle::Wilds?pixels*.12f:2*unit;
+    const float y=critical==Critical::Positive?ink.top-2*unit-halfh:ink.bottom+2*unit+halfh;
+    const float halfw=style==VisualStyle::Wilds?pixels*.55f:(ink.right-ink.left)*.5f;
+    return united(ink,{cx-halfw,y-halfh,cx+halfw,y+halfh});
+}
+inline Rect solid_bounds(Rect ink,Point pos,float pixels,float advance,float unit,Critical crit,VisualStyle style) {
+    if(style==VisualStyle::Wilds)return marker_bounds(ink,pixels,unit,crit,style);
+    if(crit==Critical::None)return ink;
+    const float stroke=1.25f*unit;
+    const float y=crit==Critical::Positive?pos.y-2*stroke:pos.y+pixels+2*stroke;
+    return united(ink,{pos.x-2*stroke,y-2*stroke,pos.x+advance+2*stroke,y+2*stroke});
+}
+struct PlacementState {
+    struct Entry { HitKey key; Point offset; bool live; } entries[128]{};
+    float x=0,y=0,width=0,height=0,scale=0;
+    VisualStyle style=VisualStyle::Wilds;
+    uint32_t epoch=0;
+    void reset() { for(auto& e:entries)e.live=false; width=height=0; }
+};
+// Host fallback only. Native always supplies actual ImGui glyph bounds.
+inline bool approximate_measure(const char* text,float pixels,VisualStyle,TextMetrics& m) {
+    unsigned n=0;while(text[n])++n;
+    m={float(n)*pixels*.55f,{0,pixels*.15f,float(n)*pixels*.55f,pixels*.85f}};
+    return n!=0;
+}
+inline unsigned layout(const Model& model,const View& view,float now,DrawNumber (&out)[128],
+                       PlacementState& cache,Measure measure=approximate_measure) {
     const Settings& s=model.config();
-    const float viewport_scale=view.height/720.0f;
-    if (!s.enabled || !valid(s) || !finite(viewport_scale) || viewport_scale<=0) return 0;
+    const float unit=view.height/720.0f*s.scale,base=24*unit;
+    if (!finite(now)||!s.enabled||!valid(s)||!finite(unit)||unit<=0||!model.size()) { cache.reset();return 0; }
+    const uint32_t epoch=model.at(0).event.key.epoch;
+    if(cache.x!=view.x||cache.y!=view.y||cache.width!=view.width||cache.height!=view.height||
+       cache.scale!=s.scale||cache.style!=s.style||cache.epoch!=epoch) cache.reset();
+    cache.x=view.x;cache.y=view.y;cache.width=view.width;cache.height=view.height;
+    cache.scale=s.scale;cache.style=s.style;cache.epoch=epoch;
+    for(auto& entry:cache.entries) if(entry.live) {
+        bool found=false;
+        for(unsigned i=0;i<model.size();++i) {
+            const Event& e=model.at(i).event;
+            found=found || (entry.key==e.key && now>=e.captured_at && now-e.captured_at<s.lifetime);
+        }
+        if(!found)entry.live=false;
+    }
+    static constexpr Point candidates[17]={{0,0},{-.8f,0},{.8f,0},{0,-.5f},{0,.5f},
+        {-.8f,-.5f},{.8f,-.5f},{-.8f,.5f},{.8f,.5f},{-1.6f,0},{1.6f,0},
+        {-1.6f,-1},{1.6f,-1},{-1.6f,1},{1.6f,1},{0,-1},{0,1}};
+    unsigned count=0;
     for(unsigned i=0;i<model.size();++i) {
-        const Event& e=model.at(i).event;
-        const float age=now-e.captured_at;
-        if (age<0 || age>=s.lifetime || !visible(e,s)) continue;
-        Point anchor{};
-        if (!project(e.position,view,anchor)) continue;
-        DrawNumber d{};
-        const float pop=age<0.1f ? 1.0f+0.25f*(1.0f-age/0.1f) : 1.0f;
-        d.pixels=24.0f*viewport_scale*s.scale*pop;
-        d.opacity=age>s.lifetime-0.25f ? (s.lifetime-age)/0.25f : 1.0f;
-        d.color=rgb(tint(e,s)); d.critical=marker(e); d.key=e.key;
-        const unsigned n=digits(e.total_damage,d.text);
-        const float width=float(n)*d.pixels*0.65f;
-        const float top_pad=d.critical==Critical::Positive ? 6*viewport_scale : 0;
-        const float bottom_pad=d.critical==Critical::Negative ? 6*viewport_scale : 0;
-        d.position={anchor.x-width*0.5f,anchor.y-8*viewport_scale-age/s.lifetime*30*viewport_scale};
-        // Place younger hits above nearby older numbers. Deterministic input
-        // order preserves every impact and gives a stable multi-hit pattern.
-        for(unsigned attempt=0;attempt<count;++attempt) {
-            bool moved=false;
-            for(unsigned j=0;j<count;++j) {
-                const DrawNumber& other=out[j]; unsigned len=0;
-                while(other.text[len])++len;
-                const float other_width=float(len)*other.pixels*0.65f;
-                const float other_top=other.position.y-(other.critical==Critical::Positive ? 6*viewport_scale : 0);
-                const float other_bottom=other.position.y+other.pixels+
-                    (other.critical==Critical::Negative ? 6*viewport_scale : 0);
-                if (d.position.x < other.position.x+other_width+4*viewport_scale &&
-                    other.position.x < d.position.x+width+4*viewport_scale &&
-                    d.position.y-top_pad < other_bottom+4*viewport_scale &&
-                    other_top < d.position.y+d.pixels+bottom_pad+4*viewport_scale) {
-                    d.position.y=other_top-d.pixels-bottom_pad-4*viewport_scale;
-                    moved=true; break;
+        const Event& e=model.at(i).event;const float age=now-e.captured_at;
+        if(age<0||age>=s.lifetime||!visible(e,s))continue;
+        Point anchor{};if(!project(e.position,view,anchor))continue;
+        DrawNumber d{};digits(e.total_damage,d.text);
+        d.pixels=base*(age<.1f?1+.25f*(1-age/.1f):1);d.unit=unit;d.classic_stroke=1.25f*view.height/720.0f;
+        d.opacity=age>s.lifetime-.25f?(s.lifetime-age)/.25f:1;
+        d.style=s.style;d.color=rgb(tint(e,s),s.style);d.critical=marker(e);d.key=e.key;
+        TextMetrics current{},peak{};
+        if(!measure(d.text,d.pixels,s.style,current)||!measure(d.text,base*1.25f,s.style,peak)||
+           !valid(current.ink)||!valid(peak.ink)||!finite(current.advance)||!finite(peak.advance))continue;
+        const float cy=anchor.y-8*view.height/720.0f-age/s.lifetime*30*view.height/720.0f;
+        d.position={anchor.x-current.advance*.5f,cy};d.advance=current.advance;
+        d.ink=shifted(current.ink,d.position);
+        Rect reserved=shifted(peak.ink,{anchor.x-peak.advance*.5f,cy});
+        reserved=solid_bounds(reserved,{anchor.x-peak.advance*.5f,cy},base*1.25f,peak.advance,
+            s.style==VisualStyle::Wilds?unit:view.height/720.0f,d.critical,s.style);
+        const float shadow=s.style==VisualStyle::Wilds?unit:1.25f*view.height/720.0f;
+        reserved={reserved.left-shadow,reserved.top-shadow,reserved.right+shadow,reserved.bottom+shadow};
+        PlacementState::Entry* entry=nullptr;
+        for(auto& item:cache.entries)if(item.live&&item.key==d.key){entry=&item;break;}
+        if(!entry) {
+            bool selected=false;float best_overlap=0,best_distance=0;Point best{};
+            for(const Point candidate:candidates) {
+                const Point offset={candidate.x*base,candidate.y*base};const Rect r=shifted(reserved,offset);
+                if(!inside(r,view))continue;
+                float area=0;for(unsigned j=0;j<count;++j)area+=overlap(r,out[j].reserve,unit);
+                const float distance=offset.x*offset.x+offset.y*offset.y;
+                if(!selected||area<best_overlap||(area==best_overlap&&distance<best_distance)) {
+                    selected=true;best_overlap=area;best_distance=distance;best=offset;
                 }
             }
-            if(!moved)break;
+            if(!selected)continue;
+            for(auto& item:cache.entries)if(!item.live){entry=&item;break;}
+            if(!entry)continue;
+            *entry={d.key,best,true};
         }
-        if (d.position.x<view.x || d.position.y-top_pad<view.y ||
-            d.position.x+width>view.x+view.width || d.position.y+d.pixels+bottom_pad>view.y+view.height) continue;
+        d.offset=entry->offset;d.position.x+=d.offset.x;d.position.y+=d.offset.y;
+        d.ink=shifted(d.ink,d.offset);d.reserve=shifted(reserved,d.offset);
+        d.solid=solid_bounds(d.ink,d.position,d.pixels,d.advance,
+            s.style==VisualStyle::Wilds?unit:view.height/720.0f,d.critical,s.style);
+        d.solid={d.solid.left-shadow,d.solid.top-shadow,d.solid.right+shadow,d.solid.bottom+shadow};
+        if(!inside(d.solid,view))continue;
+        const float halfh=s.style==VisualStyle::Wilds?d.pixels*.12f:2*unit;
+        d.star={(d.ink.left+d.ink.right)*.5f,d.critical==Critical::Positive?
+                d.ink.top-2*unit-halfh:d.ink.bottom+2*unit+halfh};
         out[count++]=d;
     }
     return count;
+}
+// Convenience for stateless host callers; native retains its cache across frames.
+inline unsigned layout(const Model& m,const View& v,float now,DrawNumber (&out)[128]) {
+    PlacementState state{};return layout(m,v,now,out,state);
 }
 }

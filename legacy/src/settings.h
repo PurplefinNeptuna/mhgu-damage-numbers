@@ -16,10 +16,8 @@ inline SettingsText encode_settings(const Settings& s) {
         for (uint32_t place=100000;place;place/=10) out.bytes[out.size++]=char('0'+(fixed/place)%10);
         out.bytes[out.size++]='\n';
     };
-    text("[DamageNumbers]\nversion=1\nenabled="); text(s.enabled?"1\n":"0\n");
-    text("monsters="); text(s.monsters?"1\n":"0\n");
-    text("objects="); text(s.objects?"1\n":"0\n");
-    text("bounce_gray="); text(s.bounce_gray?"1\n":"0\n");
+    text("[DamageNumbers]\nversion=2\nenabled="); text(s.enabled?"1\n":"0\n");
+    text("style="); text(s.style==VisualStyle::Wilds?"wilds\n":"classic\n");
     text("scale="); decimal(s.scale); text("lifetime="); decimal(s.lifetime);
     return out;
 }
@@ -40,19 +38,21 @@ inline bool decode_settings(const char* data,unsigned size,Settings& out) {
         if (split==end) return false;
         unsigned key_end=split; while (key_end>begin && space(data[key_end-1])) --key_end;
         unsigned value=split+1; while (value<end && space(data[value])) ++value;
-        const char* names[]={"version","enabled","monsters","objects","bounce_gray","scale","lifetime"};
-        unsigned key=0; while (key<7 && !equal(data+begin,key_end-begin,names[key])) ++key;
-        if (key==7) continue;
+        const char* names[]={"version","enabled","style","scale","lifetime"};
+        unsigned key=0; while (key<5 && !equal(data+begin,key_end-begin,names[key])) ++key;
+        if (key==5) return false; // No legacy keys or formats.
         if (seen&(1u<<key)) return false;
         seen|=1u<<key;
-        if (key<5) {
+        if (key==0) {
+            if (!equal(data+value,end-value,"2")) return false;
+        } else if (key==1) {
             if (end-value!=1 || (data[value]!='0' && data[value]!='1')) return false;
             const bool yes=data[value]=='1';
-            if (key==0 && !yes) return false;
-            if (key==1) next.enabled=yes;
-            if (key==2) next.monsters=yes;
-            if (key==3) next.objects=yes;
-            if (key==4) next.bounce_gray=yes;
+            next.enabled=yes;
+        } else if (key==2) {
+            if (equal(data+value,end-value,"wilds")) next.style=VisualStyle::Wilds;
+            else if (equal(data+value,end-value,"classic")) next.style=VisualStyle::Classic;
+            else return false;
         } else {
             if (value==end) return false;
             unsigned whole=0,digits=0,fraction=0,places=0; bool dot=false;
@@ -67,10 +67,10 @@ inline bool decode_settings(const char* data,unsigned size,Settings& out) {
             if (!digits) return false;
             uint32_t divisor=1; for (unsigned i=0;i<places;++i) divisor*=10;
             const float number=float(whole)+float(fraction)/float(divisor);
-            if (key==5) next.scale=number; else next.lifetime=number;
+            if (key==3) next.scale=number; else next.lifetime=number;
         }
     }
-    if (seen!=0x7fu || !valid(next)) return false;
+    if (seen!=0x1fu || !valid(next)) return false;
     out=next; return true;
 }
 bool settings_load(Settings& out);

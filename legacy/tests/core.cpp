@@ -25,9 +25,9 @@ static void policies() {
     Settings s{}; Event e=hit();
     for (unsigned source=0;source<4;++source) for (unsigned owner=0;owner<5;++owner) {
         e.source=Source(source); e.owner=Owner(owner);
-        check(visible(e,s)==(source==0 && owner<2),"default source and ownership matrix");
-        Settings enabled=s;enabled.monsters=enabled.objects=enabled.ticks=true;
-        check(visible(e,enabled)==(source!=0 || owner<2),"optional all-owner exceptions");
+        check(visible(e,s)==((source==0 && owner<2)||source==1||source==2),"default source and ownership matrix");
+        Settings enabled=s;enabled.enabled=false;
+        check(visible(e,enabled)==false,"master disable overrides every source");
     }
     e=hit();
     for(int n:{-123,0,1,123,2147483647}) {
@@ -37,12 +37,12 @@ static void policies() {
     e.physical_hzv=45;check(tint(e,s)==Tint::Weak,"HZV 45");
     e.total_damage=999;check(tint(e,s)==Tint::Weak,"elemental total does not select color");
     e.bounced=true;check(tint(e,s)==Tint::Gray,"actual bounce wins color");
-    s.bounce_gray=false;check(tint(e,s)==Tint::Weak,"bounce color can be disabled");
+    e.bounced=false;
     e.physical_hzv=-1;check(tint(e,s)==Tint::White,"unknown physical HZV");
     for(Critical c:{Critical::None,Critical::Positive,Critical::Negative}) {
         e.critical=c;check(marker(e)==c,"direct critical outcomes");
         e.source=Source::Tick;check(marker(e)==Critical::None,"ticks have no critical marker");
-        check(tint(e,s)==Tint::Gray,"ticks are gray");e.source=Source::Attack;
+        check(!visible(e,s),"unsupported recurring ticks hidden");e.source=Source::Attack;
     }
     e=hit();e.position.x=std::numeric_limits<float>::quiet_NaN();check(!visible(e,s),"bad hit position");
     e=hit();e.critical=Critical(255);check(!visible(e,s),"unknown critical outcome");
@@ -72,11 +72,11 @@ static void lifecycle() {
     check(m.pending()==0&&m.size()==0,"invalid gameplay clears display and queue");
     check(m.capture(a),"invalid context clears prior event identities");m.update(1,true);
     Settings s=m.config();s.enabled=false;check(m.configure(s)&&m.size()==0,"master disable clears active");
-    s.enabled=true;s.objects=true;check(m.configure(s),"enable objects");
+    s.enabled=true;check(m.configure(s),"enable objects");
     a=hit(50);a.key.epoch=8;a.source=Source::Object;a.owner=Owner::RemotePlayer;
-    check(m.capture(a),"remote object allowed when enabled");
-    s.objects=false;m.configure(s);s.objects=true;m.configure(s);m.update(1,true);
-    check(m.size()==0,"disabling option discards pending events before re-enable");
+    check(m.capture(a),"recognized remote object always allowed");
+    s.enabled=false;m.configure(s);s.enabled=true;m.configure(s);m.update(1,true);
+    check(m.size()==0,"master disable discards pending events before re-enable");
     s.scale=NAN;check(!m.configure(s)&&m.config().scale==1,"bad config leaves prior settings");
     m.reset(7);
     for(unsigned i=1;i<=300;++i) check(m.capture(hit(i)),"independent burst");
@@ -112,9 +112,9 @@ static void drawing() {
     check(layout(m,view(),2,commands)==0,"no expired draw");
     e=hit(2);e.critical=Critical::Negative;m.capture(e);m.update(1,true);
     check(layout(m,view(),1,commands)==2,"same-position multi-hit preserved");
-    check(commands[1].critical==Critical::Negative&&commands[1].position.y<commands[0].position.y,"separate lane and underscore");
-    check(commands[1].position.y+commands[1].pixels+6<=commands[0].position.y-6-4,
-          "multi-hit lanes reserve room for both outlined critical markers");
+    check(commands[1].critical==Critical::Negative&&commands[1].star.y>commands[1].ink.bottom,"negative star below visible glyphs");
+    check(commands[0].star.y<commands[0].ink.top,"positive star above visible glyphs");
+    check(std::fabs(commands[1].offset.x)<=38.4f&&std::fabs(commands[1].offset.y)<=24,"bounded nearby placement");
     v=view();v.height=1440;v.width=2560;
     check(layout(m,v,1.2f,commands)==2&&commands[0].pixels==48,"resolution-scaled text");
     const float native_view[16]={1,0,0,0,0,1,0,0,0,0,1,0,0,0,-10,1};
@@ -155,18 +155,17 @@ static void preview() {
     check(imgui_color(0xffffff,NAN)==0,"invalid alpha is transparent");
 }
 static void settings_and_sources() {
-    Settings s{}; s.enabled=false; s.monsters=true; s.objects=true; s.bounce_gray=false;
+    Settings s{}; s.enabled=false;s.style=VisualStyle::Classic;
     s.scale=1.75f; s.lifetime=1.5f;
     const auto saved=encode_settings(s);
     Settings decoded{};
-    check(decode_settings(saved.bytes,saved.size,decoded) && !decoded.enabled && decoded.monsters && decoded.objects &&
-          !decoded.bounce_gray && !decoded.ticks && decoded.scale==1.75f && decoded.lifetime==1.5f,"INI settings round trip");
+    check(decode_settings(saved.bytes,saved.size,decoded) && !decoded.enabled && decoded.style==VisualStyle::Classic && decoded.scale==1.75f && decoded.lifetime==1.5f,"INI settings round trip");
     const char* invalid[]={"", "[DamageNumbers]\nversion=1\n", "garbage", "[Other]\nversion=1\n"};
     for (const char* text:invalid) check(!decode_settings(text,unsigned(std::strlen(text)),decoded),"incomplete settings rejected");
     const char* values[]={"NaN","inf","-1","4.0","1e0","1.1234567",".","1..2"};
     for (const char* value:values) {
         char text[256]; const int size=std::snprintf(text,sizeof(text),
-            "[DamageNumbers]\nversion=1\nenabled=1\nmonsters=0\nobjects=0\nbounce_gray=1\nscale=%s\nlifetime=0.9\n",value);
+            "[DamageNumbers]\nversion=2\nenabled=1\nstyle=wilds\nscale=%s\nlifetime=0.9\n",value);
         check(!decode_settings(text,unsigned(size),decoded),"invalid INI numeric value rejected");
     }
     auto corrupt=saved; corrupt.bytes[corrupt.size++]='\0';
@@ -174,7 +173,7 @@ static void settings_and_sources() {
     char duplicate[256]; std::memcpy(duplicate,saved.bytes,saved.size);
     std::memcpy(duplicate+saved.size,"enabled=1\n",10);
     check(!decode_settings(duplicate,saved.size+10,decoded),"duplicate config key rejected");
-    const char* edited="; user settings\r\n[DamageNumbers]\r\nversion = 1\r\nenabled = 0\r\nmonsters=1\r\nobjects=0\r\nbounce_gray=1\r\nscale=2.5\r\nlifetime=1\r\n";
+    const char* edited="; user settings\r\n[DamageNumbers]\r\nversion = 2\r\nenabled = 0\r\nstyle=wilds\r\nscale=2.5\r\nlifetime=1\r\n";
     check(decode_settings(edited,unsigned(std::strlen(edited)),decoded) && decoded.scale==2.5f && decoded.lifetime==1,
           "INI whitespace and Windows line endings supported");
     for (float scale:{0.5f,1.0f,1.751234f,3.0f}) for (float lifetime:{0.4f,0.9f,1.231234f,2.0f}) {
@@ -182,12 +181,18 @@ static void settings_and_sources() {
         check(decode_settings(record.bytes,record.size,decoded) && std::fabs(decoded.scale-scale)<0.000001f &&
               std::fabs(decoded.lifetime-lifetime)<0.000001f,"INI decimals preserve UI values to six places at range boundaries");
     }
+    for(const char* key:{"monsters=1\n","objects=0\n","bounce_gray=1\n","style=future\n","version=1\n"}) {
+        auto bad=saved;const unsigned n=std::strlen(key);std::memcpy(bad.bytes+bad.size,key,n);bad.size+=n;
+        check(!decode_settings(bad.bytes,bad.size,decoded),"legacy, duplicate and invalid fields rejected");
+    }
+    auto old=saved;for(unsigned k=0;k<old.size;++k)if(old.bytes[k]=='2'){old.bytes[k]='1';break;}
+    Settings fresh{};check(!decode_settings(old.bytes,old.size,fresh)&&fresh.enabled&&fresh.style==VisualStyle::Wilds&&fresh.scale==1,"v1 cannot preserve old preferences");
     Source source=Source::Attack;
     check(source_outcome(0x000102,Owner::LocalPlayer,source) && source==Source::Attack,"hunter projectile remains owned attack");
     check(source_outcome(0x030802,Owner::LocalPalico,source) && source==Source::Attack,"palico support barrel remains owned attack");
     check(source_outcome(0x010202,Owner::Unknown,source) && source==Source::Monster,"secondary monster attack classified");
     check(source_outcome(0x000201,Owner::Unknown,source) && source==Source::Monster,"direct monster attack classified");
-    check(source_outcome(0x000802,Owner::RemotePlayer,source) && source==Source::Object,"placed object accepts remote owner only under object switch");
+    check(source_outcome(0x000802,Owner::RemotePlayer,source) && source==Source::Object,"placed object accepts remote owner as a recognized object");
     check(source_outcome(0x000102,Owner::RemotePlayer,source) && source==Source::Attack,"remote ranged weapon cannot be relabeled an object");
     check(!source_outcome(0x030902,Owner::LocalPalico,source),"unknown child source stays hidden");
     BounceAttack attacks[2]={{100,0,1,0,0},{200,0,0,0xff,0}};
@@ -208,4 +213,38 @@ static void settings_and_sources() {
     model.reset(8);
     check(!model.bounce(first.key),"context transition rejects stale bounce resolution");
 }
-int main() { policies();lifecycle();drawing();preview();settings_and_sources();std::printf("Passed %u core/presentation checks\n",cases); }
+static bool varied_measure(const char* text,float pixels,VisualStyle,TextMetrics& m) {
+    float advance=0;for(const char* p=text;*p;++p)advance+=pixels*(*p=='1'?.28f:.62f);
+    m={advance,{pixels*.02f,pixels*.14f,advance-pixels*.02f,pixels*.86f}};return true;
+}
+static void compact_spacing() {
+    Model m;m.reset(7);PlacementState state{};DrawNumber commands[128]{};
+    Event e=hit();e.total_damage=111;e.critical=Critical::Positive;m.capture(e);m.update(1,true);
+    check(layout(m,view(),1,commands,state,varied_measure)==1,"measured narrow digits draw");
+    const Point first=commands[0].offset;
+    check(first.x==0&&first.y==0,"isolated hit retains its original anchor");
+    check(std::fabs(commands[0].advance-25.2f)<.001f,"actual advances used instead of digit count estimate");
+    check(commands[0].color==0xf4f1ec&&star_rgb(commands[0].critical)==0xf1689b,"nonweak positive crit keeps white digits and red star");
+    for(unsigned i=2;i<=128;++i) { e=hit(i);e.total_damage=i%2?888:1;e.critical=i%3?Critical::Negative:Critical::Positive;m.capture(e); }
+    m.update(1,true);check(layout(m,view(),1,commands,state,varied_measure)==128,"dense bursts retain all 128 separate numbers");
+    Point offsets[128];
+    for(unsigned i=0;i<128;++i) {
+        offsets[i]=commands[i].offset;
+        check(std::fabs(offsets[i].x)<=38.4001f&&std::fabs(offsets[i].y)<=24.0001f,"dense placement remains inside horizontal and vertical bounds");
+        check(inside(commands[i].solid,view()),"solid label inside viewport");
+    }
+    check(layout(m,view(),1.07f,commands,state,varied_measure)==128,"burst animates without losses");
+    for(unsigned i=0;i<128;++i)check(offsets[i].x==commands[i].offset.x&&offsets[i].y==commands[i].offset.y,"existing hits never reshuffle");
+    Settings s=m.config();s.style=VisualStyle::Classic;m.configure(s);
+    layout(m,view(),1.07f,commands,state,varied_measure);
+    check(state.style==VisualStyle::Classic&&commands[0].color==0xffffff,"Classic restores old palette and resets placement generation");
+    s.scale=2;m.configure(s);View v=view();v.width=2560;v.height=1440;
+    layout(m,v,1.07f,commands,state,varied_measure);
+    check(state.scale==2&&state.width==2560,"size and viewport changes refresh reservation dimensions");
+    m.reset(8);e=hit();e.key.epoch=8;m.capture(e);m.update(1,true);
+    check(layout(m,view(),1,commands,state,varied_measure)==1&&commands[0].offset.x==0&&commands[0].offset.y==0,"context transition clears cached placements");
+    m.reset(7);e=hit();e.position.x=-.98f;m.capture(e);m.update(1,true);
+    check(layout(m,view(),1,commands,state,varied_measure)==1&&inside(commands[0].reserve,view()),"viewport edge chooses a nearby inward position");
+    check(layout(m,view(),2,commands,state,varied_measure)==0,"expired labels are not rendered");
+}
+int main() { policies();lifecycle();drawing();compact_spacing();preview();settings_and_sources();std::printf("Passed %u core/presentation checks\n",cases); }

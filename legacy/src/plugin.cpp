@@ -1,4 +1,5 @@
 #include "capture.h"
+#include "cosmetics.h"
 #include <forge/hook.h>
 #include <forge/log.h>
 #include <stdarg.h>
@@ -26,6 +27,8 @@ extern "C" void forge_onImGuiInit(void* ctx,void* alloc,void* free_fn) {
     forge_log_info("[damage-numbers] ImGui context setup entered");
     igSetCurrentContext(static_cast<ImGuiContext*>(ctx));
     igSetAllocatorFunctions(reinterpret_cast<ImGuiMemAllocFunc>(alloc),reinterpret_cast<ImGuiMemFreeFunc>(free_fn),nullptr);
+    damage_numbers::cosmetics_init(ctx);
+    damage_numbers::capture_reset_placement();
     forge_log_info("[damage-numbers] ImGui context setup complete");
 }
 extern "C" void forge_onImGuiRender() { damage_numbers::capture_panel(); }

@@ -1,7 +1,8 @@
 # Damage numbers: test results
 
-R9 report, 2026-10-05: all 16 rows passed; [TEST_CHECKLIST.md](TEST_CHECKLIST.md) is complete. LBG
-spacing needs polish. Blank metadata was not supplied.
+R9 report, 2026-10-05: all 16 rows passed. The current [TEST_CHECKLIST.md](TEST_CHECKLIST.md) covers
+r10 cosmetics; these r9 results remain the completed combat evidence. LBG
+spacing prompted the r10 changes. Blank metadata was not supplied.
 
 Date:
 
@@ -83,3 +84,14 @@ Duplicate this block only if needed.
 - Expected:
 - Observed:
 - Screenshot/clip, if available:
+
+## R10 cosmetic results (pending)
+
+| Check | Result | Short notes |
+| --- | --- | --- |
+| Gold digits / positive red star | | |
+| Gold digits / negative blue star | | |
+| White digits / positive red star | | |
+| Two LBG bursts: compact spacing and stable older numbers | | |
+| Classic / Wilds switching | | |
+| Saved style restored after one restart | | |

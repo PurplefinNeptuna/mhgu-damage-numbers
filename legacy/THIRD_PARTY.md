@@ -36,3 +36,11 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+## Roboto Condensed digit subset
+
+Copyright 2011 The Roboto Project Authors
+(https://github.com/googlefonts/roboto-classic). Licensed under SIL OFL 1.1.
+[Full license](fonts/OFL.txt), [pinned provenance](fonts/source.json) and
+[preparation recipe](fonts/README.md). Instantiated at weight 600 and subset for
+the plugin; font data and license are embedded in the NRO.

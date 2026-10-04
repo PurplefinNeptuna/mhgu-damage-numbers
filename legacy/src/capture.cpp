@@ -8,6 +8,7 @@
 #include "transaction.h"
 #include "signatures.h"
 #include "settings.h"
+#include "cosmetics.h"
 #include "sources.h"
 #include "bounce.h"
 #include "../../modern-weapon-controls/src/native_platform.h"
@@ -318,7 +319,7 @@ void capture_install() {
     }
     __atomic_store_n(&active,1,__ATOMIC_RELEASE);
     status = "Damage numbers ready";
-    forge_log_info("[damage-numbers] Capture r9: %u hooks; automatic startup; one private arena/TLS slot; hit log limit 256",hook_count);
+    forge_log_info("[damage-numbers] Capture r10: %u hooks; automatic startup; one private arena/TLS slot; hit log limit 256",hook_count);
 }
 void capture_monitor() {
     if (!load(active)) return;
@@ -425,6 +426,8 @@ void capture_consume() {
         }
     }
 }
+static PlacementState placement;
+void capture_reset_placement() { placement.reset(); }
 void capture_render() {
     capture_consume();
     if (!load(active)) return;
@@ -441,7 +444,7 @@ void capture_render() {
         preview_camera(last_camera.view,last_camera.projection,last_camera.rect,
                        io->DisplaySize.x,io->DisplaySize.y,view);
     display_model.update(time,ready);
-    if (!ready) return;
+    if (!ready) { placement.reset(); return; }
     if (camera_logs<1) {
         ++camera_logs;
         forge_log_info("[damage-numbers] Preview camera: rect %d %d %d %d; display %.0f %.0f; tick frequency %u",
@@ -456,34 +459,21 @@ void capture_render() {
         }
     }
     DrawNumber numbers[128]{};
-    const unsigned count=layout(display_model,view,time,numbers);
+    const unsigned count=layout(display_model,view,time,numbers,placement,cosmetics_measure);
     if (!count) return;
     ImDrawList* draw=igGetBackgroundDrawList_Nil();
-    ImFont* font=igGetFont();
-    if (!draw || !font) return;
-    ImDrawList_PushClipRect(draw,{0,0},{view.width,view.height},true);
+    if (!draw) return;
+    ImDrawList_PushClipRect(draw,{view.x,view.y},{view.x+view.width,view.y+view.height},true);
     for (unsigned i=0;i<count;++i) {
-        const DrawNumber& n=numbers[i]; unsigned length=0; while(n.text[length])++length;
-        const ImVec2_c size=ImFont_CalcTextSizeA(font,n.pixels,1e10f,0,n.text,nullptr,nullptr);
-        if (!finite(size.x) || !finite(size.y) || size.x<=0 || size.y<=0) continue;
-        const ImVec2_c pos={n.position.x+(float(length)*n.pixels*0.65f-size.x)*0.5f,n.position.y};
-        const float stroke=1.25f*view.height/720.0f;
-        const uint32_t outline=imgui_color(0,n.opacity),color=imgui_color(n.color,n.opacity);
-        for (int x=-1;x<=1;++x) for (int y=-1;y<=1;++y) if(x || y)
-            ImDrawList_AddText_FontPtr(draw,font,n.pixels,{pos.x+x*stroke,pos.y+y*stroke},outline,n.text,nullptr,0,nullptr);
-        ImDrawList_AddText_FontPtr(draw,font,n.pixels,pos,color,n.text,nullptr,0,nullptr);
-        if (n.critical!=Critical::None) {
-            const float y=n.critical==Critical::Positive ? pos.y-2*stroke : pos.y+size.y+2*stroke;
-            ImDrawList_AddLine(draw,{pos.x,y},{pos.x+size.x,y},outline,4*stroke);
-            ImDrawList_AddLine(draw,{pos.x,y},{pos.x+size.x,y},color,2*stroke);
-        }
+        const DrawNumber& n=numbers[i];
+        cosmetics_draw(draw,n);
         ++preview_drawn;
         bool projected_before=false;
         for (unsigned j=0;j<projection_logs;++j) projected_before=projected_before || projected_keys[j]==n.key;
         if (!projected_before && projection_logs<4) {
             projected_keys[projection_logs++]=n.key;
             forge_log_info("[damage-numbers] Preview projection: thread %u serial %u damage %s at %.2f %.2f",
-                n.key.application,n.key.serial,n.text,double(pos.x+size.x*0.5f),double(pos.y));
+                n.key.application,n.key.serial,n.text,double(n.position.x+n.advance*0.5f),double(n.position.y));
         }
     }
     ImDrawList_PopClipRect(draw);
@@ -502,18 +492,17 @@ void capture_panel() {
     }
     Settings next=display_model.config();
     bool changed=igCheckbox("Show damage numbers",&next.enabled);
+    int style=int(next.style);static const char* styles[]={"Wilds","Classic"};
+    if(igCombo_Str_arr("Style##damage-numbers",&style,styles,2,-1)) { next.style=VisualStyle(style);changed=true; }
     changed=igSliderFloat("Number size",&next.scale,0.5f,3.0f,"%.2fx",ImGuiSliderFlags_AlwaysClamp) || changed;
     changed=igSliderFloat("Duration",&next.lifetime,0.4f,2.0f,"%.2f seconds",ImGuiSliderFlags_AlwaysClamp) || changed;
-    changed=igCheckbox("Gray bounced hits",&next.bounce_gray) || changed;
-    changed=igCheckbox("Monster-to-monster damage",&next.monsters) || changed;
-    changed=igCheckbox("Placed bombs and objects",&next.objects) || changed;
     if (igButton("Restore defaults",{0,0})) { next=Settings{}; changed=true; }
     if (changed && display_model.configure(next)) settings_changed();
     if (igButton("Save settings",{0,0})) settings_save(display_model.config());
     igTextUnformatted(settings_status(),nullptr);
     if (!igTreeNode_Str("Diagnostics##damage-numbers")) return;
     const PanelTreeScope diagnostics_tree;
-    igTextUnformatted("Capture r9: automatic startup; camera and combat hooks active.",nullptr);
+    igTextUnformatted("Capture r10: automatic startup; camera and combat hooks active.",nullptr);
     igTextUnformatted("Shared counters are best-effort under contention; per-hit records remain separate.",nullptr);
     igText("Collision %u; normalization %u; feedback %u; viewport %u",load(calls[0]),load(calls[1]),load(calls[2]),load(calls[3]));
     igText("Camera uploads %u; HZV taps %u; melee queries %u; shot queries %u",load(calls[4]),load(calls[5]),load(calls[6]),load(calls[7]));
