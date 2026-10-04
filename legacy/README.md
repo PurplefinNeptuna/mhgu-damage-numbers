@@ -5,8 +5,9 @@ Manual confirmation: [in-game checklist](TEST_CHECKLIST.md) and
 
 R9 passed all 16 LS/bowgun checks on 2026-10-05: crit markers, separate impacts,
 elemental contribution, bounce/Mind's Eye, rapid fire and multiplayer filtering.
-Settings persistence and monster-to-monster damage also passed. Rapid-fire
-spacing needs polish; placed objects remain untested. See [the runtime record](RUNTIME.md#2026-10-05-r9-manual-confirmation).
+Settings persistence, monster-to-monster damage, Prowler mode and bomb damage
+also passed. Rapid-fire spacing remains the only reported issue and needs
+cosmetic polish. See [the runtime record](RUNTIME.md#2026-10-05-r9-manual-confirmation).
 
 Target: MHGU 1.4.0 Switch and local patched Forge. R3 passed startup,
 hunter/palico capture, hit logging and quest/village history retention: 23
@@ -101,11 +102,12 @@ Monster damage uses dispatch subtype 2. Objects cover generic subtype-8 shell
 impacts with a resolved hunter owner, including remote owners. Palico/Prowler
 support bombs remain owned attacks; remote weapons/palicoes stay hidden even
 with both optional switches on. Other environmental families/ticks are
-unsupported. Monster damage, bounce on/off and Mind's Eye passed; placed objects
-await confirmation.
+unsupported. Monster damage, Prowler mode, bomb damage, bounce on/off and
+Mind's Eye passed the user's trials. Bomb types and object-switch off behavior
+were not separately described in the report.
 
-Persistence needs no retest. Check a placed bomb with its switch on/off when
-convenient; no completed save or extensive session is needed.
+Persistence, Prowler mode and bomb damage need no repeat display trial.
+Rapid-fire spacing is the remaining reported cosmetic issue.
 
 The core is independent of game memory. `ownership.h` checks reads,
 local-session index and current Palico work; `camera.h` converts copied

@@ -344,3 +344,14 @@ reports.
 
 Remaining: wide rapid-fire spacing (cosmetic), Prowler and placed objects.
 Recording changed no binary, emulator or save/config.
+
+## 2026-10-05: Prowler mode and bombs confirmed
+
+User: "prowler mode and bomb works". Prowler mode and bomb damage display
+passed, completing the remaining Prowler/bomb coverage requested after the
+LS/bowgun trial. Specific moves, bomb types and switch-off behavior were not
+specified; this does not establish coverage of every environmental source.
+
+All requested damage display groups now have user confirmation. Wide LBG
+rapid-fire number spacing remains the only reported issue, a cosmetic follow-up.
+Recording changed no binary, emulator or save/config.

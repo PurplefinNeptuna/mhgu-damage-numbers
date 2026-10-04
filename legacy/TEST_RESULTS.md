@@ -47,6 +47,12 @@ retest needed.
 Passed, 2026-10-05: "monster to monster also working well". Monster pair and
 switch-off behavior were not specified.
 
+## Additional confirmation: Prowler mode and bombs
+
+Passed, 2026-10-05: "prowler mode and bomb works". This completes the remaining
+Prowler and bomb damage display checks. Specific moves, bomb types and
+switch-off behavior were not specified.
+
 ## Elemental comparison values
 
 Weapon: Orcus Quarcus
