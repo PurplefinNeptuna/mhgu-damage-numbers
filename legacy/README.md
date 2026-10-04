@@ -7,7 +7,8 @@ The user's 2026-10-05 r9 trial passed all 16 result rows: LS/bowgun critical
 markers, bowgun impact separation, elemental contribution, gray bounce and
 Mind's Eye behavior, LBG rapid fire and multiplayer filtering. LBG rapid-fire
 numbers were reported as too widely spaced; that cosmetic follow-up remains.
-The user also confirmed settings persistence works after restart.
+The user also confirmed settings persistence works after restart and
+monster-to-monster damage displays correctly.
 See [the runtime record](RUNTIME.md#2026-10-05-r9-manual-confirmation) for scope.
 
 Development targets the preserved MHGU 1.4.0 Switch executable and local patched
@@ -24,10 +25,10 @@ R5 admits their observed source tags only with resolved local-palico ownership.
 The user confirmed boomerang/barrel popups and white melee damage on a low-HZV
 part. R6 added the settings panel, SD preferences, conservative gray bounce
 matching and independent optional-source switches. Bounce passed the r9 trial,
-and the user separately confirmed settings persistence. The optional-source
-switches still need an in-game check. R7 starts combat and camera hooks
-automatically when Eden loads
-the enabled package. No activation files are required; existing `.enabled` files
+and the user separately confirmed settings persistence and monster-to-monster
+damage. Placed-object coverage still needs an in-game check. R7 starts combat
+and camera hooks automatically when Eden loads the enabled package.
+No activation files are required; existing `.enabled` files
 are ignored. Numbers are on by default, with an in-game switch and saved
 preferences. R8 stores a separate INI beside Better Input in the current player's
 save container and ignores the old SD preferences. Earlier startup failures and the nonempty-flag correction are recorded in
@@ -117,9 +118,10 @@ Monster damage follows native dispatch subtype 2. The object switch covers
 generic subtype-8 shell impacts with a resolved hunter owner, including remote
 owners. Palico/Prowler support bombs remain ordinary owned attacks, and remote
 weapons/palicoes remain hidden even with both optional switches enabled.
-Other environmental families and recurring ticks remain unsupported. The new
-optional source families still await a manual trial. Gray bounce, its off switch
-and Mind's Eye prevention passed the user's r9 checklist.
+Other environmental families and recurring ticks remain unsupported.
+Monster-to-monster damage passed the user's manual trial; placed-object coverage
+still awaits confirmation. Gray bounce, its off switch and Mind's Eye prevention
+passed the user's r9 checklist.
 
 Settings persistence has passed the user's manual check and does not need a
 repeat trial. A placed bomb with its switch on/off can be checked later when

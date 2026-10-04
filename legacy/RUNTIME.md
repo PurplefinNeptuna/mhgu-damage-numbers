@@ -398,3 +398,15 @@ The remaining reported cosmetic issue is wide LBG rapid-fire number spacing.
 Prowler-specific attacks and the optional object and monster-to-monster switches
 still lack manual confirmation in this record. No plugin or save/config file
 was changed when recording the persistence result.
+
+## 2026-10-05: monster-to-monster damage confirmed
+
+The user reported "monster to monster also working well". Record the optional
+monster-to-monster damage display as passed by the user. The report does not
+identify the monster pair or separately describe the switch's off behavior.
+This confirmation extends the checklist and persistence reports above.
+
+Wide LBG rapid-fire number spacing remains a cosmetic follow-up. Prowler-specific
+attacks and placed-object coverage still lack manual confirmation in this record.
+No plugin binary, emulator setting or save/config file was changed while
+recording this result.

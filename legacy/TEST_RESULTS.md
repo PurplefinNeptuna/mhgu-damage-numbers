@@ -45,6 +45,12 @@ Passed. On 2026-10-05 the user confirmed that settings persistence was already
 tested and works. This confirmation is separate from the 16 checklist rows;
 no repeat persistence test is needed.
 
+## Additional confirmation: monster-to-monster damage
+
+Passed. On 2026-10-05 the user reported "monster to monster also working well".
+This confirms damage display for that source. The report does not identify the
+monster pair or separately describe the switch's off behavior.
+
 ## Elemental comparison values
 
 Weapon: Orcus Quarcus
