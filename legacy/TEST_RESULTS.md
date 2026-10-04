@@ -1,9 +1,7 @@
 # Damage numbers: test results
 
-The user completed [TEST_CHECKLIST.md](TEST_CHECKLIST.md) and reported the
-results on 2026-10-05. All 16 result rows are marked "good", meaning passed.
-LBG rapid-fire separation passed with the spacing comment retained below.
-Blank metadata fields were not supplied.
+R9 report, 2026-10-05: all 16 rows passed; [TEST_CHECKLIST.md](TEST_CHECKLIST.md) is complete. LBG
+spacing needs polish. Blank metadata was not supplied.
 
 Date:
 
@@ -41,15 +39,13 @@ Other gameplay mods, if relevant:
 
 ## Additional confirmation: settings persistence
 
-Passed. On 2026-10-05 the user confirmed that settings persistence was already
-tested and works. This confirmation is separate from the 16 checklist rows;
-no repeat persistence test is needed.
+Passed, confirmed 2026-10-05 separately from the 16 checks. No persistence
+retest needed.
 
 ## Additional confirmation: monster-to-monster damage
 
-Passed. On 2026-10-05 the user reported "monster to monster also working well".
-This confirms damage display for that source. The report does not identify the
-monster pair or separately describe the switch's off behavior.
+Passed, 2026-10-05: "monster to monster also working well". Monster pair and
+switch-off behavior were not specified.
 
 ## Elemental comparison values
 
@@ -65,11 +61,9 @@ Unmarked values with three Bolt Jwl 2 and active Thunder Atk +2: 143
 
 Color before/after:
 
-The detailed values label the active skill as Thunder Atk +2; the checklist and
-comparison row name Thunder Atk +1. Both entries are retained as reported. The
-observed increase from 133 to 143 supports elemental contribution to the displayed
-total, without establishing the exact skill level or the complete damage formula.
-The checked checklist also confirms that the HZV color stayed the same.
+Observed total: 133 to 143, with HZV color unchanged. Details say Thunder Atk
++2; recipe/result row says +1. Preserve both reports; exact skill level/full
+formula remain unverified.
 
 ## Failed or uncertain case
 

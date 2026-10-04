@@ -1,21 +1,17 @@
 # Damage numbers: in-game checklist
 
-Use LS for melee and HBG/LBG for ranged. These checks cover critical markers,
-bowgun impacts, elemental damage and bounce coloring. Placement, animation,
-size, white melee damage and Palico melee/boomerang/barrel numbers have already
-passed the user's trials.
+LS/bowgun checks cover crits, impact separation, element and bounce. Placement,
+animation, size, white melee and Palico melee/boomerang/barrels already passed.
 
-Stop each check after a couple of clear examples. You can return from the quest
-once you have seen enough. For crits, about 10 to 20 clean hits should usually
-be enough; an unlucky run does not establish a failure.
+Stop after a couple of clear examples; returning early is fine. Crits usually
+need 10 to 20 clean hits. Bad luck alone is not failure.
 
-Record outcomes in [TEST_RESULTS.md](TEST_RESULTS.md). Check a box only after
-observing its expected result. Leave skipped or uncertain checks unchecked.
+Record results in [TEST_RESULTS.md](TEST_RESULTS.md). Check boxes only for observed passes;
+leave skipped/uncertain cases unchecked.
 
 ## Equipment preparation
 
-Use full Neset, no talisman and empty weapon slots. Upgrade armor defense as
-needed for comfortable testing.
+Full Neset; no talisman; weapon slots empty. Upgrade defense for comfort.
 
 | Slot | LS armor | Bowgun armor | Positive setup decoration |
 | --- | --- | --- | --- |
@@ -25,49 +21,41 @@ needed for comfortable testing.
 | Waist | Neset Coat | Neset Elytra | Expert Jwl 2 |
 | Legs | Neset Boots | Neset Feet | Expert Jwl 3 |
 
-Both sets have 2/2/3/2/3 slots. The decorations provide 19 Expert points;
-Neset's Skill +2 raises that to 21, activating Critical Eye +3 (+30% affinity).
-Sources: [Blademaster Neset](https://mhgu.kiranico.com/armor/59bb6),
-[Gunner Neset](https://mhgu.kiranico.com/armor/54be8),
-[Expert](https://mhgu.kiranico.com/skill/4ee04),
-[Skill +2](https://mhgu.kiranico.com/skill/4ea5e).
+Slots: 2/2/3/2/3. Expert 19 + Neset Skill +2 = 21, activating Critical Eye +3
+(+30% affinity). Sources: [Blademaster Neset](https://mhgu.kiranico.com/armor/59bb6), [Gunner Neset](https://mhgu.kiranico.com/armor/54be8),
+[Expert](https://mhgu.kiranico.com/skill/4ee04), [Skill +2](https://mhgu.kiranico.com/skill/4ea5e).
 
 - [x] Prepare the positive setup using the decorations above.
 - [x] Prepare a neutral setup with all decorations and the talisman removed.
 
-Check the status screen's affinity before each quest. If it differs from the
-values below, record the actual value; gameplay mods can alter equipment.
+Check displayed affinity before quests; record differences caused by gameplay
+mods.
 
 ## 1. LS critical markers
 
-Leave Palicoes behind for these checks so your hits are easy to identify.
-Choose a familiar High Rank monster. Use ordinary slashes into the same part
-and keep sharpness and spirit gauge color consistent when comparing values.
+Leave Palicoes behind. On a familiar High Rank monster, repeat ordinary slashes
+into one part with consistent sharpness/spirit gauge color.
 
 | Check | Weapon | Armor setup | Expected affinity |
 | --- | --- | --- | ---: |
 | Positive crit | Avidya Saber | Positive Blademaster | +75% |
 | Negative crit | Tigrine Edge LV1 | Neutral Blademaster | -20% |
 
-If you already have Desperate Roar, it also works for the negative check at
--15% affinity, although crits may take longer to appear. Sources:
-[Avidya Saber](https://mhgu.kiranico.com/weapon/49e70),
-[Tigrex LS progression](https://mhgu.kiranico.com/weapon/47a66).
+Desperate Roar also works at -15%, with fewer negative crits. Sources:
+[Avidya Saber](https://mhgu.kiranico.com/weapon/49e70), [Tigrex LS progression](https://mhgu.kiranico.com/weapon/47a66).
 
 - [x] Positive: a couple of critical hits show a line above the number.
 - [x] Positive: an ordinary hit shows no critical line.
 - [x] Negative: a couple of negative critical hits show a line below the number.
 - [x] Negative: an ordinary hit shows no critical line.
 
-Color still follows physical HZV. A negative crit on a soft part can stay
-orange-yellow. Compare repeated instances of the same move and part if checking
-whether positive crits are larger and negative crits smaller.
+Color follows physical HZV; negative crits on soft parts can stay orange-yellow.
+Compare the same move/part for larger positive and smaller negative crits.
 
 ## 2. HBG impacts and multiple hits
 
-Equip Orcus Quarcus with the positive Gunner setup (+50% affinity). Leave
-Palicoes behind. Pick a large monster you are comfortable fighting and bring
-a trap if it helps with aiming. Try the ammo below in one outing.
+Orcus Quarcus + positive Gunner setup: +50% affinity. Leave Palicoes behind; use
+a large familiar monster and a trap if helpful. Try all ammo in one outing.
 
 Orcus Quarcus supports all these ammo types; Slicing S Lv2 is internal ammo.
 Source: [Orcus Quarcus](https://mhgu.kiranico.com/weapon/40965).
@@ -86,24 +74,20 @@ Source: [Orcus Quarcus](https://mhgu.kiranico.com/weapon/40965).
 - [x] Thunder S Lv1: fire 2 or 3 shots. Elemental ammunition produces numbers
   normally, with one combined damage value per resolved impact.
 
-For Pierce, Pellet and Cluster, look for separate hits without trying to count
-every digit. Misses, angle and the length of the path through the monster affect
-the number of impacts.
+Look for separate Pierce/Pellet/Cluster hits without counting every number.
+Misses, angle and body-path length change impact count.
 
-Shot and cutting HZVs differ, so HBG and LS can have different colors on the
-same part. Thunder weakness itself must not turn a number orange-yellow.
-Explosions without an applicable physical HZV should use the unknown-HZV white
-fallback. Crag/Cluster explosions are not the normal-shot crit test.
+Shot/cutting HZVs differ; HBG and LS can have different colors on one part.
+Thunder weakness does not select orange-yellow. Unknown physical HZV falls back
+to white. Check crits with normal shots, not Crag/Cluster explosions.
 
 ## 3. Elemental contribution comparison
 
-Seeing Thunder numbers confirms that the ammo path displays damage. This
-comparison checks whether changing its elemental power changes the displayed
-total; it does not verify the complete damage formula.
+Thunder popups confirm display. Comparing elemental power checks its
+contribution to the total, not the complete formula.
 
-Use Orcus Quarcus with neutral Gunner Neset. Keep the same quest, monster part
-and ammo for both runs, and compare unmarked hits before the part breaks or the
-monster changes state. A few examples from each setup are enough.
+Use Orcus Quarcus + neutral Gunner Neset. Compare a few unmarked Thunder hits in
+the same quest/part/state before breaks or state changes.
 
 - [x] With no decorations, note a few unmarked Thunder S Lv1 damage values.
 - [x] For the second run, add one Bolt Jwl 2 each to head, chest and waist.
@@ -117,36 +101,32 @@ Source: [Thunder Atk and decorations](https://mhgu.kiranico.com/skill/4d684).
 
 ## 4. Gray bounce and bounce prevention
 
-Use Tigrine Edge LV1 with neutral Blademaster Neset against Basarios or Gravios.
-Use an ordinary slash against a hard, unbroken part until the hunter visibly
-recoils. Spirit attacks can prevent bounce and are unsuitable for this comparison.
+Tigrine Edge LV1 + neutral Blademaster Neset, against Basarios/Gravios.
+Ordinary-slash a hard unbroken part until visible recoil. Avoid spirit attacks,
+which can prevent bounce.
 
 - [x] With bounce coloring enabled, a clear bounced hit shows a gray number.
 - [x] Disable bounce coloring and repeat a clear bounce. The number uses its
   normal physical-HZV color.
 
-For the prevention check, add one Fencer Jwl 3 to the arms and one to the legs.
-Eight Fencing points plus Neset's Skill +2 activates Mind's Eye. Confirm it in
-the active skill list before the next outing.
+Add Fencer Jwl 3 to arms and legs: Fencing 8 + Skill +2 activates Mind's Eye.
+Confirm the active skill before testing.
 
 - [x] With Mind's Eye and bounce coloring enabled, an ordinary slash into the
   hard part has no bounce recoil and no gray bounce number.
 
-The mod conservatively matches native bounce feedback. If a clear recoil stays
-white with coloring enabled, record that as a missing-gray case for review.
-Sources: [Fencer Jwl 3](https://mhgu.kiranico.com/item/04be8),
-[Fencing](https://mhgu.kiranico.com/skill/4ed04).
+If clear recoil stays white with bounce coloring on, report missing gray.
+Sources: [Fencer Jwl 3](https://mhgu.kiranico.com/item/04be8), [Fencing](https://mhgu.kiranico.com/skill/4ed04).
 
 ## Optional checks
 
-These can wait until convenient. They cover additional paths beyond the main
-LS/HBG checks.
+Optional checks can wait until convenient.
 
 ### Negative bowgun crit
 
-Equip Diablastazooka HBG with neutral Gunner Neset (-30% affinity). Fire Normal
-S Lv2 into the same part until you see a couple of negative crits. Keep Bitter
-Affinity and affinity-boosting skills off for this check.
+Diablastazooka + neutral Gunner Neset: -30% affinity. Repeat Normal S Lv2 into
+one part until a couple of negative crits. Disable Bitter Affinity and affinity
+boosts.
 
 - [x] Negative bowgun crits have a line below the number; ordinary hits have none.
 
@@ -154,8 +134,8 @@ Source: [Diablastazooka](https://mhgu.kiranico.com/weapon/4663e).
 
 ### LBG rapid fire
 
-Equip Avidya Eye with either Gunner setup. Fire two Pierce S Lv1 rapid-fire
-bursts through a large monster's body.
+Avidya Eye + either Gunner setup: two Pierce S Lv1 rapid-fire bursts through a
+large monster.
 
 - [x] The burst's projectiles and their piercing impacts produce separate
   numbers, without combining the whole burst into one total.
@@ -164,16 +144,14 @@ Source: [Avidya Eye](https://mhgu.kiranico.com/weapon/47ea5).
 
 ### Multiplayer filtering
 
-When an online session is available, stand back while another hunter and their
-Palico attack, then make a few attacks yourself. Keep optional source switches
-off to isolate weapon ownership.
+With optional sources off, watch another hunter/Palico attack, then attack
+yourself.
 
 - [x] Other hunters' and their Palicoes' weapon attacks produce no numbers.
 - [x] Your own attacks still produce numbers.
 
 ## Reporting
 
-Use passed, failed, uncertain or skipped in the results sheet. For a failure,
-record the weapon/ammo, armor setup, monster/part and what appeared. A screenshot
-or short clip helps if the problem concerns a marker, color or missing impacts.
-Routine successful checks only need a short result.
+Record passed/failed/uncertain/skipped. Failures need weapon/ammo, armor,
+monster/part and observed behavior; a screenshot/clip helps with markers, colors
+or missing hits. Passed checks need only a short result.

@@ -27,299 +27,230 @@ Preserved source identity and segment hashes are in
 | `0x16dc6c` | Selects weighted cut/blunt damage and applies monster-state HZV adjustments. Uses VFP float arguments/results. |
 | `0x1748a8`, `0x178660` | Melee sharpness/bounce-effect and shot/fixed-damage paths. Effect codes alone do not prove a hunter bounce. |
 
-Attack fields checked in native accesses include primary owner pointer `+0xc`
-and kind `+0x10`, secondary owner kind `+0x6e` and pointer `+0x70`, impact vector
-`+0x20..+0x28`, damage type `+0x3a`, effect code `+6`, critical outcome `+0x54`
-and hurtbox pointer `+0xac`. Hurtbox byte `+6` selects the HZV record; byte `+8`
-selects the accumulation part. Damage type `0x1d` takes a healing branch and
-must be rejected explicitly, in addition to rejecting nonpositive contributions.
+Native attack fields: primary owner `+0xc`, kind `+0x10`;
+secondary kind `+0x6e`, owner `+0x70`; impact
+`+0x20..+0x28`; damage type `+0x3a`, effect `+6`,
+crit `+0x54`, hurtbox `+0xac`. Hurtbox bytes
+`+6`/`+8` select HZV/accumulation part. Reject
+healing type `0x1d` and nonpositive contributions.
 
-`0x9d6f8` adds its signed return to `monster parameter +0x488+2*part`.
-The consumer reads each eligible part into the HP sum before applying distinct
-part-break modifiers. The HP-subtraction store is at `0x98b04`; nearby clamps
-would make an HP-difference-only display lose lethal-hit values and merge hits.
-The callback at enemy vtable `+0x2f8` is an on-hit notification whose base
-implementation is a no-op. `0x9dd40` tracks attacker threat; neither is an HP
-application hook.
+`0x9d6f8` adds its signed return to `monster parameter +0x488+2*part`. The consumer
+sums eligible parts for HP before part-break modifiers; HP subtraction is at
+`0x98b04`. Nearby clamps make HP-difference capture lose lethal values
+and merge hits. Enemy vtable `+0x2f8` is an on-hit notification with a
+no-op base; `0x9dd40` tracks threat. Neither applies HP damage.
 
-Ordinary collision paths combine accompanying elemental damage with physical
-damage before native integer conversion and normalization. Capture must use
-that completed contribution and preserve the call's impact identity. The native
-normalizer's extended-part path calls vtable `+0x310` and returns zero; it needs
-separate investigation before claiming coverage of every monster part.
+Ordinary collisions combine physical/elemental damage before native integer
+conversion/normalization. Capture the completed contribution with its impact
+identity. Extended parts call vtable `+0x310` and return zero;
+coverage remains unresolved.
 
 ## Ownership
 
-The native local getter `0x276278` obtains the session index through the
-singleton cell `main+0x188ca48` and resolves the player from the table at
-`main+0x1885b58`, offset `+0x1c+4*index`. Valid ordinary player indices are 0–3.
-`ownership.h` agrees with original native execution across all four local slots.
+`0x276278` reads local index via `main+0x188ca48`, then player table
+`main+0x1885b58` at `+0x1c+4*index`. Valid indices: 0–3. `ownership.h`
+matches original execution in all four slots.
 
-The palico master getter `0x285c6c`, for its palico branch, reads the current
-work pointer at `object+0x3ac4`, then its master byte at `work+1`, and calls
-`0x274ce4` to look up the player. The native constructor supplies inline work;
-the saved DTI reports `obw->mMasterId` at `+0x3ad1`. Use the current pointer,
-which can differ from inline storage. Byte `work+0x34d` is a separate serialized
-field and is not the master ID.
+Palico getter `0x285c6c` reads current work at `object+0x3ac4`,
+master byte `work+1`, then player lookup `0x274ce4`.
+Constructor work is inline; DTI reports `obw->mMasterId` at
+`+0x3ad1`. Use the current pointer, which may differ. Serialized
+`work+0x34d` is not the master ID.
 
-The ownership fixture redirects work away from inline storage and compares
-local/remote palico classification with the native master getter. Invalid
-indices, missing work and absent master players are hidden. Constructed attack
-snapshots cover direct and secondary-owned projectiles; live source attribution
-still needs solo/Prowler and multiplayer trials.
+Fixtures redirect work away from inline storage and compare local/remote
+ownership with the native getter. Invalid indices, missing work/master are
+hidden. Snapshots cover direct/secondary projectiles. Solo hunter/Palico and
+multiplayer filtering passed; Prowler remains unconfirmed.
 
 ## Camera
 
-Native look-at `0x7c5e4c`, perspective `0x7c617c` and matrix product `0x29d48`
-use row-vector matrices: `world * view * projection`. The perspective matrix
-uses negative camera-space Z and a zero-to-one depth interval. `camera.h`
-transposes the native view/projection product for the presentation helper.
-The same C++ helper agrees with copied native matrices across rotated and
-translated cameras, FOVs and aspect ratios. The fixture's tangent import is an
-explicit float32 stub; it does not select a live camera.
+Look-at `0x7c5e4c`, perspective `0x7c617c` and product
+`0x29d48` use row vectors: `world * view * projection`, negative camera Z,
+zero-to-one depth. `camera.h` transposes the product. C++ matches copied
+native matrices across translation, rotation, FOV and aspect fixtures; tangent
+is a float32 stub, not live camera selection.
 
-The viewport render path `0xb8909c` reads a camera pointer at `viewport+0x24`,
-rectangle edges at `+0x38..+0x44`, view/projection matrices at `+0xb0/+0xf0`
-and alternate matrices at `+0x130/+0x170`. It can interpolate matrices and
-adjust projection for viewport/render scale. The eventual adapter must capture
-the matrices actually sent to rendering, identify the gameplay viewport and
-map its rectangle to Forge's display coordinates. Reading only camera FOV or
-an unblended matrix is insufficient.
+`0xb8909c` reads camera `viewport+0x24`, rectangle
+`+0x38..+0x44`, view/projection `+0xb0/+0xf0`, alternates
+`+0x130/+0x170`. Interpolation/render-scale adjustments require final
+uploaded matrices, gameplay-viewport identity and Forge-coordinate mapping;
+FOV/unblended matrices alone are insufficient.
 
-Final upload routine `0x885844` receives distance in `s0`, render context in
-`r0`, final view/projection pointers in `r1/r2`, and the integer rectangle
-pointer in `r3`. Its first eight original bytes are a register push and frame
-pointer adjustment. The capture candidate copies these matrices only inside
-the viewport-render scope when the camera has the saved `uQuestCamera` vtable
-`main+0x1730d0c`. This is a camera candidate, pending live selection and render
-scale checks.
+Upload `0x885844`: distance `s0`, context
+`r0`, view/projection `r1/r2`, rectangle
+`r3`. First eight bytes push registers/adjust frame pointer.
+Capture copies only within viewport scope with `uQuestCamera` vtable
+`main+0x1730d0c`; live selection/render-scale coverage was initially pending.
 
-R4 uses this binding for an opt-in projection preview. Forge's inspected NVN
-backend obtains `ImGuiIO::DisplaySize` from its swapchain textures and sets
-framebuffer scale to one. The preview accepts only zero-origin full-screen
-native rectangles with a matching aspect, then maps normalized clip coordinates
-into that display size. Offset/split viewports remain unsupported. Camera data
-older than 200 ms is hidden, and copied camera/viewport identity changes clear
-the transient display. No camera pointer is dereferenced by the renderer.
+R4 maps zero-origin full-screen rectangles with matching aspect to Forge
+`ImGuiIO::DisplaySize`. The inspected NVN backend uses swapchain texture
+size/framebuffer scale one. Offset/split viewports are unsupported. Hide camera
+data older than 200 ms; identity changes clear numbers. Rendering dereferences
+no camera pointer.
 
-The preserved SDK C wrapper `nnosGetSystemTick` at SDK `0x9e640` converts the
-C++ Tick aggregate to a 64-bit r0/r1 return. The original frequency implementation
-at `0x9d840` returns 19,200,000. Original-wrapper fixtures check values beyond
-32 bits; the hardware-counter query is explicit fixture data. R4 records ticks
-with damage/camera payloads and subtracts them before converting to float, so
-mailbox delay does not extend a number's lifetime. Record size is now 248 bytes,
-with copied player identity at `+236` and the tick at `+240`; the earlier fields
-keep their offsets.
+SDK `nnosGetSystemTick` wrapper `0x9e640` returns 64 bits in r0/r1;
+frequency `0x9d840`: 19,200,000 Hz. Original-wrapper fixtures cover
+>32-bit values with a supplied hardware counter. R4 subtracts captured ticks
+before float conversion, preserving lifetime despite mailbox delay. Records: 248
+bytes, player `+236`, tick `+240`; other offsets
+unchanged.
 
-The renderer uses the pinned cimgui font/draw API through Forge's free-render
-callback, which runs even when the Forge window is closed. The inspected ImGui
-font cache rounds requested sizes, and Forge's NVN backend advertises dynamic
-texture support. Outlined digits use eight black offset passes plus the color
-pass; critical lines have an outline and reserved vertical lane space. Actual
-font rasterization, GPU output and impact alignment subsequently passed the
-user's r4 melee visual check at a logged 1920x1080 viewport/display.
+Forge free-render runs with its window closed. Pinned cimgui draws eight black
+outline passes plus color, with outlined crit lines/reserved vertical space.
+ImGui rounds font sizes; NVN supports dynamic textures. The r4 user trial
+accepted rasterization, GPU output and melee alignment at logged 1920x1080.
 
-The r4 log has 51 finalized hits: 18 local hunter hits and 33 local-palico hits.
-Of the palico hits, 15 have tags `0x030403`, 15 have `0x030402` and three have
-`0x030802`. The last two families were rejected by r4's direct-primary filter;
-their total equals the panel's 18 rejected hits. The user reports missing
-boomerang and thrown-barrel popups while melee works. Tags pack primary kind
-`+0x10`, source subtype `+0x6d` and secondary owner kind `+0x6e`, so the rejected
-families have primary kind 2 and secondary palico kind 3. Ownership was already
-resolved through the secondary pointer and current palico master work.
+R4: 51 hits (18 hunter, 33 Palico); Palico tags `0x030403`: 15,
+`0x030402`: 15, `0x030802`: three. Direct-primary filtering
+rejected the latter 18, matching the panel and missing boomerang/barrel report.
+Tags pack `+0x10` primary kind, `+0x6d` subtype,
+`+0x6e` secondary kind. Rejected kinds are 2/3; secondary
+pointer/current master work already resolved ownership.
 
-R5 admits just those two observed families with `Owner::LocalPalico`, retaining
-the producer ownership and healing gates. This fixes the known display exclusion
-without generalizing to all projectile/object sources. Boomerang-versus-barrel
-subtype labels are inferred from the observed actions and HZV/effect patterns;
-the user subsequently confirmed both attacks display. Unknown physical HZV remains white.
-Saved DTI `cOtWeaponBase` separately exposes boomerang attack, element and affinity
-properties; no equipment or damage data was edited for this fix.
+R5 admits those two tags only with `Owner::LocalPalico`, retaining
+ownership/healing gates. Boomerang/barrel labels are inferred from actions and
+HZV/effect patterns; both displays passed manually. Unknown physical HZV stays
+white. DTI `cOtWeaponBase` exposes boomerang attack/element/affinity;
+equipment/damage data stayed unchanged.
 
 ## Hitzone and bounce capture
 
-The melee routine's tap at `0x16dd7c`, immediately before the selected-type
-store, exposes cut/blunt selection in `r0` and adjusted cut/blunt HZVs in
-`s20/s22`. Weighted cut/blunt ties select cut. The native fixture verifies the
-tap and C++ extraction through 1,440 combinations of hitzones, attack weights,
-monster state, player adjustment and part modifiers. Using its returned damage
-factor times 100 would lose the unweighted HZV for mixed attacks.
+Tap `0x16dd7c` precedes selected-type storage: `r0`
+cut/blunt, `s20/s22` adjusted HZVs; weighted ties choose cut.
+Native/C++ fixtures pass 1,440 HZV/weight/state/player/part combinations.
+Returned damage factor times 100 would lose mixed attacks' unweighted HZV.
 
-The candidate scopes the tap within `0x16dc6c` and the matching monster impact.
-The shot helper `0x178660` supplies its physical-factor output pointer as the
-second stack argument; only attacks with native flag `+0x30 & 1` have a shot
-HZV. The compiled capture fixture covers 44/45/80 and the no-physical-HZV case.
+Scope the tap within `0x16dc6c` and its impact. Shot helper
+`0x178660` returns physical factor through its second stack argument;
+only `+0x30 & 1` attacks have shot HZV. Compiled fixtures cover 44/45/80
+and no physical HZV.
 
-Getter `0x2a87a8` resolves weapon feedback from attacks at `player+0x3020` and
-`player+0x30d8`. Each has active byte `+5`, raw effect `+6` and flags `+0x30`.
-The getter selects the higher valid effect; it merges flags from the second
-attack only when that effect is selected. It then applies Mind's Eye,
-Steady Hand/Nightcloak variants, Blind Eye's native attack counter and status,
-stance and move-specific exceptions. Native skill arguments match the imported
-`/skills.h/SkillType` annotations. The read-only enum exporter does not establish
-other imported annotations as correct.
+`0x2a87a8` compares attacks `player+0x3020`/`player+0x30d8`:
+active `+5`, effect `+6`, flags `+0x30`.
+It chooses the higher valid effect, merging second-attack flags only if
+selected. Mind's Eye, Steady Hand/Nightcloak, Blind Eye counter,
+status/stance/move exceptions follow. Skill arguments match `/skills.h/SkillType`;
+the enum exporter verifies no other annotations.
 
-The getter and `feedback.h` agree across 3,488 calls, with unchanged fixture
-player memory and preserved callee-saved registers. Its aggregate return is
-insufficient for assigning per-hit bounce. The candidate records the native
-return, both attack identities, active/effect/critical bytes, flags and attack
-counter for live correlation. No temporary player-buffer edits or repeat RNG
-rolls are used.
+`feedback.h` matches 3,488 native calls with player memory/callee-saved
+registers preserved. Aggregate return cannot assign per-hit bounce. Capture
+records both identities, active/effect/crit bytes, flags and counter for
+correlation; no player edits or repeat RNG.
 
 ## Capture candidate and ABI
 
-`gateway.S` preserves all `r0-r12`, `d0-d31`, APSR flags and FPSCR in a
-328-byte frame. Native stack arguments stay at their original address. Around
-hooks redirect the saved caller LR through an owned native TLS scope; before-only
-taps return directly to their trampoline. Leaf return LR is restored, while
-LR values computed by native callees are retained. Native and compiled fixtures
-cover nested scopes and bounded-capacity failures.
+`gateway.S` preserves `r0-r12`, `d0-d31`, APSR/FPSCR
+in 328 bytes; native stack arguments stay put. Around hooks redirect caller LR
+via owned TLS; before-taps return to trampolines. Leaf LR is restored;
+native-calculated LR retained. Fixtures cover nesting/capacity failures.
 
-The candidate uses a private 4 KiB CodeMemory arena and one SDK TLS slot;
-Forge's shared context slot and legacy arena are not reused. Six additional
-exact displaced-instruction words extend the project's transaction whitelist.
-The installer checks the original 64-byte windows, title ID and GNU build note,
-then prepares every trampoline before publishing any hook. It runs only from
-Forge's boot callback before `original_sApp_run`; no hot install/remove is
-provided. Existing Forge, Better Input and modern-controls sites are excluded.
+Capture owns one 4 KiB CodeMemory arena/SDK TLS slot, separate from Forge's
+shared context/legacy arena. Six exact displaced words extend the transaction
+whitelist. Verify original 64-byte windows, title/GNU build note; prepare all
+trampolines before publishing hooks. Boot-only before `original_sApp_run`, no hot
+install/remove. Exclude Forge/Better Input/modern-control sites.
 
-Recovery r2 installed six combat hooks by default. Viewport `0xb8909c` and camera
-upload `0x885844` remained untouched unless a separate camera opt-in file was present.
-This isolated renderer hooks after the first enabled runtime trial exited before
-the main menu; it does not establish which hook caused the exit.
+R2 enabled six combat hooks; `0xb8909c`/`0x885844` required
+camera opt-in after the first enabled trial exited before main menu. This
+isolation does not identify the faulty hook.
 
-The fingerprinted SDK's `nnosSetTlsValue` wrapper branches through `0x43b7bc`
-to native `_ZN2nn2os11SetTlsValueENS0_7TlsSlotEj` at `0x9d80c`. This function
-returns void and leaves a computed thread/slot address in `r0`. Forge's supplied
-header declares a `Result` return. The capture plugin now uses its own verified
-void declaration and checks the stored value with `nnosGetTlsValue`. Executing
-the original getter/setter bytes passed 256 checks across 32 slots and two
-synthetic thread records. Allocation and the live scheduler were not executed.
-The compiled NRO fixture also retains a nonzero setter return register so it
-cannot mask the old declaration error by supplying zero.
+`nnosSetTlsValue`: wrapper `0x43b7bc`, native `_ZN2nn2os11SetTlsValueENS0_7TlsSlotEj` at
+`0x9d80c`, void return with thread/slot address left in
+`r0`. Forge declares `Result`. Capture uses verified
+void ABI/readback via `nnosGetTlsValue`. Original bytes passed 256 checks
+across 32 slots/two synthetic threads; no allocation/live scheduling. NRO
+fixtures retain nonzero r0 to expose the old ABI error.
 
-Each of 16 TLS contexts has 64 scopes and a 256-record mailbox. Scope overflow
-quarantines capture until the outermost accepted scope returns. Pool exhaustion
-stores a per-thread bypass sentinel. Payload words and tickets are lock-free
-32-bit atomics; producer and consumer never wait or retry. The render consumer
-rejects a competing thread. External hook changes disable capture while retaining
-callable originals; restart is required.
-Shared diagnostic increments use one weak compare-and-swap attempt and are
-best-effort under contention. Context allocation tries each of 16 slots once;
-it never spins on a contested slot. Mailbox payloads and per-thread serials
-remain independent of these approximate counters.
+Sixteen TLS contexts each hold 64 scopes/256 mailbox records. Overflow
+quarantines until the outer accepted scope returns; pool exhaustion installs a
+bypass sentinel. Lock-free 32-bit payload/ticket atomics never wait/retry;
+competing consumers are rejected. External hook changes disable capture but
+retain originals until restart. Diagnostics use one weak CAS (best-effort);
+allocation tries each slot once without spinning. Records/serials are
+independent of counters.
 
-The compiled NRO fixture uses explicit SDK/kernel bridges and a synthetic
-collision body. It executes original normalization, melee/shot HZV and feedback
-code with the real compiled capture adapter, checks local ownership in all
-four session slots, rejects healing/nonpositive contributions, preserves
-individual hits and exercises overflow/bypass and patch monitoring. Camera
-copying is tested with supplied scope/input values. These fixtures do not execute
-the original collision traversal, SDK or renderer.
+Compiled fixtures run the real adapter with original normalization, HZV and
+feedback routines, synthetic collision/SDK/kernel bridges and supplied camera
+inputs. They cover four local slots, healing/nonpositive rejection, separate
+hits, overflow/bypass and patch monitoring; not original collision traversal,
+SDK or GPU renderer.
 
 ## Empty RomFS activation-file failure
 
-The second startup log identifies Eden revision `d16735f5b6` and a fatal
-`stbtt_GetFontOffsetForIndex` assertion before capture's ImGui initialization.
-The installed font matches the maintained Forge source byte for byte. The
-installed capture opt-in file was zero bytes.
+Second startup: Eden `d16735f5b6`, fatal `stbtt_GetFontOffsetForIndex` before ImGui
+initialization. Font matched Forge byte-for-byte; opt-in file was empty.
 
-In that Eden revision, the [RomFS builder](https://github.com/eden-emulator/mirror/blob/d16735f5b6/src/core/file_sys/fsmitm_romfsbuild.cpp)
-aligns file data to 16 bytes, adds a file's length to the next offset, then uses
-an unstable sort comparing offsets only. An empty file and the next file share
-an offset. The [concatenation builder](https://github.com/eden-emulator/mirror/blob/d16735f5b6/src/core/file_sys/vfs/vfs_concat.cpp)
-sets its running end to each entry's offset plus length. When sorting places the
-empty file after the font, this moves the end backward and creates a padding
-entry covering the font. The reader's upper-bound lookup selects that padding.
+Eden's [RomFS builder](https://github.com/eden-emulator/mirror/blob/d16735f5b6/src/core/file_sys/fsmitm_romfsbuild.cpp) aligns data to 16 bytes, advances by file length and
+unstable-sorts offsets. Empty/next files share an offset. Its [concatenation builder](https://github.com/eden-emulator/mirror/blob/d16735f5b6/src/core/file_sys/vfs/vfs_concat.cpp)
+resets running end to each offset+length. If the empty file follows the font,
+end moves backward, padding covers the font and upper-bound lookup selects
+padding.
 
-The offline test models these decisions with the dump and listed-package file
-metadata. It reproduces the capture flag shadowing `Roboto-Medium.ttf` at data
-offset `9203903232`. An absent flag preserves the font there. Giving the flag
-1, 2 or 8 bytes places the font at `9203903248` and preserves its header.
-Listed-package metadata is not proof of current activation; the full emulator
-and guest filesystem were not executed by this fixture. The symptom matches the
-retained startup log. Startup with a nonempty flag was later accepted in the
-r3 user trial; [RUNTIME.md](RUNTIME.md) records that result.
+Offline dump/listed-package metadata reproduces `Roboto-Medium.ttf` shadowing at
+`9203903232`. Absent flag preserves it; 1/2/8-byte flags move it to
+`9203903248`, preserving the header. This is not activation/full-emulator
+proof. It matches the log; nonempty startup passed r3 ([RUNTIME.md](RUNTIME.md)).
 
-Earlier capture builds supplied separate nonempty activation templates. R7
-removes both flag checks and templates: all eight hooks start at boot after
-the existing title/signature, clock, TLS and transaction checks. Existing flags
-are ignored. The candidate still rejects empty RomFS files, preserving the
-packaging correction without an emulator patch or font replacement.
+R7 removes flag checks/templates. Eight hooks start at boot after
+title/signature, clock, TLS and transaction gates; old flags are ignored.
+Packaging still rejects empty RomFS files. No emulator/font patch.
 
 ## Open gates
 
-- Actual collision-to-normalization correlation, distinct hit identity,
-  lifecycle cleanup and extended monster-part behavior.
-- HZV for the resolved physical type and current part state, including mixed
-  damage-type ties and attacks without a physical HZV.
-- Actual hunter bounce versus visual impact-effect codes, Mind's Eye and
-  non-bouncing attacks.
-- Placed/environmental bombs versus owned support bomb moves; monster attacks,
-  recurring ticks and all-owner optional-source exceptions.
-- Critical marker behavior for special affinity outcomes, particularly the
-  positive native outcome produced by Bitter Affinity.
-- Active gameplay camera, blended projection, viewport and render-scale mapping.
-- ABI-preserving hooks, private arena transaction/rollback, thread ownership,
-  imports, ARM32 build and runtime capture trial.
+Manual acceptance covers hunter/Palico capture, logging/history, visuals,
+projectiles/white HZV, LS/bowgun crits and separate impacts, bounce/Mind's Eye,
+multiplayer exclusions, persistence and monster-to-monster damage.
 
-R3's local hunter/palico capture, logging and diagnostic retention passed the
-user's trial. The Phase 1 binding gate remains open for the other cases above.
-R4's melee projection, animation and size passed the user's visual trial. R5's
-palico child projectile popups and white physical-HZV coloring also passed.
-R6's optional sources and constrained bounce matching, and R8's player-save INI preferences await
-runtime acceptance.
+Remaining coverage:
+
+- Independent collision/normalization accuracy, lifecycle edge cases and extended
+  monster parts.
+- Mixed-type HZV ties and broader monster-state/no-physical-HZV cases.
+- Placed/environmental objects, recurring ticks and all-owner exceptions beyond
+  the implemented source families; Prowler-specific attacks.
+- Special affinity outcomes, particularly Bitter Affinity's positive native result.
+- Additional blended cameras, viewports and render scales.
+- Broader hook/rollback/thread/import behavior beyond fixture and accepted trials.
+- Cosmetic rapid-fire spacing and compact-row appearance.
 
 ## R6 source, bounce and storage bindings
 
-The original `0x170968` dispatch uses attack subtype `+0x6d`: 1 follows hunter
-processing, 2 monster processing and 4 palico processing. The monster branch
-resolves kind 1 through primary `+0xc` or secondary `+0x70`, with secondary kind
-`+0x6e == 1`. Other subtypes use `0x171350`'s generic impact path. R6 admits
-monster subtype 2 and the known generic subtype-8 child family with a resolved
-hunter owner as independent optional sources. The `0x030802` palico support
-family stays an owned attack. Unknown generic families are not generalized.
-These bindings use the saved exports and DTI ownership work; no dumper was run.
+`0x170968` dispatch `+0x6d`: 1 hunter, 2 monster, 4 Palico;
+others use generic `0x171350`. Monster kind 1 resolves via primary
+`+0xc` or secondary `+0x70` with `+0x6e == 1`. R6
+optional sources admit subtype 2 and known generic subtype-8 hunter-owned
+children. `0x030802` stays owned Palico support. Unknown families are
+hidden; bindings use saved exports/DTI, no dumper.
 
-R6 retains each thread's latest copied contribution until its next collision
-or local feedback observation. It requires one active embedded hunter attack,
-native resolved feedback zero, raw effect zero and identical attack pointer,
-flags, critical outcome and attack counter. It resolves only that contribution's
-epoch/serial/target/thread key, within 100 ms. Earlier multi-hits, other threads,
-two-active-attack feedback and native bounce-prevention results do not acquire
-gray. This is a conservative feedback correlation, pending in-game recoil
-acceptance; it does not edit player attacks or rerun damage/RNG.
+Keep latest contribution per thread until next collision/feedback. Bounce needs
+one active hunter attack, native feedback/raw effect zero, unchanged
+pointer/flags/crit/counter, matching epoch/serial/target/thread within 100 ms.
+Earlier multi-hits, other threads, two active attacks and prevention results
+keep HZV color. Recoil/Mind's Eye passed manually; damage/RNG is never rerun or
+edited.
 
-The ARM32 SDK filesystem declarations use 4-byte handles and aligned 64-bit
-offsets, checked against original SDK exports/instructions. The generic
-nnheaders copy's 8-byte handle describes a different ABI. R6 used a private SD
-mount with two binary records. R8 ignores those files and uses the maintained
-Forge's counted `savedata` mount, also imported by the inspected Better Input
-binary. Its helper resolves `sSavedata`, calls the native mount at main-relative
-`0x878da0` and releases the counted mount with a normal commit. The saved DTI
-index identifies `sSavedata` as a 4,000-byte `cSystem` descendant; no extraction
-was rerun. The SDK `CommitSaveData` export is checked by the builder.
+Verified ARM32 FS ABI: 4-byte handles/aligned 64-bit offsets; generic nnheaders'
+8-byte handle is incompatible. R6 used two SD binaries; r8 ignores them and
+imports Forge's counted `savedata` mount like Better Input. Helper
+resolves `sSavedata`, calls main `0x878da0`, releases with normal
+commit. Saved DTI: 4,000-byte `cSystem` descendant. Builder checks
+`CommitSaveData`; no new dump.
 
-Only `savedata:/damage_numbers.ini` and `savedata:/damage_numbers_backup.ini`
-are opened. The text is bounded to 255 bytes, versioned and range-checked. Saving
-backs up a valid primary before replacing it, verifies the written bytes and
-checks an explicit SDK commit before releasing Forge's mount. Forge's release
-also performs its normal commit. A partial primary falls back to the backup.
-No game payload or Better Input config is opened, and no SD API is imported.
+Open only `savedata:/damage_numbers.ini` and `savedata:/damage_numbers_backup.ini`, versioned/range-checked
+text ≤255 bytes. Back up valid primary, replace/read-verify, explicitly
+SDK-commit, then release (Forge commits too). Partial primary falls back to
+backup. No game/Better Input payload or SD API.
 
-Preferences load at initialization. If the player save mount is unavailable,
-the single render consumer retries at most once per second; a manual settings
-edit cancels the pending load. Writes remain exclusive to the Save settings
-button, outside native combat detours.
+Load at initialization, retry unavailable storage at most once/second on the
+single render consumer; manual edits cancel retries. Only Save settings writes,
+outside combat detours.
 
-SDK filesystem failures can invoke its automatic-abort policy. Native scoped
-disabler constructor `SDK+0x4d004` saves the previous effective FS context in
-one word and installs `g_AllReturnContext` in the current thread's SDK TLS.
-`SetCurrentThreadFsContext` at `0x4d080` restores that word on every exit.
-The original all-return handler at `0x4cffc` returns AbortSpecifier 2; the native
-decision at `0x51b64` returns false. The 36 native guard checks use explicit
-initialized GOT/context/TLS fixtures and a previous Abort callback; they show
-isolation and restoration without performing a mount or storage trial.
+SDK FS errors may auto-abort. Scoped disabler `SDK+0x4d004` saves one-word
+effective context/installing `g_AllReturnContext` in thread TLS;
+`SetCurrentThreadFsContext` (`0x4d080`) restores every exit. Handler
+`0x4cffc` returns AbortSpecifier 2; decision `0x51b64` returns
+false. 36 initialized GOT/context/TLS fixtures with prior Abort callback
+verify restoration, not live mounting/storage.
 
 ## Reproduce research
 
@@ -330,7 +261,6 @@ python3 scripts/damage_numbers_research.py scan 0x3ac4 0x3ad1
 python3 scripts/damage_numbers_research.py enum /skills.h/SkillType
 ```
 
-Exports preserve original bytes beside imported instruction bytes and caller
-references, and decompile selected functions without reanalysis. They serialize
-headless access to the preserved project. Generated inputs, database exports
-and logs stay outside Git; no runtime dumper is rerun.
+Serialized headless exports retain original/imported bytes, callers and selected
+decompilation without reanalysis. Generated inputs/exports/logs stay outside
+Git; no runtime dump.

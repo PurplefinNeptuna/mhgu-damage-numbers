@@ -1,22 +1,17 @@
 # Damage-number capture trial
 
-The prepared package is
-`build/damage-numbers/capture/candidate-package/`. It contains only
-`romfs/nativeNX/plugins/damage_numbers_capture.nro`. The manifest at
-`build/damage-numbers/capture/candidate-manifest.json` records its hash, native
-signatures, imports, source hashes and preserved Forge/SDK inputs.
+Package: `build/damage-numbers/capture/candidate-package/`, containing only `romfs/nativeNX/plugins/damage_numbers_capture.nro`.
+`build/damage-numbers/capture/candidate-manifest.json` records NRO/source hashes, signatures, imports and preserved
+Forge/SDK inputs.
 
-R9 starts automatically when Forge loads the enabled package in Eden. Both
-combat and camera hooks start together; no `.enabled` files are needed. Old
-capture/camera flags are ignored and may be removed while Eden is closed.
-The builder stages the NRO without installing it or creating activation files.
-Numbers start on unless a saved preference turns them off; the in-game **Show
-damage numbers** switch controls visibility.
+R9 starts combat/camera hooks when Forge loads the enabled Eden package. No
+`.enabled` files are needed; old flags are ignored and can be removed
+with Eden closed. Building stages only the NRO. Numbers default on unless saved
+preferences disable them; **Show damage numbers** controls visibility.
 
-The old flags isolated startup failures during early trials. The retained SDK
-TLS and font-layout fixes remain in place. Empty RomFS files are still rejected:
-on Eden `d16735f5b6`, they can overlap the following font's data offset. See
-[RUNTIME.md](RUNTIME.md) for the historical failure evidence.
+Early flags isolated startup failures. SDK TLS and font-layout fixes remain.
+Empty RomFS files are rejected because Eden `d16735f5b6` can overlap the
+following font. Evidence: [RUNTIME.md](RUNTIME.md).
 
 ## What the enabled candidate does
 
@@ -54,48 +49,39 @@ on Eden `d16735f5b6`, they can overlap the following font's data offset. See
   and stale cameras clear floating numbers without clearing diagnostic history.
   Capture timestamps prevent delayed records from acquiring a new lifetime.
 
-The candidate uses Forge's counted `savedata` mount to read/write its own
-`damage_numbers.ini` and recovery copy beside Better Input. It ignores the old
-SD preferences. Game save files and Better Input's INI are preserved. Gameplay
-values, affinity, Forge and Eden settings are unchanged. Normal gameplay still
-has its own save behavior. The first 256 consumed hits per process are sent to Eden's log
-through Forge, with damage, HZV, critical/effect bytes, owner, source tags, part,
-impact position and per-thread identity. Logging runs only in the render consumer,
-with at most eight hits and 64 total records consumed per callback. A round-robin
-cursor visits each thread mailbox. After one limit marker, the panel continues
-capturing without further hit logs. Eden can rotate its log on restart; preserve
-the current log before another launch. Scope, thread-pool and overwritten-record counters
-make capture loss visible.
-Shared diagnostic counters use one weak compare-and-swap attempt and can
-undercount concurrent calls. Individual record serials and damage values are
-independent of those counters. Thread-context claims have at most 16 attempts,
-one per slot, and do not retry a contested slot.
+Forge's counted `savedata` mount accesses only `damage_numbers.ini` and
+its recovery copy beside Better Input. Old SD preferences are ignored. Game
+saves, Better Input's INI, damage/affinity, Forge and Eden settings are
+preserved; normal gameplay still saves normally. The render consumer logs the
+first 256 hits/process with damage, HZV, crit/effect, owner/tags, part, position
+and thread identity. Each callback consumes at most eight hits/64 records,
+visiting mailboxes round-robin. One limit marker ends hit logging; capture
+continues. Preserve Eden logs before restart. Scope/pool/overwrite counters
+expose loss; one weak compare-and-swap can undercount concurrent calls without
+affecting records/serials. Thread claims try each of 16 slots once without
+retrying contention.
 
-R4 also logs one valid camera snapshot (rectangle, display size and matrices)
-and up to four distinct projected hits. These diagnostics are render-side and
-bounded. The SDK clock frequency is checked before hooks/TLS are allocated.
+R4 logs one camera snapshot (rectangle, display size, matrices) and up to four
+distinct projections on the render side. Clock frequency is checked before
+hook/TLS allocation.
 
 ## Small manual check
 
-With Eden closed, replace only the installed damage-number NRO with the staged
-r9 candidate. The two old activation files are unnecessary. Keep the current
-Forge, Better Input and emulator settings.
+With Eden closed, replace only the damage-number NRO with staged r9. Keep Forge,
+Better Input and emulator settings. Old activation files are unnecessary.
 
-Start normally and land one hit to confirm automatic startup. For the untested
-settings persistence, turn numbers off/on, save a small size change, restart
-once and check that it remains. Restore defaults and save afterward. Bounce
-and optional-source checks can follow during ordinary play. A completed save
-and a repeat of the accepted appearance tests are unnecessary.
+Startup, visuals, crits, bowgun separation, bounce, multiplayer filtering,
+persistence and monster-to-monster damage have passed. Remaining checks:
+Prowler, placed objects, compact row appearance and rapid-fire spacing polish.
+No completed save or repeat of accepted tests is needed.
 
-When collecting further runtime evidence, preserve the current Eden log before
-restarting and keep rollback material under workspace `backups/`. Critical
-markings, Prowler/ranged cases and multiplayer filtering still need suitable
-in-game evidence; the compiled fixtures do not establish those results.
+For further evidence, preserve Eden logs before restart and keep rollback under
+workspace `backups/`. Record exact NRO/test coverage; fixtures do not
+prove untested gameplay.
 
-If initialization rejects a signature or allocation, stop the run and retain
-the evidence. If capture reports an external hook change, it stops collecting
-and retains originals; remove the trial package and restart. Runtime conclusions
-must describe the exact reviewed NRO and test cases.
+On signature/allocation rejection, stop and retain evidence. An external hook
+change stops capture while retaining originals; remove the trial package and
+restart.
 
 ## Rebuild and fixture checks
 
@@ -105,13 +91,11 @@ python3 scripts/build_damage_numbers_capture.py
 tools/mwc-analysis-venv/bin/python scripts/damage_numbers_capture_probe.py
 ```
 
-These commands use the existing offline compiler container and pinned Unicorn
-environment. They do not install a package or create activation files. The compiled
-capture report is `build/damage-numbers/capture/compiled-capture-probe.json`.
-Its collision body, SDK services and kernel bridges are explicit fixtures;
-live per-hit accuracy and untested attack cases remain pending. R4 presentation,
-r5 palico projectiles and white physical-HZV damage passed the user's trial.
+Rebuilds use the offline compiler and pinned Unicorn, without installation or
+activation files. Report: `build/damage-numbers/capture/compiled-capture-probe.json`. Collision/SDK/kernel services are
+fixtures; absolute per-hit accuracy and untested attack cases remain open. R4
+visuals and r5 Palico projectiles/white HZV passed manually.
 
-R9 keeps the same eight hook sites and one private CodeMemory arena. Player-save
-INI persistence, compact plugin-row appearance, conservative gray bounce and optional-source runtime acceptance
-remain pending.
+R9 retains eight hook sites and one private arena. Persistence and gray bounce
+now passed manually; compact-row appearance and placed-object coverage remain
+unconfirmed.

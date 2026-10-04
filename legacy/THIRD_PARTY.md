@@ -1,25 +1,21 @@
 # Components used by the damage-number capture candidate
 
-The candidate uses the maintained local Forge headers, pinned libnx/cimgui
-headers and existing offline devkitARM container. Those dependencies and their
-licenses remain unchanged. No game executable or extracted asset is delivered.
+Build dependencies: maintained Forge, pinned libnx/cimgui headers and offline
+devkitARM. Licenses/dependencies are unchanged; no game executable or extracted
+asset is delivered.
 
-`src/start.S` and `src/plugin.ld` reuse the project-owned Long Sword scaffold.
-`src/transaction.h` adapts the project-owned modern-controls transaction with
-six additional exact, PC-independent instruction words. The native build links
-`mods/modern-weapon-controls/src/native_platform.cpp` and `src/svc.S` as private
-components of this NRO; it does not import the installed controls plugin or
-share that plugin's arena. Source hashes are recorded in the capture manifest.
+`src/start.S` / `src/plugin.ld`: project-owned Long Sword scaffold.
+`src/transaction.h`: modern-controls transaction plus six exact PC-independent
+words. Private NRO components: `mods/modern-weapon-controls/src/native_platform.cpp` / `src/svc.S`; no
+installed-plugin import or shared arena. Source hashes: capture manifest.
 
-The private SVC assembly adapts selected pinned libnx ARM32 wrappers. Its MIT
-notice is reproduced below. Unicorn 2.1.4 is used only by workspace fixtures and
-is not linked into the candidate.
+Private SVC assembly adapts pinned libnx ARM32 wrappers under the MIT notice
+below. Unicorn 2.1.4 is fixture-only, never linked into the NRO.
 
-`tests/romfs_flag.cpp` is a test-only model of the RomFS layout and concatenation
-logic in Eden revision `d16735f5b6`, derived from `fsmitm_romfsbuild.cpp` and
-`vfs/vfs_concat.cpp`. It retains the yuzu copyright notice and
-GPL-2.0-or-later license identifier. It is not compiled or linked into the NRO.
-Source URLs and fingerprints are in the generated RomFS probe report.
+`tests/romfs_flag.cpp` models Eden `d16735f5b6` RomFS/concatenation from
+`fsmitm_romfsbuild.cpp` / `vfs/vfs_concat.cpp`. It retains yuzu copyright and
+GPL-2.0-or-later; it is never linked into the NRO. Source URLs/fingerprints:
+RomFS probe report.
 
 Copyright (c) 2019 Hydrosphere Developers
 

@@ -16,12 +16,12 @@ is no complete assertion, guest backtrace or confirmed failing hook in this log.
 The shader-version messages immediately preceding it also occurred in the
 earlier inactive run; they do not establish the cause of this exit.
 
-Evidence is retained in workspace
+Evidence is in workspace
 `backups/damage-numbers/startup-failure-20261003-084659/eden_log.txt`, SHA-256
-`01cd94c2671124977ebd0e71868367cfa841f2214758e1e37c86d5f2bb61a41b`.
-No emulator settings, installed packages or saves were changed during this
-diagnosis. Removing the capture activation file and restarting restores the
-previous inactive behavior; that recovery has not yet been confirmed by the user.
+`01cd94c2671124977ebd0e71868367cfa841f2214758e1e37c86d5f2bb61a41b`. No emulator
+settings, installed packages or saves were changed during this diagnosis.
+Removing the capture activation file and restarting restores the previous
+inactive behavior; that recovery is unconfirmed by the user.
 
 ## Prepared recovery r2
 
@@ -35,8 +35,8 @@ The new candidate installs six combat hooks. Camera/viewport hooks stay off
 unless a separate `damage-numbers-camera.enabled` file is present. One-time
 startup markers identify entry/completion of ImGui setup and the first render
 consumer's TLS setup. The candidate remains diagnostic-only and uninstalled.
-The next manual check is startup and the Forge status panel. A quest test can
-wait until startup works.
+Next manual check: startup and the Forge status panel. A quest test can wait
+until startup works.
 
 ## 2026-10-03: r2 startup failure and empty-file reproduction
 
@@ -47,11 +47,10 @@ six hooks and camera capture off. No ImGui setup or render-consumer marker runs.
 At 13.113296 seconds Forge logs a complete `stbtt_GetFontOffsetForIndex`
 assertion in `ImGui_ImplStbTrueType_FontSrcInit`, then the guest process exits.
 
-The log and installed package snapshot are retained in
+The log and installed package snapshot are in
 `backups/damage-numbers/startup-r2-failure-20261003-090155/`. Log SHA-256:
-`a6bef204de6f9cc3077a7e6d2700db7ee8658a1002a2fd0869f4d85e5131930d`.
-The font SHA-256 is
-`9d0d55a303bfd13b79a87721f65185e93f235e2d77fe398b2dca67ac519915f5`;
+`a6bef204de6f9cc3077a7e6d2700db7ee8658a1002a2fd0869f4d85e5131930d`. The font
+SHA-256 is `9d0d55a303bfd13b79a87721f65185e93f235e2d77fe398b2dca67ac519915f5`;
 it matches `tools/forge-local/data/fonts/Roboto-Medium.ttf` byte for byte.
 
 The empty capture flag and font receive the same RomFS offset. A model of Eden's
@@ -63,15 +62,15 @@ are in [RESEARCH.md](RESEARCH.md).
 
 The corrected activation template contains `1` and a newline. The r2 NRO is
 unchanged. No installed file, font, emulator setting or save was changed during
-this diagnosis. The next user check is to put text in the existing capture flag
-and confirm that startup reaches the main menu. That check subsequently passed.
+this diagnosis. Next user check: put text in the existing capture flag and
+confirm that startup reaches the main menu. That check later passed.
 
 ## 2026-10-03: successful capture and transition retention
 
-The user reports that r2 ran, showed damage records and completed a quest. After
-the quest, the diagnostics cleared before they could show the values. This
-confirms user-observed capture, but supplies no per-hit evidence for damage
-accuracy, HZV, ownership or critical/bounce correlation.
+The user reports r2 ran, showed damage records and completed a quest. After the
+quest, the diagnostics cleared before they could show the values. This confirms
+user-observed capture, but supplies no per-hit evidence for damage accuracy,
+HZV, ownership or critical/bounce correlation.
 
 The retained log is
 `backups/damage-numbers/capture-success-20261003-094534/eden_log.txt`, SHA-256
@@ -95,13 +94,13 @@ ownership rules or final floating-number lifecycle changed.
 The compiled NRO fixture checks transition retention, queued hits without a
 player, distinct log ordinals, copied values/positions, callback budgets, the
 single log-limit marker, continued panel updates and empty history on restart.
-R3's in-game retention check remains pending. No installed files, emulator
-settings or saves were changed to prepare it.
+R3's in-game retention check is pending. No installed files, emulator settings
+or saves were changed to prepare it.
 
 ## 2026-10-03: r3 retention check passed
 
-The user reports that r3 works and supplied a screenshot back in the village.
-It shows 23 captured hits, the last eight retained records, and zero scope drops,
+The user reports r3 works and supplied a screenshot back in the village. It
+shows 23 captured hits, the last eight retained records, and zero scope drops,
 pool drops, orphan contributions, overwritten records and read failures. There
 were 26 collisions/normalizations, 23 melee HZV queries and three exclusions.
 The panel's 1,340 consumed records include 1,317 feedback records and 23 hits.
@@ -114,41 +113,40 @@ The records identify 15 local hunter hits (`owner 0`) and eight local palico hit
 and effect byte 4; this sample cannot validate the HZV color boundary, positive
 or negative critical markings, or bounce correlation.
 
-Evidence is retained in
-`backups/damage-numbers/capture-r3-retention-20261003-101333/`: the log, supplied
-village screenshot, installed package snapshot and `runtime-evidence.json`.
-Log SHA-256:
-`83e1dde7d67f16ee5661c9712f8ce1b3453511ea8ca00f1999415143e13eb542`.
-The installed NRO matches the reviewed r3 candidate, SHA-256
-`aaa5b873c786635881e49a5dcf65b4795c9c93683599b627cddb3a275c8a387f`.
-The capture flag remains nonempty and the camera flag is absent.
+Evidence is in `backups/damage-numbers/capture-r3-retention-20261003-101333/`:
+the log, supplied village screenshot, installed package snapshot and
+`runtime-evidence.json`. Log SHA-256:
+`83e1dde7d67f16ee5661c9712f8ce1b3453511ea8ca00f1999415143e13eb542`. The
+installed NRO matches the reviewed r3 candidate, SHA-256
+`aaa5b873c786635881e49a5dcf65b4795c9c93683599b627cddb3a275c8a387f`. The capture
+flag remains nonempty and the camera flag is absent.
 
 Startup, local hunter/palico capture, hit logging and quest-to-village history
 retention passed this manual trial. Independent damage/HP comparison, elemental
 assembly, other attack/source cases, multiplayer exclusion and active-camera
-projection remain pending. No plugin code, installed package, emulator setting
-or save was changed while recording this result.
+projection are pending. No plugin code, installed package, emulator setting or
+save was changed while recording this result.
 
 ## Prepared r4 camera and floating-number preview
 
-R4 adds native capture timestamps and a renderer to the free-render callback.
-It retains the six-hook default and one private arena/TLS slot. The existing
-camera opt-in enables all eight hooks and the preview; both activation templates
+R4 adds native capture timestamps and a renderer to the free-render callback. It
+retains the six-hook default and one private arena/TLS slot. The existing camera
+opt-in enables all eight hooks and the preview; both activation templates
 contain `1` and a newline. The candidate package itself contains only the NRO.
-The installed r3 package and emulator configuration remain unchanged.
+The installed r3 package and emulator configuration are unchanged.
 
 The preview uses the captured final view/projection matrices, a scoped
 `uQuestCamera` identity, a snapshot younger than 200 ms and a full-screen native
 rectangle whose aspect matches Forge's swapchain. It renders outlined digits,
-physical-HZV colors, native critical lines, pop/drift/fade and separate multi-hit
-lanes. Diagnostic history survives transitions; floating numbers clear on
-player/camera changes or stale/unsupported camera data. Hits delayed longer than
-their lifetime are retained in diagnostics but omitted from the display.
+physical-HZV colors, native critical lines, pop/drift/fade and separate
+multi-hit lanes. Diagnostic history survives transitions; floating numbers clear
+on player/camera changes or stale/unsupported camera data. Hits delayed longer
+than their lifetime are in diagnostics but omitted from the display.
 
 This first visual trial accepts direct hunter/Prowler/palico kinds 0 and 3.
 Secondary ownership/source classification, bounce gray, optional sources and
-settings persistence remain pending. It does not infer a per-hit bounce from
-the aggregate feedback getter or change native damage/affinity processing.
+settings persistence are pending. It does not infer a per-hit bounce from the
+aggregate feedback getter or change native damage/affinity processing.
 
 Automated checks: 435 host policy/presentation checks under ASan/UBSan, mailbox
 overflow and eight-producer stress with 160,000 published packets, 23 hook
@@ -164,11 +162,11 @@ activation, save edit or emulator-setting change was performed to prepare r4.
 
 ## 2026-10-03: r4 melee visuals accepted; palico projectile exclusion
 
-The user reports that player and palico melee popups work well, with accepted
-impact positioning, animation and size. They report no popup for palico
-boomerangs or thrown barrels and have not encountered positive/negative critical
-outcomes. The village screenshot retains 51 hits, 18 preview rejections and zero
-scope/pool drops, orphan contributions, overwritten records or read failures.
+The user reports player and palico melee popups work well, with accepted impact
+positioning, animation and size. They report no popup for palico boomerangs or
+thrown barrels and have not encountered positive/negative critical outcomes. The
+village screenshot retains 51 hits, 18 preview rejections and zero scope/pool
+drops, orphan contributions, overwritten records or read failures.
 
 The retained log contains 18 hunter and 33 local-palico records. Source tag
 counts are `000100`: 18, `030403`: 15, `030402`: 15 and `030802`: 3. The latter
@@ -179,182 +177,128 @@ distinct projected hits. Back in the village, the panel shows no active camera
 rectangle and zero visible numbers. The screenshot is diagnostic evidence;
 the user's report establishes the actual in-combat visual result.
 
-Evidence is retained in
-`backups/damage-numbers/capture-r4-visual-20261003-105730/`: log, supplied screenshot,
-installed package snapshot and `runtime-evidence.json`. Log SHA-256:
-`67b2eb0c39efa5bad82967e32e7aae4f3da1165a1db2eab877c91b9e90d84ddf`.
+Evidence is in `backups/damage-numbers/capture-r4-visual-20261003-105730/`: log,
+supplied screenshot, installed package snapshot and `runtime-evidence.json`. Log
+SHA-256: `67b2eb0c39efa5bad82967e32e7aae4f3da1165a1db2eab877c91b9e90d84ddf`.
 Installed r4 NRO SHA-256:
-`4e4e1ff78c884f574aa8e5e8d9ac31ffe59d01e4eb6e424fa2e3908d4d89e218`.
-Both activation flags are two-byte `1` plus newline files.
+`4e4e1ff78c884f574aa8e5e8d9ac31ffe59d01e4eb6e424fa2e3908d4d89e218`. Both
+activation flags are two-byte `1` plus newline files.
 
-R5 admits only tags `0x030402` and `0x030802` when the resolved owner is the
-local palico. Camera mapping, size, position, animation, lifetime and all combat
-hooks remain unchanged. Compiled fixtures exercise secondary palico ownership,
-white unknown-HZV barrel-like damage, physical-HZV projectile color, remote-palico
-exclusion, unknown-source omission and healing rejection. Host checks: 441;
-compiled NRO checks: 248. Its projectile display check is pending.
+R5 admits tags `0x030402`/`0x030802` only for the local Palico.
+Camera, visuals and hooks are unchanged. Fixtures cover secondary ownership,
+white unknown-HZV barrels, physical projectile HZV, remote/unknown exclusion and
+healing rejection: 441 host/248 NRO checks. Live projectiles were pending.
 
-The next manual check is only palico boomerang and thrown-barrel popups during
-ordinary play. A 100% save or save modification is unnecessary for this check;
-critical-marker runtime acceptance remains pending until suitable equipment is
-available. No installed package, setting, save or presentation value was changed
-while preparing the fix.
+Planned check: Palico boomerang/barrels during normal play; no 100% save/edit
+needed. Crit markers awaited equipment. Preparation changed no installed
+package, settings, saves or visuals.
 
 ## 2026-10-03: r5 projectiles and white coloring accepted
 
-The user confirmed that palico boomerang and thrown-barrel numbers now show.
-After the color check, they also confirmed white melee damage. Their accepted
-impact position, animation and size remain the r6 defaults. The log's first
-256 recorded impacts contain known physical HZVs 47 through 80 and eight
-unknown-HZV contributions; the later white-color acceptance comes from the
-user's in-game observation, not an uncaptured log value.
+User accepted Palico boomerang/barrel popups and white melee.
+Placement/animation/size remain r6 defaults. First 256 logged impacts: known HZV
+47–80, eight unknown; white acceptance is the user's observation, not a logged
+value.
 
-The installed r5 NRO still has SHA-256
-`81ed488cb38f13c7899e8cf7822b3b235df2d9c87d0fbeb12553e29fd2c244e0`.
-Its package snapshot, log and acceptance note are retained under
-`backups/damage-numbers/capture-r5-accepted-20261003-123254/`.
-The copied log SHA-256 is
-`55995b9d3d30328a6799bb622b036e4b4199d00f9fe785a0eef3e008b17e2cbc`.
-Critical markings and multiplayer exclusion still need manual evidence.
+Installed r5 SHA-256: `81ed488cb38f13c7899e8cf7822b3b235df2d9c87d0fbeb12553e29fd2c244e0`. Evidence: `backups/damage-numbers/capture-r5-accepted-20261003-123254/`; log:
+`55995b9d3d30328a6799bb622b036e4b4199d00f9fe785a0eef3e008b17e2cbc`. Crit/multiplayer evidence was pending.
 
 ## 2026-10-03: r6 settings, conservative bounce and optional sources staged
 
-R6 adds an enable switch, size/duration controls, default restoration, an
-explicit Save settings button and collapsed diagnostics. Preferences use two
-checksummed SD files; game saves are not mounted or written. SDK filesystem
-calls run inside a scoped thread-local abort disabler, restoring the previous
-context even on storage failure. The mount/persistence path awaits Eden testing.
+R6 adds visibility, size/duration, defaults, Save settings and collapsed
+diagnostics. Two checksummed SD preferences; no game-save mount/write. Scoped
+SDK FS abort disabling restores prior context on failure. Live persistence was
+pending.
 
-Gray bounce matches only the latest uniquely identified hunter contribution
-to native resolved feedback within 100 ms, on the same thread and attack
-counter. It leaves ambiguous, older, different-thread and earlier multi-hit
-contributions at their HZV color. Optional monster dispatch and generic
-hunter-owned object impacts have independent off-by-default switches. Other
-environmental families and recurring ticks remain hidden. Remote weapon and
-palico attacks do not become objects when the switches are enabled.
+Gray bounce needs latest unique hunter contribution/native feedback within 100
+ms on the same thread/counter. Ambiguous/old/earlier multi-hits keep HZV color.
+Monster dispatch and generic hunter-owned objects have separate default-off
+switches. Unknown environmental families/ticks stay hidden; remote
+weapons/Palicoes never become objects.
 
-Automated checks passed: 470 ASan/UBSan core/presentation checks, mailbox overflow
-and eight-producer stress with 160,000 published packets, 23 transaction cases,
-278 compiled NRO checks with explicit SDK/kernel/ImGui fixtures, and 36 checks
-executing the original SDK filesystem guard/context/abort-decision bodies.
-The compiled checks cover settings round trips, recovery from a partial write,
-source toggle cleanup, remote-source exclusion and constrained bounce matching
-through the original feedback getter. None of these checks is an Eden/GPU test.
+Passed: 470 ASan/UBSan core/presentation checks, mailbox overflow/eight-producer
+stress (160,000 packets), 23 transaction cases, 278 compiled SDK/kernel/ImGui
+checks and 36 original SDK FS guard/context/decision checks. Fixtures cover
+preferences/partial-write recovery, toggle cleanup, remote exclusion and
+constrained bounce/native getter; no Eden/GPU trial.
 
-Staged NRO SHA-256:
-`20e2b7ed3133609b2cb625e76d24d394b82b63d3eca77c5ed5d81ef874be14c7`.
-R6 retains the same eight optional-preview hook sites, one private 4 KiB arena,
-one native TLS slot and 248-byte mailbox records. Both two-byte activation
-templates remain separate from the one-NRO candidate package. Installed
-Forge, Better Input, damage-number files, emulator configuration and saves
-were not changed while preparing it.
+R6 staged SHA-256: `20e2b7ed3133609b2cb625e76d24d394b82b63d3eca77c5ed5d81ef874be14c7`. Eight optional-preview sites, one private
+4 KiB arena/TLS slot, 248-byte records. Two-byte activation templates remain
+outside the one-NRO package. Preparation changed no installed Forge/Better
+Input/damage package, emulator config or save.
 
-The first manual check is small: toggle numbers off/on, save a slight size
-change and restart once. Restore defaults afterward. Bomb switch and actual
-recoil checks can follow during normal play; no completed save is needed.
+Planned check: visibility toggle, save slight size change/restart, restore
+defaults; bombs/recoil during normal play. No completed save needed.
 
 ## 2026-10-03: r7 automatic startup staged
 
-The user requested activation without extra flag files. R7 removes both RomFS
-flag checks and their generated templates. Forge initializes all eight combat
-and camera hooks automatically when the package is enabled in Eden. The
-default preference shows numbers; the in-game switch and any saved disabled
-preference still apply. Old `.enabled` files are ignored.
+R7 removes both activation checks/templates at the user's request. Enabling the
+Eden package starts eight hooks through Forge. Numbers default on; saved
+visibility/in-game switch still apply. Old `.enabled` files are ignored.
 
-Title/build signatures, native clock validation, SDK TLS and transactional
-installation checks remain. Hook sites, the private 4 KiB arena, mailbox
-layout, source policy and accepted appearance are unchanged from r6. The
-compiled NRO has no Forge filesystem imports for activation-file access.
+R6 signatures, clock/TLS/transaction gates, sites, private 4 KiB arena,
+mailbox/source policy and visuals remain. No Forge activation-file FS imports.
 
-Automated checks passed: 276 compiled NRO checks with explicit SDK/kernel/ImGui
-fixtures, including automatic installation of all eight hooks without flag APIs,
-rendering after a camera snapshot, saved visibility preferences and detection
-of a modified camera hook. These are fixture results; r7 startup in Eden and
-the r6 settings/bounce/optional-source additions still await manual acceptance.
+Passed: 276 compiled SDK/kernel/ImGui checks covering automatic eight-hook
+installation without flag APIs, camera/rendering, saved visibility and
+camera-hook modification. Eden startup and r6 features were still pending.
 
-Staged NRO SHA-256:
-`43c6dc8a105789e32e4d22b7e8e514f235e1226641600176ba31527960685021`.
-The candidate package contains only the 65,536-byte NRO. The installed r5 NRO
-retains SHA-256
-`81ed488cb38f13c7899e8cf7822b3b235df2d9c87d0fbeb12553e29fd2c244e0`.
-No installed package, activation configuration or save was changed.
+R7 staged SHA-256: `43c6dc8a105789e32e4d22b7e8e514f235e1226641600176ba31527960685021`; package: one 65,536-byte NRO. Installed
+r5: `81ed488cb38f13c7899e8cf7822b3b235df2d9c87d0fbeb12553e29fd2c244e0`. Preparation changed no installation, activation or save.
 
-With Eden closed, replace only the damage-number NRO. The two old activation
-files may be removed. Start normally and land one hit to confirm automatic
-startup; the small settings/restart check can follow if it has not been done.
+Planned install with Eden closed: replace damage NRO, optionally remove old
+flags, hit once; settings/restart check if not already done.
 
 ## 2026-10-04: r8 preferences moved beside Better Input
 
-The user requested the same storage location as Better Input, ignoring existing
-SD preferences. R8 uses Forge's counted player-save mount and writes only
-`savedata:/damage_numbers.ini` plus `savedata:/damage_numbers_backup.ini`.
-The files are readable, versioned INI text bounded to 255 bytes. No SD mount
-API is imported, and the old SD records are neither migrated nor deleted.
-Without a valid new INI, the accepted defaults apply.
+R8 follows Better Input's counted player-save mount: only `savedata:/damage_numbers.ini` and
+`savedata:/damage_numbers_backup.ini`, readable/versioned text ≤255 bytes. No SD API; old records
+are ignored without migration/deletion. Invalid/missing new INI uses defaults.
 
-A valid primary is backed up before replacement. Writes are flushed, read back
-and explicitly committed; Forge's release also performs its normal commit.
-Partial primaries recover from the prior valid backup. Every success/failure
-path closes its file handles and releases the counted mount before restoring
-the previous SDK filesystem error context. If player save storage is not ready
-at boot, the single render consumer retries preference loading at most once
-per second. Manual edits cancel the pending load.
+Back up valid primary; flush/read-verify/commit replacement (Forge release
+commits too). Partial primary uses backup. Close handles/release mount before
+restoring FS context on every path. Single render consumer retries loading
+once/second if storage unavailable; manual edits cancel it.
 
-Automated checks passed: 490 ASan/UBSan core/presentation checks, mailbox
-overflow and eight-producer stress with 160,000 published packets, 23 hook
-transaction cases and 285 compiled NRO checks with explicit SDK/kernel/Forge
-mount/ImGui fixtures. The storage checks cover readable INI round trips,
-ignored legacy SD records, unchanged Better Input/game file fixtures, backup
-and primary write failures, explicit commit failure, mount/handle balancing,
-deferred loading and manual edits before storage availability. These fixtures
-do not execute the live game-save mount or an Eden persistence trial.
+Passed: 490 ASan/UBSan core/presentation checks, overflow/eight-producer stress
+(160,000 packets), 23 transactions, 285 compiled SDK/kernel/Forge/ImGui checks.
+Storage fixtures cover INI/legacy exclusion, preserved game/Better Input data,
+backup/primary/commit failure, balanced handles/mounts, delayed loading/manual
+edits. No live mount/persistence trial.
 
-Staged NRO SHA-256:
-`aa29f54586068b1b2fdb895beb91cb61b48198df792d585ecafe93e4b79bb0f1`.
-Its file size is 69632 bytes; BSS remains 1,089,536 bytes. Hook
-sites, arena/TLS allocation, source policy and accepted visuals are unchanged.
-The installed NRO currently matches r7 SHA-256
-`43c6dc8a105789e32e4d22b7e8e514f235e1226641600176ba31527960685021`;
-installation is observed, but no new user runtime acceptance is inferred.
-No installed package or actual save/config file was modified during preparation.
+R8 staged SHA-256: `aa29f54586068b1b2fdb895beb91cb61b48198df792d585ecafe93e4b79bb0f1`, 69632 bytes; BSS 1,089,536. Sites,
+arena/TLS, policy/visuals unchanged. Then-installed r7: `43c6dc8a105789e32e4d22b7e8e514f235e1226641600176ba31527960685021`;
+presence proves no new runtime acceptance. Preparation changed no installed
+package/save/config.
 
-With Eden closed, replace only the damage-number NRO with r8. In Forge, save
-a small size change and restart once to check that it remains and creates
-`damage_numbers.ini` beside `better_inputs.ini`. Restore defaults and save
-afterward. No existing SD settings need to be copied.
+Planned check: with Eden closed replace NRO; save slight size change/restart and
+verify `damage_numbers.ini` beside `better_inputs.ini`; restore/save defaults. No
+SD copy needed.
 
 ## 2026-10-04: r9 compact plugin rows staged
 
-The user clarified that the plugin should match the small Better Inputs Config
-row under Forge's Plugin UI. R9 replaces both framed collapsing headers with
-compact, unframed `igTreeNode_Str` rows, closed by default. The inspected Better
-Input binary imports this same API and `igTreePop`; the pinned cimgui wrapper
-forwards it to `ImGui::TreeNode`. The outer row and nested diagnostics use
-plugin-specific IDs and scoped TreePop guards, including early-return paths.
+R9 matches Better Inputs Config under Plugin UI: both framed headers become
+closed-by-default, unframed `igTreeNode_Str` rows. Better Input imports
+it/`igTreePop`; pinned wrapper forwards to `ImGui::TreeNode`.
+Plugin-specific outer/diagnostic IDs and scoped TreePop guards balance early
+exits.
 
-292 compiled NRO checks passed with explicit SDK/kernel/Forge/ImGui fixtures.
-The added UI checks cover the compact API imports, a closed row omitting controls
-and save actions, floating numbers while closed, nested tree balancing, inactive
-capture and a different render-consumer thread. Actual Eden row appearance
-remains a manual check. No gameplay hook, settings format/path or accepted
-floating-number appearance changed.
+Passed: 292 compiled SDK/kernel/Forge/ImGui checks, including imports,
+closed-row controls/save omission, numbers while closed, nested balance,
+inactive capture and competing consumer. Live row appearance remains
+unconfirmed; hooks, settings and visuals unchanged.
 
-Staged NRO SHA-256:
-`58914dd47c797356c892696cc6bdc9bd60543afeb5958f31e91bc40bb0f524fe`.
-The installed r8 NRO remains
-`aa29f54586068b1b2fdb895beb91cb61b48198df792d585ecafe93e4b79bb0f1`.
-Replace only the NRO while Eden is closed, then check that Damage numbers uses
-the same small row as Better Input and opens/closes normally.
+R9 staged SHA-256: `58914dd47c797356c892696cc6bdc9bd60543afeb5958f31e91bc40bb0f524fe`. Then-installed r8: `aa29f54586068b1b2fdb895beb91cb61b48198df792d585ecafe93e4b79bb0f1`.
+Planned check: replace NRO with Eden closed; compare Damage numbers
+row/open-close with Better Input.
 
-The workspace rules in AGENTS.md and FORGE_PLUGIN_GUIDELINES.md now specify
-compact unframed tree rows, paired pops and independent gameplay callbacks.
+AGENTS.md/FORGE_PLUGIN_GUIDELINES.md now require compact tree rows, balanced
+pops and independent gameplay callbacks.
 
 ## 2026-10-05: r9 manual confirmation
 
-The user completed the LS/bowgun checklist and reported "ive done the tests".
-The edited [checklist](TEST_CHECKLIST.md) has all 24 boxes checked, and the
-[results sheet](TEST_RESULTS.md) identifies r9 and marks all 16 rows "good".
-These are user-run in-game results; no new automated game trial was performed.
+User report: "ive done the tests". R9 [checklist](TEST_CHECKLIST.md): 24 checked boxes;
+[results](TEST_RESULTS.md): 16 "good" rows. These are manual gameplay results.
 
 The report confirms:
 
@@ -373,40 +317,30 @@ The report confirms:
 - Other hunters' and Palicoes' weapon damage hidden during multiplayer, while
   the local hunter's attacks remain visible.
 
-The LBG row includes "separation kinda too spaced". Impact separation passed,
-but its visual spacing remains a cosmetic follow-up. This recording does not
-change the number placement, animation, size or separation logic.
+LBG: "separation kinda too spaced". Impact separation passed; spacing remains
+cosmetic follow-up. Recording changed no presentation/separation logic.
 
-The sheet leaves the quest, monster/part, actual test date and other gameplay
-mods unspecified. Its r9 label is the user's report; this documentation update
-does not re-inspect the installed NRO hash. Settings persistence after restart,
-compact UI appearance, Prowler-specific coverage and the optional object and
-monster-to-monster switches are outside this checklist's confirmation scope.
+Quest, monster/part, test date and other gameplay mods are unspecified; r9 is
+user-reported, without re-inspecting the live hash. Persistence, compact UI,
+Prowler and optional object/monster switches were outside this checklist.
 
-The user's completed checkboxes and original observations are retained in local
-Git along with this acceptance record. No plugin binary, emulator setting or
-save/config file was modified while recording the trial.
+Checkboxes/original observations and this record are in local Git; no binary,
+emulator or save/config changes.
 
 ## 2026-10-05: settings persistence confirmed
 
-The user clarified: "setting persistence is already tested and its working".
-Record settings persistence after restart as passed by the user, separately
-from the LS/bowgun checklist above. It is no longer a remaining manual check.
-The report does not specify which setting was saved or the exact test date.
+User: "setting persistence is already tested and its working". Persistence after
+restart passed separately; no retest needed. Saved setting/test date
+unspecified.
 
-The remaining reported cosmetic issue is wide LBG rapid-fire number spacing.
-Prowler-specific attacks and the optional object and monster-to-monster switches
-still lack manual confirmation in this record. No plugin or save/config file
-was changed when recording the persistence result.
+At this point, rapid-fire spacing needed polish; Prowler/object/monster switches
+lacked confirmation. Recording changed no plugin/save/config.
 
 ## 2026-10-05: monster-to-monster damage confirmed
 
-The user reported "monster to monster also working well". Record the optional
-monster-to-monster damage display as passed by the user. The report does not
-identify the monster pair or separately describe the switch's off behavior.
-This confirmation extends the checklist and persistence reports above.
+User: "monster to monster also working well". Optional monster damage passed;
+pair/switch-off behavior unspecified. This extends the checklist/persistence
+reports.
 
-Wide LBG rapid-fire number spacing remains a cosmetic follow-up. Prowler-specific
-attacks and placed-object coverage still lack manual confirmation in this record.
-No plugin binary, emulator setting or save/config file was changed while
-recording this result.
+Remaining: wide rapid-fire spacing (cosmetic), Prowler and placed objects.
+Recording changed no binary, emulator or save/config.
