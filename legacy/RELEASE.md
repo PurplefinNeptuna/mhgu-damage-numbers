@@ -1,41 +1,55 @@
-# Damage numbers r14
+# Damage numbers r15 — finished, ready for distribution
 
-The open-font edition is the sole supported build. It uses Open Sans Semibold
-600 under SIL OFL 1.1, renamed Damage Digits Open, and original procedural
-red/blue crit stars. The game-derived edition is retired.
+Open Sans Semibold 600 under SIL OFL 1.1, renamed Damage Digits Open, and
+independently authored procedural red/blue critical stars. The game-derived
+edition remains retired.
 
-## Package
+## Package and installation
 
-`build/damage-numbers/releases/r14/damage-numbers-r14.zip` contains one
-`damage-number/` mod folder, a plugin at
-`romfs/nativeNX/plugins/damage_numbers_capture.nro`, font/art notices, source
-provenance, manifest and checksums. Forge is required and not bundled.
+`build/damage-numbers/releases/r15/damage-numbers-r15.zip` contains one
+`damage-number/` mod folder, one NRO at
+`romfs/nativeNX/plugins/damage_numbers_capture.nro`, full font/art/dependency
+notices, source provenance, manifest and SHA-256 checksums. The tested patched
+Forge loader is required and is not bundled. Target: MHGU 1.4.0, Switch, Eden/Linux.
 
-NRO SHA-256:
-`be263fbebf8fe2057514aabda07c12724bb0706aad2592ee1c3761100603f158`.
-The installed open r14 matches this hash. Retirement requires no reinstall.
+Close Eden before installing. For a fresh setup, extract the ZIP and copy
+`damage-number/` into Eden's title `0100770008DD8000` mod directory, alongside
+Forge, and enable it in Eden. For upgrades, preserve the previous open NRO
+outside Eden's load directory, then replace the existing NRO. Keep one copy.
 
-For a fresh setup, close Eden, extract the ZIP and copy `damage-number/` into
-Eden's mod directory for title `0100770008DD8000`. Keep one copy alongside the
-tested Forge package and enable it in Eden. For upgrades, preserve the previous
-open NRO outside Eden and replace the existing plugin.
+## Final defaults
 
-Defaults are enabled, Wilds style, size 1.0 and total duration 0.9 seconds.
-Settings remain under Forge's compact **Plugin UI > Damage numbers** row and
-use `damage_numbers.ini` beside Better Input in the active user's game save.
-Existing valid version-2 settings are retained. No activation flags are needed.
+Enabled, Wilds style, Number size **1.0 = 20px at 720p**, total duration 0.9s.
+This scales to **30px at 1080p**, 40px at 1440p and 60px at 4K. Wilds stamps at
+1.2×, settles over 0.2s, holds, then rises and fades during the final 0.2s.
+The crit stars, colors, shading and compact placement use the approved open style.
 
-## Reproduce
+Preferences remain version 2 beside Better Input in the active user's game save.
+Existing size values multiply the new base; size 1.2 yields the former 24px/36px.
+No migration, save edit or activation flag is needed. The compact Forge panel
+retains enable, Style, Number size, Duration, Save settings and Restore defaults.
+
+## Validation and status
+
+The user approved the open appearance and selected this final size from the
+real-renderer comparison. Combat, source filtering, persistence and Prowler/bomb
+confirmations remain recorded in [TEST_RESULTS.md](TEST_RESULTS.md). The final
+size update is covered by host, compiled ARM32, real-ImGui and provenance checks.
+This release makes no claim of a fresh r15 gameplay run. Installation has not
+been performed; the installed r14 plugin and rollback material are preserved.
+
+The packager requires matching build/fixture/audit hashes, checks the new
+20px/30px size assertions, then reopens and verifies every deterministic ZIP
+member. NRO and archive hashes are in the generated release manifest/checksums.
 
 ```bash
+python3 scripts/test_damage_numbers.py
 python3 scripts/build_damage_numbers_capture.py
 python3 scripts/audit_damage_numbers_open_assets.py
+python3 scripts/test_damage_numbers_visual.py
+tools/mwc-analysis-venv/bin/python scripts/damage_numbers_capture_probe.py
 python3 scripts/package_damage_numbers.py
 ```
 
-Only open assets are supported. The package requires matching build, complete
-compiled-fixture and asset-audit NRO fingerprints. It creates a deterministic
-ZIP, then reopens and verifies every member. No installation or launch occurs.
-The retirement rebuild matches the previously tested 321-check r14 binary;
-historical combat coverage is retained in [TEST_RESULTS.md](TEST_RESULTS.md).
-See [RETIREMENT.md](RETIREMENT.md) for the archive and support decision.
+Only open font/art is supported. [Retirement record](RETIREMENT.md) preserves
+the private edition's history and quarantine locations.

@@ -1,6 +1,7 @@
 # Damage numbers
 
-R14 is the sole supported edition: **Open Sans Semibold 600** digits under
+R15 is finished and ready for distribution. The sole supported edition uses
+**Open Sans Semibold 600** digits under
 SIL OFL 1.1 and independently authored procedural crit stars. The game-derived
 font/texture edition was retired on 2026-10-05. [Release/install notes](RELEASE.md),
 [open asset provenance](OPEN_ASSETS.md), [retirement record](RETIREMENT.md),
@@ -50,7 +51,7 @@ solid overlap before displacement. Glow may overlap. Offsets stay cached until
 expiry; crowded bursts may overlap instead of growing a tall stack. Camera,
 context, viewport, style and size changes reset placement caches.
 
-Defaults: enabled, Wilds, scale 1.0, duration 0.9 seconds; 24-pixel font size at
+Defaults: enabled, Wilds, scale 1.0, duration 0.9 seconds; 20-pixel font size at
 720p. Wilds uses the stamp/hold/exit timing above. Invalid, behind-camera and off-screen projections are hidden.
 Limits: 256 queued events, 128 visible numbers and 512 recent identities.
 Overflow drops oldest entries without adding their values together.
@@ -109,7 +110,7 @@ completed visual checklist and the user confirmed the mod is finished.
 Open assets are the default and only supported profile. The offline ARM32 build
 verifies installed Forge exports and preserved game/SDK/Better Input hashes.
 No new capture hooks, CodeMemory objects or TLS slots are added. The rebuilt
-plugin must match the tested r14 NRO before packaging.
+plugin must match its compiled-fixture and asset-audit NRO hashes before packaging.
 
 ```bash
 python3 scripts/build_damage_numbers_capture.py
@@ -117,11 +118,13 @@ python3 scripts/audit_damage_numbers_open_assets.py
 python3 scripts/package_damage_numbers.py
 ```
 
-Current ZIP: `build/damage-numbers/releases/r14/damage-numbers-r14.zip`.
-Package: `build/damage-numbers/releases/r14/damage-number/`.
+Current ZIP: `build/damage-numbers/releases/r15/damage-numbers-r15.zip`.
+Package: `build/damage-numbers/releases/r15/damage-number/`.
 Source manifest: `build/damage-numbers/open-assets/candidate-manifest.json`.
-NRO SHA-256: `be263fbebf8fe2057514aabda07c12724bb0706aad2592ee1c3761100603f158`.
+NRO and archive SHA-256 values are recorded in the release manifests and checksums.
 
-The installed r14 plugin already matches these bytes. Retirement does not
-install, launch or edit saves. Historical combat/visual evidence is retained;
-retired game-derived payloads are quarantined outside active build paths.
+The user approved the open appearance and selected 20px at 720p as size 1.0
+from the real-renderer comparison. This is 30px at 1080p and 40px at 1440p.
+Existing version-2 scale values remain multipliers of the new base; no save is
+changed. Installation is separate from packaging. Historical gameplay evidence
+is retained; final-size verification uses host and compiled ARM32 fixtures.

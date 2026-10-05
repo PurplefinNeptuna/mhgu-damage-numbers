@@ -1,4 +1,4 @@
-# Damage numbers r14: supported open assets
+# Damage numbers r15: finished open-only release
 
 The sole supported build uses **Open Sans Semibold 600**, a renamed digit subset under
 SIL Open Font License 1.1, and independently authored procedural red/blue crit
@@ -29,7 +29,7 @@ Classic retains its original 1.25x/0.1-second pop, continuous drift and fade.
 
 ## Download and installation
 
-Archive: `build/damage-numbers/releases/r14/damage-numbers-r14.zip`.
+Archive: `build/damage-numbers/releases/r15/damage-numbers-r15.zip`.
 Plugin: `build/damage-numbers/open-assets/candidate-package/romfs/nativeNX/plugins/damage_numbers_capture.nro`.
 
 Close Eden, preserve the current NRO outside its load directory, then replace
@@ -37,21 +37,17 @@ Close Eden, preserve the current NRO outside its load directory, then replace
 build. Keep one damage-number plugin installed; existing valid version-2 preferences remain usable. No
 save edits or activation flags are needed. Forge is required and not bundled.
 
-The historical r12 passed the full gameplay checks. Its original visual assets
-are retired; r14 uses open digits and procedural art. Build, compiled-fixture, provenance and
-real-ImGui preview results are recorded in the generated manifests. Retirement retains the existing stamp/hold/exit timing and NRO bytes.
-The installed plugin already matches r14, so no replacement is needed on this
-machine. No fresh gameplay test is claimed for this cleanup.
+The user approved the open-font appearance and selected **20px at 720p as
+Number size 1.0** from the comparison. This is 30px at 1080p, 40px at 1440p
+and 60px at 4K. Size 1.2 restores the former 24px/36px pair. Critical marker
+gaps and compact collision margins scale with the selected preview; the
+stamp/hold/exit timing and 30px exit travel remain unchanged.
 
-## Optional visual checks
-
-- [ ] Land positive/negative crits: the star halo should be easy to notice,
-      with the same solid marker size and position.
-- [ ] Fire one familiar bowgun burst while moving the camera: check that the
-      new 2/5 curves are readable. Stamp/hold/exit timing and spacing stay as r13.
-
-Previously passed combat and persistence coverage needs no full repeat.
-The byte-identical retirement rebuild needs no additional manual confirmation.
+The release is finished and ready for distribution. Prior combat, persistence
+and appearance confirmations remain the gameplay evidence. R15's final size
+is verified by host, compiled ARM32 and real-ImGui fixtures; no new in-game run
+is claimed. No additional manual checklist is required for this final adjustment.
+The installed r14 plugin is preserved; installation is a separate step.
 
 ## Asset provenance and notices
 

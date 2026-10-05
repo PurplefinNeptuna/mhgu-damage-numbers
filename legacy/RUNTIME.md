@@ -647,3 +647,27 @@ mailbox stress and 23 transactional-hook scenarios. The rebuilt NRO matches
 the installed and previously compiled-tested r14 bytes. The existing 321 ARM32
 checks cover the identical NRO. The asset audit and real-ImGui preview passed. This cleanup
 adds no fresh in-game validation claim. See [RETIREMENT.md](RETIREMENT.md).
+
+## 2026-10-05: r15 finished, 20px default, ready for distribution
+
+The user selected 20px at 720p as Number size 1.0 and requested finished status.
+The new base is 30px at 1080p, 40px at 1440p and 60px at 4K. Marker gaps and
+collision margins retain the selected preview proportions. Stamp/hold/exit
+behavior, font/art data, capture hooks and version-2 config fields are unchanged.
+Saved scale values multiply the new base; no save is edited or migrated.
+
+Verification passed: 919 host core/presentation checks, eight-producer mailbox
+stress, 23 transactional-hook scenarios, all 324 compiled ARM32 NRO checks,
+real-ImGui rendering at the new default, the refreshed six-size chart and the
+proprietary-read-blocked asset audit. The first compiled run exposed two stale
+45px expectations for saved Classic size 1.5; the corrected 37.5px expectations
+passed in the complete rerun. No game behavior fix was needed for that fixture.
+
+NRO SHA-256: `7c112c6bf497207f8bdf475687bab3b0056c0726ac4db1707db8f8adc01e07da`.
+Size remains 262,144 bytes and BSS 1,093,632 bytes. Font and procedural RGBA
+hashes are unchanged from r14. The installed r14 NRO and r14 ZIP are preserved;
+a hashed r14 candidate/fixture/audit rollback copy is under
+`backups/damage-numbers/r14-before-r15-20261005/`. R15 is staged at
+`build/damage-numbers/releases/r15/damage-numbers-r15.zip`; installation is
+separate. Prior user-confirmed gameplay coverage is retained, with no fresh
+r15 game run claimed. The release status is `FINISHED_DISTRIBUTION_READY`.

@@ -108,3 +108,14 @@ Installed plugin and tested candidate both have SHA-256
 The final package preserves those exact bytes. Appearance is user-accepted;
 pixel-perfect equality with RE Engine has not been measured. Automated fixture
 coverage remains separate from the user's real-game confirmation.
+
+## Final r15 release verification — 2026-10-05
+
+Finished and ready for distribution at the user's request. The approved open
+appearance uses 20px at 720p as 1.0, or 30px at 1080p. Passed: 919 host
+core/presentation checks, mailbox stress, 23 transaction scenarios, all 324
+compiled ARM32 checks, real-ImGui preview and complete font/art provenance audit.
+New compiled checks confirm 20px/30px defaults and 24px at 1.2; persistence
+checks confirm existing scales remain multipliers of the new base. Historical
+gameplay confirmations above remain the manual evidence; no new r15 gameplay
+run is claimed. No further exhaustive manual checklist is requested.

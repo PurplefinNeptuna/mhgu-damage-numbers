@@ -18,7 +18,7 @@ int main(int argc,char** argv) {
     const char* texts[]={"40","47","12","6","155","111","888"};
     for(unsigned i=0;i<7;++i) {
         DrawNumber n{};std::snprintf(n.text,sizeof(n.text),"%s",texts[i]);n.style=VisualStyle::Wilds;
-        n.pixels=30;n.opacity=1;n.unit=1.25f;n.position={30+float(i%4)*150,40+float(i/4)*110};
+        n.pixels=base_pixels_720p;n.opacity=1;n.unit=base_pixels_720p/24;n.position={30+float(i%4)*150,40+float(i/4)*110};
         n.color=rgb(i==1||i==2||i==4?Tint::Weak:Tint::White,n.style);
         n.critical=i==4?Critical::Negative:Critical::Positive;
         TextMetrics m{};assert(cosmetics_measure(n.text,n.pixels,n.style,m));n.advance=m.advance;n.ink=shifted(m.ink,n.position);
