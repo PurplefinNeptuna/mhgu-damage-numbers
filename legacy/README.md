@@ -1,6 +1,6 @@
 # Damage numbers
 
-R15 is finished and ready for distribution. The sole supported edition uses
+R16 is ready for distribution with losslessly compressed artwork. The sole supported edition uses
 **Open Sans Semibold 600** digits under
 SIL OFL 1.1 and independently authored procedural crit stars. The game-derived
 font/texture edition was retired on 2026-10-05. [Release/install notes](RELEASE.md),
@@ -9,6 +9,9 @@ font/texture edition was retired on 2026-10-05. [Release/install notes](RELEASE.
 
 Target: MHGU 1.4.0 Switch, Eden/Linux, and the tested patched Forge baseline.
 Capture hooks, damage calculations and ownership bindings are unchanged.
+R16 shrinks the NRO from 256KiB to 152KiB while preserving every artwork byte.
+The decoder runs once per ImGui context; rendering uses the same texture and
+draw calls. [Compression evidence](COMPRESSION.md) records the checks and timing.
 
 ## Display behavior
 
@@ -118,8 +121,8 @@ python3 scripts/audit_damage_numbers_open_assets.py
 python3 scripts/package_damage_numbers.py
 ```
 
-Current ZIP: `build/damage-numbers/releases/r15/damage-numbers-r15.zip`.
-Package: `build/damage-numbers/releases/r15/damage-number/`.
+Current ZIP: `build/damage-numbers/releases/r16/damage-numbers-r16.zip`.
+Package: `build/damage-numbers/releases/r16/damage-number/`.
 Source manifest: `build/damage-numbers/open-assets/candidate-manifest.json`.
 The ZIP contains only the runtime NRO. README, combined redistribution notices,
 provenance/audit manifest and checksums remain beside it. Keep `NOTICES.txt`

@@ -1,58 +1,45 @@
-# Damage numbers r15 — finished, ready for distribution
+# Damage numbers r16
 
-Open Sans Semibold 600 under SIL OFL 1.1, renamed Damage Digits Open, and
-independently authored procedural red/blue critical stars. The game-derived
-edition remains retired.
+R16 compresses the approved open artwork losslessly, reducing the NRO from
+256KiB to **152KiB**. The Open Sans Semibold font, texture pixels, rendering,
+20px default, animation and settings remain identical to r15. The decoder runs
+once per ImGui context directly into the existing texture buffer; it adds no
+per-hit work or persistent allocation. [Compression evidence](COMPRESSION.md)
+records bounds checks, exact comparisons and host initialization timings.
 
 ## Package and installation
 
-`build/damage-numbers/releases/r15/damage-numbers-r15.zip` contains one
-`damage-number/` mod folder with only
-`romfs/nativeNX/plugins/damage_numbers_capture.nro`, matching modern-control's
-runtime-only archive layout. README, combined `NOTICES.txt`, source/audit release
-manifest and SHA-256 checksums remain beside the ZIP. Keep `NOTICES.txt` with
-the archive when redistributing. The tested patched
-Forge loader is required and is not bundled. Target: MHGU 1.4.0, Switch, Eden/Linux.
+`build/damage-numbers/releases/r16/damage-numbers-r16.zip` contains only
+`damage-number/romfs/nativeNX/plugins/damage_numbers_capture.nro`. README,
+`NOTICES.txt`, release provenance and `SHA256SUMS` stay beside the ZIP, matching
+the clean modern-control layout. Redistribute the archive with its notices.
+The tested patched Forge loader is required and not bundled. Target: MHGU
+1.4.0, Switch, Eden/Linux.
 
-Close Eden before installing. For a fresh setup, extract the ZIP and copy
-`damage-number/` into Eden's title `0100770008DD8000` mod directory, alongside
-Forge, and enable it in Eden. For upgrades, preserve the previous open NRO
-outside Eden's load directory, then replace the existing NRO. Keep one copy.
+Close Eden before installing. Preserve the current NRO outside Eden's load
+directory, then replace it with the r16 NRO. Keep one damage-number plugin.
+For a fresh setup, copy the extracted `damage-number/` folder into Eden's title
+`0100770008DD8000` mod directory alongside Forge, and enable it in Eden.
+The packager performs no installation; installed r15 remains unchanged.
 
-## Final defaults
+## Defaults and evidence
 
-Enabled, Wilds style, Number size **1.0 = 20px at 720p**, total duration 0.9s.
-This scales to **30px at 1080p**, 40px at 1440p and 60px at 4K. Wilds stamps at
-1.2×, settles over 0.2s, holds, then rises and fades during the final 0.2s.
-The crit stars, colors, shading and compact placement use the approved open style.
+Enabled, Wilds style, Number size **1.0 = 20px at 720p / 30px at 1080p**,
+Duration 0.9s. Wilds stamps at 1.2×, settles over 0.2s, holds, then rises and
+fades during the final 0.2s. Existing version-2 preferences remain usable.
+No configuration or save migration is needed.
 
-Preferences remain version 2 beside Better Input in the active user's game save.
-Existing size values multiply the new base; size 1.2 yields the former 24px/36px.
-No migration, save edit or activation flag is needed. The compact Forge panel
-retains enable, Style, Number size, Duration, Save settings and Restore defaults.
+Passed: 919 host core/presentation checks, mailbox stress, 23 transaction
+scenarios, **338 compiled ARM32 checks**, bounded codec tests under ASan/UBSan,
+real-ImGui byte equivalence and open-asset provenance audit. The deterministic
+ZIP is reopened and checked member by member. Prior user-confirmed combat and
+appearance remain the gameplay evidence; no fresh r16 in-game run or live FPS
+measurement is claimed.
 
-## Validation and status
-
-The user approved the open appearance and selected this final size from the
-real-renderer comparison. Combat, source filtering, persistence and Prowler/bomb
-confirmations remain recorded in [TEST_RESULTS.md](TEST_RESULTS.md). The final
-size update is covered by host, compiled ARM32, real-ImGui and provenance checks.
-This release makes no claim of a fresh r15 gameplay run. Installation has not
-been performed by the packager; rollback material is preserved. A fresh read
-now finds the installed plugin matching r15.
-
-The packager requires matching build/fixture/audit hashes, checks the new
-20px/30px size assertions, then reopens and verifies every deterministic ZIP
-member. NRO and archive hashes are in the generated release manifest/checksums.
-
-```bash
-python3 scripts/test_damage_numbers.py
-python3 scripts/build_damage_numbers_capture.py
-python3 scripts/audit_damage_numbers_open_assets.py
-python3 scripts/test_damage_numbers_visual.py
-tools/mwc-analysis-venv/bin/python scripts/damage_numbers_capture_probe.py
-python3 scripts/package_damage_numbers.py
-```
+The tested Forge loader's corruption when its menu and damage popups appear
+together remains unresolved. This asset compression update leaves that loader
+unchanged. [Repair handoff](../../docs/FORGE_IMGUI_DAMAGE_CORRUPTION_HANDOFF.md).
 
 Only open font/art is supported. [Retirement record](RETIREMENT.md) preserves
-the private edition's history and quarantine locations.
+the private edition's history and quarantine locations. NRO and ZIP hashes,
+font provenance and verification reports are in the adjacent release manifest.

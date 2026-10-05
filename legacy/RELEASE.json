@@ -1,13 +1,13 @@
 {
   "status": "FINISHED_DISTRIBUTION_READY",
-  "revision": "r15",
+  "revision": "r16",
   "date": "2026-10-05",
   "asset_profile": "open",
   "font": "Open Sans Semibold 600",
-  "nro_sha256": "7c112c6bf497207f8bdf475687bab3b0056c0726ac4db1707db8f8adc01e07da",
-  "release_archive": "build/damage-numbers/releases/r15/damage-numbers-r15.zip",
-  "installed_plugin_matches": true,
-  "compiled_fixture_checks": 324,
+  "nro_sha256": "5f59506f88d5156ed8db7cffd5747651717b3bab7ecdfd398800a0402fe4f33e",
+  "release_archive": "build/damage-numbers/releases/r16/damage-numbers-r16.zip",
+  "installed_plugin_matches": false,
+  "compiled_fixture_checks": 338,
   "compiled_fixture_reused_only_for_identical_nro": false,
   "fresh_runtime_test_performed": false,
   "retired_edition": "r12-game-derived",
@@ -22,5 +22,12 @@
   "asset_audit": "PASSED_OPEN_ASSET_PROVENANCE",
   "installed_by_recipe": false,
   "archive_layout": "runtime_only",
-  "redistribution_notices": "build/damage-numbers/releases/r15/NOTICES.txt"
+  "redistribution_notices": "build/damage-numbers/releases/r16/NOTICES.txt",
+  "sprite_codec": "DN-LZ1",
+  "nro_file_bytes": 155648,
+  "previous_nro_file_bytes": 262144,
+  "rgba_bytes_unchanged": true,
+  "extra_persistent_bytes": 0,
+  "per_frame_decode": false,
+  "known_loader_issue": "docs/FORGE_IMGUI_DAMAGE_CORRUPTION_HANDOFF.md"
 }

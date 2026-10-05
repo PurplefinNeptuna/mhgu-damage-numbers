@@ -1,4 +1,4 @@
-# Damage Numbers r15
+# Damage Numbers r16
 
 Finished open-font release for Monster Hunter Generations Ultimate 1.4.0
 (Nintendo Switch), tested on Eden/Linux with the maintained patched Forge loader.
@@ -58,9 +58,15 @@ notices are combined in `NOTICES.txt` beside the ZIP. Keep this notice file
 with the ZIP when redistributing. Font provenance and asset verification are
 recorded in the adjacent `release-manifest.json`.
 
-The release retains prior user-confirmed gameplay coverage and the approved open
-appearance. The final 20px size was selected from the real-renderer comparison
-and verified with host, compiled ARM32 and real-ImGui fixtures. No fresh r15
-in-game run is claimed. `release-manifest.json` records the exact NRO hash and
+R16 losslessly compresses the same artwork, shrinking the NRO from 256KiB to
+152KiB. It decodes once per UI context directly into the existing texture.
+Appearance, settings, hit rendering and GPU texture dimensions remain unchanged.
+Host, compiled ARM32 and real-ImGui fixtures verify the decoded bytes and
+rendering. Prior user-confirmed gameplay remains the manual evidence; no fresh
+r16 in-game run is claimed. `release-manifest.json` records the exact NRO hash and
 compiled check count. The adjacent `SHA256SUMS` covers the ZIP, plugin, README,
 notices and release manifest. Only the `damage-number` folder belongs in Eden.
+
+The tested Forge loader has a known visual corruption issue when its menu and
+damage popups are visible together. This compression update leaves that issue
+unchanged.

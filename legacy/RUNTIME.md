@@ -691,3 +691,27 @@ Clean packaging validation reopens a one-member ZIP, compares its NRO with the
 324-check report, checks every adjacent checksum, and verifies full font/art/
 dependency notices. Two packaging runs produce identical bytes. A fresh read
 of the installed NRO now matches r15; this packaging task did not install it.
+
+## 2026-10-05: r16 lossless embedded artwork compression
+
+At the user's request, replace pixel RLE with an owned bounded DN-LZ1 decoder.
+The 64,170-byte compressed stream reproduces the exact 524,288-byte RGBA
+atlas (`fe15190c98259443a01add264777b2b4bee994bbd58f9c8f5f12338abb399f2b`).
+The NRO becomes 155,648 bytes (152KiB) from 262,144 (256KiB); BSS remains
+1,093,632 bytes and imports are unchanged. The native decoder runs only at
+ImGui context initialization, directly into Forge's texture allocation.
+No per-hit decoding, persistent scratch storage or extra draw calls are added.
+
+The host decoder median is 143.431µs, compared with the previous RLE's
+139.387µs, measured across nine batches of 100 decodes. This is initialization
+CPU timing on the host, not Eden/ARM/GPU performance. Exact real-ImGui texture,
+vertex/index/command and composited-preview comparisons pass. All 338 compiled
+ARM32 checks and the host/codec/provenance suites pass. Prior gameplay evidence
+remains applicable; no new runtime test is claimed.
+
+R15 input artifacts are hashed and preserved at
+`backups/damage-numbers/r15-before-compression-20261005/`. The clean r16 ZIP
+contains only the runtime NRO, with notices and provenance beside it.
+Installed r15, Forge, Better Input, saves and configuration are left unchanged.
+The known multi-draw-list corruption in Forge's renderer remains unresolved.
+See [compression details](COMPRESSION.md).

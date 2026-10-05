@@ -56,3 +56,11 @@ version-1 settings are ignored; save explicitly to create version 2.
 These checked items record r9 and earlier user reports. The unchecked r10 items
 above remain pending. Record only new observations in the r10 section of
 [TEST_RESULTS.md](TEST_RESULTS.md).
+
+## R16 compression smoke check
+
+All previous checks above remain completed. R16 preserves the same font,
+artwork, draw output, settings and behavior. If trying the new compressed NRO,
+a normal boot and a few Wilds-style hits are sufficient to confirm the startup
+texture appears. There is no need to repeat the combat checklist.
+The known Forge menu/damage-popup corruption remains outside this update.

@@ -119,3 +119,20 @@ New compiled checks confirm 20px/30px defaults and 24px at 1.2; persistence
 checks confirm existing scales remain multipliers of the new base. Historical
 gameplay confirmations above remain the manual evidence; no new r15 gameplay
 run is claimed. No further exhaustive manual checklist is requested.
+
+## R16 compression verification — 2026-10-05
+
+The 152KiB plugin preserves the accepted r15 artwork, font and real-ImGui
+rendering byte for byte. Passed: 13 deterministic codec round trips, 20,000
+malformed streams under ASan/UBSan, explicit guard/truncation checks, the
+919 core/presentation checks, mailbox stress, 23 transaction scenarios and
+338 compiled ARM32 checks. New compiled checks cover exact texture decode,
+per-context initialization, no decoding during hit rendering, malformed
+copies and cleanup/logging of invalid artwork.
+
+BSS and imported APIs match r15; the GPU texture and draw output are unchanged.
+The host decoder median is 143.431µs once per UI context, versus 139.387µs for
+RLE. These are host CPU measurements, with no new gameplay or live FPS result
+claimed. Installed r15 and its rollback materials remain unchanged. Detailed
+evidence: [COMPRESSION.md](COMPRESSION.md). The known Forge overlay corruption
+remains open.

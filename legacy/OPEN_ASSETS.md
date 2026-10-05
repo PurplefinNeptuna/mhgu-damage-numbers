@@ -1,4 +1,4 @@
-# Damage numbers r15: finished open-only release
+# Damage numbers r16: open-only release
 
 The sole supported build uses **Open Sans Semibold 600**, a renamed digit subset under
 SIL Open Font License 1.1, and independently authored procedural red/blue crit
@@ -29,7 +29,7 @@ Classic retains its original 1.25x/0.1-second pop, continuous drift and fade.
 
 ## Download and installation
 
-Archive: `build/damage-numbers/releases/r15/damage-numbers-r15.zip`.
+Archive: `build/damage-numbers/releases/r16/damage-numbers-r16.zip`.
 Plugin: `build/damage-numbers/open-assets/candidate-package/romfs/nativeNX/plugins/damage_numbers_capture.nro`.
 
 Close Eden, preserve the current NRO outside its load directory, then replace
@@ -43,12 +43,13 @@ and 60px at 4K. Size 1.2 restores the former 24px/36px pair. Critical marker
 gaps and compact collision margins scale with the selected preview; the
 stamp/hold/exit timing and 30px exit travel remain unchanged.
 
-The release is finished and ready for distribution. Prior combat, persistence
-and appearance confirmations remain the gameplay evidence. R15's final size
-is verified by host, compiled ARM32 and real-ImGui fixtures; no new in-game run
-is claimed. No additional manual checklist is required for this final adjustment.
-Packaging preserves installed files; a fresh read now finds r15 installed.
-The packager does not perform installation.
+R16 compresses the accepted RGBA atlas losslessly with DN-LZ1. The artwork,
+font, visible size and animation remain identical to r15. The NRO is 152KiB,
+down from 256KiB. Decoding writes directly into Forge's existing texture buffer
+once per ImGui context. It adds no per-hit work or persistent allocation.
+[Compression evidence](COMPRESSION.md) includes bounded host/ARM decoding,
+byte comparisons and initialization timing. The installed r15 remains unchanged;
+no fresh r16 gameplay run is claimed.
 
 ## Asset provenance and notices
 
@@ -77,10 +78,12 @@ Forge/devkitARM baseline remains required. Wilds installation/extraction is not
 needed for this profile.
 
 ```bash
+python3 scripts/test_damage_numbers_sprite_codec.py
 python3 scripts/test_damage_numbers.py
 python3 scripts/build_damage_numbers_capture.py
 python3 scripts/audit_damage_numbers_open_assets.py
 python3 scripts/test_damage_numbers_visual.py
+python3 scripts/verify_damage_numbers_compression.py
 tools/mwc-analysis-venv/bin/python scripts/damage_numbers_capture_probe.py
 python3 scripts/package_damage_numbers.py
 ```

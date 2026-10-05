@@ -7,6 +7,7 @@
 #include <cstddef>
 #include "wilds_font_data.h"
 #include "wilds_sprite_data.h"
+#include "sprite_codec.h"
 namespace damage_numbers {
 static void* font_context;
 static ImFont* wilds_font;
@@ -43,17 +44,9 @@ void cosmetics_init(void* context) {
         sprite_texture=ImTextureData_ImTextureData();
         if(sprite_texture) {
             ImTextureData_Create(sprite_texture,ImTextureFormat_RGBA32,wilds_sprite_width,wilds_sprite_height);
-            auto* pixels=static_cast<uint32_t*>(ImTextureData_GetPixels(sprite_texture));
-            if(pixels) {
-                unsigned written=0;
-                for(unsigned i=0;i<sizeof(wilds_sprite_rle);i+=5) {
-                    const unsigned count=wilds_sprite_rle[i];
-                    for(unsigned j=0;j<count;++j) {
-                        pixels[written++]=uint32_t(wilds_sprite_rle[i+1])|
-                            (uint32_t(wilds_sprite_rle[i+2])<<8)|(uint32_t(wilds_sprite_rle[i+3])<<16)|
-                            (uint32_t(wilds_sprite_rle[i+4])<<24);
-                    }
-                }
+            auto* pixels=static_cast<uint8_t*>(ImTextureData_GetPixels(sprite_texture));
+            if(pixels&&decode_sprite(wilds_sprite_lz,sizeof(wilds_sprite_lz),pixels,
+                    wilds_sprite_width*wilds_sprite_height*4)) {
                 igRegisterUserTexture(sprite_texture);
             } else {ImTextureData_destroy(sprite_texture);sprite_texture=nullptr;}
         }
