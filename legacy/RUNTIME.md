@@ -403,3 +403,49 @@ The fixtures inspect draw arguments and modeled storage; they do not prove
 Forge GPU output or Eden gameplay. R10 manual confirmation remains pending:
 three reference crit cases, two LBG bursts, style switching and one saved-style
 restart. Earlier accepted combat coverage is retained in TEST_RESULTS.md.
+
+## 2026-10-05: r11 screenshot matching, staged
+
+The user described r10 positive/negative crit symbols as near-perfect, then
+supplied Wilds/mod screenshots showing thin/narrow digits and a star core that
+needed more thickness. They clarified that weakspot digits should glow instead
+of using the r10 dark shadow. Their existing r10 checklist has all six cosmetic,
+spacing, style-switch and saved-style restart items checked; those edits are
+preserved without changing or committing their checklist in this update.
+
+R11 replaces Condensed Semibold 600 with full-width Roboto Bold 700. The zero's
+ink width/height ratio changes from 0.554 to 0.658, keeping height normalization
+at 1.0. Star height is 0.30 rather than 0.24 font sizes, with a fuller waist and
+brighter pale core; its width, polarity/colors and default gap remain. Stars
+now center on the actual pixel-rounded glyph bounds. Weakspot digits use a
+symmetric warm halo behind crisp fill and no black shadow. White/gray digits
+retain a small shadow. Classic, capture hooks, damage/source behavior, animation,
+settings format and cached bounded offsets remain unchanged.
+
+Validation:
+
+- 895 ASan/UBSan host checks passed, including thicker marker bounds, actual
+  glyph centering and preserved Classic origins. Mailbox stress and 23
+  transactional-hook scenarios passed.
+- 312 compiled ARM32 NRO checks passed with explicit fixtures, including
+  font registration/ownership/fallback, warm halo without black shadow,
+  symmetric rounded halo offsets, fractional-position star centering for
+  both polarities, final fade and the 128-number dense limit.
+- Static TTF checks confirm width 100, weight 700, complete digits/fallbacks
+  and no remaining variable axes. Python syntax and Git whitespace passed.
+  Installed Forge exports and the baseline input hashes were checked by build.
+
+Candidate NRO SHA-256: `2b55907b6f19b57f04d776db75eba0a209e6c4bccf0e9d2e46ee9f610eae6330`
+(90,112 file bytes; 1,093,632 BSS bytes).
+Font subset SHA-256: `495d951b5c118e5c1169928eb8a606d4bf79f945f6f654e2dc34515eb96d0b1b`
+(10,440 bytes). Source/axes/license hashes:
+`fonts/source.json`; package license: `Roboto-OFL.txt`.
+
+Installed r10 was verified as
+`4030d8c4d564b3f61f4b7c3a4b23421a30874be032cbf4d54ebdcf164a05bf6b`,
+with a matching rollback under `backups/damage-numbers/pre-r11/` outside Eden.
+The installed binary, game saves and emulator settings were not changed.
+
+The fixtures record modeled font/draw calls and do not execute the Forge GPU
+renderer. R11 appearance still needs a short comparison in-game, described in
+R11_VISUAL_CHECK.md. Earlier damage/persistence coverage needs no full repeat.

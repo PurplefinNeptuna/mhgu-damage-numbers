@@ -319,7 +319,7 @@ void capture_install() {
     }
     __atomic_store_n(&active,1,__ATOMIC_RELEASE);
     status = "Damage numbers ready";
-    forge_log_info("[damage-numbers] Capture r10: %u hooks; automatic startup; one private arena/TLS slot; hit log limit 256",hook_count);
+    forge_log_info("[damage-numbers] Capture r11: %u hooks; automatic startup; one private arena/TLS slot; hit log limit 256",hook_count);
 }
 void capture_monitor() {
     if (!load(active)) return;
@@ -502,7 +502,7 @@ void capture_panel() {
     igTextUnformatted(settings_status(),nullptr);
     if (!igTreeNode_Str("Diagnostics##damage-numbers")) return;
     const PanelTreeScope diagnostics_tree;
-    igTextUnformatted("Capture r10: automatic startup; camera and combat hooks active.",nullptr);
+    igTextUnformatted("Capture r11: automatic startup; camera and combat hooks active.",nullptr);
     igTextUnformatted("Shared counters are best-effort under contention; per-hit records remain separate.",nullptr);
     igText("Collision %u; normalization %u; feedback %u; viewport %u",load(calls[0]),load(calls[1]),load(calls[2]),load(calls[3]));
     igText("Camera uploads %u; HZV taps %u; melee queries %u; shot queries %u",load(calls[4]),load(calls[5]),load(calls[6]),load(calls[7]));

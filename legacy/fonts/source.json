@@ -1,11 +1,15 @@
 {
-  "family": "Roboto Condensed",
-  "weight": 600,
+  "family": "Roboto",
+  "weight": 700,
   "revision": "69d0549e8fc7ad72e1531734c81237be401ec4fd",
-  "source_url": "https://raw.githubusercontent.com/google/fonts/69d0549e8fc7ad72e1531734c81237be401ec4fd/ofl/robotocondensed/RobotoCondensed%5Bwght%5D.ttf",
-  "source_sha256": "dace262afcee68a5276f200d8026c57221735c0118ab5fda8c2c0d3dc409a8d0",
-  "license_sha256": "0e4cc6ece88573545be2ed25835363662a6182ba4a4c1b5c8feda52add30e8a6",
+  "source_url": "https://raw.githubusercontent.com/google/fonts/69d0549e8fc7ad72e1531734c81237be401ec4fd/ofl/roboto/Roboto%5Bwdth%2Cwght%5D.ttf",
+  "source_sha256": "d7598e12c5dbef095ff8272cfc55da0250bd07fbdecbac8a530b9b277872a134",
+  "license_sha256": "061402327a96aadb0bfb694a960ed289ecd38d383e396243831ab81feb109c41",
   "fonttools_version": "4.66.1",
   "glyphs": "0123456789 ?",
-  "original_path": "work/damage-numbers/font-source/RobotoCondensed[wght].ttf"
+  "original_path": "work/damage-numbers/font-source/roboto/Roboto[wdth,wght].ttf",
+  "axes": {
+    "wdth": 100,
+    "wght": 700
+  }
 }

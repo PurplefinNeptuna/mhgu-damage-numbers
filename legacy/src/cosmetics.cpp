@@ -52,8 +52,8 @@ bool cosmetics_measure(const char* text,float pixels,VisualStyle style,TextMetri
 }
 static void star(ImDrawList* draw,Point center,float width,float height,uint32_t color) {
     const float x=width*.5f,y=height*.5f;
-    const Point ring[8]={{-x,0},{-x*.10f,-y*.24f},{0,-y},{x*.10f,-y*.24f},
-                        {x,0},{x*.10f,y*.24f},{0,y},{-x*.10f,y*.24f}};
+    const Point ring[8]={{-x,0},{-x*.14f,-y*.34f},{0,-y},{x*.14f,-y*.34f},
+                        {x,0},{x*.14f,y*.34f},{0,y},{-x*.14f,y*.34f}};
     for(unsigned i=0;i<8;++i) {
         const Point a=ring[i],b=ring[(i+1)%8];
         ImDrawList_AddTriangleFilled(draw,{center.x,center.y},{center.x+a.x,center.y+a.y},
@@ -64,6 +64,11 @@ void cosmetics_draw(void* list,const DrawNumber& n) {
     auto* draw=static_cast<ImDrawList*>(list);ImFont* font=selected_font(n.style);if(!draw||!font)return;
     const float pixels=n.style==VisualStyle::Wilds&&wilds_font?n.pixels*wilds_font_scale:n.pixels;
     auto text=[&](float x,float y,uint32_t color) {
+        // ImGui truncates origins. Round signed halo offsets first so opposite
+        // glow passes stay symmetric around the same pixel-aligned glyphs.
+        if(n.style==VisualStyle::Wilds) {
+            x=float(int(x+(x>=0?.5f:-.5f)));y=float(int(y+(y>=0?.5f:-.5f)));
+        }
         ImDrawList_AddText_FontPtr(draw,font,pixels,{n.position.x+x,n.position.y+y},color,n.text,nullptr,0,nullptr);
     };
     const uint32_t color=imgui_color(n.color,n.opacity);
@@ -78,14 +83,24 @@ void cosmetics_draw(void* list,const DrawNumber& n) {
         }
         return;
     }
-    text(n.unit,n.unit,imgui_color(0,n.opacity*.38f));
-    const float edge=.45f*n.unit;const uint32_t outline=imgui_color(0,n.opacity*.18f);
-    text(-edge,0,outline);text(edge,0,outline);text(0,-edge,outline);text(0,edge,outline);text(0,0,color);
+    if(n.color==rgb(Tint::Weak,VisualStyle::Wilds)) {
+        // Symmetric warm halo, with a crisp opaque center. No black shadow.
+        const float outer=1.8f*n.unit,inner=.75f*n.unit;
+        const uint32_t halo=imgui_color(n.color,n.opacity*.055f);
+        const uint32_t rim=imgui_color(n.color,n.opacity*.10f);
+        text(-outer,0,halo);text(outer,0,halo);text(0,-outer,halo);text(0,outer,halo);
+        text(-inner,-inner,rim);text(inner,-inner,rim);text(-inner,inner,rim);text(inner,inner,rim);
+    } else {
+        text(n.unit,n.unit,imgui_color(0,n.opacity*.22f));
+        const float edge=.35f*n.unit;const uint32_t outline=imgui_color(0,n.opacity*.10f);
+        text(-edge,0,outline);text(edge,0,outline);text(0,-edge,outline);text(0,edge,outline);
+    }
+    text(0,0,color);
     if(n.critical==Critical::None)return;
     const uint32_t rgb=star_rgb(n.critical);
     const float expansions[3]={1.8f,1.5f,1.25f},alphas[3]={.055f,.09f,.16f};
-    for(unsigned i=0;i<3;++i)star(draw,n.star,n.pixels*1.1f*expansions[i],n.pixels*.24f*expansions[i],imgui_color(rgb,n.opacity*alphas[i]));
-    star(draw,n.star,n.pixels*1.1f,n.pixels*.24f,imgui_color(rgb,n.opacity));
-    star(draw,n.star,n.pixels*.42f,n.pixels*.065f,imgui_color(n.critical==Critical::Positive?0xffe7f0:0xe5f4ff,n.opacity*.9f));
+    for(unsigned i=0;i<3;++i)star(draw,n.star,n.pixels*1.1f*expansions[i],n.pixels*wilds_star_height*expansions[i],imgui_color(rgb,n.opacity*alphas[i]));
+    star(draw,n.star,n.pixels*1.1f,n.pixels*wilds_star_height,imgui_color(rgb,n.opacity));
+    star(draw,n.star,n.pixels*.38f,n.pixels*.12f,imgui_color(n.critical==Critical::Positive?0xffe7f0:0xe5f4ff,n.opacity*.9f));
 }
 }

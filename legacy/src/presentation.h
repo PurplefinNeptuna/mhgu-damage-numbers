@@ -44,6 +44,10 @@ inline float overlap(Rect a,Rect b,float margin) {
            high(0,low(a.bottom,b.bottom)+margin-high(a.top,b.top));
 }
 inline bool inside(Rect r,const View& v) { return r.left>=v.x&&r.top>=v.y&&r.right<=v.x+v.width&&r.bottom<=v.y+v.height; }
+static constexpr float wilds_star_height=.30f;
+inline Point glyph_origin(Point p,VisualStyle style) {
+    return style==VisualStyle::Wilds?Point{float(int(p.x)),float(int(p.y))}:p;
+}
 inline uint32_t star_rgb(Critical c) { return c==Critical::Positive?0xf1689b:0x68b9ff; }
 struct DrawNumber {
     Point position, offset, star;
@@ -58,7 +62,7 @@ struct DrawNumber {
 inline Rect marker_bounds(Rect ink,float pixels,float unit,Critical critical,VisualStyle style) {
     if (critical==Critical::None) return ink;
     const float cx=(ink.left+ink.right)*0.5f;
-    const float halfh=style==VisualStyle::Wilds?pixels*.12f:2*unit;
+    const float halfh=style==VisualStyle::Wilds?pixels*wilds_star_height*.5f:2*unit;
     const float y=critical==Critical::Positive?ink.top-2*unit-halfh:ink.bottom+2*unit+halfh;
     const float halfw=style==VisualStyle::Wilds?pixels*.55f:(ink.right-ink.left)*.5f;
     return united(ink,{cx-halfw,y-halfh,cx+halfw,y+halfh});
@@ -123,7 +127,8 @@ inline unsigned layout(const Model& model,const View& view,float now,DrawNumber 
         reserved=solid_bounds(reserved,{anchor.x-peak.advance*.5f,cy},base*1.25f,peak.advance,
             s.style==VisualStyle::Wilds?unit:view.height/720.0f,d.critical,s.style);
         const float shadow=s.style==VisualStyle::Wilds?unit:1.25f*view.height/720.0f;
-        reserved={reserved.left-shadow,reserved.top-shadow,reserved.right+shadow,reserved.bottom+shadow};
+        const float snap_pad=s.style==VisualStyle::Wilds?1.0f:0.0f;
+        reserved={reserved.left-shadow-snap_pad,reserved.top-shadow-snap_pad,reserved.right+shadow+snap_pad,reserved.bottom+shadow+snap_pad};
         PlacementState::Entry* entry=nullptr;
         for(auto& item:cache.entries)if(item.live&&item.key==d.key){entry=&item;break;}
         if(!entry) {
@@ -143,12 +148,15 @@ inline unsigned layout(const Model& model,const View& view,float now,DrawNumber 
             *entry={d.key,best,true};
         }
         d.offset=entry->offset;d.position.x+=d.offset.x;d.position.y+=d.offset.y;
-        d.ink=shifted(d.ink,d.offset);d.reserve=shifted(reserved,d.offset);
+        // ImGui truncates text origins before drawing. Center stars on those
+        // same visible glyph bounds rather than the pre-rounded text origin.
+        d.position=glyph_origin(d.position,d.style);
+        d.ink=shifted(current.ink,d.position);d.reserve=shifted(reserved,d.offset);
         d.solid=solid_bounds(d.ink,d.position,d.pixels,d.advance,
             s.style==VisualStyle::Wilds?unit:view.height/720.0f,d.critical,s.style);
         d.solid={d.solid.left-shadow,d.solid.top-shadow,d.solid.right+shadow,d.solid.bottom+shadow};
         if(!inside(d.solid,view))continue;
-        const float halfh=s.style==VisualStyle::Wilds?d.pixels*.12f:2*unit;
+        const float halfh=s.style==VisualStyle::Wilds?d.pixels*wilds_star_height*.5f:2*unit;
         d.star={(d.ink.left+d.ink.right)*.5f,d.critical==Critical::Positive?
                 d.ink.top-2*unit-halfh:d.ink.bottom+2*unit+halfh};
         out[count++]=d;

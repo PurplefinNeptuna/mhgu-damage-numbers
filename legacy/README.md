@@ -1,8 +1,8 @@
 # Damage numbers
 
-R10 adds Wilds-inspired cosmetics and compact hit spacing. The candidate is
-staged for manual confirmation; installation is separate. Use the short
-[cosmetic checklist](TEST_CHECKLIST.md). The [r9 results](TEST_RESULTS.md) and
+R11 refines the Wilds font, crit star thickness/alignment and weakspot glow
+against the new comparison screenshots. The candidate is staged; installation
+is separate. Use the short [visual check](R11_VISUAL_CHECK.md). The [r9 results](TEST_RESULTS.md) and
 [runtime history](RUNTIME.md) retain the completed combat checks.
 
 Target: MHGU 1.4.0 Switch, Eden/Linux, and the tested patched Forge baseline.
@@ -28,9 +28,12 @@ Capture hooks, damage calculations and ownership bindings are unchanged.
 | Positive crit | Pink-red `#F1689B` star above | Digit-colored line above |
 | Negative crit | Blue `#68B9FF` star below | Digit-colored line below |
 
-Wilds uses Roboto Condensed Semibold 600, a visual approximation of the
-references. Digits have a small dark shadow and thin translucent edge. Only
-crit stars have colored glow; their colors are independent of digit color.
+Wilds uses full-width Roboto Bold 700 as a visual approximation of the
+references, retaining the accepted digit height. Gold digits have a symmetric
+warm halo and crisp center, without a black shadow. White/gray digits keep a
+small dark shadow. Stars have a slightly fuller center, a brighter pale core
+and independent red/blue glow. They align to the actual pixel-rounded glyph
+bounds; their colors are independent of digit color.
 Classic keeps Forge's font, outlined digits and straight critical lines.
 Font provenance, reproducible preparation and license: [fonts/README.md](fonts/README.md).
 
@@ -87,7 +90,10 @@ source filtering and config recovery. They do not run Forge's GPU renderer.
 
 R9 passed all 16 LS/bowgun checks, settings persistence, monster-to-monster,
 Prowler and bomb display. The reported wide LBG spacing prompted this update.
-R10 cosmetic appearance and saved style still need the brief manual trial.
+The r10 working checklist marks style, saved-style restart and spacing checks
+complete. The user described the crit symbols as near-perfect and requested
+closer font, thickness/alignment and weakspot glow matching. Only those r11
+visual refinements need another look.
 
 ## Build and delivery
 
@@ -99,6 +105,7 @@ No new capture hooks, CodeMemory objects or TLS slots are added.
 
 Candidate: `build/damage-numbers/capture/candidate-package/`.
 Hashes and sources: `build/damage-numbers/capture/candidate-manifest.json`.
-R9 rollback: `backups/damage-numbers/r9/58914dd47c797356c892696cc6bdc9bd60543afeb5958f31e91bc40bb0f524fe/`.
+R10 rollback: `backups/damage-numbers/pre-r11/4030d8c4d564b3f61f4b7c3a4b23421a30874be032cbf4d54ebdcf164a05bf6b/`.
+The earlier r9 rollback remains under `backups/damage-numbers/r9/`.
 Preparation preserves installed packages, emulator settings and save files.
 Installation, game launch, Forge upgrades and pushes require separate scope.

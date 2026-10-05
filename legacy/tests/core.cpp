@@ -247,4 +247,17 @@ static void compact_spacing() {
     check(layout(m,view(),1,commands,state,varied_measure)==1&&inside(commands[0].reserve,view()),"viewport edge chooses a nearby inward position");
     check(layout(m,view(),2,commands,state,varied_measure)==0,"expired labels are not rendered");
 }
-int main() { policies();lifecycle();drawing();compact_spacing();preview();settings_and_sources();std::printf("Passed %u core/presentation checks\n",cases); }
+static void aligned_markers() {
+    const Rect ink={0,4,40,24};
+    const Rect positive=marker_bounds(ink,30,1,Critical::Positive,VisualStyle::Wilds);
+    const Rect negative=marker_bounds(ink,30,1,Critical::Negative,VisualStyle::Wilds);
+    check(std::fabs(positive.top-(4-2-9))<.001f&&std::fabs(negative.bottom-(24+2+9))<.001f,"fuller star solid bounds reserve 0.30 font heights plus glyph gap");
+    Model m;m.reset(7);Event e=hit();e.position={.2517f,.013f,.5f};e.critical=Critical::Positive;m.capture(e);m.update(1,true);
+    DrawNumber out[128]{};PlacementState state{};
+    layout(m,view(),1,out,state,varied_measure);
+    check(out[0].position.x==int(out[0].position.x)&&out[0].position.y==int(out[0].position.y),"Wilds text origin is pixel aligned");
+    check(std::fabs(out[0].star.x-(out[0].ink.left+out[0].ink.right)*.5f)<.001f,"star follows actual visible glyph center");
+    Settings s=m.config();s.style=VisualStyle::Classic;m.configure(s);layout(m,view(),1,out,state,varied_measure);
+    check(out[0].position.x!=int(out[0].position.x),"Classic retains original text origin behavior");
+}
+int main() { policies();lifecycle();drawing();compact_spacing();aligned_markers();preview();settings_and_sources();std::printf("Passed %u core/presentation checks\n",cases); }

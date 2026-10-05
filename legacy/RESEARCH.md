@@ -286,3 +286,23 @@ input order for equal scores. Reservations include maximum-pop glyphs, solid
 markers and small shadows, excluding glow. New hits retain bounded offsets;
 existing hits retain theirs until expiry or context/style/size/viewport reset.
 Classic collision bounds include its existing straight outlined markers.
+
+## R11 screenshot refinement
+
+The supplied Wilds reference shows wider/heavier digits and a fuller star core
+than r10. Full-width Roboto Bold 700 replaces Condensed Semibold 600; this is
+still an approximation. The pinned preparation recipe preserves visible digit
+height. Star solid height changes from 0.24 to 0.30 font sizes, with a fuller
+waist and pale center; width and two-pixel default gap remain unchanged.
+
+ImGui's pinned RenderText truncates text origins. Wilds layout now matches that
+origin before computing visible glyph bounds/star centers. Signed glow offsets
+are rounded symmetrically before rendering. Only weakspot digits receive an
+eight-pass warm halo behind the crisp fill; no black shadow is drawn there.
+White and gray retain a small dark shadow. Classic is unchanged.
+
+Solid placement bounds include the thicker star and one pixel of reservation
+slack for origin rounding, excluding the soft halo. Cached offsets and the
+17-candidate bounds remain unchanged. The installed NVN backend advertises and
+uses RendererHasVtxOffset, so increased halo vertices remain supported in dense
+bursts; ARM fixtures still do not execute that GPU backend.
