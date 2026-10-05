@@ -20,7 +20,9 @@ Close Eden before installing. Preserve the current NRO outside Eden's load
 directory, then replace it with the r16 NRO. Keep one damage-number plugin.
 For a fresh setup, copy the extracted `damage-number/` folder into Eden's title
 `0100770008DD8000` mod directory alongside Forge, and enable it in Eden.
-The packager performs no installation; installed r15 remains unchanged.
+The packager performs no installation. A fresh read during release cleanup
+finds the installed NRO matching r16; this is a file-hash check, not new
+gameplay confirmation.
 
 ## Defaults and evidence
 

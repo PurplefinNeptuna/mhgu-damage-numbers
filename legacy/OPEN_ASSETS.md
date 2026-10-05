@@ -48,8 +48,9 @@ font, visible size and animation remain identical to r15. The NRO is 152KiB,
 down from 256KiB. Decoding writes directly into Forge's existing texture buffer
 once per ImGui context. It adds no per-hit work or persistent allocation.
 [Compression evidence](COMPRESSION.md) includes bounded host/ARM decoding,
-byte comparisons and initialization timing. The installed r15 remains unchanged;
-no fresh r16 gameplay run is claimed.
+byte comparisons and initialization timing. Release cleanup made no installed
+file changes; a fresh read now finds the installed NRO matching r16. No fresh
+r16 gameplay run is claimed.
 
 ## Asset provenance and notices
 
