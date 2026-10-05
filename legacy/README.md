@@ -121,7 +121,9 @@ python3 scripts/package_damage_numbers.py
 Current ZIP: `build/damage-numbers/releases/r15/damage-numbers-r15.zip`.
 Package: `build/damage-numbers/releases/r15/damage-number/`.
 Source manifest: `build/damage-numbers/open-assets/candidate-manifest.json`.
-NRO and archive SHA-256 values are recorded in the release manifests and checksums.
+The ZIP contains only the runtime NRO. README, combined redistribution notices,
+provenance/audit manifest and checksums remain beside it. Keep `NOTICES.txt`
+with the ZIP when redistributing. NRO and archive hashes are recorded there.
 
 The user approved the open appearance and selected 20px at 720p as size 1.0
 from the real-renderer comparison. This is 30px at 1080p and 40px at 1440p.

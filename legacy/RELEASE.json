@@ -6,7 +6,7 @@
   "font": "Open Sans Semibold 600",
   "nro_sha256": "7c112c6bf497207f8bdf475687bab3b0056c0726ac4db1707db8f8adc01e07da",
   "release_archive": "build/damage-numbers/releases/r15/damage-numbers-r15.zip",
-  "installed_plugin_matches": false,
+  "installed_plugin_matches": true,
   "compiled_fixture_checks": 324,
   "compiled_fixture_reused_only_for_identical_nro": false,
   "fresh_runtime_test_performed": false,
@@ -20,5 +20,7 @@
   "transactional_hook_scenarios": 23,
   "real_imgui_preview": "PASSED",
   "asset_audit": "PASSED_OPEN_ASSET_PROVENANCE",
-  "installed_by_recipe": false
+  "installed_by_recipe": false,
+  "archive_layout": "runtime_only",
+  "redistribution_notices": "build/damage-numbers/releases/r15/NOTICES.txt"
 }

@@ -52,7 +52,8 @@ PAK/font-conversion notices and provenance are archived under `history/r12/`.
 ## Supported open assets
 
 The only supported r15 profile embeds an Open Sans Semibold 600 digit subset from pinned Google
-Fonts and includes the full SIL OFL notice. It is renamed Damage Digits Open;
+Fonts; the NRO embeds the full SIL OFL notice. The release also supplies full
+font/art/dependency notices in `NOTICES.txt` beside the runtime-only ZIP. It is renamed Damage Digits Open;
 [source/axes/license hashes](fonts/open-source.json) document the modified
 subset. Independently authored procedural crit artwork uses the separate
 [notice](OPEN_ART_LICENSE.txt). Its binary and ZIP include no extracted

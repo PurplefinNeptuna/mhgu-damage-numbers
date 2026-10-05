@@ -7,9 +7,11 @@ edition remains retired.
 ## Package and installation
 
 `build/damage-numbers/releases/r15/damage-numbers-r15.zip` contains one
-`damage-number/` mod folder, one NRO at
-`romfs/nativeNX/plugins/damage_numbers_capture.nro`, full font/art/dependency
-notices, source provenance, manifest and SHA-256 checksums. The tested patched
+`damage-number/` mod folder with only
+`romfs/nativeNX/plugins/damage_numbers_capture.nro`, matching modern-control's
+runtime-only archive layout. README, combined `NOTICES.txt`, source/audit release
+manifest and SHA-256 checksums remain beside the ZIP. Keep `NOTICES.txt` with
+the archive when redistributing. The tested patched
 Forge loader is required and is not bundled. Target: MHGU 1.4.0, Switch, Eden/Linux.
 
 Close Eden before installing. For a fresh setup, extract the ZIP and copy
@@ -36,7 +38,8 @@ real-renderer comparison. Combat, source filtering, persistence and Prowler/bomb
 confirmations remain recorded in [TEST_RESULTS.md](TEST_RESULTS.md). The final
 size update is covered by host, compiled ARM32, real-ImGui and provenance checks.
 This release makes no claim of a fresh r15 gameplay run. Installation has not
-been performed; the installed r14 plugin and rollback material are preserved.
+been performed by the packager; rollback material is preserved. A fresh read
+now finds the installed plugin matching r15.
 
 The packager requires matching build/fixture/audit hashes, checks the new
 20px/30px size assertions, then reopens and verifies every deterministic ZIP

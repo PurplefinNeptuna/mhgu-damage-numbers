@@ -671,3 +671,23 @@ a hashed r14 candidate/fixture/audit rollback copy is under
 `build/damage-numbers/releases/r15/damage-numbers-r15.zip`; installation is
 separate. Prior user-confirmed gameplay coverage is retained, with no fresh
 r15 game run claimed. The release status is `FINISHED_DISTRIBUTION_READY`.
+
+## 2026-10-05: clean r15 installable archive
+
+The first r15 ZIP put eight README/license/provenance/checksum files inside the
+installable `damage-number` folder. The user requested modern-control's clean
+layout. The packager now asserts one member: the NRO at its runtime path.
+README, combined font/art/dependency notices, full source/audit release manifest
+and checksums remain beside the ZIP. Notices accompany redistribution.
+
+The previous package is preserved under
+`backups/damage-numbers/r15-before-clean-package-20261005/` with verified hashes.
+No plugin behavior changes: the NRO remains
+`7c112c6bf497207f8bdf475687bab3b0056c0726ac4db1707db8f8adc01e07da`;
+the completed 324-check ARM32 report remains applicable to these same bytes.
+No gameplay rerun or installation is part of this packaging correction.
+
+Clean packaging validation reopens a one-member ZIP, compares its NRO with the
+324-check report, checks every adjacent checksum, and verifies full font/art/
+dependency notices. Two packaging runs produce identical bytes. A fresh read
+of the installed NRO now matches r15; this packaging task did not install it.

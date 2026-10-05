@@ -3,7 +3,7 @@
 Finished open-font release for Monster Hunter Generations Ultimate 1.4.0
 (Nintendo Switch), tested on Eden/Linux with the maintained patched Forge loader.
 Forge is required and is not included. Its tested binary fingerprint is recorded
-in `MANIFEST.json`; other loader/game versions have not been validated.
+in `release-manifest.json` beside the ZIP; other loader/game versions have not been validated.
 
 Shows individual damage numbers near each impact, including elemental damage.
 Your hunter/Prowler and Palicoes are included; other hunters' and their Palicoes'
@@ -53,12 +53,14 @@ package does not edit saves or migrate old configurations automatically.
 
 The NRO uses an OFL-licensed Open Sans digit subset and independently authored
 critical-star art. No extracted Monster Hunter Wilds font or texture is bundled.
-Full font, art and dependency notices are included as `FONT_LICENSE.txt`,
-`ART_LICENSE.txt` and `DEPENDENCY_NOTICES.txt`. Font provenance is in
-`FONT_SOURCE.json`; asset verification is in `ASSET_AUDIT.json`.
+The installable ZIP contains only the NRO. Full font, art and dependency
+notices are combined in `NOTICES.txt` beside the ZIP. Keep this notice file
+with the ZIP when redistributing. Font provenance and asset verification are
+recorded in the adjacent `release-manifest.json`.
 
 The release retains prior user-confirmed gameplay coverage and the approved open
 appearance. The final 20px size was selected from the real-renderer comparison
 and verified with host, compiled ARM32 and real-ImGui fixtures. No fresh r15
-in-game run is claimed. `MANIFEST.json` records the exact NRO hash and compiled
-check count; `SHA256SUMS` covers every other package file.
+in-game run is claimed. `release-manifest.json` records the exact NRO hash and
+compiled check count. The adjacent `SHA256SUMS` covers the ZIP, plugin, README,
+notices and release manifest. Only the `damage-number` folder belongs in Eden.

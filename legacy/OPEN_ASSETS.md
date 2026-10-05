@@ -47,7 +47,8 @@ The release is finished and ready for distribution. Prior combat, persistence
 and appearance confirmations remain the gameplay evidence. R15's final size
 is verified by host, compiled ARM32 and real-ImGui fixtures; no new in-game run
 is claimed. No additional manual checklist is required for this final adjustment.
-The installed r14 plugin is preserved; installation is a separate step.
+Packaging preserves installed files; a fresh read now finds r15 installed.
+The packager does not perform installation.
 
 ## Asset provenance and notices
 
@@ -57,7 +58,9 @@ The upstream Google Fonts revision is pinned to
 The modified subset is named **Damage Digits Open** and contains digits, space
 and a question mark. [Source recipe](fonts/open-source.json) records the exact
 axes, font source, license hash and FontTools version. The full
-[OFL notice](fonts/OFL.txt) is embedded and included in the ZIP.
+[OFL notice](fonts/OFL.txt) is embedded in the NRO and included in the adjacent
+`NOTICES.txt`, together with art and dependency notices. The ZIP contains only
+the runtime NRO; redistribute it with `NOTICES.txt`.
 
 The independently authored crit artwork has a separate
 [notice](OPEN_ART_LICENSE.txt). The generator operates on the licensed font
