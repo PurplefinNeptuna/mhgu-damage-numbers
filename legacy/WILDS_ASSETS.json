@@ -1,0 +1,98 @@
+{
+  "reference": "User confirmed default Monster Hunter Wilds damage UI, not Enhanced Damage Numbers",
+  "local_installation": "/mnt/storage2/SteamLibrary/steamapps/common/MonsterHunterWilds/",
+  "extraction": "Selective read-only extraction to ignored work copies; no launch or installation changes",
+  "assets": [
+    {
+      "path": "natives/stm/gui/ui_font/font_efigs0.oft.1",
+      "sha256": "f7f88faa92d7384398c8890769eced2efdb4bb6067628093716093e676dcc521",
+      "bytes": 69504,
+      "archive": "re_chunk_000.pak",
+      "archive_offset": 31890550423
+    },
+    {
+      "path": "natives/stm/gui/ui_texture/tex020000/tex020020_0_imlm4.tex.241106027",
+      "sha256": "04bd3d5ddc942a545e83009a125e898f52767285c9ef505e0ef03d43212ddf16",
+      "bytes": 19548,
+      "archive": "re_chunk_000.pak.sub_000.pak",
+      "archive_offset": 22592807208
+    },
+    {
+      "path": "natives/stm/gui/ui_texture/tex020000/uvs020020.uvs.8",
+      "sha256": "aec9042ef3740e51a4d98891aa3eb3833d906cd7b6c3bcbc9004a1e9c8c5e056",
+      "bytes": 584,
+      "archive": "re_chunk_000.pak",
+      "archive_offset": 33542114396
+    },
+    {
+      "path": "natives/stm/gui/ui020000/ui020000/ui020020.gui.850041",
+      "sha256": "0762cb1848c6a21d0900ed493f0a99bb59dae48f642409422c090bbdb2f1c06e",
+      "bytes": 109364,
+      "archive": "re_chunk_000.pak.patch_014.pak",
+      "archive_offset": 19919669642
+    }
+  ],
+  "font": {
+    "family": "Frutiger Neue LT W1G Medium",
+    "weight": 500,
+    "units_per_em": 1000,
+    "conversion": "CFF cubic to TrueType quadratic, max error 0.25 font units; digits, space, question mark only",
+    "converted_source_sha256": "ff0329d2823f7337997e0bc51203d3b7ed8a06a48706a71008dbfe0343a95fa9",
+    "embedded_sha256": "b2a79e1f114f576f4cf47f68547cab3202f1e48a1b2864e7557984ad5e061b2c",
+    "embedded_bytes": 2352,
+    "height_scale": 0.8621484555094513
+  },
+  "crit": {
+    "atlas_size": [
+      512,
+      256
+    ],
+    "positive_pattern": 2,
+    "negative_pattern": 3,
+    "positive_crop": [
+      0,
+      148,
+      88,
+      196
+    ],
+    "negative_crop": [
+      92,
+      148,
+      180,
+      196
+    ],
+    "rgba_preserved": "Original colors, pale core and baked bloom; RGB at fully transparent pixels canonicalized to zero",
+    "native_size_at_font_30": [
+      44,
+      24
+    ]
+  },
+  "native_gui": {
+    "font_slot": "Slot0",
+    "font_size": 30,
+    "raster_size": 45,
+    "shadow_blur": [
+      6,
+      6
+    ],
+    "shadow_strength": 5,
+    "foreground_glow_blur": [
+      4,
+      4
+    ],
+    "runtime_palette": "Static GUI colors do not establish runtime HZV/crit colors; r11 white/gold/gray digit colors retained"
+  },
+  "render_limit": "Original font outlines and crit sprite pixels are used. Forge/STB rasterization and Gaussian text blur are different from RE Engine; one-to-one final pixels have not been established.",
+  "tools": {
+    "fonttools": "4.66.1",
+    "ree_pak_rs": "59883125d959c7d7238a69d10ec547078b65042e",
+    "ree_pak_gui_list_Ekey": "3626a12a82c5fad753abd0f4fb33f90405c59a04",
+    "path_list_sha256": "e8e6100414a4c28fcb5743f458949e6e0d7a7add19c16ce416298f229265584c",
+    "pak_cipher_source_sha256": "c4530382c068074dd51fc39e8434944cc6bc40bf8a3963d339fefa9a5d6bf883",
+    "tex_chopper": "098a11c4cc77cbdc01db7d87949abda3c32d8b33",
+    "gdeflate_wrapper": "9bac292908bcac7276583efa5ee385e78a28390a",
+    "nvidia_libdeflate": "3bb5c6924b32a91e6e6a8f54ba00a21f037a8db5",
+    "ree_engine_lib_gui_uvs": "ceb0d2fbe9d76f29c552e4c56f4fd8cd87a165ef"
+  },
+  "distribution": "Generated game-derived fonts/textures and NRO remain local and ignored; no redistribution license asserted"
+}

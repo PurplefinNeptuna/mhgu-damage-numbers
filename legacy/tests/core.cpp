@@ -251,7 +251,7 @@ static void aligned_markers() {
     const Rect ink={0,4,40,24};
     const Rect positive=marker_bounds(ink,30,1,Critical::Positive,VisualStyle::Wilds);
     const Rect negative=marker_bounds(ink,30,1,Critical::Negative,VisualStyle::Wilds);
-    check(std::fabs(positive.top-(4-2-9))<.001f&&std::fabs(negative.bottom-(24+2+9))<.001f,"fuller star solid bounds reserve 0.30 font heights plus glyph gap");
+    check(std::fabs(positive.top-(4-2-30*wilds_star_height))<.001f&&std::fabs(negative.bottom-(24+2+30*wilds_star_height))<.001f,"original sprite solid bounds reserve measured alpha-core height plus glyph gap");
     Model m;m.reset(7);Event e=hit();e.position={.2517f,.013f,.5f};e.critical=Critical::Positive;m.capture(e);m.update(1,true);
     DrawNumber out[128]{};PlacementState state{};
     layout(m,view(),1,out,state,varied_measure);

@@ -1,34 +1,65 @@
-# Wilds digit font
+# Wilds digit font and effects
 
-Full-width Roboto Bold is instantiated at `wdth=100`, `wght=700` and subset to digits
-0–9 plus space and a fallback question mark. It approximates the reference font;
-it is not extracted from Monster Hunter Wilds.
+R12 uses the default Wilds damage font: **Frutiger Neue LT W1G Medium**, resolved
+from the UI020020 font slot to `gui/ui_font/font_efigs0.oft.1`. It replaces the
+Roboto approximation used in r10/r11. The user's reference is the default game
+UI, not Enhanced Damage Numbers, which happens to be present in their Wilds
+installation.
 
-Source: [Google Fonts metadata](https://github.com/google/fonts/blob/main/ofl/roboto/METADATA.pb).
-Pinned revision, source URL/hash, OFL hash and FontTools version:
-[source.json](source.json). Full license: [OFL.txt](OFL.txt).
+[Source manifest](source.json) pins the original OFT and converted input hashes.
+[Asset provenance](../WILDS_ASSETS.json) records the selected texture/UV/layout
+resources and tool revisions. Extraction reads the local installation into
+ignored workspace copies; it never modifies or launches Wilds.
 
-For a fresh checkout, obtain the pinned source URL from `source.json` and save it
-at its `original_path`. Install FontTools 4.66.1 in the build's Python environment,
-then run `python3 scripts/prepare_damage_numbers_font.py`. The recipe verifies
-input and license hashes before instancing/subsetting. Generated files live in
-`work/damage-numbers/native-capture/`; they are not committed.
+The OFT wraps a CFF font. Forge's STB rasterizer requires quadratic outlines,
+so the recipe converts only digits, space and question mark with FontTools
+4.66.1, at a maximum curve error of 0.25 font units out of 1,000 units per em.
+The embedded subset is 2,352 bytes, SHA-256
+`b2a79e1f114f576f4cf47f68547cab3202f1e48a1b2864e7557984ad5e061b2c`.
+Visible digit height is normalized against Forge's existing Roboto Medium:
+`0.8621484555`. This retains the accepted on-screen number height.
 
-Subset SHA-256: `495d951b5c118e5c1169928eb8a606d4bf79f945f6f654e2dc34515eb96d0b1b`
-(10,440 bytes). The preparation manifest also records the existing Forge font's
-height-reference hash. Visible digit height is normalized against that font;
-the current factor is 1.0.
+The original crit sprites come from UVS patterns 2 and 3 in the 512x256 damage
+texture. Their original RGBA color, pale core and bloom are retained. Smooth
+glyph-effect masks replace repeated hard-outline text passes. The native GUI
+records shadow blur 6x6/strength 5 and foreground glow blur 4x4; Gaussian mask
+conversion is an approximation of the RE Engine shader. Forge rasterization
+and the blur conversion still need an in-game comparison; using the original
+assets does not establish a pixel-perfect renderer match.
 
-`forge_onImGuiInit` registers the embedded TTF using Forge's exported ImGui APIs.
-The static font buffer and glyph ranges stay alive for the context, with
-`FontDataOwnedByAtlas=false`; only the temporary config is destroyed. A failed
-registration logs once and uses Forge's font with Wilds colors/stars. Ownership
-reference: [ImGui font documentation](https://github.com/ocornut/imgui/blob/master/docs/FONTS.md).
+## Reproduce this local build
 
-The NRO embeds the OFL notice; the staged package includes
-`Roboto-OFL.txt`. Only digits/fallback glyphs are added to the atlas.
+Prerequisites: the user's Wilds installation, the pinned PAK path list and
+cipher source under `tools/wilds-reference/`, FontTools 4.66.1, Pillow/NumPy,
+and the local GDeflate wrapper. Tool revisions and source hashes are recorded
+in [WILDS_ASSETS.json](../WILDS_ASSETS.json). Build the GDeflate wrapper from its
+pinned checkout with CMake `-DCMAKE_POSITION_INDEPENDENT_CODE=ON`.
 
-R11 replaces the r10 condensed weight-600 subset after the user's side-by-side
-screenshots showed thin, narrow digits. The new zero's ink width/height ratio is
-0.658 versus 0.554 for r10; height normalization remains 1.0. Original r10 source
-and license provenance remain in Git history and its NRO rollback.
+```bash
+python3 scripts/extract_wilds_damage_assets.py
+python3 scripts/prepare_damage_numbers_wilds_source.py
+python3 scripts/prepare_damage_numbers_font.py
+python3 scripts/prepare_damage_numbers_sprites.py
+python3 scripts/test_damage_numbers_visual.py
+```
+
+PAK Zstandard entries require Python's `compression.zstd` (available in the
+local Python 3.14). Extracted originals, converted font, generated headers,
+textures and preview stay in ignored `work/damage-numbers/` paths. The recipes
+and fingerprints are tracked, without the game-derived payload. This personal
+candidate contains local game assets; `LOCAL_ASSETS.txt` accompanies the package.
+The old OFL file remains as historical attribution for r10/r11 only.
+
+## Forge registration
+
+`forge_onImGuiInit` registers the embedded font through Forge's exported ImGui
+API. Static font bytes and glyph ranges live for the context, with
+`FontDataOwnedByAtlas=false`; the temporary font config is destroyed. Font
+registration failure logs once and falls back to Forge's font.
+
+The 512x256 RGBA effects texture is registered once per context through
+`igRegisterUserTexture`, using `ImTextureData` and `ImDrawList_AddImage`. Forge's
+installed renderer advertises `RendererHasTextures` and handles its GPU upload.
+Texture pixels and metadata remain alive while the context uses them. The
+baseline loader has no plugin unload callback. Missing texture support logs
+and leaves crisp digits; capture and Classic rendering continue.

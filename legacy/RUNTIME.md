@@ -449,3 +449,58 @@ The installed binary, game saves and emulator settings were not changed.
 The fixtures record modeled font/draw calls and do not execute the Forge GPU
 renderer. R11 appearance still needs a short comparison in-game, described in
 R11_VISUAL_CHECK.md. Earlier damage/persistence coverage needs no full repeat.
+
+## 2026-10-05: r12 original Wilds assets, staged
+
+The user confirmed the supplied reference shows default Wilds damage numbers,
+not the Enhanced Damage Numbers mod present in their installation. Selective
+read-only extraction found UI020020's font slot, original Frutiger Neue LT W1G
+Medium font, the red/blue critical sprites and native text blur properties.
+Original assets and generated payloads stay in ignored work/build directories;
+tracked recipes and WILDS_ASSETS.json retain provenance. Wilds was not launched
+or modified.
+
+R12 replaces Roboto with the original digit outlines, converted from cubic CFF
+to quadratic TrueType at maximum error 0.25/1000 font units. The height factor
+0.8621484555 retains accepted visible height. Original RGBA critical sprite
+crops replace triangle stars, preserving their baked pale center and bloom.
+Gaussian effect masks replace the repeated text outline with smooth centered
+shading and a gold halo. The compact spacing/caches, animation, Classic style,
+config v2, source policies and eight tested capture hooks remain unchanged.
+
+Validation:
+
+- 895 ASan/UBSan host checks, eight-producer mailbox stress and 23 transactional
+  hook scenarios passed.
+- 312 compiled ARM32 NRO checks passed. They inspect font registration and
+  fallback, once-per-context texture registration, decoded texture fingerprints,
+  original red/blue sprite selection, separate digit colors, marker placement,
+  fade, stable spacing, 128-number limit, filtering and configuration recovery.
+- A separate harness executes the pinned real ImGui font atlas, custom texture
+  registration and draw-list code. Its actual draw commands are composited with
+  linear texture sampling into `work/damage-numbers/host-visual/preview.png`.
+  This exercises the original digit shapes and crit pixels without an Eden GPU
+  or runtime claim. Reproduce with `scripts/test_damage_numbers_visual.py`.
+- Offline ARM32 build verifies installed Forge exports and preserved input
+  fingerprints. Python syntax, JSON and Git whitespace checks passed.
+
+Candidate NRO SHA-256:
+`1a851eb2947a88ec3bb06685c5b852d2324b742ff0420d56fee13a1e31bf7b3f`
+(188,416 file bytes; 1,093,632 BSS bytes). Embedded font: 2,352 bytes, SHA-256
+`b2a79e1f114f576f4cf47f68547cab3202f1e48a1b2864e7557984ad5e061b2c`.
+Effects RLE: 109,915 bytes; decoded RGBA SHA-256
+`a121a8925f60bfc6adc9ac56428e4118ad702cc95dbb9d7962f2a0b5bc62bbd4`.
+Package: `build/damage-numbers/capture/candidate-package/`, with local-asset
+notice. Full build/fixture reports remain beside the package.
+
+Installed r11 was rechecked unchanged:
+`2b55907b6f19b57f04d776db75eba0a209e6c4bccf0e9d2e46ee9f610eae6330`.
+Matching rollback: `backups/damage-numbers/pre-r12/` outside Eden. Saves,
+emulator settings and installed packages were not changed. The user's completed
+r10 checklist edits remain untouched and uncommitted.
+
+Original font outlines and crit pixels remove the asset approximations, but
+Forge/STB rasterization and Gaussian conversion still differ from RE Engine's
+blur shader. A pixel-perfect final result is not established. The brief
+R12_VISUAL_CHECK.md requests white/gold/crit shading comparison and a couple of
+LBG bursts; completed combat and persistence coverage needs no full repeat.

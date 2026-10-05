@@ -1,8 +1,9 @@
 # Damage numbers
 
-R11 refines the Wilds font, crit star thickness/alignment and weakspot glow
-against the new comparison screenshots. The candidate is staged; installation
-is separate. Use the short [visual check](R11_VISUAL_CHECK.md). The [r9 results](TEST_RESULTS.md) and
+R12 uses the original Wilds digit outlines and crit sprites, replacing the
+font/star approximations. Soft texture shading replaces the hard text outline.
+The candidate is staged; installation is separate. Use the short
+[visual check](R12_VISUAL_CHECK.md). The [r9 results](TEST_RESULTS.md) and
 [runtime history](RUNTIME.md) retain the completed combat checks.
 
 Target: MHGU 1.4.0 Switch, Eden/Linux, and the tested patched Forge baseline.
@@ -25,17 +26,21 @@ Capture hooks, damage calculations and ownership bindings are unchanged.
 | Physical HZV below 45 or unknown | Warm white `#F4F1EC` | White `#FFFFFF` |
 | Physical HZV at least 45 | Gold `#F2C45B` | Orange-yellow `#FFBF3F` |
 | Confirmed bounce | Gray `#9A9A9A` | Gray `#9A9A9A` |
-| Positive crit | Pink-red `#F1689B` star above | Digit-colored line above |
-| Negative crit | Blue `#68B9FF` star below | Digit-colored line below |
+| Positive crit | Original pink-red sprite above | Digit-colored line above |
+| Negative crit | Original blue sprite below | Digit-colored line below |
 
-Wilds uses full-width Roboto Bold 700 as a visual approximation of the
-references, retaining the accepted digit height. Gold digits have a symmetric
-warm halo and crisp center, without a black shadow. White/gray digits keep a
-small dark shadow. Stars have a slightly fuller center, a brighter pale core
-and independent red/blue glow. They align to the actual pixel-rounded glyph
-bounds; their colors are independent of digit color.
-Classic keeps Forge's font, outlined digits and straight critical lines.
-Font provenance, reproducible preparation and license: [fonts/README.md](fonts/README.md).
+Wilds uses Frutiger Neue LT W1G Medium digit outlines from the local game,
+normalized to retain the accepted digit height. Digits have a smooth, centered
+shadow; gold digits also have a soft warm halo behind their crisp fill. Stars
+use the original colored texture with its pale center and bloom. They align to
+the actual pixel-rounded glyph bounds and fade with the numbers. Digit color
+remains independent of crit polarity. Classic keeps Forge's font, outlined
+digits and straight critical lines.
+
+[Font/effect preparation](fonts/README.md) and
+[asset provenance](WILDS_ASSETS.json) describe the local sources. The font
+rasterizer and Gaussian blur differ from RE Engine's renderer, so an exact
+pixel match still requires an in-game comparison.
 
 Both styles preserve the accepted impact anchor, visible digit height, size,
 pop, upward drift, duration and fade. Measured glyph bounds and solid markers
@@ -78,6 +83,7 @@ does not establish a bounce. Other environmental families remain unsupported.
 
 ```bash
 python3 scripts/test_damage_numbers.py
+python3 scripts/test_damage_numbers_visual.py
 python3 scripts/build_damage_numbers_capture.py
 tools/mwc-analysis-venv/bin/python scripts/damage_numbers_capture_probe.py
 ```
@@ -87,25 +93,29 @@ storage under ASan/UBSan. ARM32 fixtures execute the compiled NRO with explicit
 SDK/kernel/font/draw stubs and original HZV/damage routines. They inspect font
 registration, draw arguments, colors, marker geometry, fades, burst limits,
 source filtering and config recovery. They do not run Forge's GPU renderer.
+A separate host harness executes the pinned real ImGui font/texture/draw code,
+then composites its actual draw commands into
+`work/damage-numbers/host-visual/preview.png` with linear texture sampling.
+This checks actual font and sprite output without claiming an Eden GPU test.
 
 R9 passed all 16 LS/bowgun checks, settings persistence, monster-to-monster,
 Prowler and bomb display. The reported wide LBG spacing prompted this update.
 The r10 working checklist marks style, saved-style restart and spacing checks
 complete. The user described the crit symbols as near-perfect and requested
-closer font, thickness/alignment and weakspot glow matching. Only those r11
-visual refinements need another look.
+closer font, thickness/alignment and weakspot glow matching. Only the r12 visual replacement needs another look.
 
 ## Build and delivery
 
-The font preparation recipe pins Google Fonts and FontTools 4.66.1, records
-source/license/subset hashes and embeds the static font and OFL notice in the
-NRO. The package also includes the license. Installed Forge exports and the
-preserved game/SDK/Better Input hashes are checked during the offline ARM32 build.
-No new capture hooks, CodeMemory objects or TLS slots are added.
+The local asset recipes pin FontTools 4.66.1, original resource hashes and
+converted font/texture hashes. Original game-derived payloads stay outside Git
+and the personal candidate includes `LOCAL_ASSETS.txt`. Installed Forge exports
+and preserved game/SDK/Better Input hashes are checked during the offline ARM32
+build. No capture hooks, CodeMemory objects or TLS slots are added.
 
 Candidate: `build/damage-numbers/capture/candidate-package/`.
 Hashes and sources: `build/damage-numbers/capture/candidate-manifest.json`.
-R10 rollback: `backups/damage-numbers/pre-r11/4030d8c4d564b3f61f4b7c3a4b23421a30874be032cbf4d54ebdcf164a05bf6b/`.
+R11 rollback: `backups/damage-numbers/pre-r12/2b55907b6f19b57f04d776db75eba0a209e6c4bccf0e9d2e46ee9f610eae6330/`.
+The r10 rollback remains under `backups/damage-numbers/pre-r11/`.
 The earlier r9 rollback remains under `backups/damage-numbers/r9/`.
 Preparation preserves installed packages, emulator settings and save files.
 Installation, game launch, Forge upgrades and pushes require separate scope.

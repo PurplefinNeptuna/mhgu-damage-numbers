@@ -6,17 +6,23 @@
 #include <cimgui.h>
 #include <cstddef>
 #include "wilds_font_data.h"
+#include "wilds_sprite_data.h"
 namespace damage_numbers {
 static void* font_context;
 static ImFont* wilds_font;
 static bool font_warning;
+static ImTextureData* sprite_texture;
+extern "C" __attribute__((used)) const uint32_t dn_sprite_abi[]={
+    sizeof(ImTextureData),offsetof(ImTextureData,Pixels),offsetof(ImTextureData,Status),offsetof(ImTextureData,RefCount)};
 // The fixture reads compiler-derived ABI offsets, then checks actual ARM calls.
 extern "C" __attribute__((used)) const uint32_t dn_font_abi[]={
     offsetof(ImGuiIO,Fonts),offsetof(ImFontConfig,FontDataOwnedByAtlas),
-    offsetof(ImFontBaked,Size),offsetof(ImFontGlyph,AdvanceX),offsetof(ImFontGlyph,X0)};
+    offsetof(ImFontBaked,Size),offsetof(ImFontGlyph,AdvanceX),offsetof(ImFontGlyph,X0),offsetof(ImGuiIO,BackendFlags)};
 static_assert(sizeof(ImWchar)==2 && sizeof(ImFontGlyph)==44);
+#ifndef DAMAGE_NUMBERS_HOST_VISUAL
 static_assert(offsetof(ImGuiIO,Fonts)==44 && offsetof(ImFontConfig,FontDataOwnedByAtlas)==48);
 static_assert(offsetof(ImFontBaked,Size)==16 && offsetof(ImFontGlyph,AdvanceX)==4 && offsetof(ImFontGlyph,X0)==8);
+#endif
 void cosmetics_init(void* context) {
     if(font_context==context)return;
     font_context=context;wilds_font=nullptr;
@@ -31,6 +37,28 @@ void cosmetics_init(void* context) {
             ImFontConfig_destroy(config);
         }
     }
+    ImGuiIO* texture_io=igGetIO_Nil();
+    sprite_texture=nullptr;
+    if(texture_io&&(texture_io->BackendFlags&ImGuiBackendFlags_RendererHasTextures)) {
+        sprite_texture=ImTextureData_ImTextureData();
+        if(sprite_texture) {
+            ImTextureData_Create(sprite_texture,ImTextureFormat_RGBA32,wilds_sprite_width,wilds_sprite_height);
+            auto* pixels=static_cast<uint32_t*>(ImTextureData_GetPixels(sprite_texture));
+            if(pixels) {
+                unsigned written=0;
+                for(unsigned i=0;i<sizeof(wilds_sprite_rle);i+=5) {
+                    const unsigned count=wilds_sprite_rle[i];
+                    for(unsigned j=0;j<count;++j) {
+                        pixels[written++]=uint32_t(wilds_sprite_rle[i+1])|
+                            (uint32_t(wilds_sprite_rle[i+2])<<8)|(uint32_t(wilds_sprite_rle[i+3])<<16)|
+                            (uint32_t(wilds_sprite_rle[i+4])<<24);
+                    }
+                }
+                igRegisterUserTexture(sprite_texture);
+            } else {ImTextureData_destroy(sprite_texture);sprite_texture=nullptr;}
+        }
+    }
+    if(!sprite_texture)forge_log_info("[damage-numbers] Wilds effect texture unavailable; using crisp digits without sprite effects");
     if(!wilds_font&&!font_warning) {
         font_warning=true;
         forge_log_info("[damage-numbers] Wilds digit font unavailable; using Forge font with Wilds colors/stars");
@@ -50,25 +78,37 @@ bool cosmetics_measure(const char* text,float pixels,VisualStyle style,TextMetri
     }
     out={advance,ink};return found&&finite(advance)&&advance>0;
 }
-static void star(ImDrawList* draw,Point center,float width,float height,uint32_t color) {
-    const float x=width*.5f,y=height*.5f;
-    const Point ring[8]={{-x,0},{-x*.14f,-y*.34f},{0,-y},{x*.14f,-y*.34f},
-                        {x,0},{x*.14f,y*.34f},{0,y},{-x*.14f,y*.34f}};
-    for(unsigned i=0;i<8;++i) {
-        const Point a=ring[i],b=ring[(i+1)%8];
-        ImDrawList_AddTriangleFilled(draw,{center.x,center.y},{center.x+a.x,center.y+a.y},
-                                    {center.x+b.x,center.y+b.y},color);
+static void sprite(ImDrawList* draw,unsigned index,Rect target,uint32_t color) {
+    if(!sprite_texture||index>=22)return;
+    const auto* r=wilds_sprite_rects[index];
+    ImDrawList_AddImage(draw,ImTextureData_GetTexRef(sprite_texture),
+        {target.left,target.top},{target.right,target.bottom},
+        {float(r[0])/wilds_sprite_width,float(r[1])/wilds_sprite_height},
+        {float(r[0]+r[2])/wilds_sprite_width,float(r[1]+r[3])/wilds_sprite_height},color);
+}
+static void glyph_effects(ImDrawList* draw,const DrawNumber& n,ImFont* font,float pixels) {
+    if(!sprite_texture)return;
+    ImFontBaked* baked=ImFont_GetFontBaked(font,pixels,-1);if(!baked||baked->Size<=0)return;
+    const float ratio=pixels/baked->Size;float advance=0;
+    for(const char* p=n.text;*p;++p) {
+        if(*p<'0'||*p>'9')return;
+        ImFontGlyph* g=ImFontBaked_FindGlyph(baked,ImWchar(*p));if(!g)return;
+        const unsigned index=unsigned(*p-'0');const auto* r=wilds_sprite_rects[index];
+        const float sx=(g->X1-g->X0)*ratio/r[6],sy=(g->Y1-g->Y0)*ratio/r[7];
+        const float x=n.position.x+advance+g->X0*ratio-r[4]*sx;
+        const float y=n.position.y+g->Y0*ratio-r[5]*sy;
+        const Rect target={x,y,x+r[2]*sx,y+r[3]*sy};
+        // Both native text layers use a centered soft shadow, not an offset stroke.
+        sprite(draw,index,target,imgui_color(0,n.opacity*.22f));
+        if(n.color==rgb(Tint::Weak,VisualStyle::Wilds))
+            sprite(draw,index+10,target,imgui_color(n.color,n.opacity*.32f));
+        advance+=g->AdvanceX*ratio;
     }
 }
 void cosmetics_draw(void* list,const DrawNumber& n) {
     auto* draw=static_cast<ImDrawList*>(list);ImFont* font=selected_font(n.style);if(!draw||!font)return;
     const float pixels=n.style==VisualStyle::Wilds&&wilds_font?n.pixels*wilds_font_scale:n.pixels;
     auto text=[&](float x,float y,uint32_t color) {
-        // ImGui truncates origins. Round signed halo offsets first so opposite
-        // glow passes stay symmetric around the same pixel-aligned glyphs.
-        if(n.style==VisualStyle::Wilds) {
-            x=float(int(x+(x>=0?.5f:-.5f)));y=float(int(y+(y>=0?.5f:-.5f)));
-        }
         ImDrawList_AddText_FontPtr(draw,font,pixels,{n.position.x+x,n.position.y+y},color,n.text,nullptr,0,nullptr);
     };
     const uint32_t color=imgui_color(n.color,n.opacity);
@@ -83,24 +123,14 @@ void cosmetics_draw(void* list,const DrawNumber& n) {
         }
         return;
     }
-    if(n.color==rgb(Tint::Weak,VisualStyle::Wilds)) {
-        // Symmetric warm halo, with a crisp opaque center. No black shadow.
-        const float outer=1.8f*n.unit,inner=.75f*n.unit;
-        const uint32_t halo=imgui_color(n.color,n.opacity*.055f);
-        const uint32_t rim=imgui_color(n.color,n.opacity*.10f);
-        text(-outer,0,halo);text(outer,0,halo);text(0,-outer,halo);text(0,outer,halo);
-        text(-inner,-inner,rim);text(inner,-inner,rim);text(-inner,inner,rim);text(inner,inner,rim);
-    } else {
-        text(n.unit,n.unit,imgui_color(0,n.opacity*.22f));
-        const float edge=.35f*n.unit;const uint32_t outline=imgui_color(0,n.opacity*.10f);
-        text(-edge,0,outline);text(edge,0,outline);text(0,-edge,outline);text(0,edge,outline);
-    }
+    glyph_effects(draw,n,font,pixels);
     text(0,0,color);
     if(n.critical==Critical::None)return;
-    const uint32_t rgb=star_rgb(n.critical);
-    const float expansions[3]={1.8f,1.5f,1.25f},alphas[3]={.055f,.09f,.16f};
-    for(unsigned i=0;i<3;++i)star(draw,n.star,n.pixels*1.1f*expansions[i],n.pixels*wilds_star_height*expansions[i],imgui_color(rgb,n.opacity*alphas[i]));
-    star(draw,n.star,n.pixels*1.1f,n.pixels*wilds_star_height,imgui_color(rgb,n.opacity));
-    star(draw,n.star,n.pixels*.38f,n.pixels*.12f,imgui_color(n.critical==Critical::Positive?0xffe7f0:0xe5f4ff,n.opacity*.9f));
+    // Native uvs020020 contains the complete colored bloom and pale core.
+    const float scale=n.pixels*wilds_sprite_font_scale/60.0f;
+    const float height=48*scale;
+    sprite(draw,n.critical==Critical::Positive?20:21,
+        {n.star.x-44.5f*scale,n.star.y-height*.5f,n.star.x+43.5f*scale,n.star.y+height*.5f},
+        imgui_color(0xffffff,n.opacity));
 }
 }

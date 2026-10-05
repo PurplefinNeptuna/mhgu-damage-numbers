@@ -1,15 +1,13 @@
 {
-  "family": "Roboto",
-  "weight": 700,
-  "revision": "69d0549e8fc7ad72e1531734c81237be401ec4fd",
-  "source_url": "https://raw.githubusercontent.com/google/fonts/69d0549e8fc7ad72e1531734c81237be401ec4fd/ofl/roboto/Roboto%5Bwdth%2Cwght%5D.ttf",
-  "source_sha256": "d7598e12c5dbef095ff8272cfc55da0250bd07fbdecbac8a530b9b277872a134",
-  "license_sha256": "061402327a96aadb0bfb694a960ed289ecd38d383e396243831ab81feb109c41",
+  "family": "Frutiger Neue LT W1G Medium",
+  "weight": 500,
+  "source_url": null,
+  "source_sha256": "ff0329d2823f7337997e0bc51203d3b7ed8a06a48706a71008dbfe0343a95fa9",
   "fonttools_version": "4.66.1",
   "glyphs": "0123456789 ?",
-  "original_path": "work/damage-numbers/font-source/roboto/Roboto[wdth,wght].ttf",
-  "axes": {
-    "wdth": 100,
-    "wght": 700
-  }
+  "original_path": "work/damage-numbers/font-source/frutiger-digits.ttf",
+  "axes": {},
+  "source_kind": "local Wilds OFT converted CFF to quadratic outlines, maximum error 0.25 font units",
+  "license_kind": "local game asset; do not redistribute generated payload",
+  "wilds_oft_sha256": "f7f88faa92d7384398c8890769eced2efdb4bb6067628093716093e676dcc521"
 }

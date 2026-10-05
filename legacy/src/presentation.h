@@ -44,7 +44,7 @@ inline float overlap(Rect a,Rect b,float margin) {
            high(0,low(a.bottom,b.bottom)+margin-high(a.top,b.top));
 }
 inline bool inside(Rect r,const View& v) { return r.left>=v.x&&r.top>=v.y&&r.right<=v.x+v.width&&r.bottom<=v.y+v.height; }
-static constexpr float wilds_star_height=.30f;
+static constexpr float wilds_star_height=.31612110f;
 inline Point glyph_origin(Point p,VisualStyle style) {
     return style==VisualStyle::Wilds?Point{float(int(p.x)),float(int(p.y))}:p;
 }
@@ -64,7 +64,7 @@ inline Rect marker_bounds(Rect ink,float pixels,float unit,Critical critical,Vis
     const float cx=(ink.left+ink.right)*0.5f;
     const float halfh=style==VisualStyle::Wilds?pixels*wilds_star_height*.5f:2*unit;
     const float y=critical==Critical::Positive?ink.top-2*unit-halfh:ink.bottom+2*unit+halfh;
-    const float halfw=style==VisualStyle::Wilds?pixels*.55f:(ink.right-ink.left)*.5f;
+    const float halfw=style==VisualStyle::Wilds?pixels*.38078224f:(ink.right-ink.left)*.5f;
     return united(ink,{cx-halfw,y-halfh,cx+halfw,y+halfh});
 }
 inline Rect solid_bounds(Rect ink,Point pos,float pixels,float advance,float unit,Critical crit,VisualStyle style) {
