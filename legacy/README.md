@@ -2,9 +2,10 @@
 
 R12 uses the original Wilds digit outlines and crit sprites, replacing the
 font/star approximations. Soft texture shading replaces the hard text outline.
-The candidate is staged; installation is separate. Use the short
-[visual check](R12_VISUAL_CHECK.md). The [r9 results](TEST_RESULTS.md) and
-[runtime history](RUNTIME.md) retain the completed combat checks.
+R12 is complete and user-accepted on 2026-10-05. The finished local package
+uses the exact tested binary. [Release/install notes](RELEASE.md),
+[completed visual check](R12_VISUAL_CHECK.md), [test results](TEST_RESULTS.md)
+and [runtime history](RUNTIME.md) retain the evidence.
 
 Target: MHGU 1.4.0 Switch, Eden/Linux, and the tested patched Forge baseline.
 Capture hooks, damage calculations and ownership bindings are unchanged.
@@ -40,7 +41,7 @@ digits and straight critical lines.
 [Font/effect preparation](fonts/README.md) and
 [asset provenance](WILDS_ASSETS.json) describe the local sources. The font
 rasterizer and Gaussian blur differ from RE Engine's renderer, so an exact
-pixel match still requires an in-game comparison.
+pixel match has not been measured; the user accepted the in-game appearance.
 
 Both styles preserve the accepted impact anchor, visible digit height, size,
 pop, upward drift, duration and fade. Measured glyph bounds and solid markers
@@ -102,7 +103,8 @@ R9 passed all 16 LS/bowgun checks, settings persistence, monster-to-monster,
 Prowler and bomb display. The reported wide LBG spacing prompted this update.
 The r10 working checklist marks style, saved-style restart and spacing checks
 complete. The user described the crit symbols as near-perfect and requested
-closer font, thickness/alignment and weakspot glow matching. Only the r12 visual replacement needs another look.
+closer font, thickness/alignment and weakspot glow matching. R12 passed the
+completed visual checklist and the user confirmed the mod is finished.
 
 ## Build and delivery
 
@@ -112,8 +114,12 @@ and the personal candidate includes `LOCAL_ASSETS.txt`. Installed Forge exports
 and preserved game/SDK/Better Input hashes are checked during the offline ARM32
 build. No capture hooks, CodeMemory objects or TLS slots are added.
 
-Candidate: `build/damage-numbers/capture/candidate-package/`.
-Hashes and sources: `build/damage-numbers/capture/candidate-manifest.json`.
+Finished ZIP: `build/damage-numbers/releases/r12/damage-numbers-r12.zip`.
+Package: `build/damage-numbers/releases/r12/damage-number/`.
+Release manifest/checksums: beside that ZIP; acceptance: [RELEASE.json](RELEASE.json).
+Original build provenance: `build/damage-numbers/capture/candidate-manifest.json`.
+The build manifest retains its historical pre-test status; release acceptance
+is recorded separately without rebuilding the tested bytes.
 R11 rollback: `backups/damage-numbers/pre-r12/2b55907b6f19b57f04d776db75eba0a209e6c4bccf0e9d2e46ee9f610eae6330/`.
 The r10 rollback remains under `backups/damage-numbers/pre-r11/`.
 The earlier r9 rollback remains under `backups/damage-numbers/r9/`.

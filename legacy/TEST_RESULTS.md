@@ -1,6 +1,6 @@
 # Damage numbers: test results
 
-R9 report, 2026-10-05: all 16 rows passed. The current [TEST_CHECKLIST.md](TEST_CHECKLIST.md) covers
+R9 report, 2026-10-05: all 16 rows passed. The completed [TEST_CHECKLIST.md](TEST_CHECKLIST.md) covers
 r10 cosmetics; these r9 results remain the completed combat evidence. LBG
 spacing prompted the r10 changes. Blank metadata was not supplied.
 
@@ -85,13 +85,26 @@ Duplicate this block only if needed.
 - Observed:
 - Screenshot/clip, if available:
 
-## R10 cosmetic results (pending)
+## R10 cosmetic results (completed)
 
 | Check | Result | Short notes |
 | --- | --- | --- |
-| Gold digits / positive red star | | |
-| Gold digits / negative blue star | | |
-| White digits / positive red star | | |
-| Two LBG bursts: compact spacing and stable older numbers | | |
-| Classic / Wilds switching | | |
-| Saved style restored after one restart | | |
+| Gold digits / positive red star | Passed | User completed checklist |
+| Gold digits / negative blue star | Passed | User completed checklist |
+| White digits / positive red star | Passed | User completed checklist |
+| Two LBG bursts: compact spacing and stable older numbers | Passed | User completed checklist |
+| Classic / Wilds switching | Passed | User completed checklist |
+| Saved style restored after one restart | Passed | User completed checklist |
+
+## R12 final acceptance: 2026-10-05
+
+All three rows in R12_VISUAL_CHECK.md were checked by the user: white/gold
+positive crit appearance, negative crit appearance/fade, and LBG bursts plus
+Classic/Wilds switching. The user then confirmed: "all works well, good job,
+now it is complete". No additional gameplay tests are pending.
+
+Installed plugin and tested candidate both have SHA-256
+`1a851eb2947a88ec3bb06685c5b852d2324b742ff0420d56fee13a1e31bf7b3f`.
+The final package preserves those exact bytes. Appearance is user-accepted;
+pixel-perfect equality with RE Engine has not been measured. Automated fixture
+coverage remains separate from the user's real-game confirmation.

@@ -504,3 +504,29 @@ Forge/STB rasterization and Gaussian conversion still differ from RE Engine's
 blur shader. A pixel-perfect final result is not established. The brief
 R12_VISUAL_CHECK.md requests white/gold/crit shading comparison and a couple of
 LBG bursts; completed combat and persistence coverage needs no full repeat.
+
+## 2026-10-05: r12 accepted and packaged
+
+The user completed all three R12_VISUAL_CHECK.md checks, then confirmed:
+"all works well, good job, now it is complete". The earlier six r10 checklist
+items remain checked. Their recorded results are preserved and included in the
+completion commit. No further gameplay confirmation is required for this scope.
+
+The installed plugin now matches the tested r12 candidate SHA-256
+`1a851eb2947a88ec3bb06685c5b852d2324b742ff0420d56fee13a1e31bf7b3f`.
+This replaces the previous observation of installed r11; installation was
+performed outside this packaging action. The exact candidate is frozen in
+`build/damage-numbers/releases/r12/damage-numbers-r12.zip`, with local asset
+notice, installation notes, acceptance manifest and file hashes. ZIP contents
+are reopened and compared byte-for-byte with the tested input. Release
+acceptance is separate from the historical pending candidate-build status.
+
+Packaging changes no NRO bytes, installed files, save/config contents or
+emulator settings. R11/r10/r9 rollback material remains outside Eden.
+The final appearance is accepted by the user; no pixel-perfect renderer claim
+or public release is made.
+
+Final ZIP SHA-256:
+`7c0a4c50b4f02fe151c71ed49a40ae95986da97b8341cc85a795de9e026f67e9`.
+Two packaging runs produced identical bytes. Reopened ZIP CRC, exact member
+inventory and every payload comparison passed; installed r12 stayed unchanged.
