@@ -41,7 +41,7 @@ SOFTWARE.
 
 Copyright 2011 The Roboto Project Authors
 (https://github.com/googlefonts/roboto-classic). Licensed under SIL OFL 1.1.
-[Full license](fonts/OFL.txt). Source provenance for those builds remains in Git
+[Full license](fonts/roboto-OFL.txt). Source provenance for those builds remains in Git
 history. R12 does not embed or package the Roboto digit subset/OFL notice.
 
 ## Local Wilds resources (r12)
@@ -86,7 +86,7 @@ SOFTWARE.
 
 ## Alternate open-asset edition
 
-The open profile embeds a Roboto Semibold 600 digit subset from pinned Google
+The r14 open profile embeds an Open Sans Semibold 600 digit subset from pinned Google
 Fonts and includes the full SIL OFL notice. It is renamed Damage Digits Open;
 [source/axes/license hashes](fonts/open-source.json) document the modified
 subset. Independently authored procedural crit artwork uses the separate

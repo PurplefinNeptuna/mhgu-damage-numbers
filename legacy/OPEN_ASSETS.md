@@ -1,11 +1,17 @@
-# Damage numbers r13: alternate open assets
+# Damage numbers r14: alternate open assets
 
-This alternate build uses **Roboto Semibold 600**, a renamed digit subset under
+This alternate build uses **Open Sans Semibold 600**, a renamed digit subset under
 SIL Open Font License 1.1, and independently authored procedural red/blue crit
 stars. It bundles no extracted Wilds font or texture. The artwork is generated
 from a generic four-point polygon, Gaussian bloom and a pale highlight; it is
 not traced from the Wilds sprite. Its shape and the font differ from the
-original-asset r12 edition.
+original-asset r12 edition. The user selected Open Sans after comparing twelve
+licensed font families at equal visible digit height.
+
+The red/blue stars now have a stronger broad colored halo and horizontal bloom
+streak. Their solid polygon, texture dimensions and render size remain unchanged.
+Star size is independent of the new font's height normalization. The bloom is
+baked into the existing texture without extra draw calls.
 
 Soft number shading, gold halo, positive/negative marker placement, individual
 hit capture, compact spacing, source filtering, Classic mode,
@@ -23,7 +29,7 @@ Classic retains its original 1.25x/0.1-second pop, continuous drift and fade.
 
 ## Download and switch editions
 
-Archive: `build/damage-numbers/releases/r13-open-assets/damage-numbers-r13-open-assets.zip`.
+Archive: `build/damage-numbers/releases/r14-open-assets/damage-numbers-r14-open-assets.zip`.
 Plugin: `build/damage-numbers/open-assets/candidate-package/romfs/nativeNX/plugins/damage_numbers_capture.nro`.
 
 Close Eden, preserve the current NRO outside its load directory, then replace
@@ -39,19 +45,18 @@ stamp/hold/exit timing still needs a brief in-game look.
 
 ## Brief animation check
 
-- [ ] Land a single hit in Wilds style: the number stamps down to normal size,
-      holds still, then rises quickly while fading. Try Duration 1.2 seconds
-      for a one-second hold.
-- [ ] Fire one familiar bowgun burst: each hit remains separate, with stable
-      spacing and crit stars attached during the exit.
+- [ ] Land positive/negative crits: the star halo should be easy to notice,
+      with the same solid marker size and position.
+- [ ] Fire one familiar bowgun burst while moving the camera: check that the
+      new 2/5 curves are readable. Stamp/hold/exit timing and spacing stay as r13.
 
 Previously passed combat and persistence coverage needs no full repeat.
 
 ## Asset provenance and notices
 
-The upstream Roboto revision is pinned to
-`69d0549e8fc7ad72e1531734c81237be401ec4fd`. Source font SHA-256:
-`d7598e12c5dbef095ff8272cfc55da0250bd07fbdecbac8a530b9b277872a134`.
+The upstream Google Fonts revision is pinned to
+`9710da1eacb3be272583c3224dcb70f9da6eadbb`. Open Sans source font SHA-256:
+`36643644f318a812aab2d2ed3bb98f8cf0872527f835fe9398d95fe6b9adb878`.
 The modified subset is named **Damage Digits Open** and contains digits, space
 and a question mark. [Source recipe](fonts/open-source.json) records the exact
 axes, font source, license hash and FontTools version. The full

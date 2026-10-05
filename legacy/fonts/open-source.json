@@ -1,13 +1,13 @@
 {
-  "family": "Roboto",
+  "family": "Open Sans",
   "weight": 600,
-  "revision": "69d0549e8fc7ad72e1531734c81237be401ec4fd",
-  "source_url": "https://raw.githubusercontent.com/google/fonts/69d0549e8fc7ad72e1531734c81237be401ec4fd/ofl/roboto/Roboto%5Bwdth%2Cwght%5D.ttf",
-  "source_sha256": "d7598e12c5dbef095ff8272cfc55da0250bd07fbdecbac8a530b9b277872a134",
-  "license_sha256": "061402327a96aadb0bfb694a960ed289ecd38d383e396243831ab81feb109c41",
+  "revision": "9710da1eacb3be272583c3224dcb70f9da6eadbb",
+  "source_url": "https://raw.githubusercontent.com/google/fonts/9710da1eacb3be272583c3224dcb70f9da6eadbb/ofl/opensans/OpenSans%5Bwdth%2Cwght%5D.ttf",
+  "source_sha256": "36643644f318a812aab2d2ed3bb98f8cf0872527f835fe9398d95fe6b9adb878",
+  "license_sha256": "fbbbcfef55318de350562559b671360de6d597112ecc5c73881b05092db89602",
   "fonttools_version": "4.66.1",
   "glyphs": "0123456789 ?",
-  "original_path": "work/damage-numbers/font-source/roboto/Roboto[wdth,wght].ttf",
+  "original_path": "work/damage-numbers/font-source/opensans/OpenSans[wdth,wght].ttf",
   "axes": {
     "wdth": 100,
     "wght": 600

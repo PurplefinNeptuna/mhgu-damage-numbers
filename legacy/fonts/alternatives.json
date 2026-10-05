@@ -1,0 +1,102 @@
+{
+  "revision": "9710da1eacb3be272583c3224dcb70f9da6eadbb",
+  "weight": 600,
+  "sources": [
+    {
+      "family": "arimo",
+      "file": "work/damage-numbers/font-alternatives/arimo/Arimo[wght].ttf",
+      "revision": "9710da1eacb3be272583c3224dcb70f9da6eadbb",
+      "source_url": "https://raw.githubusercontent.com/google/fonts/9710da1eacb3be272583c3224dcb70f9da6eadbb/ofl/arimo/Arimo%5Bwght%5D.ttf",
+      "source_sha256": "e43898b143ec826ac8cb4034816458a7047fbe0836558de2a1f8c6223ae3e0ca",
+      "license_sha256": "11cce536cd2f3864d767003af5dcd739e2e15818cf2279b6175edeadd3960992"
+    },
+    {
+      "family": "sourcesans3",
+      "file": "work/damage-numbers/font-alternatives/sourcesans3/SourceSans3[wght].ttf",
+      "revision": "9710da1eacb3be272583c3224dcb70f9da6eadbb",
+      "source_url": "https://raw.githubusercontent.com/google/fonts/9710da1eacb3be272583c3224dcb70f9da6eadbb/ofl/sourcesans3/SourceSans3%5Bwght%5D.ttf",
+      "source_sha256": "042fe2cc0b933e328410d7acbd0aa6a1873dca5aef81875f4bc214b08825c7b9",
+      "license_sha256": "09746787287a289323b0ec3cff4d1a4a801331b82b7207c1e186f5d26619a392"
+    },
+    {
+      "family": "inter",
+      "file": "work/damage-numbers/font-alternatives/inter/Inter[opsz,wght].ttf",
+      "revision": "9710da1eacb3be272583c3224dcb70f9da6eadbb",
+      "source_url": "https://raw.githubusercontent.com/google/fonts/9710da1eacb3be272583c3224dcb70f9da6eadbb/ofl/inter/Inter%5Bopsz%2Cwght%5D.ttf",
+      "source_sha256": "29160a80ff49ddcab2c97711247e08b1fab27a484a329ce8b813d820dc559031",
+      "license_sha256": "5b9321a4298cfeb6b34354164a1c3afc3db114569984c502b9b35d988fd58c57"
+    },
+    {
+      "family": "lato",
+      "file": "work/damage-numbers/font-alternatives/lato/Lato-SemiBold.ttf",
+      "revision": "9710da1eacb3be272583c3224dcb70f9da6eadbb",
+      "source_url": "https://raw.githubusercontent.com/google/fonts/9710da1eacb3be272583c3224dcb70f9da6eadbb/ofl/lato/Lato-SemiBold.ttf",
+      "source_sha256": "71b8b7decbe75a881ed267be539d402bd1e9420b799658aada4e0d1bd5af803c",
+      "license_sha256": "74ba064d03f1f1c4a952da936c3eb71866c34404916734de3cae73b34357e59e"
+    },
+    {
+      "family": "hind",
+      "file": "work/damage-numbers/font-alternatives/hind/Hind-SemiBold.ttf",
+      "revision": "9710da1eacb3be272583c3224dcb70f9da6eadbb",
+      "source_url": "https://raw.githubusercontent.com/google/fonts/9710da1eacb3be272583c3224dcb70f9da6eadbb/ofl/hind/Hind-SemiBold.ttf",
+      "source_sha256": "1742a1b0aba97b49da1d3ee3af568fa997c59a3cfe73829f7bec293f416d25dd",
+      "license_sha256": "f62ef357d3a1c3d27edd35a6e1ba350e8a8d13499797964eeadefbf0b3b15d1f"
+    },
+    {
+      "family": "mukta",
+      "file": "work/damage-numbers/font-alternatives/mukta/Mukta-SemiBold.ttf",
+      "revision": "9710da1eacb3be272583c3224dcb70f9da6eadbb",
+      "source_url": "https://raw.githubusercontent.com/google/fonts/9710da1eacb3be272583c3224dcb70f9da6eadbb/ofl/mukta/Mukta-SemiBold.ttf",
+      "source_sha256": "f437fb098f8f29acb8628617cb2682f0780ef22fa8b0443de1f66090c36e510a",
+      "license_sha256": "2ee5e8e47cd7d08f60bb9555f72b25912c9e81b13f5bc9a0551ddf943da6ca98"
+    },
+    {
+      "family": "hindmadurai",
+      "file": "work/damage-numbers/font-alternatives/hindmadurai/HindMadurai-SemiBold.ttf",
+      "revision": "9710da1eacb3be272583c3224dcb70f9da6eadbb",
+      "source_url": "https://raw.githubusercontent.com/google/fonts/9710da1eacb3be272583c3224dcb70f9da6eadbb/ofl/hindmadurai/HindMadurai-SemiBold.ttf",
+      "source_sha256": "fce32cd155130741e8dbae7256ddc2cb195eb07f7816746e7bc828e03c7b0ce5",
+      "license_sha256": "4b255eb44f613a8e426e195f0d0b7e10fcba1af7eb6047d9a7f4f3c449940e19"
+    },
+    {
+      "family": "opensans",
+      "file": "work/damage-numbers/font-alternatives/opensans/OpenSans[wdth,wght].ttf",
+      "revision": "9710da1eacb3be272583c3224dcb70f9da6eadbb",
+      "source_url": "https://raw.githubusercontent.com/google/fonts/9710da1eacb3be272583c3224dcb70f9da6eadbb/ofl/opensans/OpenSans%5Bwdth%2Cwght%5D.ttf",
+      "source_sha256": "36643644f318a812aab2d2ed3bb98f8cf0872527f835fe9398d95fe6b9adb878",
+      "license_sha256": "fbbbcfef55318de350562559b671360de6d597112ecc5c73881b05092db89602"
+    },
+    {
+      "family": "notosans",
+      "file": "work/damage-numbers/font-alternatives/notosans/NotoSans[wdth,wght].ttf",
+      "revision": "9710da1eacb3be272583c3224dcb70f9da6eadbb",
+      "source_url": "https://raw.githubusercontent.com/google/fonts/9710da1eacb3be272583c3224dcb70f9da6eadbb/ofl/notosans/NotoSans%5Bwdth%2Cwght%5D.ttf",
+      "source_sha256": "bfb7bb691513f12e734dc346c03a03f784912432d7e3fa8e56efcf906fe86b3d",
+      "license_sha256": "cee9892f9f0cc8fe882c9e9537ee6a89621d86ee7ceaf70b02e2b2b1c25c061a"
+    },
+    {
+      "family": "firasans",
+      "file": "work/damage-numbers/font-alternatives/firasans/FiraSans-SemiBold.ttf",
+      "revision": "9710da1eacb3be272583c3224dcb70f9da6eadbb",
+      "source_url": "https://raw.githubusercontent.com/google/fonts/9710da1eacb3be272583c3224dcb70f9da6eadbb/ofl/firasans/FiraSans-SemiBold.ttf",
+      "source_sha256": "db0321f83eb3e9f527b8af384a1b3fefdc1039cf2b06fd39b3f61492bda9561c",
+      "license_sha256": "8f24842e9174beda18a556c2ae7d54f5dc444340c19a3a9ef77e23bca366adbd"
+    },
+    {
+      "family": "publicsans",
+      "file": "work/damage-numbers/font-alternatives/publicsans/PublicSans[wght].ttf",
+      "revision": "9710da1eacb3be272583c3224dcb70f9da6eadbb",
+      "source_url": "https://raw.githubusercontent.com/google/fonts/9710da1eacb3be272583c3224dcb70f9da6eadbb/ofl/publicsans/PublicSans%5Bwght%5D.ttf",
+      "source_sha256": "d75a7dc1a27eb9e336d5b33f55489d2ecb5621bf694d5c43b2415bce2ca830a8",
+      "license_sha256": "157a9e77f7580246e97c769490e2e977ae94399f9d30f4556015c41fe8c28bac"
+    },
+    {
+      "family": "librefranklin",
+      "file": "work/damage-numbers/font-alternatives/librefranklin/LibreFranklin[wght].ttf",
+      "revision": "9710da1eacb3be272583c3224dcb70f9da6eadbb",
+      "source_url": "https://raw.githubusercontent.com/google/fonts/9710da1eacb3be272583c3224dcb70f9da6eadbb/ofl/librefranklin/LibreFranklin%5Bwght%5D.ttf",
+      "source_sha256": "2329f394b10ed1c71107df20fddc11e2bb1b68c1ecbb385f975b36fd64a971f8",
+      "license_sha256": "2710268527181a27b8e938617551bae29e714e6525247be6679bf897a9942a60"
+    }
+  ]
+}

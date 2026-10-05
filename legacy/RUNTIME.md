@@ -597,3 +597,38 @@ The existing r12 releases and installed personal NRO retain their hashes;
 the r12 open NRO is also preserved under workspace backups for rollback.
 Fixtures are not an Eden gameplay trial. The brief open-edition animation
 check remains pending in [OPEN_ASSETS.md](OPEN_ASSETS.md).
+
+## 2026-10-05: r14 open font and crit bloom trial
+
+The user requested stronger crit bloom at the accepted star dimensions and
+fuller readable digit curves. Twelve OFL families were compared at weight 600
+and equal visible height. Hind was rejected; the user selected Open Sans
+Semibold. [Comparison notes](FONT_COMPARISON.md) and pinned source/license hashes
+retain the research. The subset is renamed Damage Digits Open and its complete
+Open Sans OFL notice replaces the embedded/package Roboto notice. Historical
+Roboto licensing is preserved separately.
+
+The procedural star adds a broad colored halo and horizontal streak behind
+the unchanged polygon and pale core. Its 88x48 texture bounds and render scale
+are preserved independently of font normalization, with no new draw calls.
+The accepted open r13 stamp/hold/exit timing, capture code, source filtering,
+Classic style, saved preferences and compact Forge panel are unchanged.
+The personal game-asset edition is preserved; no installation, game launch
+or save changes are part of this trial.
+
+R14 verification passed: all 321 compiled ARM32 fixture checks, the real pinned
+ImGui font/texture/draw preview, proprietary-read-blocked asset provenance and
+compiled-payload audit, all three comparison groups, Python syntax and Git
+whitespace checks. The unchanged r13 presentation/policy core retains its
+earlier host-test evidence; no new host combat test is claimed. These fixtures
+do not run Eden's GPU renderer or establish camera-motion readability in-game.
+
+NRO SHA-256: `be263fbebf8fe2057514aabda07c12724bb0706aad2592ee1c3761100603f158`.
+File size is 262,144 bytes; BSS remains 1,093,632 bytes. Open Sans subset SHA-256:
+`24b1f1efddfd8107ec1cbb1ca866ab50632618794933989eed9968791d72c4ef`.
+Procedural effect RGBA SHA-256:
+`fe15190c98259443a01add264777b2b4bee994bbd58f9c8f5f12338abb399f2b`.
+The r13 open and r12 personal ZIPs retain their recorded hashes; the r13 NRO
+is preserved in workspace backups outside Eden. A fresh installed-file read
+matched r13 open, which this task did not replace. The r14 visual trial remains
+pending; [OPEN_ASSETS.md](OPEN_ASSETS.md) contains the brief confirmation checks.
