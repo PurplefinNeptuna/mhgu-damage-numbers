@@ -16,6 +16,7 @@ they do not prove readability during camera movement in Eden.
 | Initial | Roboto, Arimo, Source Sans 3, Inter, Lato, Hind | `comparison.png` |
 | Hind alternatives | Roboto, Hind, Hind Madurai, Mukta, Open Sans, Source Sans 3 | `hind-alternatives.png` |
 | Open Sans alternatives | Open Sans, Noto Sans, Fira Sans, Public Sans, Libre Franklin, Lato | `open-sans-alternatives.png` |
+| Requested three-font comparison | Current Open Sans, Titillium Web, Hind | `open-sans-titillium-hind.png` |
 
 Visual observations: Hind Madurai resembles Hind closely. Noto Sans is closest
 to Open Sans in these digit samples. Fira Sans is narrower; Public Sans and
@@ -40,7 +41,15 @@ Reproduce after placing the source files and OFL notices at the recorded paths:
 python3 scripts/compare_damage_numbers_fonts.py --group initial
 python3 scripts/compare_damage_numbers_fonts.py --group hind
 python3 scripts/compare_damage_numbers_fonts.py --group open-sans
+python3 scripts/compare_damage_numbers_fonts.py --group titillium
 ```
+
+The three-font preview uses the current r14 Open Sans source and axes, with
+Titillium Web Semibold and Hind Semibold at weight 600. It shows the same
+enlarged 2/5, digit strip and small labels as earlier comparisons. The r14
+candidate, release ZIP and installed NRO are fingerprinted before and after;
+no build, deployment or settings change is part of this preview request.
+[Titillium Web metadata](https://github.com/google/fonts/blob/9710da1eacb3be272583c3224dcb70f9da6eadbb/ofl/titilliumweb/METADATA.pb).
 
 ## Prepared crit bloom adjustment
 

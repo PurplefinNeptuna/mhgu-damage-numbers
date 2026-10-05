@@ -97,6 +97,14 @@
       "source_url": "https://raw.githubusercontent.com/google/fonts/9710da1eacb3be272583c3224dcb70f9da6eadbb/ofl/librefranklin/LibreFranklin%5Bwght%5D.ttf",
       "source_sha256": "2329f394b10ed1c71107df20fddc11e2bb1b68c1ecbb385f975b36fd64a971f8",
       "license_sha256": "2710268527181a27b8e938617551bae29e714e6525247be6679bf897a9942a60"
+    },
+    {
+      "family": "titilliumweb",
+      "file": "work/damage-numbers/font-alternatives/titilliumweb/TitilliumWeb-SemiBold.ttf",
+      "revision": "9710da1eacb3be272583c3224dcb70f9da6eadbb",
+      "source_url": "https://raw.githubusercontent.com/google/fonts/9710da1eacb3be272583c3224dcb70f9da6eadbb/ofl/titilliumweb/TitilliumWeb-SemiBold.ttf",
+      "source_sha256": "7c92f15302d7ac1836015cb9cf4068796406667b304a061b75df8e11f1648c81",
+      "license_sha256": "c0562e066174197902a4a10606673d189f067970ef89c6013943b9cf182aadbc"
     }
   ]
 }
