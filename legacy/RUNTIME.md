@@ -565,3 +565,35 @@ audit passed. Python syntax and Git whitespace passed. The NRO is 212,992 bytes
 with 1,093,632 BSS bytes; no capture/renderer C++ implementation was changed.
 The default profile still regenerates the exact accepted r12 font/RLE payloads,
 and the original final ZIP and installed NRO retain their recorded hashes.
+
+## 2026-10-05: r13 open Wilds animation trial
+
+User requested a 1.2x stamp settling in 0.2 seconds, a stationary interval,
+then faster upward motion during disappearance. Only the open-asset build's
+Wilds style changes. A compile-time profile flag selects this behavior; the
+personal game-asset edition and Classic retain their previous animation.
+
+Duration stays the total display lifetime and settings/codec/defaults are
+preserved. The final 0.2 seconds rise 30 pixels at 720p while fading. At the
+existing 0.9-second default, the number holds its projected position for 0.7
+seconds; a 1.2-second Duration gives a 1-second hold. The initial 0.2-second
+size settlement uses quadratic easing. The maximum placement reservation is
+now the 1.2x stamp for this style, with stable bounded offsets unchanged.
+
+Host checks cover both profile builds, including hold timing, attached critical
+markers, total expiry, minimum duration, resolution scaling and Classic's old
+animation. Compiled fixture checks inspect stamp, settled size, fully opaque
+hold, fast exit and Classic preservation. The open font/texture provenance
+and licenses remain unchanged. This trial is staged separately as r13-open-assets;
+no game-asset version is retired and no installation or save write is performed.
+
+Verification passed: 917 open and 900 legacy host core/presentation checks,
+the eight-producer mailbox stress and 23 transactional-hook scenarios,
+321 compiled ARM32 checks, the pinned real-ImGui visual harness, and the
+open-asset provenance/compiled-payload audit. Python syntax and Git whitespace
+checks passed. The NRO is 212,992 bytes with 1,093,632 BSS bytes, SHA-256
+`1937e96bcb3b52bac86a7252e1967ba5799cd466930d51a0f19b34add9e869e8`.
+The existing r12 releases and installed personal NRO retain their hashes;
+the r12 open NRO is also preserved under workspace backups for rollback.
+Fixtures are not an Eden gameplay trial. The brief open-edition animation
+check remains pending in [OPEN_ASSETS.md](OPEN_ASSETS.md).

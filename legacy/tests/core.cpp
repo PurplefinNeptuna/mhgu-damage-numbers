@@ -104,11 +104,11 @@ static void drawing() {
     Model m;m.reset(7);Event e=hit();e.critical=Critical::Positive;m.capture(e);m.update(1,true);
     DrawNumber commands[128]{};
     check(layout(m,view(),1,commands)==1,"initial draw");
-    check(commands[0].pixels==30&&commands[0].opacity==1&&commands[0].critical==Critical::Positive,"pop and overscore command");
+    check(std::fabs(commands[0].pixels-24*peak_scale(VisualStyle::Wilds))<.001f&&commands[0].opacity==1&&commands[0].critical==Critical::Positive,"pop and overscore command");
     check(layout(m,view(),1.2f,commands)==1&&commands[0].pixels==24,"pop settles");
     const float old_y=commands[0].position.y;
     check(layout(m,view(),1.8f,commands)==1&&commands[0].position.y<old_y,"upward drift");
-    check(std::fabs(commands[0].opacity-0.4f)<0.00001f,"last quarter-second fade");
+    check(std::fabs(commands[0].opacity-number_motion(.8f,.9f,VisualStyle::Wilds).opacity)<0.00001f,"last quarter-second fade");
     check(layout(m,view(),2,commands)==0,"no expired draw");
     e=hit(2);e.critical=Critical::Negative;m.capture(e);m.update(1,true);
     check(layout(m,view(),1,commands)==2,"same-position multi-hit preserved");
@@ -223,7 +223,7 @@ static void compact_spacing() {
     check(layout(m,view(),1,commands,state,varied_measure)==1,"measured narrow digits draw");
     const Point first=commands[0].offset;
     check(first.x==0&&first.y==0,"isolated hit retains its original anchor");
-    check(std::fabs(commands[0].advance-25.2f)<.001f,"actual advances used instead of digit count estimate");
+    check(std::fabs(commands[0].advance-(24*peak_scale(VisualStyle::Wilds)*.28f*3))<.001f,"actual advances used instead of digit count estimate");
     check(commands[0].color==0xf4f1ec&&star_rgb(commands[0].critical)==0xf1689b,"nonweak positive crit keeps white digits and red star");
     for(unsigned i=2;i<=128;++i) { e=hit(i);e.total_damage=i%2?888:1;e.critical=i%3?Critical::Negative:Critical::Positive;m.capture(e); }
     m.update(1,true);check(layout(m,view(),1,commands,state,varied_measure)==128,"dense bursts retain all 128 separate numbers");
@@ -260,4 +260,47 @@ static void aligned_markers() {
     Settings s=m.config();s.style=VisualStyle::Classic;m.configure(s);layout(m,view(),1,out,state,varied_measure);
     check(out[0].position.x!=int(out[0].position.x),"Classic retains original text origin behavior");
 }
-int main() { policies();lifecycle();drawing();compact_spacing();aligned_markers();preview();settings_and_sources();std::printf("Passed %u core/presentation checks\n",cases); }
+static void stamp_hold_exit() {
+    Model m;m.reset(7);Event e=hit();e.critical=Critical::Positive;m.capture(e);m.update(1,true);
+    Settings s=m.config();s.lifetime=1.2f;m.configure(s);
+    PlacementState cache{};DrawNumber out[128]{};
+#ifdef DAMAGE_NUMBERS_OPEN_ASSETS
+    check(layout(m,view(),1,out,cache,varied_measure)==1&&std::fabs(out[0].pixels-28.8f)<.001f,
+          "open Wilds starts with 1.2x stamp");
+    const float start_y=out[0].position.y;const Point offset=out[0].offset;
+    check(layout(m,view(),1.1f,out,cache,varied_measure)==1&&std::fabs(out[0].pixels-25.2f)<.001f,
+          "stamp eases down halfway through the 0.2-second settlement");
+    check(layout(m,view(),1.2f,out,cache,varied_measure)==1&&out[0].pixels==24,
+          "stamp reaches normal size at 0.2 seconds");
+    for(float age:{.25f,.5f,.75f,.95f,1.0f}) {
+        check(layout(m,view(),1+age,out,cache,varied_measure)==1&&out[0].position.y==start_y&&out[0].opacity>.999f,
+              "one-second stationary fully opaque hold with total duration 1.2");
+        check(out[0].offset.x==offset.x&&out[0].offset.y==offset.y,"hold keeps cached spacing fixed");
+    }
+    check(layout(m,view(),2.1f,out,cache,varied_measure)==1&&std::fabs(out[0].position.y-(start_y-15))<=1&&std::fabs(out[0].opacity-.5f)<.001f,
+          "final 0.2 seconds rises fast while fading, halfway at 15 pixels and half alpha");
+    check(out[0].pixels==24&&out[0].star.y<out[0].ink.top,"exit keeps settled size and positive star attached");
+    check(layout(m,view(),2.2f,out,cache,varied_measure)==0,"label disappears at total duration");
+    s.lifetime=.9f;m.configure(s);layout(m,view(),1.65f,out,cache,varied_measure);
+    check(out[0].position.y==start_y&&out[0].opacity==1,"default duration holds beyond half a second");
+    s.lifetime=.4f;m.configure(s);layout(m,view(),1.3f,out,cache,varied_measure);
+    check(std::fabs(out[0].opacity-.5f)<.001f&&out[0].pixels==24,"minimum duration fits stamp and exit without negative hold");
+    s.lifetime=1.2f;m.configure(s);View large=view();large.width*=2;large.height*=2;
+    layout(m,large,1.5f,out,cache,varied_measure);const float large_y=out[0].position.y;
+    layout(m,large,2.1f,out,cache,varied_measure);
+    check(std::fabs(out[0].position.y-(large_y-30))<=1,"exit distance scales with viewport resolution");
+#else
+    layout(m,view(),1,out,cache,varied_measure);const float local_y=out[0].position.y;
+    check(out[0].pixels==30,"local build retains 1.25x initial pop");
+    layout(m,view(),1.5f,out,cache,varied_measure);
+    check(out[0].position.y<local_y&&out[0].opacity==1,"local Wilds keeps its previous continuous drift");
+#endif
+    s.style=VisualStyle::Classic;s.lifetime=.9f;m.configure(s);
+    layout(m,view(),1,out,cache,varied_measure);const float classic_y=out[0].position.y;
+    check(out[0].pixels==30,"Classic keeps 1.25x pop in both build profiles");
+    layout(m,view(),1.1f,out,cache,varied_measure);check(out[0].pixels==24&&out[0].position.y<classic_y,
+          "Classic keeps 0.1-second settlement and continuous upward drift");
+    layout(m,view(),1.8f,out,cache,varied_measure);check(std::fabs(out[0].opacity-.4f)<.001f,
+          "Classic keeps its quarter-second fade");
+}
+int main() { policies();lifecycle();drawing();compact_spacing();aligned_markers();stamp_hold_exit();preview();settings_and_sources();std::printf("Passed %u core/presentation checks\n",cases); }

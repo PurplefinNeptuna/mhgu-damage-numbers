@@ -8,7 +8,9 @@ uses the exact tested binary. [Release/install notes](RELEASE.md),
 and [runtime history](RUNTIME.md) retain the evidence.
 
 An [alternate open-asset build](OPEN_ASSETS.md) uses OFL digits and original
-procedural stars without bundling Wilds font/texture assets.
+procedural stars without bundling Wilds font/texture assets. Its r13 Wilds style
+adds a 0.2-second stamp, a stationary hold, then a fast rise/fade in the final
+0.2 seconds; the personal r12 and Classic retain their existing animation.
 
 Target: MHGU 1.4.0 Switch, Eden/Linux, and the tested patched Forge baseline.
 Capture hooks, damage calculations and ownership bindings are unchanged.

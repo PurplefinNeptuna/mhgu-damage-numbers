@@ -74,6 +74,31 @@ inline Rect solid_bounds(Rect ink,Point pos,float pixels,float advance,float uni
     const float y=crit==Critical::Positive?pos.y-2*stroke:pos.y+pixels+2*stroke;
     return united(ink,{pos.x-2*stroke,y-2*stroke,pos.x+advance+2*stroke,y+2*stroke});
 }
+// Only the open-asset trial uses the requested stamp/hold/exit timing.
+// The local asset profile and Classic retain their accepted animation.
+inline float peak_scale(VisualStyle style) {
+#ifdef DAMAGE_NUMBERS_OPEN_ASSETS
+    if(style==VisualStyle::Wilds)return 1.2f;
+#else
+    (void)style;
+#endif
+    return 1.25f;
+}
+struct NumberMotion { float scale, opacity, rise; };
+inline NumberMotion number_motion(float age,float lifetime,VisualStyle style) {
+#ifdef DAMAGE_NUMBERS_OPEN_ASSETS
+    if(style==VisualStyle::Wilds) {
+        const float settle=low(1,high(0,age/.2f));
+        const float stamp=1-settle;
+        const float exit=low(1,high(0,(age-(lifetime-.2f))/.2f));
+        return {1+.2f*stamp*stamp,1-exit,30*exit};
+    }
+#else
+    (void)style;
+#endif
+    return {age<.1f?1+.25f*(1-age/.1f):1,
+            age>lifetime-.25f?(lifetime-age)/.25f:1,age/lifetime*30};
+}
 struct PlacementState {
     struct Entry { HitKey key; Point offset; bool live; } entries[128]{};
     float x=0,y=0,width=0,height=0,scale=0;
@@ -114,17 +139,19 @@ inline unsigned layout(const Model& model,const View& view,float now,DrawNumber 
         if(age<0||age>=s.lifetime||!visible(e,s))continue;
         Point anchor{};if(!project(e.position,view,anchor))continue;
         DrawNumber d{};digits(e.total_damage,d.text);
-        d.pixels=base*(age<.1f?1+.25f*(1-age/.1f):1);d.unit=unit;d.classic_stroke=1.25f*view.height/720.0f;
-        d.opacity=age>s.lifetime-.25f?(s.lifetime-age)/.25f:1;
+        const NumberMotion motion=number_motion(age,s.lifetime,s.style);
+        const float peak_pixels=base*peak_scale(s.style);
+        d.pixels=base*motion.scale;d.unit=unit;d.classic_stroke=1.25f*view.height/720.0f;
+        d.opacity=motion.opacity;
         d.style=s.style;d.color=rgb(tint(e,s),s.style);d.critical=marker(e);d.key=e.key;
         TextMetrics current{},peak{};
-        if(!measure(d.text,d.pixels,s.style,current)||!measure(d.text,base*1.25f,s.style,peak)||
+        if(!measure(d.text,d.pixels,s.style,current)||!measure(d.text,peak_pixels,s.style,peak)||
            !valid(current.ink)||!valid(peak.ink)||!finite(current.advance)||!finite(peak.advance))continue;
-        const float cy=anchor.y-8*view.height/720.0f-age/s.lifetime*30*view.height/720.0f;
+        const float cy=anchor.y-8*view.height/720.0f-motion.rise*view.height/720.0f;
         d.position={anchor.x-current.advance*.5f,cy};d.advance=current.advance;
         d.ink=shifted(current.ink,d.position);
         Rect reserved=shifted(peak.ink,{anchor.x-peak.advance*.5f,cy});
-        reserved=solid_bounds(reserved,{anchor.x-peak.advance*.5f,cy},base*1.25f,peak.advance,
+        reserved=solid_bounds(reserved,{anchor.x-peak.advance*.5f,cy},peak_pixels,peak.advance,
             s.style==VisualStyle::Wilds?unit:view.height/720.0f,d.critical,s.style);
         const float shadow=s.style==VisualStyle::Wilds?unit:1.25f*view.height/720.0f;
         const float snap_pad=s.style==VisualStyle::Wilds?1.0f:0.0f;
