@@ -40,7 +40,7 @@ int main(int argc,char** argv) {
     out<<"],\"commands\":[";
     for(int i=0;i<draw->CmdBuffer.Size;++i){auto c=draw->CmdBuffer.Data[i];if(i)out<<',';out<<'['<<ImDrawCmd_GetTexID(&c)<<','<<c.IdxOffset<<','<<c.ElemCount<<','<<c.VtxOffset<<']';}
     out<<"]}";assert(dd->Textures->Size==2);
-    std::puts("Real ImGui font, original RGBA sprites and draw commands passed");
+    std::puts("Real ImGui font, selected RGBA sprites and draw commands passed");
     // Texture and font data have process/context lifetime, as in Forge.
     igDestroyContext(ctx);
 }

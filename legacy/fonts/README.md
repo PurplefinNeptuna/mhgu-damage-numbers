@@ -63,3 +63,12 @@ installed renderer advertises `RendererHasTextures` and handles its GPU upload.
 Texture pixels and metadata remain alive while the context uses them. The
 baseline loader has no plugin unload callback. Missing texture support logs
 and leaves crisp digits; capture and Classic rendering continue.
+
+## Alternate open-asset edition
+
+`--assets open` selects [open-source.json](open-source.json): pinned Google
+Fonts Roboto, width 100, weight 600, renamed to Damage Digits Open, under the
+[full SIL OFL notice](OFL.txt). It does not read the extracted Wilds font or
+texture. Sprite generation uses independently authored geometric artwork.
+The open preparation/build/preview outputs are isolated from the accepted
+personal r12. See [OPEN_ASSETS.md](../OPEN_ASSETS.md).

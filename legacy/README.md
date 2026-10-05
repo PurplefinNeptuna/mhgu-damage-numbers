@@ -7,6 +7,9 @@ uses the exact tested binary. [Release/install notes](RELEASE.md),
 [completed visual check](R12_VISUAL_CHECK.md), [test results](TEST_RESULTS.md)
 and [runtime history](RUNTIME.md) retain the evidence.
 
+An [alternate open-asset build](OPEN_ASSETS.md) uses OFL digits and original
+procedural stars without bundling Wilds font/texture assets.
+
 Target: MHGU 1.4.0 Switch, Eden/Linux, and the tested patched Forge baseline.
 Capture hooks, damage calculations and ownership bindings are unchanged.
 

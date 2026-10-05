@@ -530,3 +530,38 @@ Final ZIP SHA-256:
 `7c0a4c50b4f02fe151c71ed49a40ae95986da97b8341cc85a795de9e026f67e9`.
 Two packaging runs produced identical bytes. Reopened ZIP CRC, exact member
 inventory and every payload comparison passed; installed r12 stayed unchanged.
+
+## 2026-10-05: alternate open visual assets
+
+Requested after completion of the personal r12 edition. The alternate uses a
+Roboto Semibold 600 digit subset named Damage Digits Open under SIL OFL 1.1,
+and independently authored procedural four-point crit art. The font's full
+notice is embedded and included; original art has a separate notice.
+No extracted Wilds font/texture is included. Gameplay/source/render policies,
+spacing, animation, config paths/version, Classic mode and UI are unchanged.
+Both editions are alternatives for the same plugin, not simultaneous installs.
+
+Generation and build outputs are isolated under `open-assets/`; the accepted
+r12 NRO/ZIP and installed plugin remain unchanged. The font and atlas input
+pipeline is audited with proprietary visual file reads blocked. Compiled font,
+full license and RLE sprite buffers are compared to the open payloads. The
+real-ImGui preview uses the alternate font/effect texture at
+`work/damage-numbers/open-visual/preview.png`.
+
+Alternate NRO SHA-256:
+`87390164d5541d0922f072a95033fc7bf61e3687e3a23e1b5ae25154196d9ab2`.
+The full build, asset audit and compiled fixture reports are recorded under
+`build/damage-numbers/open-assets/`. The package recipe requires a passing
+312-check compiled report with the same hash before creating the ZIP.
+The alternate's in-game appearance is pending; earlier gameplay coverage
+remains evidence for the unchanged implementation. No installation, game
+launch, save write or publishing is part of this alternate build.
+
+Alternate verification completed: 312 compiled ARM32 checks passed, including
+full registered-font fingerprints, decoded sprite/effect fingerprints, both
+styles, fading, spacing, source exclusion/master switch and save recovery.
+Real pinned ImGui font/texture rendering and the proprietary-read-blocked asset
+audit passed. Python syntax and Git whitespace passed. The NRO is 212,992 bytes
+with 1,093,632 BSS bytes; no capture/renderer C++ implementation was changed.
+The default profile still regenerates the exact accepted r12 font/RLE payloads,
+and the original final ZIP and installed NRO retain their recorded hashes.

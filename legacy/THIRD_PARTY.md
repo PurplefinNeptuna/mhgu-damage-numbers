@@ -83,3 +83,13 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+## Alternate open-asset edition
+
+The open profile embeds a Roboto Semibold 600 digit subset from pinned Google
+Fonts and includes the full SIL OFL notice. It is renamed Damage Digits Open;
+[source/axes/license hashes](fonts/open-source.json) document the modified
+subset. Independently authored procedural crit artwork uses the separate
+[notice](OPEN_ART_LICENSE.txt). Its binary and ZIP include no extracted
+Wilds font/texture payload and do not include the Wilds extraction tools.
+Forge remains an external dependency. See [OPEN_ASSETS.md](OPEN_ASSETS.md).
