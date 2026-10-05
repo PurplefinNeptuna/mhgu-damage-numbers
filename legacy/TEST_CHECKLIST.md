@@ -64,3 +64,11 @@ artwork, draw output, settings and behavior. If trying the new compressed NRO,
 a normal boot and a few Wilds-style hits are sufficient to confirm the startup
 texture appears. There is no need to repeat the combat checklist.
 The known Forge menu/damage-popup corruption remains outside this update.
+
+## R17 Ryujinx compatibility confirmation
+
+After replacing the NRO with the emulator closed, restart completely, load
+your save, enter one quest, land a few hunter/Palico hits, and return to the
+village. Confirm normal controls, visible numbers and no `APSR_g` failure.
+That is sufficient for the new gateway change; previous combat coverage needs
+no full repeat. This check has not been marked complete by automated fixtures.

@@ -1,6 +1,8 @@
 # Damage numbers
 
-R16 is ready for distribution with losslessly compressed artwork. The sole supported edition uses
+R17 applies the audited NZCVQ-only gateway fix for Ryujinx-based emulators.
+The compatibility candidate is statically validated; fresh emulator gameplay
+confirmation remains pending. The sole supported edition uses
 **Open Sans Semibold 600** digits under
 SIL OFL 1.1 and independently authored procedural crit stars. The game-derived
 font/texture edition was retired on 2026-10-05. [Release/install notes](RELEASE.md),
@@ -8,7 +10,10 @@ font/texture edition was retired on 2026-10-05. [Release/install notes](RELEASE.
 [test results](TEST_RESULTS.md) and [runtime history](RUNTIME.md) retain the evidence.
 
 Target: MHGU 1.4.0 Switch, Eden/Linux, and the tested patched Forge baseline.
-Capture hooks, damage calculations and ownership bindings are unchanged.
+Hook sites, damage calculations and ownership bindings are unchanged.
+The nine gateway restore instructions now write NZCVQ while leaving GE as set
+by helpers. [GE audit](GE_PRESERVATION_AUDIT.md) establishes why this is safe at
+the current hook sites; [r17 notes](RYUJINX_COMPATIBILITY.md) record validation.
 R16 shrinks the NRO from 256KiB to 152KiB while preserving every artwork byte.
 The decoder runs once per ImGui context; rendering uses the same texture and
 draw calls. [Compression evidence](COMPRESSION.md) records the checks and timing.
@@ -121,8 +126,8 @@ python3 scripts/audit_damage_numbers_open_assets.py
 python3 scripts/package_damage_numbers.py
 ```
 
-Current ZIP: `build/damage-numbers/releases/r16/damage-numbers-r16.zip`.
-Package: `build/damage-numbers/releases/r16/damage-number/`.
+Current ZIP: `build/damage-numbers/releases/r17/damage-numbers-r17.zip`.
+Package: `build/damage-numbers/releases/r17/damage-number/`.
 Source manifest: `build/damage-numbers/open-assets/candidate-manifest.json`.
 The ZIP contains only the runtime NRO. README, combined redistribution notices,
 provenance/audit manifest and checksums remain beside it. Keep `NOTICES.txt`

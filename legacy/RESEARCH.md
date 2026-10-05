@@ -139,10 +139,13 @@ correlation; no player edits or repeat RNG.
 
 ## Capture candidate and ABI
 
-`gateway.S` preserves `r0-r12`, `d0-d31`, APSR/FPSCR
+`gateway.S` preserves `r0-r12`, `d0-d31`, NZCVQ/FPSCR
 in 328 bytes; native stack arguments stay put. Around hooks redirect caller LR
 via owned TLS; before-taps return to trampolines. Leaf LR is restored;
 native-calculated LR retained. Fixtures cover nesting/capacity failures.
+R17 leaves GE as set by the helper, based on the eight-site
+[GE liveness audit](GE_PRESERVATION_AUDIT.md); this is not a general gateway
+contract for arbitrary new interior hooks.
 
 Capture owns one 4 KiB CodeMemory arena/SDK TLS slot, separate from Forge's
 shared context/legacy arena. Six exact displaced words extend the transaction

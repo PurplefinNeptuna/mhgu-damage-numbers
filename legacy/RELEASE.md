@@ -1,47 +1,48 @@
-# Damage numbers r16
+# Damage numbers r17 compatibility candidate
 
-R16 compresses the approved open artwork losslessly, reducing the NRO from
-256KiB to **152KiB**. The Open Sans Semibold font, texture pixels, rendering,
-20px default, animation and settings remain identical to r15. The decoder runs
-once per ImGui context directly into the existing texture buffer; it adds no
-per-hit work or persistent allocation. [Compression evidence](COMPRESSION.md)
-records bounds checks, exact comparisons and host initialization timings.
+R17 applies the audited NZCVQ-only gateway restoration for Ryujinx-based
+emulators. Nine restore instructions stop writing GE, avoiding the
+`APSR_g` translation path in the recorded Ryujinx-Nextendo reference.
+The existing eight MHGU 1.4.0 hook sites do not consume GE. NZCVQ, integer/VFP
+registers, FPSCR, native stack arguments and return state remain preserved.
+[Compatibility notes](RYUJINX_COMPATIBILITY.md) and the
+[GE audit](GE_PRESERVATION_AUDIT.md) record the evidence and its limits.
+
+The NRO remains **152KiB**. Every other executable byte matches the audited
+r16 build. Open Sans Semibold, the compressed artwork, colors, animation,
+spacing, settings and capture behavior remain unchanged. R17 is a validated
+candidate awaiting fresh emulator gameplay confirmation.
 
 ## Package and installation
 
-`build/damage-numbers/releases/r16/damage-numbers-r16.zip` contains only
+`build/damage-numbers/releases/r17/damage-numbers-r17.zip` contains only
 `damage-number/romfs/nativeNX/plugins/damage_numbers_capture.nro`. README,
-`NOTICES.txt`, release provenance and `SHA256SUMS` stay beside the ZIP, matching
-the clean modern-control layout. Redistribute the archive with its notices.
-The tested patched Forge loader is required and not bundled. Target: MHGU
-1.4.0, Switch, Eden/Linux.
+`NOTICES.txt`, provenance and `SHA256SUMS` remain beside it. Redistribute the
+archive with its notices. The tested patched Forge loader is required and
+not bundled; this package does not replace an emulator.
 
-Close Eden before installing. Preserve the current NRO outside Eden's load
-directory, then replace it with the r16 NRO. Keep one damage-number plugin.
-For a fresh setup, copy the extracted `damage-number/` folder into Eden's title
-`0100770008DD8000` mod directory alongside Forge, and enable it in Eden.
-The packager performs no installation. A fresh read during release cleanup
-finds the installed NRO matching r16; this is a file-hash check, not new
-gameplay confirmation.
+Close the emulator before installing. Preserve the existing NRO outside its
+mods directory, then replace it with the r17 NRO. Keep one damage-number
+plugin. For a fresh setup, place the extracted `damage-number/` folder in
+MHGU's per-title mods directory alongside Forge. On Ryujinx-based emulators,
+use the emulator's `mods/contents/0100770008dd8000/` directory. On Eden, use
+its title `0100770008DD8000` mod directory. Listing and activation are separate.
+The recipes perform no installation, activation, save edit or cache deletion.
 
-## Defaults and evidence
+## Verification and brief manual check
 
-Enabled, Wilds style, Number size **1.0 = 20px at 720p / 30px at 1080p**,
-Duration 0.9s. Wilds stamps at 1.2×, settles over 0.2s, holds, then rises and
-fades during the final 0.2s. Existing version-2 preferences remain usable.
-No configuration or save migration is needed.
+Passed: 919 host checks, mailbox stress, 23 transaction scenarios, **9,287
+ARM gateway checks across 2,025 calls**, **347 compiled capture checks**,
+production instruction comparison, real-ImGui equivalence and open-asset audit.
+All 16 GE patterns were tested across all eight entries with preserving and
+clobbering helpers. No fresh Ryujinx or Eden gameplay result is claimed.
 
-Passed: 919 host core/presentation checks, mailbox stress, 23 transaction
-scenarios, **338 compiled ARM32 checks**, bounded codec tests under ASan/UBSan,
-real-ImGui byte equivalence and open-asset provenance audit. The deterministic
-ZIP is reopened and checked member by member. Prior user-confirmed combat and
-appearance remain the gameplay evidence; no fresh r16 in-game run or live FPS
-measurement is claimed.
+After installing, restart completely, load the save, enter one quest, land a
+few hunter/Palico hits and return to the village. Confirm normal controls,
+visible numbers and no `APSR_g` failure. Prior combat tests need no full repeat.
 
-The tested Forge loader's corruption when its menu and damage popups appear
-together remains unresolved. This asset compression update leaves that loader
-unchanged. [Repair handoff](../../docs/FORGE_IMGUI_DAMAGE_CORRUPTION_HANDOFF.md).
-
-Only open font/art is supported. [Retirement record](RETIREMENT.md) preserves
-the private edition's history and quarantine locations. NRO and ZIP hashes,
-font provenance and verification reports are in the adjacent release manifest.
+The separate Forge menu/popups corruption remains unresolved and documented
+in the [renderer handoff](../../docs/FORGE_IMGUI_DAMAGE_CORRUPTION_HANDOFF.md).
+R16 rollback and test artifacts remain under
+`backups/damage-numbers/r16-before-r17-ge-20261006/`. Only open font/art is
+supported; the game-derived edition remains retired.

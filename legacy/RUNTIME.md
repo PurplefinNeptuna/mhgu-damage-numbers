@@ -715,3 +715,27 @@ contains only the runtime NRO, with notices and provenance beside it.
 Installed r15, Forge, Better Input, saves and configuration are left unchanged.
 The known multi-draw-list corruption in Forge's renderer remains unresolved.
 See [compression details](COMPRESSION.md).
+
+## 2026-10-06: r17 NZCVQ-only gateway compatibility candidate
+
+The shared restore macro now emits `msr APSR_nzcvq, r2` (`e128f002`) rather
+than `msr APSR_nzcvqg, r2` (`e12cf002`). Exactly nine words change across the
+eight production entries and return gateway. This is bounded by the original
+MHGU 1.4.0 eight-site GE-liveness audit. GE remains as set by callbacks; it is
+neither restored nor zeroed. The stale fixture-only entries-6/7 comment is
+corrected without changing hooks or the 328-byte frame.
+
+The NRO is `1eb78f3430f6c5c5ce1f60a382fa8bd4fc18ee56cf267649b95a94a462115ea4`,
+155,648 bytes. Every other executable byte matches audited r16; initialized
+data, imports, BSS and segment sizes also match. Font, compressed art,
+20px default, animation, UI and version-2 settings remain unchanged.
+
+Fresh gateway coverage passes 9,287 checks across 2,025 calls, including
+256 explicit GE-boundary cases (16 patterns × eight entries × preserving/
+clobbering callbacks). The complete production fixture passes 347 checks,
+including nine emitted-instruction checks. Host and appearance/provenance
+checks pass. Original r16/gateway/work/source artifacts and installed-file
+fingerprints are preserved at `backups/damage-numbers/r16-before-r17-ge-20261006/`.
+No installed files, emulator binaries, configurations, caches or saves are
+changed. This remains a validated compatibility candidate pending a user-run
+Ryujinx/Eden quest check. See [compatibility notes](RYUJINX_COMPATIBILITY.md).

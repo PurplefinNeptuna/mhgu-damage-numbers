@@ -126,6 +126,15 @@ hook-function disassembly, encoding candidates, scratch gateway binary and
 native service dependencies are fixture stubs; these are not live Ryujinx or
 Eden gameplay tests.
 
+## R17 implementation — 2026-10-06
+
+The audited change is now applied in the production `gateway.S` restore macro.
+The original r16/scratch evidence above remains a historical record.
+[R17 compatibility notes](RYUJINX_COMPATIBILITY.md) document the reduced
+contract, production binary comparison, fresh fixtures and pending runtime
+confirmation. The stale entries-6/7 comment is corrected; all eight entries
+remain production hooks. No hook location or captured frame layout changes.
+
 The original Ryujinx-Nextendo translator at reference commit
 `05577ab543f4322cb7534c1f5caca0e0079791bf` handles MSR mask 8 (NZCVQ) and throws
 `APSR_g` for mask 4 (GE). The proposed instruction therefore avoids this

@@ -1,4 +1,4 @@
-# Damage numbers r16: open-only release
+# Damage numbers r17: open-only compatibility candidate
 
 The sole supported build uses **Open Sans Semibold 600**, a renamed digit subset under
 SIL Open Font License 1.1, and independently authored procedural red/blue crit
@@ -29,7 +29,7 @@ Classic retains its original 1.25x/0.1-second pop, continuous drift and fade.
 
 ## Download and installation
 
-Archive: `build/damage-numbers/releases/r16/damage-numbers-r16.zip`.
+Archive: `build/damage-numbers/releases/r17/damage-numbers-r17.zip`.
 Plugin: `build/damage-numbers/open-assets/candidate-package/romfs/nativeNX/plugins/damage_numbers_capture.nro`.
 
 Close Eden, preserve the current NRO outside its load directory, then replace
@@ -48,9 +48,9 @@ font, visible size and animation remain identical to r15. The NRO is 152KiB,
 down from 256KiB. Decoding writes directly into Forge's existing texture buffer
 once per ImGui context. It adds no per-hit work or persistent allocation.
 [Compression evidence](COMPRESSION.md) includes bounded host/ARM decoding,
-byte comparisons and initialization timing. Release cleanup made no installed
-file changes; a fresh read now finds the installed NRO matching r16. No fresh
-r16 gameplay run is claimed.
+byte comparisons and initialization timing. R17 changes only the gateway flag-restoration instructions. Appearance and
+settings remain unchanged. No installed files are replaced by these recipes;
+no fresh r17 gameplay run is claimed. [Compatibility notes](RYUJINX_COMPATIBILITY.md).
 
 ## Asset provenance and notices
 

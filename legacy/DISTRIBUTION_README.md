@@ -1,6 +1,6 @@
-# Damage Numbers r16
+# Damage Numbers r17
 
-Finished open-font release for Monster Hunter Generations Ultimate 1.4.0
+Open-font compatibility candidate for Monster Hunter Generations Ultimate 1.4.0
 (Nintendo Switch), tested on Eden/Linux with the maintained patched Forge loader.
 Forge is required and is not included. Its tested binary fingerprint is recorded
 in `release-manifest.json` beside the ZIP; other loader/game versions have not been validated.
@@ -15,7 +15,8 @@ is included. Unsupported recurring damage ticks remain excluded.
 1. Close Eden.
 2. Extract this ZIP. For a fresh install, copy its `damage-number` folder into
    Eden's mod directory for title `0100770008DD8000`, alongside the required Forge
-   package, and enable it in Eden.
+   package, and enable it in Eden. For Ryujinx-based emulators, use the emulator's
+   MHGU `mods/contents/0100770008dd8000/` directory alongside Forge.
 3. For an update, back up your existing plugin outside Eden's mod directory,
    then replace `damage-number/romfs/nativeNX/plugins/damage_numbers_capture.nro`.
    Keep only one damage-number plugin installed.
@@ -58,15 +59,25 @@ notices are combined in `NOTICES.txt` beside the ZIP. Keep this notice file
 with the ZIP when redistributing. Font provenance and asset verification are
 recorded in the adjacent `release-manifest.json`.
 
-R16 losslessly compresses the same artwork, shrinking the NRO from 256KiB to
-152KiB. It decodes once per UI context directly into the existing texture.
-Appearance, settings, hit rendering and GPU texture dimensions remain unchanged.
-Host, compiled ARM32 and real-ImGui fixtures verify the decoded bytes and
-rendering. Prior user-confirmed gameplay remains the manual evidence; no fresh
-r16 in-game run is claimed. `release-manifest.json` records the exact NRO hash and
+R17 retains r16's 152KiB NRO size and losslessly compressed open artwork. Its
+nine gateway restore instructions use NZCVQ only, avoiding Ryujinx's unsupported
+APSR_g translation. GE is unused at the eight audited hook sites and is left
+as set by callbacks. Font, animation, damage capture, settings, hooks and
+texture dimensions remain unchanged. This fix targets the plugin; Forge is
+still required. No emulator replacement is included.
+
+Host/native fixtures verify state preservation, all 16 GE patterns with
+preserving and clobbering helpers, production instructions and identical
+rendering. Prior gameplay remains the manual evidence; no fresh r17 Ryujinx
+or Eden in-game run is claimed. `release-manifest.json` records the exact NRO hash and
 compiled check count. The adjacent `SHA256SUMS` covers the ZIP, plugin, README,
 notices and release manifest. Only the `damage-number` folder belongs in Eden.
 
 The tested Forge loader has a known visual corruption issue when its menu and
 damage popups are visible together. This compression update leaves that issue
 unchanged.
+
+For a brief confirmation after installing r17, restart the emulator completely,
+load your save, land a few hunter/Palico hits in one quest and return to the
+village. Check for normal controls, visible numbers and no APSR_g error. Prior
+combat coverage needs no full repeat.

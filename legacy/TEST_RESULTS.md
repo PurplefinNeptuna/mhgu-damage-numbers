@@ -136,3 +136,26 @@ RLE. These are host CPU measurements, with no new gameplay or live FPS result
 claimed. Installed r15 and its rollback materials remain unchanged. Detailed
 evidence: [COMPRESSION.md](COMPRESSION.md). The known Forge overlay corruption
 remains open.
+
+## R17 NZCVQ gateway compatibility — 2026-10-06
+
+Applied the eight-site GE audit by changing the shared gateway restore to
+NZCVQ only. Production verification against the audited r16 NRO proves that
+exactly nine executable words changed; every other executable byte,
+initialized data, imports, BSS and segment sizes remain unchanged. Font and
+artwork are identical. The candidate remains 155,648 bytes (152KiB).
+
+Passed: 9,287 gateway checks across 2,025 calls, including the existing 9,031
+state/native-damage/HZV checks under the explicit NZCVQ restoration contract
+and 256 additional GE-boundary checks. All 16 patterns across all eight
+entries were exercised with GE-preserving and GE-clobbering callbacks.
+Integer registers, d0-d31, NZCVQ, FPSCR, LR/SP and stack arguments still match.
+Fresh compiled production checks total 347: the existing 338 plus nine
+NZCVQ-only instruction checks. Host core/presentation checks (919), mailbox
+stress and 23 transactional scenarios pass. Real-ImGui equivalence and the
+open-asset audit retain appearance/provenance evidence.
+
+No fresh Ryujinx or Eden gameplay test is claimed. The mask-8 path is supported
+by the unmodified recorded translator; broad fork/gameplay compatibility
+still requires the brief user-run check in [RYUJINX_COMPATIBILITY.md](RYUJINX_COMPATIBILITY.md).
+Installed packages, emulator/cache settings and saves were not changed.

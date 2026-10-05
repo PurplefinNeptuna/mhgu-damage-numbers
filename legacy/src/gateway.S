@@ -22,7 +22,10 @@
     str r0, [sp]
     ldr r2, [sp, #8]
     ldr r3, [sp, #12]
-    msr APSR_nzcvqg, r2
+    /* GE is dead at these eight audited hook sites; NZCVQ-only restoration
+     * avoids Ryujinx's unsupported APSR_g translation. See GE_PRESERVATION_AUDIT.md.
+     * This leaves callback GE untouched; it neither restores nor clears it. */
+    msr APSR_nzcvq, r2
     vmsr fpscr, r3
     add sp, sp, #16
     vpop {d16-d31}
@@ -50,7 +53,7 @@ ENTRY 2, dn_gateway_enter
 ENTRY 3, dn_gateway_enter
 ENTRY 4, dn_gateway_tap
 ENTRY 5, dn_gateway_tap
-/* Reserved entries used by the native ABI fixture, without game hooks. */
+/* Production melee and shot HZV entries, also exercised by the ABI fixture. */
 ENTRY 6, dn_gateway_enter
 ENTRY 7, dn_gateway_enter
 
