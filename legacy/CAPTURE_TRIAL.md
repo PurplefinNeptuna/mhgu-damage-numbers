@@ -1,3 +1,9 @@
+# Historical capture trial
+
+This R9 record predates the supported open-only r14. See [README.md](README.md)
+for current build paths, source behavior and presentation. Old candidate outputs
+were retired to the workspace archive.
+
 # Damage-number capture trial
 
 Package: `build/damage-numbers/capture/candidate-package/`, containing only `romfs/nativeNX/plugins/damage_numbers_capture.nro`.

@@ -632,3 +632,18 @@ The r13 open and r12 personal ZIPs retain their recorded hashes; the r13 NRO
 is preserved in workspace backups outside Eden. A fresh installed-file read
 matched r13 open, which this task did not replace. The r14 visual trial remains
 pending; [OPEN_ASSETS.md](OPEN_ASSETS.md) contains the brief confirmation checks.
+
+## 2026-10-05: private edition retired; open r14 is the default
+
+At the user's request, the game-derived edition is retired. The installed NRO
+already matches open r14 SHA-256 `be263fbebf8fe2057514aabda07c12724bb0706aad2592ee1c3761100603f158`. No installed files or saves are changed. Default build, font/sprite
+preparation, real-ImGui preview and packaging now use only open assets. The
+private extraction/conversion entry points and legacy animation branch are
+removed. Historical provenance moved to `history/r12/`; private payloads were
+archived outside active output directories with a 160-file hash inventory.
+
+Fresh host verification passed 917 core/presentation checks, eight-producer
+mailbox stress and 23 transactional-hook scenarios. The rebuilt NRO matches
+the installed and previously compiled-tested r14 bytes. The existing 321 ARM32
+checks cover the identical NRO. The asset audit and real-ImGui preview passed. This cleanup
+adds no fresh in-game validation claim. See [RETIREMENT.md](RETIREMENT.md).

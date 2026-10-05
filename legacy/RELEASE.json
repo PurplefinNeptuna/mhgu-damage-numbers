@@ -1,25 +1,17 @@
 {
-  "status": "COMPLETE_USER_ACCEPTED",
-  "revision": "r12",
+  "status": "SUPPORTED_OPEN_ONLY",
+  "revision": "r14",
   "date": "2026-10-05",
-  "title_id": "0100770008DD8000",
-  "game_version": "MHGU 1.4.0 Switch",
-  "platform": "Eden/Linux with tested forge-patched baseline",
-  "nro_sha256": "1a851eb2947a88ec3bb06685c5b852d2324b742ff0420d56fee13a1e31bf7b3f",
-  "implementation_commit": "8ec0107",
-  "user_confirmation": "all works well, good job, now it is complete, finish the needed packaging if needed",
-  "r12_checks": [
-    "White/gold positive crit font, shading and red star",
-    "Negative crit blue star, placement and fading",
-    "Familiar LBG bursts, compact spacing, size/animation and Classic/Wilds switching"
-  ],
-  "earlier_coverage": "R9 combat/source/element checks and persistence, plus completed r10 cosmetic/style/restart checklist retained in TEST_RESULTS.md",
-  "static_checks": {
-    "host_core_presentation": 895,
-    "transactional_hook_scenarios": 23,
-    "arm32_compiled_nro": 312,
-    "real_imgui_visual": "Passed"
-  },
-  "scope": "User accepts appearance and behavior; pixel-perfect equality against RE Engine is not measured",
-  "packaging": "Freeze tested NRO; no rebuild, installation, launch, save write or publishing"
+  "asset_profile": "open",
+  "font": "Open Sans Semibold 600",
+  "nro_sha256": "be263fbebf8fe2057514aabda07c12724bb0706aad2592ee1c3761100603f158",
+  "release_archive": "build/damage-numbers/releases/r14/damage-numbers-r14.zip",
+  "installed_plugin_matches": true,
+  "installed_by_retirement": false,
+  "compiled_fixture_checks": 321,
+  "compiled_fixture_reused_only_for_identical_nro": true,
+  "fresh_runtime_test_performed": false,
+  "retired_edition": "r12-game-derived",
+  "retired_payload_archive": "backups/damage-numbers/retired-game-assets-20261005",
+  "history": "history/r12/README.md"
 }

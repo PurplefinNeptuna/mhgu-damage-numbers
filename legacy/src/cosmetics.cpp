@@ -126,7 +126,7 @@ void cosmetics_draw(void* list,const DrawNumber& n) {
     glyph_effects(draw,n,font,pixels);
     text(0,0,color);
     if(n.critical==Critical::None)return;
-    // Native uvs020020 contains the complete colored bloom and pale core.
+    // Procedural sprites include the complete colored bloom and pale core.
     const float scale=n.pixels*wilds_sprite_font_scale/60.0f;
     const float height=48*scale;
     sprite(draw,n.critical==Critical::Positive?20:21,

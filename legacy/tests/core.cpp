@@ -264,7 +264,6 @@ static void stamp_hold_exit() {
     Model m;m.reset(7);Event e=hit();e.critical=Critical::Positive;m.capture(e);m.update(1,true);
     Settings s=m.config();s.lifetime=1.2f;m.configure(s);
     PlacementState cache{};DrawNumber out[128]{};
-#ifdef DAMAGE_NUMBERS_OPEN_ASSETS
     check(layout(m,view(),1,out,cache,varied_measure)==1&&std::fabs(out[0].pixels-28.8f)<.001f,
           "open Wilds starts with 1.2x stamp");
     const float start_y=out[0].position.y;const Point offset=out[0].offset;
@@ -289,15 +288,9 @@ static void stamp_hold_exit() {
     layout(m,large,1.5f,out,cache,varied_measure);const float large_y=out[0].position.y;
     layout(m,large,2.1f,out,cache,varied_measure);
     check(std::fabs(out[0].position.y-(large_y-30))<=1,"exit distance scales with viewport resolution");
-#else
-    layout(m,view(),1,out,cache,varied_measure);const float local_y=out[0].position.y;
-    check(out[0].pixels==30,"local build retains 1.25x initial pop");
-    layout(m,view(),1.5f,out,cache,varied_measure);
-    check(out[0].position.y<local_y&&out[0].opacity==1,"local Wilds keeps its previous continuous drift");
-#endif
     s.style=VisualStyle::Classic;s.lifetime=.9f;m.configure(s);
     layout(m,view(),1,out,cache,varied_measure);const float classic_y=out[0].position.y;
-    check(out[0].pixels==30,"Classic keeps 1.25x pop in both build profiles");
+    check(out[0].pixels==30,"Classic keeps 1.25x pop");
     layout(m,view(),1.1f,out,cache,varied_measure);check(out[0].pixels==24&&out[0].position.y<classic_y,
           "Classic keeps 0.1-second settlement and continuous upward drift");
     layout(m,view(),1.8f,out,cache,varied_measure);check(std::fabs(out[0].opacity-.4f)<.001f,

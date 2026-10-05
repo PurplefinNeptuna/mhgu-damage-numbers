@@ -1,41 +1,41 @@
-# Damage numbers r12
+# Damage numbers r14
 
-Complete and accepted in-game on 2026-10-05. MHGU 1.4.0 Switch, Eden/Linux,
-using the tested `forge-patched` baseline. The installed r12 is already the
-same binary as this package; no reinstall is needed on the current setup.
+The open-font edition is the sole supported build. It uses Open Sans Semibold
+600 under SIL OFL 1.1, renamed Damage Digits Open, and original procedural
+red/blue crit stars. The game-derived edition is retired.
 
 ## Package
 
-`build/damage-numbers/releases/r12/damage-numbers-r12.zip` contains the
-`damage-number/` mod folder, with one plugin under
-`romfs/nativeNX/plugins/damage_numbers_capture.nro`, notes and checksums.
-Forge is a dependency and is not bundled. No activation flags or config files
-are supplied. This is the personal local build using the original Wilds digit
-outlines and crit sprites; its asset notice and provenance are retained.
+`build/damage-numbers/releases/r14/damage-numbers-r14.zip` contains one
+`damage-number/` mod folder, a plugin at
+`romfs/nativeNX/plugins/damage_numbers_capture.nro`, font/art notices, source
+provenance, manifest and checksums. Forge is required and not bundled.
+
+NRO SHA-256:
+`be263fbebf8fe2057514aabda07c12724bb0706aad2592ee1c3761100603f158`.
+The installed open r14 matches this hash. Retirement requires no reinstall.
 
 For a fresh setup, close Eden, extract the ZIP and copy `damage-number/` into
-Eden's mod directory for title `0100770008DD8000`. Keep one copy of the damage
-plugin, alongside the tested Forge package. Enable the package in Eden.
-For an upgrade, preserve the old plugin outside Eden, then replace its existing
-NRO with the packaged NRO. Do not add a second differently named mod folder.
+Eden's mod directory for title `0100770008DD8000`. Keep one copy alongside the
+tested Forge package and enable it in Eden. For upgrades, preserve the previous
+open NRO outside Eden and replace the existing plugin.
 
-Defaults are enabled, Wilds style, size 1.0 and duration 0.9 seconds. Settings
-are in Forge's compact **Plugin UI → Damage numbers** row. Save settings writes
-`damage_numbers.ini` beside Better Input in the active user's game save.
-Existing valid version-2 settings are retained; old versions are ignored.
-No save or emulator-setting changes are needed for installation.
+Defaults are enabled, Wilds style, size 1.0 and total duration 0.9 seconds.
+Settings remain under Forge's compact **Plugin UI > Damage numbers** row and
+use `damage_numbers.ini` beside Better Input in the active user's game save.
+Existing valid version-2 settings are retained. No activation flags are needed.
 
-Tested binary SHA-256:
-`1a851eb2947a88ec3bb06685c5b852d2324b742ff0420d56fee13a1e31bf7b3f`.
-
-## Recreate the package
+## Reproduce
 
 ```bash
+python3 scripts/build_damage_numbers_capture.py
+python3 scripts/audit_damage_numbers_open_assets.py
 python3 scripts/package_damage_numbers.py
 ```
 
-The recipe freezes the accepted candidate after checking its hash against the
-ARM32 fixture report and release record. It produces a deterministic ZIP,
-reopens it and verifies every member. It does not rebuild or install anything.
-Completed coverage: [TEST_RESULTS.md](TEST_RESULTS.md),
-[R12_VISUAL_CHECK.md](R12_VISUAL_CHECK.md) and [RELEASE.json](RELEASE.json).
+Only open assets are supported. The package requires matching build, complete
+compiled-fixture and asset-audit NRO fingerprints. It creates a deterministic
+ZIP, then reopens and verifies every member. No installation or launch occurs.
+The retirement rebuild matches the previously tested 321-check r14 binary;
+historical combat coverage is retained in [TEST_RESULTS.md](TEST_RESULTS.md).
+See [RETIREMENT.md](RETIREMENT.md) for the archive and support decision.

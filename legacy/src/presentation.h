@@ -74,28 +74,20 @@ inline Rect solid_bounds(Rect ink,Point pos,float pixels,float advance,float uni
     const float y=crit==Critical::Positive?pos.y-2*stroke:pos.y+pixels+2*stroke;
     return united(ink,{pos.x-2*stroke,y-2*stroke,pos.x+advance+2*stroke,y+2*stroke});
 }
-// Only the open-asset trial uses the requested stamp/hold/exit timing.
-// The local asset profile and Classic retain their accepted animation.
+// Wilds appearance uses the accepted open-font stamp/hold/exit timing.
+// Classic retains its original continuous drift.
 inline float peak_scale(VisualStyle style) {
-#ifdef DAMAGE_NUMBERS_OPEN_ASSETS
     if(style==VisualStyle::Wilds)return 1.2f;
-#else
-    (void)style;
-#endif
     return 1.25f;
 }
 struct NumberMotion { float scale, opacity, rise; };
 inline NumberMotion number_motion(float age,float lifetime,VisualStyle style) {
-#ifdef DAMAGE_NUMBERS_OPEN_ASSETS
     if(style==VisualStyle::Wilds) {
         const float settle=low(1,high(0,age/.2f));
         const float stamp=1-settle;
         const float exit=low(1,high(0,(age-(lifetime-.2f))/.2f));
         return {1+.2f*stamp*stamp,1-exit,30*exit};
     }
-#else
-    (void)style;
-#endif
     return {age<.1f?1+.25f*(1-age/.1f):1,
             age>lifetime-.25f?(lifetime-age)/.25f:1,age/lifetime*30};
 }

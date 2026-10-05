@@ -1,18 +1,10 @@
 # Damage numbers
 
-R12 uses the original Wilds digit outlines and crit sprites, replacing the
-font/star approximations. Soft texture shading replaces the hard text outline.
-R12 is complete and user-accepted on 2026-10-05. The finished local package
-uses the exact tested binary. [Release/install notes](RELEASE.md),
-[completed visual check](R12_VISUAL_CHECK.md), [test results](TEST_RESULTS.md)
-and [runtime history](RUNTIME.md) retain the evidence.
-
-An [alternate open-asset build](OPEN_ASSETS.md) uses OFL digits and original
-procedural stars without bundling Wilds font/texture assets. Its r13 Wilds style
-adds a 0.2-second stamp, a stationary hold, then a fast rise/fade in the final
-0.2 seconds; the personal r12 and Classic retain their existing animation.
-R14 uses the user-selected Open Sans Semibold digits and stronger red/blue star
-bloom, preserving the star size and r13 timing.
+R14 is the sole supported edition: **Open Sans Semibold 600** digits under
+SIL OFL 1.1 and independently authored procedural crit stars. The game-derived
+font/texture edition was retired on 2026-10-05. [Release/install notes](RELEASE.md),
+[open asset provenance](OPEN_ASSETS.md), [retirement record](RETIREMENT.md),
+[test results](TEST_RESULTS.md) and [runtime history](RUNTIME.md) retain the evidence.
 
 Target: MHGU 1.4.0 Switch, Eden/Linux, and the tested patched Forge baseline.
 Capture hooks, damage calculations and ownership bindings are unchanged.
@@ -34,24 +26,24 @@ Capture hooks, damage calculations and ownership bindings are unchanged.
 | Physical HZV below 45 or unknown | Warm white `#F4F1EC` | White `#FFFFFF` |
 | Physical HZV at least 45 | Gold `#F2C45B` | Orange-yellow `#FFBF3F` |
 | Confirmed bounce | Gray `#9A9A9A` | Gray `#9A9A9A` |
-| Positive crit | Original pink-red sprite above | Digit-colored line above |
-| Negative crit | Original blue sprite below | Digit-colored line below |
+| Positive crit | Procedural pink-red star above | Digit-colored line above |
+| Negative crit | Procedural blue star below | Digit-colored line below |
 
-Wilds uses Frutiger Neue LT W1G Medium digit outlines from the local game,
-normalized to retain the accepted digit height. Digits have a smooth, centered
-shadow; gold digits also have a soft warm halo behind their crisp fill. Stars
-use the original colored texture with its pale center and bloom. They align to
-the actual pixel-rounded glyph bounds and fade with the numbers. Digit color
-remains independent of crit polarity. Classic keeps Forge's font, outlined
-digits and straight critical lines.
+Wilds appearance uses the licensed Open Sans digit subset, normalized to the
+accepted visible height. Digits have a smooth centered shadow; gold digits also
+have a soft warm halo. Original procedural stars include colored bloom and a
+pale center. They align to actual pixel-rounded glyph bounds and fade with the
+numbers. Digit color remains independent of crit polarity. Classic keeps
+Forge's font, outlined digits and straight critical lines.
 
 [Font/effect preparation](fonts/README.md) and
-[asset provenance](WILDS_ASSETS.json) describe the local sources. The font
-rasterizer and Gaussian blur differ from RE Engine's renderer, so an exact
-pixel match has not been measured; the user accepted the in-game appearance.
+[asset provenance](OPEN_ASSETS.md) describe the supported sources. No extracted
+Wilds font or texture is read, embedded or packaged.
 
-Both styles preserve the accepted impact anchor, visible digit height, size,
-pop, upward drift, duration and fade. Measured glyph bounds and solid markers
+Both styles preserve the accepted impact anchor, visible digit height and size.
+Wilds stamps from 1.2x to normal size over 0.2 seconds, holds still, then rises
+30 pixels at 720p during the final 0.2-second fade. Duration is the total lifetime:
+0.9 seconds gives a 0.7-second hold. Classic retains its original pop and drift. Measured glyph bounds and solid markers
 reserve the maximum initial-pop dimensions. Placement checks 17 nearby staggered
 positions within 1.6 font sizes horizontally and one vertically, minimizing
 solid overlap before displacement. Glow may overlap. Offsets stay cached until
@@ -59,8 +51,7 @@ expiry; crowded bursts may overlap instead of growing a tall stack. Camera,
 context, viewport, style and size changes reset placement caches.
 
 Defaults: enabled, Wilds, scale 1.0, duration 0.9 seconds; 24-pixel font size at
-720p, 1.25 initial pop, 0.1-second pop settlement, 30-pixel lifetime drift and
-0.25-second fade. Invalid, behind-camera and off-screen projections are hidden.
+720p. Wilds uses the stamp/hold/exit timing above. Invalid, behind-camera and off-screen projections are hidden.
 Limits: 256 queued events, 128 visible numbers and 512 recent identities.
 Overflow drops oldest entries without adding their values together.
 
@@ -103,7 +94,7 @@ registration, draw arguments, colors, marker geometry, fades, burst limits,
 source filtering and config recovery. They do not run Forge's GPU renderer.
 A separate host harness executes the pinned real ImGui font/texture/draw code,
 then composites its actual draw commands into
-`work/damage-numbers/host-visual/preview.png` with linear texture sampling.
+`work/damage-numbers/open-visual/preview.png` with linear texture sampling.
 This checks actual font and sprite output without claiming an Eden GPU test.
 
 R9 passed all 16 LS/bowgun checks, settings persistence, monster-to-monster,
@@ -115,20 +106,22 @@ completed visual checklist and the user confirmed the mod is finished.
 
 ## Build and delivery
 
-The local asset recipes pin FontTools 4.66.1, original resource hashes and
-converted font/texture hashes. Original game-derived payloads stay outside Git
-and the personal candidate includes `LOCAL_ASSETS.txt`. Installed Forge exports
-and preserved game/SDK/Better Input hashes are checked during the offline ARM32
-build. No capture hooks, CodeMemory objects or TLS slots are added.
+Open assets are the default and only supported profile. The offline ARM32 build
+verifies installed Forge exports and preserved game/SDK/Better Input hashes.
+No new capture hooks, CodeMemory objects or TLS slots are added. The rebuilt
+plugin must match the tested r14 NRO before packaging.
 
-Finished ZIP: `build/damage-numbers/releases/r12/damage-numbers-r12.zip`.
-Package: `build/damage-numbers/releases/r12/damage-number/`.
-Release manifest/checksums: beside that ZIP; acceptance: [RELEASE.json](RELEASE.json).
-Original build provenance: `build/damage-numbers/capture/candidate-manifest.json`.
-The build manifest retains its historical pre-test status; release acceptance
-is recorded separately without rebuilding the tested bytes.
-R11 rollback: `backups/damage-numbers/pre-r12/2b55907b6f19b57f04d776db75eba0a209e6c4bccf0e9d2e46ee9f610eae6330/`.
-The r10 rollback remains under `backups/damage-numbers/pre-r11/`.
-The earlier r9 rollback remains under `backups/damage-numbers/r9/`.
-Preparation preserves installed packages, emulator settings and save files.
-Installation, game launch, Forge upgrades and pushes require separate scope.
+```bash
+python3 scripts/build_damage_numbers_capture.py
+python3 scripts/audit_damage_numbers_open_assets.py
+python3 scripts/package_damage_numbers.py
+```
+
+Current ZIP: `build/damage-numbers/releases/r14/damage-numbers-r14.zip`.
+Package: `build/damage-numbers/releases/r14/damage-number/`.
+Source manifest: `build/damage-numbers/open-assets/candidate-manifest.json`.
+NRO SHA-256: `be263fbebf8fe2057514aabda07c12724bb0706aad2592ee1c3761100603f158`.
+
+The installed r14 plugin already matches these bytes. Retirement does not
+install, launch or edit saves. Historical combat/visual evidence is retained;
+retired game-derived payloads are quarantined outside active build paths.

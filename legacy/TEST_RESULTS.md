@@ -98,7 +98,7 @@ Duplicate this block only if needed.
 
 ## R12 final acceptance: 2026-10-05
 
-All three rows in R12_VISUAL_CHECK.md were checked by the user: white/gold
+All three rows in [the historical r12 visual checklist](history/r12/R12_VISUAL_CHECK.md) were checked by the user: white/gold
 positive crit appearance, negative crit appearance/fade, and LBG bursts plus
 Classic/Wilds switching. The user then confirmed: "all works well, good job,
 now it is complete". No additional gameplay tests are pending.

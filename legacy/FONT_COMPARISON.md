@@ -57,7 +57,8 @@ The open crit sprite retains its 88x48 texture bounds and solid star polygon.
 An additional broad colored halo and horizontal bloom streak improve its
 visibility at gameplay size. They are baked into the same sprite without
 extra runtime draw calls. Both red and blue markers retain their pale cores.
-The game-asset generator does not use this procedural marker.
+The game-asset generator was removed when the private edition was retired;
+this procedural marker belongs to the sole supported open edition.
 
 The first real-ImGui preview passed with the updated procedural art and
 unchanged Roboto font. R14 applies the selected Open Sans font and keeps the
