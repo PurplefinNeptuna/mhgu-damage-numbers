@@ -1,4 +1,6 @@
-# Damage numbers r17: open-only compatibility candidate
+# Damage numbers r17: open-only
+
+Ready to distribute. See [distribution status and coverage](RELEASE.md).
 
 The sole supported build uses **Open Sans Semibold 600**, a renamed digit subset under
 SIL Open Font License 1.1, and independently authored procedural red/blue crit

@@ -68,7 +68,9 @@ files, emulator configuration, caches and saves are not changed by these recipes
 `build/damage-numbers/releases/r17/damage-numbers-r17.zip` contains only the NRO
 inside `damage-number/romfs/nativeNX/plugins/`. README, notices, checksums and
 provenance remain beside the ZIP. Keep the notices with redistributions.
-The status is **validated compatibility candidate, runtime confirmation pending**.
+The status is **ready to distribute**, as directed by the user on 2026-10-06.
+No fresh r17 Ryujinx/Eden gameplay confirmation is recorded. Publication has
+not been performed.
 
 After installing the NRO with the emulator closed, restart completely, load
 the save, enter one quest, land a few hunter/Palico hits and return to the

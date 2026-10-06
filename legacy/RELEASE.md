@@ -1,4 +1,7 @@
-# Damage numbers r17 compatibility candidate
+# Damage numbers r17
+
+Ready to distribute, as directed by the user on 2026-10-06. The package is local
+and has not been published.
 
 R17 applies the audited NZCVQ-only gateway restoration for Ryujinx-based
 emulators. Nine restore instructions stop writing GE, avoiding the
@@ -10,8 +13,9 @@ registers, FPSCR, native stack arguments and return state remain preserved.
 
 The NRO remains **152KiB**. Every other executable byte matches the audited
 r16 build. Open Sans Semibold, the compressed artwork, colors, animation,
-spacing, settings and capture behavior remain unchanged. R17 is a validated
-candidate awaiting fresh emulator gameplay confirmation.
+spacing, settings and capture behavior remain unchanged. R17 passed static
+validation. No fresh r17 emulator gameplay confirmation is recorded; this
+coverage limit remains documented with the distribution status.
 
 ## Package and installation
 

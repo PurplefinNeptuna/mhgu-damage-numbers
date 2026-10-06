@@ -1,8 +1,9 @@
 # Damage numbers
 
 R17 applies the audited NZCVQ-only gateway fix for Ryujinx-based emulators.
-The compatibility candidate is statically validated; fresh emulator gameplay
-confirmation remains pending. The sole supported edition uses
+Ready to distribute, as directed by the user on 2026-10-06. The package is local
+and has not been published. Static validation passed; no fresh r17 emulator
+gameplay confirmation is recorded. The sole supported edition uses
 **Open Sans Semibold 600** digits under
 SIL OFL 1.1 and independently authored procedural crit stars. The game-derived
 font/texture edition was retired on 2026-10-05. [Release/install notes](RELEASE.md),

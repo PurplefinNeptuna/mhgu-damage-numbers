@@ -739,3 +739,11 @@ fingerprints are preserved at `backups/damage-numbers/r16-before-r17-ge-20261006
 No installed files, emulator binaries, configurations, caches or saves are
 changed. This remains a validated compatibility candidate pending a user-run
 Ryujinx/Eden quest check. See [compatibility notes](RYUJINX_COMPATIBILITY.md).
+
+## 2026-10-06: distribution status
+
+The user directed that damage numbers r17, modern weapon controls r10 and
+key quest markers r1 all be marked ready to distribute. R17's distribution
+status is `READY_TO_DISTRIBUTE`. This status update preserves the validated
+binary and recorded evidence; it adds no fresh gameplay result. No public
+publication was performed.

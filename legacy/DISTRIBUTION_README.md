@@ -1,6 +1,8 @@
 # Damage Numbers r17
 
-Open-font compatibility candidate for Monster Hunter Generations Ultimate 1.4.0
+Ready to distribute. The package is local and has not been published.
+
+Open-font damage numbers for Monster Hunter Generations Ultimate 1.4.0
 (Nintendo Switch), tested on Eden/Linux with the maintained patched Forge loader.
 Forge is required and is not included. Its tested binary fingerprint is recorded
 in `release-manifest.json` beside the ZIP; other loader/game versions have not been validated.
