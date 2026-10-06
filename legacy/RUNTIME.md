@@ -737,8 +737,9 @@ including nine emitted-instruction checks. Host and appearance/provenance
 checks pass. Original r16/gateway/work/source artifacts and installed-file
 fingerprints are preserved at `backups/damage-numbers/r16-before-r17-ge-20261006/`.
 No installed files, emulator binaries, configurations, caches or saves are
-changed. This remains a validated compatibility candidate pending a user-run
-Ryujinx/Eden quest check. See [compatibility notes](RYUJINX_COMPATIBILITY.md).
+changed. At preparation, this was a validated compatibility candidate awaiting
+a user-run quest check. The subsequent confirmation below records r17 working
+on both emulators. See [compatibility notes](RYUJINX_COMPATIBILITY.md).
 
 ## 2026-10-06: r17 confirmed on Eden and Ryujinx-based emulators
 
@@ -791,5 +792,6 @@ publishes nothing.
 The user directed that damage numbers r17, modern weapon controls r10 and
 key quest markers r1 all be marked ready to distribute. R17's distribution
 status is `READY_TO_DISTRIBUTE`. This status update preserves the validated
-binary and recorded evidence; it adds no fresh gameplay result. No public
+binary and recorded evidence, including the confirmed r17 gameplay on both
+emulators above. The label update ran no additional gameplay test. No public
 publication was performed.
