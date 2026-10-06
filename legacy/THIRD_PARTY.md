@@ -1,7 +1,7 @@
-# Components used by the damage-number capture candidate
+# Components used by damage numbers
 
 Build dependencies: maintained Forge, pinned libnx/cimgui headers and offline
-devkitARM. The supported r15 embeds only OFL Open Sans digits and independently
+devkitARM. The supported r17 embeds only OFL Open Sans digits and independently
 authored procedural crit artwork. No game executable or extracted visual asset
 is delivered.
 
@@ -51,7 +51,7 @@ PAK/font-conversion notices and provenance are archived under `history/r12/`.
 
 ## Supported open assets
 
-The only supported r15 profile embeds an Open Sans Semibold 600 digit subset from pinned Google
+The only supported r17 profile embeds an Open Sans Semibold 600 digit subset from pinned Google
 Fonts; the NRO embeds the full SIL OFL notice. The release also supplies full
 font/art/dependency notices in `NOTICES.txt` beside the runtime-only ZIP. It is renamed Damage Digits Open;
 [source/axes/license hashes](fonts/open-source.json) document the modified

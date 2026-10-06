@@ -1,5 +1,8 @@
 # Damage numbers
 
+Distribution: [READY_TO_DISTRIBUTE](DISTRIBUTION.json); governed by the
+[workspace standard](../../docs/DISTRIBUTION_STANDARD.md).
+
 R17 applies the audited NZCVQ-only gateway fix for Ryujinx-based emulators.
 Ready to distribute, as directed by the user on 2026-10-06. The package is local
 and has not been published. Static validation passed; no fresh r17 emulator

@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "mod": "damage-numbers",
+  "status": "READY_TO_DISTRIBUTE",
+  "reason": "User approved local distribution readiness on 2026-10-06.",
+  "publication": {
+    "published": false,
+    "url": null,
+    "date": null
+  },
+  "version": "r17",
+  "package_name": "damage-number",
+  "archive": "damage-numbers-r17.zip",
+  "approval": {
+    "date": "2026-10-06",
+    "basis": "Explicit user instruction: those 3 should all be ready to distribute"
+  },
+  "target": "MHGU Nintendo Switch 1.4.0; Eden/Linux and Ryujinx-based emulators with Forge; open assets only.",
+  "limitations": [
+    "No fresh r17 Eden/Ryujinx gameplay confirmation recorded.",
+    "Separate Forge overlay menu/popups corruption remains unresolved.",
+    "Requires Forge; only the audited MHGU 1.4.0 eight-site layout is supported."
+  ],
+  "readme": "mods/damage-numbers/DISTRIBUTION_README.md",
+  "notices": [
+    "mods/damage-numbers/fonts/OFL.txt",
+    "mods/damage-numbers/OPEN_ART_LICENSE.txt",
+    "mods/damage-numbers/THIRD_PARTY.md"
+  ],
+  "support": {},
+  "payloads": {
+    "romfs/nativeNX/plugins/damage_numbers_capture.nro": {
+      "source": "build/damage-numbers/open-assets/candidate-package/romfs/nativeNX/plugins/damage_numbers_capture.nro",
+      "sha256": "1eb78f3430f6c5c5ce1f60a382fa8bd4fc18ee56cf267649b95a94a462115ea4"
+    }
+  },
+  "evidence": {
+    "static": [
+      "build/damage-numbers/open-assets/candidate-manifest.json",
+      "build/damage-numbers/open-assets/compiled-capture-probe.json",
+      "build/damage-numbers/open-assets/asset-audit.json",
+      "build/damage-numbers/open-assets/ge-compatibility.json",
+      "build/damage-numbers/open-assets/gateway-probe.json",
+      "build/damage-numbers/open-assets/compression-render-comparison.json",
+      "build/damage-numbers/open-assets/sprite-codec-test.json"
+    ],
+    "manual": [
+      "mods/damage-numbers/RUNTIME.md"
+    ],
+    "manual_summary": "Prior combat/appearance evidence retained. User approved distribution of r17 on 2026-10-06; no fresh r17 Eden/Ryujinx gameplay confirmation recorded.",
+    "static_summary": {
+      "compiled_capture_checks": 347,
+      "gateway_checks": 9287,
+      "host_core_presentation_checks": 919,
+      "transactional_hook_scenarios": 23,
+      "asset_audit": "PASSED_OPEN_ASSET_PROVENANCE",
+      "real_imgui_preview": "PASSED"
+    }
+  },
+  "dependencies": [
+    {
+      "name": "Forge loader",
+      "sha256": "374684063adb939b389f0e4d1c8766c09e52339bfe9eaedadd4a8f44635252a7",
+      "scope": "Recorded build baseline; external dependency, not bundled."
+    }
+  ]
+}
