@@ -19,7 +19,8 @@ The unmodified Ryujinx-Nextendo reference at
 `05577ab543f4322cb7534c1f5caca0e0079791bf` accepts MSR mask 8 (NZCVQ) and throws
 `APSR_g` for mask 4 (GE). R17 removes that GE-write path from this plugin. It
 does not modify Forge or an emulator. Compatibility still depends on the
-loader and the other APIs used by the plugin; a live emulator run is required.
+loader and the other APIs used by the plugin. The user confirmed working
+gameplay on both tested installations on 2026-10-06.
 
 This is not permission to drop GE at arbitrary new hooks. Re-audit any added
 tap, especially one between GE-setting arithmetic and `SEL` or a GE-reading
@@ -69,11 +70,12 @@ files, emulator configuration, caches and saves are not changed by these recipes
 inside `damage-number/romfs/nativeNX/plugins/`. README, notices, checksums and
 provenance remain beside the ZIP. Keep the notices with redistributions.
 The status is **ready to distribute**, as directed by the user on 2026-10-06.
-No fresh r17 Ryujinx/Eden gameplay confirmation is recorded. Publication has
-not been performed.
+The user confirmed r17 working on both Eden and Ryujinx-based emulators on
+2026-10-06. Installed NROs match r17; latest logs were reviewed and retained.
+See [runtime history](RUNTIME.md) for log details and coverage limits.
+Publication has not been performed.
 
-After installing the NRO with the emulator closed, restart completely, load
-the save, enter one quest, land a few hunter/Palico hits and return to the
-village. Confirm normal controls, visible numbers and no `APSR_g` failure.
-Previous combat tests need no full repeat. The separate Forge menu/popups
+The compatibility confirmation is complete for the two tested installations.
+The user report does not specify a repeat of every earlier combat test or
+verification of every Ryujinx fork. The separate Forge menu/popups
 corruption remains documented in the [renderer handoff](../../docs/FORGE_IMGUI_DAMAGE_CORRUPTION_HANDOFF.md).

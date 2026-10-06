@@ -740,6 +740,52 @@ No installed files, emulator binaries, configurations, caches or saves are
 changed. This remains a validated compatibility candidate pending a user-run
 Ryujinx/Eden quest check. See [compatibility notes](RYUJINX_COMPATIBILITY.md).
 
+## 2026-10-06: r17 confirmed on Eden and Ryujinx-based emulators
+
+User report: "it is already confirmed to work on both, so please update the status".
+Gameplay confirmation is recorded for both tested installations. Both installed
+NROs freshly match the released r17 SHA-256:
+`1eb78f3430f6c5c5ce1f60a382fa8bd4fc18ee56cf267649b95a94a462115ea4`.
+The report confirms working gameplay; it does not enumerate individual smoke
+check actions or a repeat of every prior combat test.
+
+Latest logs were reviewed before updating the status. Copies, original paths,
+hashes and installed-file fingerprints are preserved under
+`backups/damage-numbers/r17-runtime-confirmation-20261006/`.
+
+- Eden: `eden_log.txt`, SHA-256
+  `49a360e21e23936198812f3fe1a145091d7138e912c8d7084ff800013a7b777f`.
+  Eden build `master-10bcd2d849-master` boots MHGU 1.4.0, main build
+  `FB08F1D20FD1204FE7070672777F869B`. It logs Forge
+  `1.4.1-originalbi1`, loading Better Input, Damage Numbers, Key Quest Markers
+  and Modern Weapon Controls. Damage capture's eight-hook startup, ImGui setup
+  and render TLS setup complete. The inherited "Capture r11" message is not
+  the package revision; the installed-file hash identifies r17. The log does
+  not enumerate the complete named resource-mod set.
+- Ryujinx: `Ryujinx_1.8.12_2026-10-06_13-49-59.log`, SHA-256
+  `ab04a03878ac02ab6ee4643b408fcd19d56c532f43f1922955a727adeddb17b7`.
+  The log includes an earlier different game; only its MHGU launch segment
+  is used here. MHGU 1.4.0/main build `FB08F1D20FD1204FE7070672777F869B`
+  loads with enabled `forge`, `better-inputs`, `damage-number`,
+  `key-quest-markers`, `modern-control`, `HD Project`, `Z_Balanced` and
+  `FOV (Medium)`. The `forge-patched` and `better-inputs-patched` packages
+  are disabled in this run. Forge reports version 1.4.1; the enabled cheats
+  include 60 FPS, quest-result skip, small-monster marking, Great Luck,
+  crafting-requirement removal and lock-on target.
+
+Neither inspected log contains an `APSR_g` failure. They are not error-free:
+both contain the shader gpuCode 1.16 diagnostic; Eden also contains GPU macro
+assertions, an unmapped-memory message and a forced stop, while Ryujinx contains
+audio-pool unmap failures and a GPU syncpoint timeout. These records do not
+establish their cause or prove clean shutdown. They remain separate from the
+user's successful damage-number gameplay report. The known Forge overlay
+menu/popups issue also remains open.
+
+Distribution remains `READY_TO_DISTRIBUTE`; fresh runtime confirmation is now
+recorded. Support metadata is refreshed with a verified backup while r17 NRO
+and ZIP bytes remain unchanged. This status update installs, launches and
+publishes nothing.
+
 ## 2026-10-06: distribution status
 
 The user directed that damage numbers r17, modern weapon controls r10 and

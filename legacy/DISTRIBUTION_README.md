@@ -70,16 +70,15 @@ still required. No emulator replacement is included.
 
 Host/native fixtures verify state preservation, all 16 GE patterns with
 preserving and clobbering helpers, production instructions and identical
-rendering. Prior gameplay remains the manual evidence; no fresh r17 Ryujinx
-or Eden in-game run is claimed. `release-manifest.json` records the exact NRO hash and
+rendering. The user confirmed r17 working on Eden and Ryujinx-based emulators
+on 2026-10-06. Installed NROs match r17 and latest logs were reviewed. `release-manifest.json` records the exact NRO hash and
 compiled check count. The adjacent `SHA256SUMS` covers the ZIP, plugin, README,
 notices and release manifest. Only the `damage-number` folder belongs in Eden.
 
 The tested Forge loader has a known visual corruption issue when its menu and
-damage popups are visible together. This compression update leaves that issue
+damage popups are visible together. R17 leaves that issue
 unchanged.
 
-For a brief confirmation after installing r17, restart the emulator completely,
-load your save, land a few hunter/Palico hits in one quest and return to the
-village. Check for normal controls, visible numbers and no APSR_g error. Prior
-combat coverage needs no full repeat.
+Compatibility is confirmed for the two tested installations. This does not
+establish compatibility with every emulator fork or resolve the separate
+Forge overlay issue.

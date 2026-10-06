@@ -52,7 +52,8 @@ once per ImGui context. It adds no per-hit work or persistent allocation.
 [Compression evidence](COMPRESSION.md) includes bounded host/ARM decoding,
 byte comparisons and initialization timing. R17 changes only the gateway flag-restoration instructions. Appearance and
 settings remain unchanged. No installed files are replaced by these recipes;
-no fresh r17 gameplay run is claimed. [Compatibility notes](RYUJINX_COMPATIBILITY.md).
+the user confirmed r17 working on Eden and Ryujinx-based emulators
+on 2026-10-06. [Compatibility notes](RYUJINX_COMPATIBILITY.md).
 
 ## Asset provenance and notices
 

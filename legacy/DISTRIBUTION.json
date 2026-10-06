@@ -2,7 +2,7 @@
   "schema_version": 1,
   "mod": "damage-numbers",
   "status": "READY_TO_DISTRIBUTE",
-  "reason": "User approved local distribution readiness on 2026-10-06.",
+  "reason": "User approved local distribution and confirmed r17 working on Eden and Ryujinx-based emulators on 2026-10-06.",
   "publication": {
     "published": false,
     "url": null,
@@ -17,7 +17,6 @@
   },
   "target": "MHGU Nintendo Switch 1.4.0; Eden/Linux and Ryujinx-based emulators with Forge; open assets only.",
   "limitations": [
-    "No fresh r17 Eden/Ryujinx gameplay confirmation recorded.",
     "Separate Forge overlay menu/popups corruption remains unresolved.",
     "Requires Forge; only the audited MHGU 1.4.0 eight-site layout is supported."
   ],
@@ -47,7 +46,7 @@
     "manual": [
       "mods/damage-numbers/RUNTIME.md"
     ],
-    "manual_summary": "Prior combat/appearance evidence retained. User approved distribution of r17 on 2026-10-06; no fresh r17 Eden/Ryujinx gameplay confirmation recorded.",
+    "manual_summary": "User confirmed r17 working on both Eden and Ryujinx-based emulators on 2026-10-06. Latest logs were reviewed and both installed NROs match the r17 payload. Prior detailed combat/appearance evidence is retained; this report does not assert a repeat of every earlier test.",
     "static_summary": {
       "compiled_capture_checks": 347,
       "gateway_checks": 9287,
@@ -55,6 +54,15 @@
       "transactional_hook_scenarios": 23,
       "asset_audit": "PASSED_OPEN_ASSET_PROVENANCE",
       "real_imgui_preview": "PASSED"
+    },
+    "runtime_confirmation": {
+      "date": "2026-10-06",
+      "basis": "User report: it is already confirmed to work on both, so please update the status",
+      "eden": true,
+      "ryujinx_based": true,
+      "installed_nro_sha256": "1eb78f3430f6c5c5ce1f60a382fa8bd4fc18ee56cf267649b95a94a462115ea4",
+      "log_snapshot_manifest": "backups/damage-numbers/r17-runtime-confirmation-20261006/manifest.json",
+      "scope": "User-confirmed gameplay on the two tested installations; not all emulator forks, exhaustive feature retesting or clean emulator shutdown."
     }
   },
   "dependencies": [

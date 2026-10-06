@@ -14,8 +14,8 @@ registers, FPSCR, native stack arguments and return state remain preserved.
 The NRO remains **152KiB**. Every other executable byte matches the audited
 r16 build. Open Sans Semibold, the compressed artwork, colors, animation,
 spacing, settings and capture behavior remain unchanged. R17 passed static
-validation. No fresh r17 emulator gameplay confirmation is recorded; this
-coverage limit remains documented with the distribution status.
+validation. The user confirmed gameplay on both Eden and Ryujinx-based
+emulators on 2026-10-06. Both installed payloads match the released NRO.
 
 ## Package and installation
 
@@ -33,17 +33,18 @@ use the emulator's `mods/contents/0100770008dd8000/` directory. On Eden, use
 its title `0100770008DD8000` mod directory. Listing and activation are separate.
 The recipes perform no installation, activation, save edit or cache deletion.
 
-## Verification and brief manual check
+## Verification and runtime confirmation
 
 Passed: 919 host checks, mailbox stress, 23 transaction scenarios, **9,287
 ARM gateway checks across 2,025 calls**, **347 compiled capture checks**,
 production instruction comparison, real-ImGui equivalence and open-asset audit.
 All 16 GE patterns were tested across all eight entries with preserving and
-clobbering helpers. No fresh Ryujinx or Eden gameplay result is claimed.
+clobbering helpers. The user confirmed r17 working on both tested emulators.
+Latest logs and installed hashes were reviewed; details and remaining emulator
+log errors are retained in [runtime history](RUNTIME.md).
 
-After installing, restart completely, load the save, enter one quest, land a
-few hunter/Palico hits and return to the village. Confirm normal controls,
-visible numbers and no `APSR_g` failure. Prior combat tests need no full repeat.
+The r17 compatibility confirmation is complete. The report does not imply
+a repeat of every prior combat test or testing of every Ryujinx fork.
 
 The separate Forge menu/popups corruption remains unresolved and documented
 in the [renderer handoff](../../docs/FORGE_IMGUI_DAMAGE_CORRUPTION_HANDOFF.md).

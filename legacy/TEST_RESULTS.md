@@ -159,3 +159,13 @@ No fresh Ryujinx or Eden gameplay test is claimed. The mask-8 path is supported
 by the unmodified recorded translator; broad fork/gameplay compatibility
 still requires the brief user-run check in [RYUJINX_COMPATIBILITY.md](RYUJINX_COMPATIBILITY.md).
 Installed packages, emulator/cache settings and saves were not changed.
+
+## R17 runtime confirmation — 2026-10-06
+
+The user confirmed r17 working on both Eden and Ryujinx-based emulators.
+Both installed NRO hashes match the released r17 payload. Latest logs identify
+MHGU 1.4.0 and the expected main build, with no `APSR_g` failure. Launch sets,
+log hashes and remaining emulator diagnostics are recorded in
+[runtime history](RUNTIME.md). This is user-run gameplay evidence; it does not
+imply exhaustive retesting or a clean emulator shutdown. Distribution remains
+ready, with unchanged runtime and ZIP bytes.

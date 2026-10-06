@@ -5,8 +5,8 @@ Distribution: [READY_TO_DISTRIBUTE](DISTRIBUTION.json); governed by the
 
 R17 applies the audited NZCVQ-only gateway fix for Ryujinx-based emulators.
 Ready to distribute, as directed by the user on 2026-10-06. The package is local
-and has not been published. Static validation passed; no fresh r17 emulator
-gameplay confirmation is recorded. The sole supported edition uses
+and has not been published. Static validation passed. The user confirmed r17 working on Eden and
+Ryujinx-based emulators on 2026-10-06; installed payloads match r17. The sole supported edition uses
 **Open Sans Semibold 600** digits under
 SIL OFL 1.1 and independently authored procedural crit stars. The game-derived
 font/texture edition was retired on 2026-10-05. [Release/install notes](RELEASE.md),

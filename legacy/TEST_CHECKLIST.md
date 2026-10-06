@@ -71,4 +71,10 @@ After replacing the NRO with the emulator closed, restart completely, load
 your save, enter one quest, land a few hunter/Palico hits, and return to the
 village. Confirm normal controls, visible numbers and no `APSR_g` failure.
 That is sufficient for the new gateway change; previous combat coverage needs
-no full repeat. This check has not been marked complete by automated fixtures.
+no full repeat.
+
+- [x] User confirmed r17 working on both Eden and Ryujinx-based emulators
+  on 2026-10-06. Latest logs reviewed; installed NROs match r17.
+
+This is a user gameplay confirmation. Individual actions above were not
+separately itemized in the report, and automated fixtures do not prove gameplay.
