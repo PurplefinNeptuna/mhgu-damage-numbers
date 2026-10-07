@@ -6,7 +6,7 @@ hits.
 
 ## Requirements
 
-MHGU 1.4.0 for Nintendo Switch and Forge.
+MHGU 1.4.0 for Nintendo Switch and Forge 1.4.1.
 
 ## Installation
 
