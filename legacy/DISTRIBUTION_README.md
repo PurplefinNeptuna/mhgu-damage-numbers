@@ -1,4 +1,4 @@
-# Damage Numbers r18
+# Damage Numbers r19
 
 Ready to distribute. The package is local and has not been published.
 
@@ -38,7 +38,9 @@ Defaults: enabled, Wilds style, Number size **1.0**, Duration **0.9 seconds**.
 | 1.1 | 22 px | 33 px |
 | 1.2 | 24 px | 36 px |
 
-Wilds style uses Open Sans Semibold and glowing red/blue critical stars. Numbers
+Wilds style uses Open Sans Semibold, a thin near-black outline and glowing
+red/blue critical stars. The outline is 0.5 px at the default 20 px size and
+scales with size and resolution. The gold halo is removed. Numbers
 stamp at 1.2× size, settle over 0.2 seconds, hold, then rise and fade during the
 last 0.2 seconds. Classic uses Forge's font, outlines and straight critical lines.
 
@@ -61,8 +63,11 @@ notices are combined in `NOTICES.txt` beside the ZIP. Keep this notice file
 with the ZIP when redistributing. Font provenance and asset verification are
 recorded in the adjacent `release-manifest.json`.
 
-R18 keeps the appearance and behavior settings, replaces diagnostic panels with concise Forge logs, and emits no normal hit or camera dumps. Its 148KiB NRO retains the open artwork and audited NZCVQ-only gateways. The damage overlay continues with settings closed.
+R19 adds the approved 0.5 px outline to improve readability against bright
+backgrounds. Font, digit colors, crit stars, animation and audited NZCVQ-only
+gateways are unchanged. The NRO remains 148 KiB. The damage overlay continues
+with settings closed, and normal hits and camera frames produce no logs.
 
 Fresh host, compiled ARM32, ABI, import, asset and rendering fixtures cover this payload. No new Eden, Ryujinx or Switch gameplay run was performed. R17's user-confirmed Eden/Ryujinx reports remain historical evidence for that version. The adjacent release manifest records this payload and its evidence; SHA256SUMS covers the delivery.
 
-The tested Forge loader has a known visual corruption issue when its menu and damage popups are visible together. R18 leaves Forge unchanged. Close its menu during gameplay and use the included renderer handoff for the known limitation.
+The tested Forge loader has a known visual corruption issue when its menu and damage popups are visible together. R19 leaves Forge unchanged. Close its menu during gameplay and use the included renderer handoff for the known limitation.

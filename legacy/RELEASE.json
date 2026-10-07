@@ -1,13 +1,13 @@
 {
   "status": "READY_TO_DISTRIBUTE",
-  "revision": "r18",
+  "revision": "r19",
   "date": "2026-10-07",
   "asset_profile": "open",
   "font": "Open Sans Semibold 600",
-  "nro_sha256": "a569e1269160c9660a8d6e472d4ae7ebcee9ff8666bac650989d7ccb98d537a7",
-  "release_archive": "build/damage-numbers/releases/r18/damage-numbers-r18.zip",
+  "nro_sha256": "7a0b42298d4d6eac1c4ca7d73056f84fdbb300b7be96614df8eaaec020e8f638",
+  "release_archive": "build/damage-numbers/releases/r19/damage-numbers-r19.zip",
   "installed_plugin_matches": false,
-  "compiled_fixture_checks": 343,
+  "compiled_fixture_checks": 345,
   "compiled_fixture_reused_only_for_identical_nro": false,
   "fresh_runtime_test_performed": false,
   "retired_edition": "r12-game-derived",
@@ -22,10 +22,10 @@
   "asset_audit": "PASSED_OPEN_ASSET_PROVENANCE",
   "installed_by_recipe": false,
   "archive_layout": "runtime_only",
-  "redistribution_notices": "build/damage-numbers/releases/r18/NOTICES.txt",
+  "redistribution_notices": "build/damage-numbers/releases/r19/NOTICES.txt",
   "sprite_codec": "DN-LZ1",
   "nro_file_bytes": 151552,
-  "previous_nro_file_bytes": 155648,
+  "previous_nro_file_bytes": 151552,
   "rgba_bytes_unchanged": true,
   "extra_persistent_bytes": 0,
   "per_frame_decode": false,
@@ -36,7 +36,7 @@
   "ryujinx_gameplay_confirmation": false,
   "published": false,
   "distribution_status_date": "2026-10-07",
-  "distribution_status_basis": "User-authorized standalone settings/log cleanup and local deliveries; no new gameplay claim",
+  "distribution_status_basis": "User approved the 0.5 px renderer preview and requested build and ready-to-distribute status; no new gameplay claim",
   "eden_gameplay_confirmation": false,
   "user_accepted": false,
   "runtime_binary_changed_for_release": true,
@@ -44,6 +44,8 @@
   "prior_runtime_evidence": {
     "version": "r17",
     "nro_sha256": "1eb78f3430f6c5c5ce1f60a382fa8bd4fc18ee56cf267649b95a94a462115ea4",
-    "record": "Git layout checkpoint 18ccbdc and RUNTIME.md"
-  }
+    "record": "RUNTIME.md"
+  },
+  "appearance_change": "Wilds near-black symmetric 0.5 px outline at 20 px, scaled with size/resolution/pop; gold halo removed; shadow and crit sprites retained",
+  "outline_pixels_at_20px": 0.5
 }

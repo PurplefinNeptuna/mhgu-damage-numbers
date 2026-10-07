@@ -1,3 +1,12 @@
+## r19 readability release, 2026-10-07
+
+The user approved the host real-renderer 0.5 px outline preview and requested a
+built release ready to distribute. Fresh host/compiled ARM32/asset/GE/package
+checks passed; no new Eden, Ryujinx or Switch gameplay run was performed.
+This is visual-design acceptance only. Earlier reports below retain their
+recorded payload/version. [Readability evidence](READABILITY.md) records the
+changed edge and removed gold halo. Forge remains unchanged.
+
 # Capture runtime observations
 
 ## 2026-10-03: first enabled candidate

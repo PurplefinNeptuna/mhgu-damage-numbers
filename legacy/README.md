@@ -1,6 +1,6 @@
 # Damage numbers
 
-Current cleanup release: **r18**. New host/ARM/static checks passed; no new gameplay test was run. Earlier manual reports retain their original version. See [cleanup evidence](CLEANUP_VALIDATION.json) and [development workflow](DEVELOPMENT.md).
+Current release: **r19**. Wilds digits use the approved 0.5 px dark outline and no gold halo. Fresh host/ARM/static checks passed; no new gameplay test was run. Earlier manual reports retain their original version. See [readability validation](READABILITY.md) and [development workflow](DEVELOPMENT.md).
 
 ## Build this mod
 
@@ -64,8 +64,9 @@ draw calls. [Compression evidence](COMPRESSION.md) records the checks and timing
 | Negative crit | Procedural blue star below | Digit-colored line below |
 
 Wilds appearance uses the licensed Open Sans digit subset, normalized to the
-accepted visible height. Digits have a smooth centered shadow; gold digits also
-have a soft warm halo. Original procedural stars include colored bloom and a
+accepted visible height. Digits have a smooth centered shadow and a near-black outline measuring 0.5 px
+at the default 20 px size, scaled with size, resolution and animation. The gold
+halo is removed. Original procedural stars include colored bloom and a
 pale center. They align to actual pixel-rounded glyph bounds and fade with the
 numbers. Digit color remains independent of crit polarity. Classic keeps
 Forge's font, outlined digits and straight critical lines.

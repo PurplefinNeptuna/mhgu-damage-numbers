@@ -2,10 +2,12 @@
 #define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
 #include <cimgui.h>
 #include "cosmetics.h"
+#include "preview.h"
 #include <cstdio>
 #include <fstream>
 #include <string>
 #include <cassert>
+#include <cmath>
 extern "C" void forge_log_info(const char*,...) {}
 int main(int argc,char** argv) {
     assert(argc==3);auto* ctx=igCreateContext(nullptr);auto* io=igGetIO_Nil();
@@ -32,6 +34,7 @@ int main(int argc,char** argv) {
         std::ofstream file(std::string(argv[2])+"/texture-"+std::to_string(i+1)+".rgba",std::ios::binary);
         assert(t->Format==ImTextureFormat_RGBA32);file.write((char*)t->Pixels,t->Width*t->Height*4);
         if(i)out<<',';out<<'['<<i+1<<','<<t->Width<<','<<t->Height<<']';
+        ImTextureData_SetStatus(t,ImTextureStatus_OK);
     }
     out<<"],\"vertices\":[";
     for(int i=0;i<draw->VtxBuffer.Size;++i){auto v=draw->VtxBuffer.Data[i];if(i)out<<',';out<<'['<<v.pos.x<<','<<v.pos.y<<','<<v.uv.x<<','<<v.uv.y<<','<<v.col<<']';}
@@ -40,6 +43,43 @@ int main(int argc,char** argv) {
     out<<"],\"commands\":[";
     for(int i=0;i<draw->CmdBuffer.Size;++i){auto c=draw->CmdBuffer.Data[i];if(i)out<<',';out<<'['<<ImDrawCmd_GetTexID(&c)<<','<<c.IdxOffset<<','<<c.ElemCount<<','<<c.VtxOffset<<']';}
     out<<"]}";assert(dd->Textures->Size==2);
+    igNewFrame();draw=igGetBackgroundDrawList_Nil();
+    // Validate subpixel geometry, resolution/pop scaling and fade on real ImGui.
+    for(unsigned sample=0;sample<3;++sample) {
+        DrawNumber n{};std::snprintf(n.text,sizeof(n.text),"40");n.style=VisualStyle::Wilds;
+        n.pixels=sample==0?20:sample==1?30:24;n.opacity=sample==2?.5f:1;
+        n.position={30,40};n.color=rgb(sample==0?Tint::Weak:sample==1?Tint::White:Tint::Gray,n.style);
+        cosmetics_draw(draw,n);
+        const int glyph_vertices=8,shadow_vertices=8,fill=shadow_vertices+8*glyph_vertices;
+        assert(draw->VtxBuffer.Size==shadow_vertices+9*glyph_vertices);
+        unsigned pass=0;
+        for(int x=-1;x<=1;++x)for(int y=-1;y<=1;++y)if(x||y) {
+            for(int j=0;j<glyph_vertices;++j) {
+                const auto& v=draw->VtxBuffer.Data[shadow_vertices+pass*glyph_vertices+j];
+                const auto& f=draw->VtxBuffer.Data[fill+j];
+                assert(std::abs(v.pos.x-f.pos.x-x*.5f*n.pixels/20)<.0001f);
+                assert(std::abs(v.pos.y-f.pos.y-y*.5f*n.pixels/20)<.0001f);
+                assert(v.uv.x==f.uv.x&&v.uv.y==f.uv.y);
+                assert(v.col==imgui_color(0x17130f,n.opacity*.9f));
+                assert(f.col==imgui_color(n.color,n.opacity));
+            }
+            ++pass;
+        }
+        ImDrawList__ResetForNewFrame(draw);
+        ImDrawList_PushClipRect(draw,{0,0},{620,220},false);
+        ImDrawList_PushTexture(draw,io->Fonts->TexRef);
+    }
+    // Ten-digit totals at the 128-label cap remain inside 16-bit vertex indexing.
+    for(unsigned i=0;i<128;++i) {
+        DrawNumber n{};std::snprintf(n.text,sizeof(n.text),"2147483647");n.style=VisualStyle::Wilds;
+        n.pixels=20;n.opacity=1;n.position={30,40};n.color=rgb(Tint::Weak,n.style);
+        n.critical=Critical::Positive;n.star={80,30};cosmetics_draw(draw,n);
+    }
+    assert(draw->VtxBuffer.Size==51712&&draw->VtxBuffer.Size<65536);
+    ImDrawList__ResetForNewFrame(draw);
+    ImDrawList_PushClipRect(draw,{0,0},{620,220},false);
+    ImDrawList_PushTexture(draw,io->Fonts->TexRef);
+    igEndFrame();
     std::puts("Real ImGui font, selected RGBA sprites and draw commands passed");
     // Texture and font data have process/context lifetime, as in Forge.
     igDestroyContext(ctx);

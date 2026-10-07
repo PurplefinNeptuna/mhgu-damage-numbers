@@ -1,12 +1,19 @@
-# Damage numbers r18
+# Damage numbers r19
 
-Local delivery: `build/damage-numbers/releases/r18/damage-numbers-r18.zip`.
-The named `damage-number` package contains one plugin NRO. Keep the adjacent README, notices, release manifest and checksums with it.
+Local delivery: `build/damage-numbers/releases/r19/damage-numbers-r19.zip`.
+The named `damage-number` package contains one plugin NRO. Keep its adjacent
+README, notices, release manifest and checksums with it.
 
-R18 retains appearance/behavior settings and the damage overlay. Its panel contains settings and save feedback only. Forge logs one startup summary and actionable failures, with process-lifetime deduplication. Default builds omit hit and camera dumps; developer diagnostics require an explicit build option and add no diagnostic UI.
+Wilds digits use the approved 0.5 px near-black outline at the default 20 px
+size. It scales with size/resolution/pop and fades with the digits. The warm
+gold halo is removed. Font, fill colors, centered shadow, positive/negative
+crit stars, animation and Classic appearance are unchanged.
 
-The audited eight hooks and nine NZCVQ-only gateway restores are unchanged. Fresh host, original/compiled ARM32, ABI/import, GE and rendering fixtures passed. No new gameplay run was performed. R17 was confirmed on Eden and Ryujinx; that confirmation does not extend to every feature of this new payload.
+Fresh host, compiled ARM32, ABI/import, GE, asset and real-renderer fixtures
+passed. [Readability evidence](READABILITY.md) describes the checks and limits.
+No new gameplay run was performed; r17's Eden/Ryujinx confirmation remains
+scoped to that payload. The known Forge menu/background issue remains unresolved.
+Forge is a separate dependency. This work did not install, activate or publish.
 
-Forge remains a separate dependency. Its known menu/background rendering issue remains unresolved and unchanged; see [renderer handoff](docs/FORGE_IMGUI_DAMAGE_CORRUPTION_HANDOFF.md). Prepare/install instructions are in [the delivery README](DISTRIBUTION_README.md). This work did not install or activate anything.
-
-Previous immutable r17 deliveries are preserved under `backups/damage-numbers/standalone-settings-cleanup-20261007/releases/r17/`. Source snapshots, checks and original receipts remain in Git and [the migration record](docs/STANDALONE_MIGRATION.json).
+The immutable r18 delivery and prior build evidence are preserved under
+`backups/damage-numbers/readability-r19-20261007/`, with per-file hashes.

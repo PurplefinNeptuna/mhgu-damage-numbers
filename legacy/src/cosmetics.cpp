@@ -20,6 +20,8 @@ extern "C" __attribute__((used)) const uint32_t dn_sprite_abi[]={
 extern "C" __attribute__((used)) const uint32_t dn_font_abi[]={
     offsetof(ImGuiIO,Fonts),offsetof(ImFontConfig,FontDataOwnedByAtlas),
     offsetof(ImFontBaked,Size),offsetof(ImFontGlyph,AdvanceX),offsetof(ImFontGlyph,X0),offsetof(ImGuiIO,BackendFlags)};
+extern "C" __attribute__((used)) const uint32_t dn_draw_abi[]={
+    offsetof(ImDrawList,VtxBuffer),offsetof(ImVector_ImDrawVert,Data),sizeof(ImDrawVert),offsetof(ImDrawVert,pos)};
 static_assert(sizeof(ImWchar)==2 && sizeof(ImFontGlyph)==44);
 #ifndef DAMAGE_NUMBERS_HOST_VISUAL
 static_assert(offsetof(ImGuiIO,Fonts)==44 && offsetof(ImFontConfig,FontDataOwnedByAtlas)==48);
@@ -93,10 +95,8 @@ static void glyph_effects(ImDrawList* draw,const DrawNumber& n,ImFont* font,floa
         const float x=n.position.x+advance+g->X0*ratio-r[4]*sx;
         const float y=n.position.y+g->Y0*ratio-r[5]*sy;
         const Rect target={x,y,x+r[2]*sx,y+r[3]*sy};
-        // Both native text layers use a centered soft shadow, not an offset stroke.
+        // Keep the centered shadow; the crisp edge replaces the warm gold halo.
         sprite(draw,index,target,imgui_color(0,n.opacity*.22f));
-        if(n.color==rgb(Tint::Weak,VisualStyle::Wilds))
-            sprite(draw,index+10,target,imgui_color(n.color,n.opacity*.32f));
         advance+=g->AdvanceX*ratio;
     }
 }
@@ -119,6 +119,18 @@ void cosmetics_draw(void* list,const DrawNumber& n) {
         return;
     }
     glyph_effects(draw,n,font,pixels);
+    const float stroke=.5f*n.pixels/base_pixels_720p;
+    const uint32_t edge=imgui_color(0x17130f,n.opacity*.9f);
+    for(int x=-1;x<=1;++x)for(int y=-1;y<=1;++y)if(x||y) {
+        const int first=draw->VtxBuffer.Size;
+        text(0,0,edge);
+        // ImGui truncates text origins. Translate emitted vertices so the
+        // half-pixel edge remains symmetric at every size and resolution.
+        for(int i=first;i<draw->VtxBuffer.Size;++i) {
+            draw->VtxBuffer.Data[i].pos.x+=x*stroke;
+            draw->VtxBuffer.Data[i].pos.y+=y*stroke;
+        }
+    }
     text(0,0,color);
     if(n.critical==Critical::None)return;
     // Procedural sprites include the complete colored bloom and pale core.

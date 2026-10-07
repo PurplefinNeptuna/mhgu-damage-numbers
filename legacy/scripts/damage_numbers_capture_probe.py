@@ -67,6 +67,10 @@ class CaptureProbe:
         self.tree_open={'Damage numbers##damage-numbers':True};self.tree_depth=0;self.tree_pops=0
         self.fs_context=0x12340000;self.fs_guard_depth=0
         abi=self.address('dn_font_abi');self.font_abi=struct.unpack('<6I',self.uc.mem_read(abi,24))
+        self.draw_abi=struct.unpack('<4I',self.uc.mem_read(self.address('dn_draw_abi'),16))
+        self.vertex_buffer=0x35000000;self.uc.mem_map(self.vertex_buffer,0x100000)
+        self.draw_vector=DATA+0x1e1000+self.draw_abi[0]
+        self.write(self.draw_vector+self.draw_abi[1],self.vertex_buffer)
         self.write(DATA+0x1e0000+self.font_abi[0],DATA+0x1e3000)
         self.write(DATA+0x1e0000+self.font_abi[5],16)
         self.uc.mem_map(0x34000000,0x100000)
@@ -254,6 +258,12 @@ class CaptureProbe:
                     'pixels':struct.unpack('<f',struct.pack('<I',args[2]))[0],
                     'position':(struct.unpack('<f',struct.pack('<I',args[3]))[0],self.read(sp,'<f')),
                     'color':self.read(sp+4),'font':args[1],'text_ptr':self.read(sp+8)})
+                row=self.text_draws[-1];first=self.read(self.draw_vector)
+                row['vertex_start']=first;row['vertex_count']=4*len(row['text'])
+                for j in range(row['vertex_count']):
+                    self.uc.mem_write(self.vertex_buffer+(first+j)*self.draw_abi[2],
+                        struct.pack('<4fI',row['position'][0]+j%2,row['position'][1]+(j//2)%2,0,0,row['color']))
+                self.write(self.draw_vector,first+row['vertex_count'])
                 self.ret()
             elif name=='ImDrawList_AddLine':
                 sp=u.reg_read(arm.UC_ARM_REG_SP)
@@ -376,6 +386,7 @@ class CaptureProbe:
         if self.tree_depth: raise ValueError('Plugin panel leaked a TreeNode scope')
     def render(self):
         self.text_draws=[];self.lines=[];self.triangles=[];self.images=[]
+        self.write(self.draw_vector,0)
         self.call('forge_onImGuiFreeRender',budget=8000000)
     def camera_record(self,rect=(0,0,1280,720),view=None,projection=None,camera_delta=0):
         frame,viewport,camera,vm,pm,rectangle=[DATA+0x1f0000+i*0x1000 for i in range(6)]
@@ -485,7 +496,7 @@ def main():
     fade_alpha=128 if open_motion else 102
     stars=lambda p:[r for r in p.images if r['uv_min'][1]==.5]
     center=lambda r:tuple((a+b)*.5 for a,b in zip(r['min'],r['max']))
-    check(len(visual.text_draws)==1 and len(fills())==1 and fills()[0]['text']=='75',
+    check(len(visual.text_draws)==9 and len(fills())==1 and fills()[0]['text']=='75',
           'Native callback draws smooth texture shading and one crisp profile-font fill')
     check(fills()[0]['color']==0xff5bc4f2 and abs(fills()[0]['pixels']-start_pixels*font_scale)<.001,
           'Physical HZV 45 keeps the golden digit color and accepted normalized height')
@@ -498,8 +509,18 @@ def main():
           'Critical sprite preserves the renderer design aspect ratio')
     check(center(r)[1]<fills()[0]['position'][1] and r['color']==0xffffffff,
           'Crit sprite stays above glyphs with independent sprite RGBA colors')
-    check(len(visual.images)==5 and sum(row['color']&0xffffff==0 for row in visual.images)==2,
-          'Gold digits get centered smooth shadow and glow masks; no shifted duplicate glyph strokes')
+    check(len(visual.images)==3 and sum(row['color']&0xffffff==0 for row in visual.images)==2,
+          'Gold digits retain centered shadow without a warm halo')
+    outline=visual.text_draws[:-1];fill=visual.text_draws[-1]
+    offsets=[(x,y) for x in (-1,0,1) for y in (-1,0,1) if x or y]
+    def vertex_pos(p,row):
+        return struct.unpack('<2f',p.uc.mem_read(p.vertex_buffer+row['vertex_start']*p.draw_abi[2]+p.draw_abi[3],8))
+    origin=vertex_pos(visual,fill);stroke=.5*start_pixels/20
+    check(len(outline)==8 and all(row['color']&0xffffff==0x0f1317 and row['color']>>24==230 for row in outline),
+          'Wilds uses eight near-black outline passes at 90 percent opacity')
+    check(all(abs(vertex_pos(visual,row)[axis]-origin[axis]-offset[axis]*stroke)<.0001
+              for row,offset in zip(outline,offsets) for axis in (0,1)),
+          'Compiled outline translates vertices symmetrically by 0.5 pixels scaled with font size')
     check(visual.clip_depth==0,'Native renderer balances draw-list clipping')
     check(visual.read(visual.private('recent')+240,'<Q')==visual.clock,
           'Compiled producer copies the full 64-bit capture timestamp')
@@ -620,7 +641,7 @@ def main():
           compact.mount_calls==calls and 'Number size' in compact.changes,
           'Collapsed plugin row omits controls, diagnostics and save actions without a TreePop')
     compact.uc.mem_write(POSITION,struct.pack('<3f',.25,0,.5));compact.camera_record();compact.collision();compact.render()
-    check(len(compact.text_draws)==1,'Collapsed plugin row leaves floating damage rendering active')
+    check(len(compact.text_draws)==9,'Collapsed plugin row leaves floating damage rendering active')
     compact.changes={};compact.buttons=set();compact.tree_open={'Damage numbers##damage-numbers':True}
     compact.headers=[];compact.panel()
     check(compact.headers==['Damage numbers##damage-numbers'] and compact.tree_pops==1,
@@ -640,12 +661,12 @@ def main():
     check(options.fs_context==0x12340000 and options.fs_guard_depth==0,'Unavailable save mount restores original thread filesystem error policy')
     options.uc.mem_write(POSITION,struct.pack('<3f',.25,0,.5))
     options.write(HIT+0x6d,2,'<B');options.camera_record();options.collision(kind=1);options.render()
-    check(len(options.text_draws)==1 and options.recent()[-1][2]==4,'Recognized monster damage always displays')
+    check(len(options.text_draws)==9 and options.recent()[-1][2]==4,'Recognized monster damage always displays')
     options.clock+=options.frequency
     options.collision_body=gateway['symbols']['dn_probe_collision_shot_body'];options.write(HIT+0x30,0)
     options.write(HIT+0x6d,8,'<B');options.write(HIT+0x6e,0,'<B');options.write(HIT+0x70,options.players[1])
     options.camera_record();options.collision(kind=2,owner=1);options.render()
-    check(len(options.text_draws)==1 and options.text_draws[-1]['color']==0xffecf1f4,'Recognized remote-owned generic object always displays with unknown-HZV white')
+    check(len(options.text_draws)==9 and options.text_draws[-1]['color']==0xffecf1f4,'Recognized remote-owned generic object always displays with unknown-HZV white')
     options.clock+=options.frequency
     captured=options.read(options.private('captured_hits'))
     options.write(HIT+0x6d,1,'<B');options.camera_record();options.collision(kind=2,owner=1);options.render()
@@ -692,7 +713,7 @@ def main():
           'Partial primary write retains the last valid config in backup and closes all handles')
     recovered=probe();recovered.save_available=True;recovered.files=damaged;recovered.call('forge_onInit')
     recovered.uc.mem_write(POSITION,struct.pack('<3f',.25,0,.5));recovered.camera_record();recovered.collision();recovered.render()
-    check(len(recovered.text_draws)==1 and abs(recovered.text_draws[-1]['pixels']-start_pixels*font_scale)<.001,
+    check(len(recovered.text_draws)==9 and abs(recovered.text_draws[-1]['pixels']-start_pixels*font_scale)<.001,
           'Restart rejects a partial primary and recovers the previous saved defaults')
     recovered.changes={'Show damage numbers':False};recovered.panel();recovered.render()
     check(not recovered.text_draws,'Disabling display immediately clears already visible numbers')
@@ -737,7 +758,7 @@ def main():
             bounce.changes={'Style##damage-numbers':1};bounce.panel();bounce.render()
             check(len(bounce.text_draws)==9 and bounce.text_draws[-1]['color']==0xff9a9a9a,'Confirmed bounce stays gray in Classic style')
             bounce.changes={'Style##damage-numbers':0};bounce.panel();bounce.render()
-            check(len(bounce.text_draws)==1 and bounce.text_draws[-1]['color']==0xff9a9a9a,'Confirmed bounce stays gray in Wilds style')
+            check(len(bounce.text_draws)==9 and bounce.text_draws[-1]['color']==0xff9a9a9a,'Confirmed bounce stays gray in Wilds style')
             bounce.clock+=bounce.frequency;bounce.camera_record()
             bounce.collision(amount=80,zone=20,attack=attack)
             bounce.collision(amount=40,zone=20,attack=attack)
@@ -833,17 +854,17 @@ def main():
     star=stars(aligned)[0]
     center=star['min'][0]+(star['max'][0]-star['min'][0])*44.5/88
     check(abs(center-(fill['position'][0]+fill['pixels']*.55))<.001,'Positive star centers on actual rendered glyph bounds at fractional impact coordinates')
-    check(len(aligned.text_draws)==1 and all(row['color']&0xffffff==0 for row in aligned.images if row not in stars(aligned)),'White nonweakspot digits have a smooth centered shadow without an outline stroke or gold halo')
+    check(len(aligned.text_draws)==9 and all(row['color']&0xffffff==0 for row in aligned.images if row not in stars(aligned)),'White digits retain centered shadow and eight outline passes without a gold halo')
     aligned.clock+=aligned.frequency;aligned.write(HIT+0x54,1,'<B');aligned.camera_record();aligned.collision(zone=80);aligned.render()
     fill=fill_rows(aligned.text_draws)[0]
     check(stars(aligned)[0]['uv_min'][0]==.1875 and abs(stars(aligned)[0]['min'][0]+(stars(aligned)[0]['max'][0]-stars(aligned)[0]['min'][0])*44.5/88-(fill['position'][0]+fill['pixels']*.55))<.001,
-          'Negative star centers below gold glyphs independently of their halo')
+          'Negative star centers below outlined gold glyphs')
     aligned.clock+=int(.895*aligned.frequency);aligned.camera_record();aligned.render()
     check(len(fill_rows(aligned.text_draws))==1 and 0<aligned.text_draws[-1]['color']>>24<10,
-          'Very faint final fill remains identifiable separately from warm halo passes')
+          'Very faint final fill remains identifiable separately from outline passes')
     old=probe();old.save_available=True;old.files={primary:b'[DamageNumbers]\nversion=1\nenabled=0\nmonsters=1\nobjects=1\nbounce_gray=0\nscale=2\nlifetime=1.8\n'};old.files[backup]=old.files[primary]
     old_files=old.files.copy();old.call('forge_onInit');old.uc.mem_write(POSITION,struct.pack('<3f',0,0,.5));old.camera_record();old.collision();old.render()
-    check(old.files==old_files and len(old.text_draws)==1 and abs(old.text_draws[-1]['pixels']-start_pixels*font_scale)<.001,'Version-1 primary and backup are ignored without migration, deletion or automatic writes')
+    check(old.files==old_files and len(old.text_draws)==9 and abs(old.text_draws[-1]['pixels']-start_pixels*font_scale)<.001,'Version-1 primary and backup are ignored without migration, deletion or automatic writes')
     old.buttons={'Save settings'};old.panel()
     check(b'version=2' in old.files[primary] and old.files[backup]==old_files[backup],'Explicit Save replaces primary with fresh v2 and does not preserve old v1 preferences')
     p=probe();p.call('forge_onInit')
