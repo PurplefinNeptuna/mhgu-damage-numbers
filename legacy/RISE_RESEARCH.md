@@ -125,7 +125,7 @@ does not show a polarity-specific lean rule.
 Colored beam fits above the impact estimate the positive sample at roughly
 13 degrees from vertical and the negative sample at roughly 8 degrees, leaning
 opposite ways. Bloom makes the positive fit less precise. The two hits are
-consistent with the user's proposed approximate +/-20 degree range, but do
+consistent with the user's revised approximate +/-15 degree range, but do
 not establish its endpoints, distribution or whether the game randomizes it.
 
 At `before_go`, the masked orange top moves down 4 pixels in both the normal
@@ -169,9 +169,9 @@ independently authored red/purple tapered slash with a pale core and fading
 colored glow behind the digits. Noncrit gets no slash. The short effect
 expires separately from the held number; do not carry it into the exit fade.
 
-For the proposed approximate angle range, choose slope `s` in `[-3/8,+3/8]`
+For the user's revised approximate +/-15 degree range, choose slope `s` in `[-1/4,+1/4]`
 once per hit and retain it for the effect's lifetime. An upward vector `(s,-1)`
-has a maximum tilt `atan(3/8)`, approximately 20.56 degrees. Build endpoints
+has a maximum tilt `atan(1/4)`, approximately 14.04 degrees. Build endpoints
 as `(x+s*dy, y-dy)`, and a perpendicular along `(1,s)`; normalize once per hit
 if consistent physical width/length is needed. This avoids per-frame sine,
 cosine or degree conversion. Radians alone do not remove that work. An

@@ -118,7 +118,7 @@ def inspect(source):
             "digits": "Broad rendered digits with thick nearly solid black outline and lightly softened outer edge; calibrate full outlined glyphs.",
             "motion": "Grow/shrink/settle, hold, small +4 reference-unit downward kick at exit, then upward alpha fade; time based, not one rendered frame at every FPS.",
             "affinity": "Red positive slash, purple negative slash, none for noncrit; digit palette remains independent of affinity.",
-            "angle": "Proposed slope s in [-3/8,+3/8], approximately +/-20.56 degrees. Choose once per hit; upward direction (s,-1) needs no trig.",
+            "angle": "User revised target to approximately +/-15 degrees. Proposed slope s in [-1/4,+1/4], approximately +/-14.04 degrees. Choose once per hit; upward direction (s,-1) needs no trig.",
             "other_colors": "Share animation and outline behavior, per user direction; retain existing MHGU damage-color classification.",
         },
     }
