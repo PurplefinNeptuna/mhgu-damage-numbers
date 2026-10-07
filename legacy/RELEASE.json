@@ -1,13 +1,13 @@
 {
   "status": "READY_TO_DISTRIBUTE",
-  "revision": "r19",
+  "revision": "r20",
   "date": "2026-10-07",
   "asset_profile": "open",
   "font": "Open Sans Semibold 600",
-  "nro_sha256": "7a0b42298d4d6eac1c4ca7d73056f84fdbb300b7be96614df8eaaec020e8f638",
-  "release_archive": "build/damage-numbers/releases/r19/damage-numbers-r19.zip",
+  "nro_sha256": "318ee366acfd905451ddeec2c39d42b8587d24372f222ded3026907f8f9cc2c3",
+  "release_archive": "build/damage-numbers/releases/r20/damage-numbers-r20.zip",
   "installed_plugin_matches": false,
-  "compiled_fixture_checks": 345,
+  "compiled_fixture_checks": 347,
   "compiled_fixture_reused_only_for_identical_nro": false,
   "fresh_runtime_test_performed": false,
   "retired_edition": "r12-game-derived",
@@ -22,7 +22,7 @@
   "asset_audit": "PASSED_OPEN_ASSET_PROVENANCE",
   "installed_by_recipe": false,
   "archive_layout": "runtime_only",
-  "redistribution_notices": "build/damage-numbers/releases/r19/NOTICES.txt",
+  "redistribution_notices": "build/damage-numbers/releases/r20/NOTICES.txt",
   "sprite_codec": "DN-LZ1",
   "nro_file_bytes": 151552,
   "previous_nro_file_bytes": 151552,
@@ -36,7 +36,7 @@
   "ryujinx_gameplay_confirmation": false,
   "published": false,
   "distribution_status_date": "2026-10-07",
-  "distribution_status_basis": "User approved the 0.5 px renderer preview and requested build and ready-to-distribute status; no new gameplay claim",
+  "distribution_status_basis": "User selected the 1.5x crit-size renderer preview and requested direct local distribution readiness; no new gameplay claim",
   "eden_gameplay_confirmation": false,
   "user_accepted": false,
   "runtime_binary_changed_for_release": true,
@@ -46,6 +46,7 @@
     "nro_sha256": "1eb78f3430f6c5c5ce1f60a382fa8bd4fc18ee56cf267649b95a94a462115ea4",
     "record": "RUNTIME.md"
   },
-  "appearance_change": "Wilds near-black symmetric 0.5 px outline at 20 px, scaled with size/resolution/pop; gold halo removed; shadow and crit sprites retained",
-  "outline_pixels_at_20px": 0.5
+  "appearance_change": "Wilds positive/negative crit artwork scaled uniformly to 1.5x with matching solid placement bounds and unchanged core gap; r19 half-pixel digits retained",
+  "outline_pixels_at_20px": 0.5,
+  "crit_size_multiplier": 1.5
 }

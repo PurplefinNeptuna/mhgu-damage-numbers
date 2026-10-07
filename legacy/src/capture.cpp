@@ -279,7 +279,7 @@ void capture_install() {
     attempted = true;
     struct StartupReport {
         ~StartupReport() {
-            if (load(active)) forge_log_info("[damage-numbers] r19 loaded");
+            if (load(active)) forge_log_info("[damage-numbers] r20 loaded");
             else forge_log_warn("[damage-numbers] %s; check game/Forge inputs and conflicting mods, then restart", status);
         }
     } startup_report;

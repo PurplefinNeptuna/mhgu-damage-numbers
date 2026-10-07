@@ -504,11 +504,13 @@ def main():
           'Compiled renderer centers measured profile-font advances at the projected impact')
     check(len(stars(visual))==1 and stars(visual)[0]['uv_min'][0]==0 and not visual.triangles,
           'Positive critical selects profile red sprite with baked glow, without triangle overdraw')
-    r=stars(visual)[0];scale=start_pixels*manifest['sprites'].get('crit_render_scale',font_scale)/60
+    r=stars(visual)[0];scale=start_pixels*manifest['sprites'].get('crit_render_scale',font_scale)/60*manifest['wilds_crit_size_multiplier']
     check(abs(r['max'][0]-r['min'][0]-88*scale)<.001 and abs(r['max'][1]-r['min'][1]-48*scale)<.001,
           'Critical sprite preserves the renderer design aspect ratio')
     check(center(r)[1]<fills()[0]['position'][1] and r['color']==0xffffffff,
           'Crit sprite stays above glyphs with independent sprite RGBA colors')
+    check(abs(fills()[0]['position'][1]+fills()[0]['pixels']*.15-center(r)[1]-start_pixels*manifest['wilds_star_height_font_sizes']*.5-2*start_pixels/1.2/24)<.001,
+          'Larger positive crit preserves the gap above visible digits')
     check(len(visual.images)==3 and sum(row['color']&0xffffff==0 for row in visual.images)==2,
           'Gold digits retain centered shadow without a warm halo')
     outline=visual.text_draws[:-1];fill=visual.text_draws[-1]
@@ -532,6 +534,8 @@ def main():
     check(len(stars(visual))==2 and stars(visual)[1]['uv_min'][0]==.1875 and
           center(stars(visual)[1])[1]>lower['position'][1]+lower['pixels']*.85,
           'Negative critical selects profile blue sprite below visible digits')
+    check(abs(center(stars(visual)[1])[1]-start_pixels*manifest['wilds_star_height_font_sizes']*.5-lower['position'][1]-lower['pixels']*.85-2*start_pixels/1.2/24)<.001,
+          'Larger negative crit preserves the gap below visible digits')
     first_position=fills()[0]['position'];visual.render()
     check(first_position==fills()[0]['position'],'New overlapping hit does not reshuffle an existing number')
     visual.clock+=int(.8*visual.frequency);visual.camera_record();visual.render()

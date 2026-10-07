@@ -1,3 +1,12 @@
+## r20 crit-size release, 2026-10-07
+
+The user selected the host real-renderer 1.5× positive/negative crit preview
+and requested direct readiness. Fresh host/compiled ARM32/asset/GE/package
+checks passed; no new Eden, Ryujinx or Switch gameplay run was performed.
+This is visual-design acceptance only. [Crit-size evidence](CRIT_SIZE.md)
+records the scale, placement bounds and retained digit appearance. Earlier
+reports below retain their recorded versions. Forge is unchanged.
+
 ## r19 readability release, 2026-10-07
 
 The user approved the host real-renderer 0.5 px outline preview and requested a

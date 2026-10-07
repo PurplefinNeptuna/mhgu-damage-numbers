@@ -1,6 +1,6 @@
 # Damage numbers
 
-Current release: **r19**. Wilds digits use the approved 0.5 px dark outline and no gold halo. Fresh host/ARM/static checks passed; no new gameplay test was run. Earlier manual reports retain their original version. See [readability validation](READABILITY.md) and [development workflow](DEVELOPMENT.md).
+Current release: **r20**. Wilds crit stars are 1.5× their previous size; digits retain the 0.5 px dark outline and no gold halo. Fresh host/ARM/static checks passed; no new gameplay test was run. Earlier manual reports retain their original version. See [crit-size validation](CRIT_SIZE.md) and [r19 readability validation](READABILITY.md) and [development workflow](DEVELOPMENT.md).
 
 ## Build this mod
 
@@ -67,7 +67,8 @@ Wilds appearance uses the licensed Open Sans digit subset, normalized to the
 accepted visible height. Digits have a smooth centered shadow and a near-black outline measuring 0.5 px
 at the default 20 px size, scaled with size, resolution and animation. The gold
 halo is removed. Original procedural stars include colored bloom and a
-pale center. They align to actual pixel-rounded glyph bounds and fade with the
+pale center, now drawn uniformly at 1.5× their r19 size. Their solid placement
+bounds grow with them; the gap to the digits is unchanged. They align to actual pixel-rounded glyph bounds and fade with the
 numbers. Digit color remains independent of crit polarity. Classic keeps
 Forge's font, outlined digits and straight critical lines.
 

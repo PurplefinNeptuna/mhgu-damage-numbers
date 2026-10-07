@@ -69,6 +69,36 @@ int main(int argc,char** argv) {
         ImDrawList_PushClipRect(draw,{0,0},{620,220},false);
         ImDrawList_PushTexture(draw,io->Fonts->TexRef);
     }
+    // Inspect real sprite quads at both polarities and framebuffer sizes.
+    for(float pixels:{20.0f,30.0f})for(Critical crit:{Critical::Positive,Critical::Negative}) {
+        DrawNumber n{};std::snprintf(n.text,sizeof(n.text),"40");n.style=VisualStyle::Wilds;
+        n.pixels=pixels;n.unit=pixels/24;n.opacity=1;n.position={30,40};
+        n.color=rgb(Tint::Weak,n.style);n.critical=crit;
+        TextMetrics m{};assert(cosmetics_measure(n.text,pixels,n.style,m));
+        n.ink=shifted(m.ink,n.position);
+        n.star={(n.ink.left+n.ink.right)*.5f,crit==Critical::Positive?
+            n.ink.top-2*n.unit-pixels*wilds_star_height*.5f:
+            n.ink.bottom+2*n.unit+pixels*wilds_star_height*.5f};
+        cosmetics_draw(draw,n);
+        const int start=draw->VtxBuffer.Size-4;
+        float l=1e6f,t=1e6f,r=-1e6f,b=-1e6f;
+        for(int j=start;j<draw->VtxBuffer.Size;++j) {
+            const auto p=draw->VtxBuffer.Data[j].pos;
+            l=p.x<l?p.x:l;t=p.y<t?p.y:t;r=p.x>r?p.x:r;b=p.y>b?p.y:b;
+        }
+        assert(std::abs((r-l)/(b-t)-88.0f/48)<.0001f);
+        assert(std::abs((b-t)/pixels-.8f*1.5f)<.0001f);
+        const float core_top=n.star.y-pixels*wilds_star_height*.5f;
+        const float core_bottom=n.star.y+pixels*wilds_star_height*.5f;
+        assert(std::abs((crit==Critical::Positive?n.ink.top-core_bottom:core_top-n.ink.bottom)-2*n.unit)<.0001f);
+        const Rect reserved=marker_bounds(n.ink,pixels,n.unit,crit,n.style);
+        assert(reserved.left<=n.star.x-pixels*.38078224f*1.5f+.0001f);
+        assert(reserved.right>=n.star.x+pixels*.38078224f*1.5f-.0001f);
+        assert(reserved.top<=core_top+.0001f&&reserved.bottom>=core_bottom-.0001f);
+        ImDrawList__ResetForNewFrame(draw);
+        ImDrawList_PushClipRect(draw,{0,0},{620,220},false);
+        ImDrawList_PushTexture(draw,io->Fonts->TexRef);
+    }
     // Ten-digit totals at the 128-label cap remain inside 16-bit vertex indexing.
     for(unsigned i=0;i<128;++i) {
         DrawNumber n{};std::snprintf(n.text,sizeof(n.text),"2147483647");n.style=VisualStyle::Wilds;

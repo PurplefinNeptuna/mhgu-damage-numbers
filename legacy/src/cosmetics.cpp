@@ -134,7 +134,7 @@ void cosmetics_draw(void* list,const DrawNumber& n) {
     text(0,0,color);
     if(n.critical==Critical::None)return;
     // Procedural sprites include the complete colored bloom and pale core.
-    const float scale=n.pixels*wilds_sprite_font_scale/60.0f;
+    const float scale=n.pixels*wilds_sprite_font_scale/60.0f*wilds_crit_scale;
     const float height=48*scale;
     sprite(draw,n.critical==Critical::Positive?20:21,
         {n.star.x-44.5f*scale,n.star.y-height*.5f,n.star.x+43.5f*scale,n.star.y+height*.5f},

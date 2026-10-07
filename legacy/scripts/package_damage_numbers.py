@@ -40,12 +40,14 @@ def main(refresh_support=False):
               'Invalid embedded stream destroys the unregistered texture and retains crisp-digit fallback'}
     required.update({'Wilds uses eight near-black outline passes at 90 percent opacity',
                      'Compiled outline translates vertices symmetrically by 0.5 pixels scaled with font size',
-                     'Gold digits retain centered shadow without a warm halo'})
+                     'Gold digits retain centered shadow without a warm halo',
+                     'Larger positive crit preserves the gap above visible digits',
+                     'Larger negative crit preserves the gap below visible digits'})
     required.update('Compiled dn_gateway_'+name+' restores NZCVQ without unsupported APSR_g'
                     for name in [str(i) for i in range(8)]+['after'])
     require(probe['checks'] >= 340 and required.issubset(probe['passed']),
             'Baseline and new compiled animation checks are required')
-    require(built['recovery_revision']==19 and built['base_font_pixels_720p']==20, 'Expected r19 readability build with 20px base size')
+    require(built['recovery_revision']==20 and built['base_font_pixels_720p']==20, 'Expected r20 crit-size build with 20px base size')
     require(ge['status']=='PASSED_NZCVQ_ONLY_GATEWAYS' and ge['nro_sha256']==digest(plugin) and
             len(ge['restore_sites'])==9 and gateway['checks']>=9287 and
             gateway['gateway_sha256']==gateway_manifest['binary_sha256'] and
@@ -58,13 +60,13 @@ def main(refresh_support=False):
             codec['compressed_bytes']==built['sprites']['compressed_bytes'] and
             not codec['per_frame_decode'] and codec['extra_persistent_bytes']==0,
             'Lossless codec and memory verification required')
-    require(comparison['status']=='PASSED_R19_READABILITY_ASSET_EQUIVALENCE' and
+    require(comparison['status']=='PASSED_R20_CRIT_SIZE_ASSET_EQUIVALENCE' and
             comparison['nro_sha256']==digest(plugin) and
             comparison['rgba_sha256']==audit['sprite_rgba_sha256'] and
             comparison['bss_bytes']==built['nro_bss_bytes'] and comparison['bss_not_increased'] and
             all(v['identical'] for v in comparison['real_imgui'].values()),
-            'Unchanged assets, approved r19 rendering and memory bounds required')
-    require(comparison['appearance_baseline_sha256']==digest((RECIPE/'research/readability-r19.json').read_bytes()),
+            'Unchanged assets, approved r20 rendering and memory bounds required')
+    require(comparison['appearance_baseline_sha256']==digest((RECIPE/'research/readability-r20.json').read_bytes()),
             'Reviewed appearance baseline changed')
     for name,record in comparison['real_imgui'].items():
         require(digest((ROOT/'work/damage-numbers/open-visual'/name).read_bytes())==record['sha256'],

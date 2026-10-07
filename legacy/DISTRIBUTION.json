@@ -2,22 +2,22 @@
   "schema_version": 1,
   "mod": "damage-numbers",
   "status": "READY_TO_DISTRIBUTE",
-  "reason": "User approved the real-renderer 0.5 px outline preview and requested a built local release ready to distribute. Fresh host/ARM/static gates cover r19; no new gameplay run.",
+  "reason": "User selected the real-renderer 1.5x crit-size preview and requested a ready local release. Fresh host/ARM/static checks cover r20; no new gameplay run.",
   "publication": {
     "published": false,
     "url": null,
     "date": null
   },
-  "version": "r19",
+  "version": "r20",
   "package_name": "damage-number",
-  "archive": "damage-numbers-r19.zip",
+  "archive": "damage-numbers-r20.zip",
   "approval": {
     "date": "2026-10-07",
-    "basis": "Explicit user instruction: update to 0.5px, build it and mark it ready to distribute."
+    "basis": "Explicit user instruction: choose 1.5x crit size and make it ready to distribute directly."
   },
   "target": "MHGU Nintendo Switch 1.4.0; Eden/Linux and Ryujinx-based emulators with Forge; open assets only.",
   "limitations": [
-    "r19 readability is host-rendered and statically/computationally validated; no separate Eden, Ryujinx or Switch gameplay run was performed.",
+    "r20 enlarged crits are host-rendered and statically/computationally validated; no separate Eden, Ryujinx or Switch gameplay run was performed.",
     "Separate Forge overlay menu/popups corruption remains unresolved.",
     "Requires Forge; only the audited MHGU 1.4.0 eight-site layout is supported.",
     "Forge's known ImGui/background renderer issue remains disclosed and unchanged."
@@ -31,12 +31,13 @@
   ],
   "support": {
     "DEVELOPMENT.md": "mods/damage-numbers/DEVELOPMENT.md",
-    "READABILITY.md": "mods/damage-numbers/READABILITY.md"
+    "READABILITY.md": "mods/damage-numbers/READABILITY.md",
+    "CRIT_SIZE.md": "mods/damage-numbers/CRIT_SIZE.md"
   },
   "payloads": {
     "romfs/nativeNX/plugins/damage_numbers_capture.nro": {
       "source": "build/damage-numbers/open-assets/candidate-package/romfs/nativeNX/plugins/damage_numbers_capture.nro",
-      "sha256": "7a0b42298d4d6eac1c4ca7d73056f84fdbb300b7be96614df8eaaec020e8f638"
+      "sha256": "318ee366acfd905451ddeec2c39d42b8587d24372f222ded3026907f8f9cc2c3"
     }
   },
   "evidence": {
@@ -54,9 +55,9 @@
     "manual": [
       "mods/damage-numbers/RUNTIME.md"
     ],
-    "manual_summary": "Historical r17 gameplay reports remain scoped to that payload. The user approved the r19 0.5 px real-renderer preview on a bright screenshot; this is visual-design acceptance, not a new gameplay run.",
+    "manual_summary": "The user approved the host real-renderer 1.5x positive/negative crit preview on a bright screenshot. This is visual-design acceptance, not a new gameplay run; historical r17 gameplay reports remain scoped to that payload.",
     "static_summary": {
-      "compiled_capture_checks": 345,
+      "compiled_capture_checks": 347,
       "gateway_checks": 9287,
       "host_core_presentation_checks": 919,
       "transactional_hook_scenarios": 23,
@@ -73,7 +74,7 @@
       "scope": "User-confirmed gameplay on the two tested installations; not all emulator forks, exhaustive feature retesting or clean emulator shutdown."
     },
     "runtime_confirmation": {
-      "version": "r19",
+      "version": "r20",
       "fresh_gameplay_test": false,
       "scope": "Fresh host/ARM/static and renderer checks only; earlier runtime reports remain scoped to their original payloads."
     },
