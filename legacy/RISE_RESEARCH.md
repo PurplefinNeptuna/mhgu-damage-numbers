@@ -179,9 +179,12 @@ initial candidate, not a measured Rise dimension or a final accepted size.
 Keep the core/glow narrow and short-lived so repeated crits remain readable.
 
 The existing plugin projects each event's saved world hit position every
-frame, then applies digit motion and number-placement offsets. A separate
-slash anchor can use that raw projection before those offsets, following
-camera movement without following the digit bounce/rise. Draw the slash behind
+frame, then applies digit motion and number-placement offsets. Per the user's
+direction, the slash origin must use that raw projected registered hit position,
+with no digit anchor adjustment or overlap-avoidance displacement. Reproject
+the saved world hit position as the camera moves; do not attach the slash to
+the monster's later position. Damage numbers retain the usual overlap avoidance,
+cached per-hit placement and bounce/rise motion independently. Draw the slash behind
 the digits and clip to the gameplay viewport. Its large bounds should not
 enter the digit collision solver or force numbers away from the hit. This
 requires separate effect geometry/age in presentation; current `DrawNumber`
