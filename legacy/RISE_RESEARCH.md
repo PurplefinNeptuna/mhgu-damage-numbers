@@ -119,7 +119,9 @@ lifetime is independent of the number's later hold/exit. Assuming consecutive
 30 fps numbered samples, the three intervals from 3 to 6 cover approximately
 100 ms; this does not establish a complete native effect duration. These
 screenshots locate the slash in the rendered scene but do not identify which
-native GUI/effect resource creates it. A single slash direction per polarity
+native GUI/effect resource creates it. The user identifies it as a world-space
+hit effect whose endpoint is constrained by the scene/ground. The MHGU proposal
+below adapts its appearance to the existing UI renderer. A single slash direction per polarity
 does not show a polarity-specific lean rule.
 
 Colored beam fits above the impact estimate the positive sample at roughly
@@ -169,6 +171,28 @@ independently authored red/purple tapered slash with a pale core and fading
 colored glow behind the digits. Noncrit gets no slash. The short effect
 expires separately from the held number; do not carry it into the exit fade.
 
+Treat the slash as a UI approximation of Rise's world effect. Start previews
+with a total vertical extent of half the gameplay viewport height; compare
+three-quarters height if the shorter version loses the intended appearance.
+At 1080p these are 540 and 810 pixels, at 720p 360 and 540. Half height is the
+initial candidate, not a measured Rise dimension or a final accepted size.
+Keep the core/glow narrow and short-lived so repeated crits remain readable.
+
+The existing plugin projects each event's saved world hit position every
+frame, then applies digit motion and number-placement offsets. A separate
+slash anchor can use that raw projection before those offsets, following
+camera movement without following the digit bounce/rise. Draw the slash behind
+the digits and clip to the gameplay viewport. Its large bounds should not
+enter the digit collision solver or force numbers away from the hit. This
+requires separate effect geometry/age in presentation; current `DrawNumber`
+markers are attached to the moving number and share its alpha.
+
+The inspected path renders with ImGui draw lists. It supplies no ground-plane
+intersection or scene depth test for this overlay, so it cannot reproduce the
+native effect's ground stop or monster/terrain occlusion. Keep the lower tail
+short as an appearance choice; do not infer a ground boundary from the number's
+screen y. A camera-projected UI streak remains an overlay.
+
 For the user's revised approximate +/-15 degree range, choose slope `s` in `[-1/4,+1/4]`
 once per hit and retain it for the effect's lifetime. An upward vector `(s,-1)`
 has a maximum tilt `atan(1/4)`, approximately 14.04 degrees. Build endpoints
@@ -178,19 +202,31 @@ cosine or degree conversion. Radians alone do not remove that work. An
 existing stable hit identity can seed a small hash for varied tilts, separate
 from polarity. This is a proposed approximation, not a recovered Rise RNG.
 
-The proposed initial rule is to retain MHGU's physical HZV >=45 selection for
-orange and confirmed-bounce selection for gray. This is an MHGU design choice,
-not a verified reconstruction of Rise's native classifier. `OTOMO` supplies a
-separate gray presentation reference if companion coloring is desired. Avoid
-using positive affinity to select the larger orange clip merely because of its
-name. Decide affinity indicators separately using MHGU's existing captured
-polarity.
+Use the existing shared `tint()` classifier for every style. A confirmed bounce
+selects gray first; otherwise physical HZV >=45 selects orange/yellow, while
+HZV <45 or unavailable selects white. Style chooses palette/appearance only.
+Rise borrows these native GUI colors:
+
+| Shared MHGU tint | Rise palette reference |
+| --- | --- |
+| Weak: physical HZV >=45, no confirmed bounce | Orange/yellow `#F0B41E` |
+| White: physical HZV <45 or unknown, no confirmed bounce | White `#FFFFFF` |
+| Gray: confirmed bounce, regardless of HZV | OTOMO gray `#808080` |
+
+`OTOMO` supplies the gray color only; companion ownership does not select it.
+Do not add Rise's display categories, companion-specific coloring, affinity
+color selection or separate style classifiers. Existing Wilds/Classic palettes
+keep their own colors with the same classification. The native clip names
+remain asset evidence; MHGU affinity selects only the separate crit effect.
 
 Implementation points:
 
-- `src/model.h`: new style value and palette; distinguish HZV from affinity.
+- `src/model.h`: new style value and Rise palette; retain shared `tint()` and
+  captured affinity independently.
 - `src/presentation.h`: Rise motion, larger orange bounds, anchor alignment and
-  maximum entrance dimensions; retain fixed per-hit placement.
+  maximum entrance dimensions; retain fixed per-hit placement. Supply a separate
+  raw projected hit anchor and short effect lifetime for the UI slash, outside
+  digit motion and collision bounds.
 - `src/cosmetics.cpp`: digit font, thick black outline and red/purple slash. Existing Forge/ImGui
   font, texture and draw facilities cover these operations. An independently
   generated alpha texture can provide the softened edge/glow; matching RE Engine's blur

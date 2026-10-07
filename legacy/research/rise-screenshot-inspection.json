@@ -388,7 +388,15 @@
     "digits": "Broad rendered digits with thick nearly solid black outline and lightly softened outer edge; calibrate full outlined glyphs.",
     "motion": "Grow/shrink/settle, hold, small +4 reference-unit downward kick at exit, then upward alpha fade; time based, not one rendered frame at every FPS.",
     "affinity": "Red positive slash, purple negative slash, none for noncrit; digit palette remains independent of affinity.",
+    "slash_space": "User identifies Rise slash as a world-space hit effect. MHGU uses a UI approximation anchored to the camera-projected saved hit point, independent of digit motion/placement; no ground clipping or scene occlusion in the current overlay path.",
+    "slash_height": "Initial preview candidate: total vertical extent 1/2 gameplay viewport height. Compare 3/4 height; final size remains undecided. Keep slash outside digit collision bounds and give it a separate short lifetime.",
     "angle": "User revised target to approximately +/-15 degrees. Proposed slope s in [-1/4,+1/4], approximately +/-14.04 degrees. Choose once per hit; upward direction (s,-1) needs no trig.",
-    "other_colors": "Share animation and outline behavior, per user direction; retain existing MHGU damage-color classification."
+    "classification": "All styles share existing tint(): confirmed bounce -> Gray; otherwise physical HZV >=45 -> Weak; lower/unknown HZV -> White. No Rise-specific categories or companion tint rule.",
+    "rise_palette": {
+      "Weak": "#F0B41E",
+      "White": "#FFFFFF",
+      "Gray": "#808080"
+    },
+    "other_colors": "Share animation and outline behavior. Borrow Rise colors only, including OTOMO gray for bounce; style does not choose categorization."
   }
 }
