@@ -1,0 +1,471 @@
+{
+  "schema_version": 1,
+  "inspection_date": "2026-10-07",
+  "kind": "static research, no runtime change",
+  "assets": [
+    {
+      "pak": "/mnt/storage2/SteamLibrary/steamapps/common/MonsterHunterRise/re_chunk_000.pak",
+      "pak_size": 32237404351,
+      "pak_header_sha256": "a3d96efd416350235083d756796d90d19627f679082401fdbee0ee079db98a4f",
+      "path": "natives/stm/gui/04_quest/hud/damagecount.gui.430033",
+      "offset": 25610356475,
+      "compressed_size": 5349,
+      "size": 52808,
+      "sha256": "1ec532ab0717f11d8e794d2951ed608a14eb613c36be5299c2fdc10537fcb631",
+      "compressed_sha256": "bc4f9a71518db6ba49eb9c8328773f6a6b8786bfbe336c17b76659bcef3aa027"
+    },
+    {
+      "pak": "/mnt/storage2/SteamLibrary/steamapps/common/MonsterHunterRise/re_chunk_000.pak",
+      "pak_size": 32237404351,
+      "pak_header_sha256": "a3d96efd416350235083d756796d90d19627f679082401fdbee0ee079db98a4f",
+      "path": "natives/stm/gui/01_common/font/gp-udkakugoc80pro-db.oft.1",
+      "offset": 23482792005,
+      "compressed_size": 9586,
+      "size": 10620,
+      "sha256": "2a361d7419ef5034596f155cda2cd0d02375bca7c1b2fc050a369046d7071778",
+      "compressed_sha256": "497ed479d6e9b09db947369685f139dbc408b6eda1c61ecdfd80d1ed261e5827"
+    },
+    {
+      "pak": "/mnt/storage2/SteamLibrary/steamapps/common/MonsterHunterRise/re_chunk_000.pak.patch_001.pak",
+      "pak_size": 4388488186,
+      "pak_header_sha256": "6366cedd7399a340647cf18b02beed351ccd6f06ffe9679f5721fa5489956ec8",
+      "path": "natives/stm/gui/font_eul.fslt.2",
+      "offset": 2985836664,
+      "compressed_size": 424,
+      "size": 1730,
+      "sha256": "f4d43641700e7e93937b31840b6ccc8391bb53615ace1dcf6bfe43bb5bb6bcba",
+      "compressed_sha256": "e8b93e347b7f8cefedf92b011a8cf3447461050e68a28af050ac6825145f7ed8"
+    }
+  ],
+  "digit_font": {
+    "family": "GP-UDKakugoC80 Pro",
+    "style": "DB",
+    "weight": 600,
+    "slot": "Slot1",
+    "decrypted_sha256": "f8938990b20efddd35db433ae8f1f9db381fb4ed6f3203eabe6ff1a73e96bcae"
+  },
+  "list": {
+    "source_url": "https://raw.githubusercontent.com/Ekey/REE.PAK.Tool/main/Projects/MHR_STM_Release.list",
+    "sha256": "bd59e623cb9770d446dfca1ca6f16e13ab402e7720b21c5d7faa6f69afd7df81"
+  },
+  "format_reference_revision": "ceb0d2fbe9d76f29c552e4c56f4fd8cd87a165ef",
+  "limits": [
+    "Archive identities use header, length and inspected compressed-range hashes; full archive hashes were not computed.",
+    "Static clip names do not verify runtime damage classification, timing rate or total lifetime.",
+    "Extracted assets and font reference PNG stay in ignored research files; no game assets enter the runtime or distribution."
+  ],
+  "gui": {
+    "version": 430033,
+    "text_element": "txt_DamageCount",
+    "text_class": "via.gui.Text",
+    "effect_element": "crcl_DamageEfx",
+    "effect_class": "via.gui.Circle",
+    "font_size": [26, 26],
+    "raster_size": [30, 30],
+    "black_glow": {
+      "enabled": true,
+      "blur_size": [7, 7],
+      "strength": 12
+    },
+    "shadow_enabled": false,
+    "panel_clips_parsed": 13,
+    "properties_parsed": 235,
+    "leaf_keys_parsed": 567,
+    "clips": {
+      "Normal": {
+        "authored_frames": 30.0,
+        "text_curves": {
+          "Position": {
+            "y": [
+              [0.0, 0.0, 2],
+              [29.0, 0.0, 1]
+            ]
+          },
+          "FontSize": {
+            "w": [
+              [0.0, 16.0, 2],
+              [2.0, 30.0, 2],
+              [7.0, 22.0, 2],
+              [9.0, 25.0, 1]
+            ],
+            "h": [
+              [0.0, 16.0, 2],
+              [2.0, 30.0, 2],
+              [7.0, 22.0, 2],
+              [9.0, 25.0, 1]
+            ]
+          },
+          "Color": {
+            "r": [
+              [0.0, 255, 2],
+              [7.0, 255, 1]
+            ],
+            "g": [
+              [0.0, 255, 2],
+              [7.0, 255, 1]
+            ],
+            "b": [
+              [0.0, 255, 2],
+              [7.0, 255, 1]
+            ],
+            "a": [
+              [0.0, 0, 2],
+              [7.0, 255, 1]
+            ]
+          },
+          "GlowColor": {
+            "r": [
+              [0.0, 0, 2],
+              [2.0, 255, 2],
+              [4.0, 64, 2],
+              [6.0, 0, 1]
+            ],
+            "g": [
+              [0.0, 0, 2],
+              [2.0, 255, 2],
+              [4.0, 64, 2],
+              [6.0, 0, 1]
+            ],
+            "b": [
+              [0.0, 0, 2],
+              [2.0, 255, 2],
+              [4.0, 64, 2],
+              [6.0, 0, 1]
+            ],
+            "a": [
+              [0.0, 255, 2],
+              [2.0, 255, 2],
+              [4.0, 255, 2],
+              [6.0, 255, 1]
+            ]
+          }
+        }
+      },
+      "Critical": {
+        "authored_frames": 32.0,
+        "text_curves": {
+          "Position": {
+            "y": [
+              [0.0, 0.0, 2],
+              [32.0, 0.0, 1]
+            ]
+          },
+          "FontSize": {
+            "w": [
+              [0.0, 16.0, 2],
+              [3.0, 40.0, 2],
+              [7.0, 32.0, 2],
+              [9.0, 35.0, 1]
+            ],
+            "h": [
+              [0.0, 16.0, 2],
+              [3.0, 40.0, 2],
+              [7.0, 32.0, 2],
+              [9.0, 35.0, 1]
+            ]
+          },
+          "Color": {
+            "r": [
+              [0.0, 255, 2],
+              [3.0, 240, 2],
+              [7.0, 240, 1]
+            ],
+            "g": [
+              [0.0, 255, 2],
+              [3.0, 180, 2],
+              [7.0, 180, 1]
+            ],
+            "b": [
+              [0.0, 255, 2],
+              [3.0, 30, 2],
+              [7.0, 30, 1]
+            ],
+            "a": [
+              [0.0, 0, 2],
+              [3.0, 255, 2],
+              [7.0, 255, 1]
+            ]
+          },
+          "GlowColor": {
+            "r": [
+              [0.0, 220, 2],
+              [2.0, 220, 2],
+              [4.0, 90, 2],
+              [6.0, 0, 1]
+            ],
+            "g": [
+              [0.0, 130, 2],
+              [2.0, 130, 2],
+              [4.0, 20, 2],
+              [6.0, 0, 1]
+            ],
+            "b": [
+              [0.0, 10, 2],
+              [2.0, 10, 2],
+              [4.0, 0, 2],
+              [6.0, 0, 1]
+            ],
+            "a": [
+              [0.0, 255, 2],
+              [2.0, 255, 2],
+              [4.0, 255, 2],
+              [6.0, 255, 1]
+            ]
+          }
+        }
+      },
+      "OTOMO": {
+        "authored_frames": 30.0,
+        "text_curves": {
+          "Position": {
+            "y": [
+              [0.0, 0.0, 2],
+              [29.0, 0.0, 1]
+            ]
+          },
+          "FontSize": {
+            "w": [
+              [0.0, 16.0, 2],
+              [2.0, 30.0, 2],
+              [7.0, 22.0, 2],
+              [9.0, 25.0, 1]
+            ],
+            "h": [
+              [0.0, 16.0, 2],
+              [2.0, 30.0, 2],
+              [7.0, 22.0, 2],
+              [9.0, 25.0, 1]
+            ]
+          },
+          "Color": {
+            "r": [
+              [0.0, 128, 2],
+              [7.0, 128, 1]
+            ],
+            "g": [
+              [0.0, 128, 2],
+              [7.0, 128, 1]
+            ],
+            "b": [
+              [0.0, 128, 2],
+              [7.0, 128, 1]
+            ],
+            "a": [
+              [0.0, 0, 2],
+              [7.0, 255, 1]
+            ]
+          },
+          "GlowColor": {
+            "r": [
+              [0.0, 0, 2],
+              [2.0, 255, 2],
+              [4.0, 64, 2],
+              [6.0, 0, 1]
+            ],
+            "g": [
+              [0.0, 0, 2],
+              [2.0, 255, 2],
+              [4.0, 64, 2],
+              [6.0, 0, 1]
+            ],
+            "b": [
+              [0.0, 0, 2],
+              [2.0, 255, 2],
+              [4.0, 64, 2],
+              [6.0, 0, 1]
+            ],
+            "a": [
+              [0.0, 255, 2],
+              [2.0, 255, 2],
+              [4.0, 255, 2],
+              [6.0, 255, 1]
+            ]
+          }
+        }
+      },
+      "Normal_OUT": {
+        "authored_frames": 10.0,
+        "text_curves": {
+          "Position": {
+            "y": [
+              [0.0, 4.0, 2],
+              [10.0, -50.0, 1]
+            ]
+          },
+          "FontSize": {
+            "w": [
+              [0.0, 25.0, 1]
+            ],
+            "h": [
+              [0.0, 25.0, 1]
+            ]
+          },
+          "Color": {
+            "r": [
+              [0.0, 255, 2],
+              [10.0, 255, 1]
+            ],
+            "g": [
+              [0.0, 255, 2],
+              [10.0, 255, 1]
+            ],
+            "b": [
+              [0.0, 255, 2],
+              [10.0, 255, 1]
+            ],
+            "a": [
+              [0.0, 255, 2],
+              [10.0, 0, 1]
+            ]
+          },
+          "GlowColor": {
+            "r": [
+              [0.0, 0, 1]
+            ],
+            "g": [
+              [0.0, 0, 1]
+            ],
+            "b": [
+              [0.0, 0, 1]
+            ],
+            "a": [
+              [0.0, 255, 1]
+            ]
+          }
+        }
+      },
+      "Critical_OUT": {
+        "authored_frames": 10.0,
+        "text_curves": {
+          "Position": {
+            "y": [
+              [0.0, 4.0, 2],
+              [10.0, -50.0, 1]
+            ]
+          },
+          "FontSize": {
+            "w": [
+              [0.0, 35.0, 1]
+            ],
+            "h": [
+              [0.0, 35.0, 1]
+            ]
+          },
+          "Color": {
+            "r": [
+              [0.0, 240, 2],
+              [10.0, 240, 1]
+            ],
+            "g": [
+              [0.0, 180, 2],
+              [10.0, 180, 1]
+            ],
+            "b": [
+              [0.0, 30, 2],
+              [10.0, 30, 1]
+            ],
+            "a": [
+              [0.0, 255, 2],
+              [10.0, 0, 1]
+            ]
+          },
+          "GlowColor": {
+            "r": [
+              [0.0, 0, 1]
+            ],
+            "g": [
+              [0.0, 0, 1]
+            ],
+            "b": [
+              [0.0, 0, 1]
+            ],
+            "a": [
+              [0.0, 255, 1]
+            ]
+          }
+        }
+      },
+      "OTOMO_OUT": {
+        "authored_frames": 10.0,
+        "text_curves": {
+          "Position": {
+            "y": [
+              [0.0, 4.0, 2],
+              [10.0, -50.0, 1]
+            ]
+          },
+          "FontSize": {
+            "w": [
+              [0.0, 25.0, 1]
+            ],
+            "h": [
+              [0.0, 25.0, 1]
+            ]
+          },
+          "Color": {
+            "r": [
+              [0.0, 128, 2],
+              [10.0, 128, 1]
+            ],
+            "g": [
+              [0.0, 128, 2],
+              [10.0, 128, 1]
+            ],
+            "b": [
+              [0.0, 128, 2],
+              [10.0, 128, 1]
+            ],
+            "a": [
+              [0.0, 255, 2],
+              [10.0, 0, 1]
+            ]
+          },
+          "GlowColor": {
+            "r": [
+              [0.0, 0, 1]
+            ],
+            "g": [
+              [0.0, 0, 1]
+            ],
+            "b": [
+              [0.0, 0, 1]
+            ],
+            "a": [
+              [0.0, 255, 1]
+            ]
+          }
+        }
+      }
+    }
+  },
+  "local_rise_mod": {
+    "source": "reframework/autorun/Adjustable_Damage_Number_Size/damage_numbers.lua",
+    "sha256": "63f7aad724305542d4f2f9d2d47567bd2d702d3881c4a81432917d1ace8727be",
+    "native_type": "snow.gui.GuiDamageDisp.NumDisp",
+    "routines": [
+      "setRoutine",
+      "routineIn",
+      "routineWait",
+      "routineOut",
+      "stateFinishEvent"
+    ],
+    "display_types": [
+      "WHITE",
+      "ORANGE",
+      "BIG_ORANGE",
+      "GRAY",
+      "RED",
+      "BIG_GRAY"
+    ],
+    "saved_config_enabled": true,
+    "saved_width_height_multipliers": 0.6,
+    "activation_verified": false
+  },
+  "comparison": {
+    "method": "Pillow FreeType, identical 48-pixel digit ink height; whole string 0123456789 advance",
+    "rise_width": 303.4375,
+    "current_open_sans_width": 365.9375,
+    "ratio": 0.829205807002562,
+    "scope": "font geometry only, no RE Engine or Forge GPU comparison"
+  }
+}
