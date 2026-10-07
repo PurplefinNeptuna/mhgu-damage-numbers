@@ -1,4 +1,4 @@
-# Damage Numbers r17
+# Damage Numbers r18
 
 Ready to distribute. The package is local and has not been published.
 
@@ -61,24 +61,8 @@ notices are combined in `NOTICES.txt` beside the ZIP. Keep this notice file
 with the ZIP when redistributing. Font provenance and asset verification are
 recorded in the adjacent `release-manifest.json`.
 
-R17 retains r16's 152KiB NRO size and losslessly compressed open artwork. Its
-nine gateway restore instructions use NZCVQ only, avoiding Ryujinx's unsupported
-APSR_g translation. GE is unused at the eight audited hook sites and is left
-as set by callbacks. Font, animation, damage capture, settings, hooks and
-texture dimensions remain unchanged. This fix targets the plugin; Forge is
-still required. No emulator replacement is included.
+R18 keeps the appearance and behavior settings, replaces diagnostic panels with concise Forge logs, and emits no normal hit or camera dumps. Its 148KiB NRO retains the open artwork and audited NZCVQ-only gateways. The damage overlay continues with settings closed.
 
-Host/native fixtures verify state preservation, all 16 GE patterns with
-preserving and clobbering helpers, production instructions and identical
-rendering. The user confirmed r17 working on Eden and Ryujinx-based emulators
-on 2026-10-06. Installed NROs match r17 and latest logs were reviewed. `release-manifest.json` records the exact NRO hash and
-compiled check count. The adjacent `SHA256SUMS` covers the ZIP, plugin, README,
-notices and release manifest. Only the `damage-number` folder belongs in Eden.
+Fresh host, compiled ARM32, ABI, import, asset and rendering fixtures cover this payload. No new Eden, Ryujinx or Switch gameplay run was performed. R17's user-confirmed Eden/Ryujinx reports remain historical evidence for that version. The adjacent release manifest records this payload and its evidence; SHA256SUMS covers the delivery.
 
-The tested Forge loader has a known visual corruption issue when its menu and
-damage popups are visible together. R17 leaves that issue
-unchanged.
-
-Compatibility is confirmed for the two tested installations. This does not
-establish compatibility with every emulator fork or resolve the separate
-Forge overlay issue.
+The tested Forge loader has a known visual corruption issue when its menu and damage popups are visible together. R18 leaves Forge unchanged. Close its menu during gameplay and use the included renderer handoff for the known limitation.

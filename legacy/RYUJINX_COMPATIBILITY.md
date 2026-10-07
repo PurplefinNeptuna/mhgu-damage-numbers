@@ -78,4 +78,4 @@ Publication has not been performed.
 The compatibility confirmation is complete for the two tested installations.
 The user report does not specify a repeat of every earlier combat test or
 verification of every Ryujinx fork. The separate Forge menu/popups
-corruption remains documented in the [renderer handoff](../../docs/FORGE_IMGUI_DAMAGE_CORRUPTION_HANDOFF.md).
+corruption remains documented in the [renderer handoff](docs/FORGE_IMGUI_DAMAGE_CORRUPTION_HANDOFF.md).

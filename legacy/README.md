@@ -1,5 +1,7 @@
 # Damage numbers
 
+Current cleanup release: **r18**. New host/ARM/static checks passed; no new gameplay test was run. Earlier manual reports retain their original version. See [cleanup evidence](CLEANUP_VALIDATION.json) and [development workflow](DEVELOPMENT.md).
+
 ## Build this mod
 
 Run `./build.sh doctor`, `./build.sh prepare`, `./build.sh build`,
@@ -20,7 +22,7 @@ The author keeps all rights to owned code; third-party and font licenses remain 
 
 
 Distribution: [READY_TO_DISTRIBUTE](DISTRIBUTION.json); governed by the
-[workspace standard](../../docs/DISTRIBUTION_STANDARD.md).
+[workspace standard](docs/DISTRIBUTION_STANDARD.md).
 
 R17 applies the audited NZCVQ-only gateway fix for Ryujinx-based emulators.
 Ready to distribute, as directed by the user on 2026-10-06. The package is local
@@ -91,7 +93,7 @@ Overflow drops oldest entries without adding their values together.
 
 The compact **Damage numbers** tree under Forge's **Plugin UI** starts closed.
 It contains enable, Style, Number size, Duration, Save settings, Restore defaults
-and nested diagnostics. Rendering continues while the panel is closed.
+and brief preference feedback. Runtime failures use concise Forge logs. Rendering continues while the panel is closed.
 
 Settings live beside Better Input in `savedata:/damage_numbers.ini`; the
 transactional recovery copy is `savedata:/damage_numbers_backup.ini`. Version 2
@@ -149,8 +151,8 @@ python3 scripts/audit_damage_numbers_open_assets.py
 python3 scripts/package_damage_numbers.py
 ```
 
-Current ZIP: `build/damage-numbers/releases/r17/damage-numbers-r17.zip`.
-Package: `build/damage-numbers/releases/r17/damage-number/`.
+Current ZIP: `build/damage-numbers/releases/r18/damage-numbers-r18.zip`.
+Package: `build/damage-numbers/releases/r18/damage-number/`.
 Source manifest: `build/damage-numbers/open-assets/candidate-manifest.json`.
 The ZIP contains only the runtime NRO. README, combined redistribution notices,
 provenance/audit manifest and checksums remain beside it. Keep `NOTICES.txt`

@@ -77,4 +77,4 @@ Prior gameplay confirmations remain recorded in [TEST_RESULTS.md](TEST_RESULTS.m
 No new gameplay run is claimed. If installing this trial, one normal boot and a
 few hits in Wilds style are enough for a brief smoke check; combat coverage needs
 no full repeat. The known Forge menu/damage-popup corruption is unchanged:
-[handoff](../../docs/FORGE_IMGUI_DAMAGE_CORRUPTION_HANDOFF.md).
+[handoff](docs/FORGE_IMGUI_DAMAGE_CORRUPTION_HANDOFF.md).

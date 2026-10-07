@@ -15,7 +15,7 @@ remain unchanged. Historical combat results are retained in
 These paths and hashes record the retirement checkpoint. See
 [RELEASE.md](RELEASE.md) for the supported release. Superseded open packages
 are now preserved outside the active release directory; the cleanup inventory
-is recorded in [release cleanup](../../docs/DAMAGE_NUMBERS_RELEASE_CLEANUP.md).
+is recorded in [release cleanup](docs/DAMAGE_NUMBERS_RELEASE_CLEANUP.md).
 
 - Release: `build/damage-numbers/releases/r14/damage-numbers-r14.zip`.
 - Candidate: `build/damage-numbers/open-assets/candidate-package/romfs/nativeNX/plugins/damage_numbers_capture.nro`.

@@ -63,7 +63,7 @@ arm-none-eabi-nm -n /output/plugin.elf > /output/symbols.txt
 arm-none-eabi-objdump -d /output/plugin.elf > /output/disassembly.txt
 """
     args = ['podman','--root',CONTAINER_STORAGE,'--runroot',
-            f'/tmp/mhgu-forge-container-{os.getuid()}','--storage-driver','vfs','run','--rm',
+            f'/tmp/mhgu-forge-container-{os.getuid()}','--storage-driver','vfs','run','--pull=never','--rm',
             '--network=none','-v',f'{MOD}:/mod:ro','-v',f'{ROOT}:/workspace:ro','-v',f'{NATIVE}:/output:rw',
             baseline.IMAGE,'bash','-lc',command.replace('{diagnostics}', os.environ.get('MHGU_DIAGNOSTICS', '0'))]
     result=subprocess.run(list(map(str,args)),capture_output=True,text=True)
@@ -115,7 +115,7 @@ arm-none-eabi-objdump -d /output/plugin.elf > /output/disassembly.txt
     for name in ('damage-numbers-capture.enabled','damage-numbers-camera.enabled'):
         if (OUT/'candidate-package/romfs/nativeNX/forge'/name).exists():
             raise ValueError('Automatic-start candidate must not contain obsolete activation files')
-    sources=sorted(RECIPE.rglob('*'))+[Path(__file__),SCRIPTS / 'prepare_damage_numbers_font.py',SCRIPTS / 'prepare_damage_numbers_sprites.py',SCRIPTS / 'render_damage_numbers_visual.py',SCRIPTS / 'test_damage_numbers_visual.py',SCRIPTS / 'damage_numbers_capture_probe.py',
+    sources=sorted(p for p in RECIPE.rglob('*') if p.is_file() and not any(x in p.relative_to(RECIPE).parts for x in ('build','work','tools','.venv','__pycache__','history')) and p.name!='build.local.json')+[Path(__file__),SCRIPTS / 'prepare_damage_numbers_font.py',SCRIPTS / 'prepare_damage_numbers_sprites.py',SCRIPTS / 'render_damage_numbers_visual.py',SCRIPTS / 'test_damage_numbers_visual.py',SCRIPTS / 'damage_numbers_capture_probe.py',
         SCRIPTS / 'test_damage_numbers.py',SCRIPTS / 'damage_numbers_assets.py',SCRIPTS / 'damage_numbers_sprite_codec.py',SCRIPTS / 'test_damage_numbers_sprite_codec.py',SCRIPTS / 'verify_damage_numbers_compression.py',SCRIPTS / 'verify_damage_numbers_ge_compat.py',SCRIPTS / 'build_damage_numbers_gateway.py',SCRIPTS / 'damage_numbers_gateway_probe.py',SCRIPTS / 'audit_damage_numbers_open_assets.py',SCRIPTS / 'package_damage_numbers.py',SCRIPTS / 'damage_numbers_package_helpers.py',MOD / 'vendor' / 'modern-weapon-controls' / 'src/native_platform.cpp',
         MOD / 'vendor' / 'modern-weapon-controls' / 'src/native_platform.h',MOD / 'vendor' / 'modern-weapon-controls' / 'src/svc.S']
     manifest={'asset_profile':profile,'status':'R17_NZCVQ_GATEWAY_COMPATIBILITY','nro_sha256':sha(target),
@@ -123,12 +123,12 @@ arm-none-eabi-objdump -d /output/plugin.elf > /output/disassembly.txt
         'forge_sha256':sha(live_forge),'forge_revision':revision,
         'hook_offsets':[hex(o) for o in OFFSETS[:8]],
         'default_hook_offsets':[hex(o) for o in OFFSETS[:8]],
-        'recovery_revision':17,'base_font_pixels_720p':20.0,
+        'recovery_revision':18,'base_font_pixels_720p':20.0,
         'apsr_restore':'NZCVQ only; GE remains as left by helper',
         'ge_liveness_audit':'mods/damage-numbers/GE_PRESERVATION_AUDIT.md',
         'wilds_animation':{'peak_scale':1.2,'settle_seconds':0.2,'rise_fade_seconds':0.2,'rise_pixels_720p':30,'duration_is_total':True},'camera_capture_default':True,'activation_flags_required':False,
         'diagnostic_history_records':8,'history_retained_across_player_changes':True,
-        'hit_log_limit_per_process':256,'hit_budget_per_render_consume':8,'record_budget_per_render_consume':64,
+        'hit_log_limit_per_process':256 if os.environ.get('MHGU_DIAGNOSTICS','0')=='1' else 0,'hit_budget_per_render_consume':8,'record_budget_per_render_consume':64,
         'camera_max_age_seconds':0.20,'preview_direct_owned_sources_only':False,
         'preview_local_palico_child_tags':['0x030402','0x030802'],
         'recognized_monster_dispatch_subtype':2,'recognized_object_hunter_child_tag':'0x000802',
@@ -139,7 +139,7 @@ arm-none-eabi-objdump -d /output/plugin.elf > /output/disassembly.txt
         'settings_format':'INI version 2 only; five required fields; bounded 255 bytes; transactional primary and backup',
         'appearance_default':'Wilds','appearance_styles':['Wilds','Classic'],'font':font_manifest,'sprites':sprite_manifest,
         'spacing_candidates':17,'spacing_max_font_sizes':[1.6,1.0],'spacing_offsets_cached':True,
-        'plugin_panel_style':'compact unframed TreeNode; closed by default; nested diagnostics',
+        'plugin_panel_style':'compact unframed TreeNode; closed by default; settings only',
         'settings_load_retry_seconds':1,'settings_sd_migration':False,'settings_save_requires_button':True,
         'settings_fs_error_policy':'SDK scoped thread-local abort disabler; previous context restored',
         'extra_code_memory_objects':1,'arena_bytes':4096,

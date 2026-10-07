@@ -149,3 +149,5 @@ parallel arithmetic and a `SEL`, or code that reads GE through `MRS`.
 A generic transparent gateway should retain GE preservation when such
 liveness has not been ruled out. Gameplay compatibility of a changed NRO
 still requires a user-run emulator test.
+
+R18 revalidation (2026-10-07): gateway source is byte-identical to the audited r17 assembly. All nine emitted NZCVQ restores and all original/compiled gateway state fixtures passed. No hook site or continuation changed; r18 carries this liveness conclusion. This is static/compiled evidence without a fresh gameplay run.

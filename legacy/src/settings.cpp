@@ -1,3 +1,5 @@
+#include "log_policy.h"
+#include <forge/log.h>
 #include "settings.h"
 #include "sdk_fs.h"
 #include <forge/fs.h>
@@ -47,23 +49,36 @@ bool settings_load(Settings& out) {
     storage_status="Default settings; no valid saved settings"; return false;
 }
 bool settings_save(const Settings& value) {
+    static mod_log::Once failures;
+    static Settings saved{};
+    static bool have_saved;
+    struct FailureReport {
+        mod_log::Once& failures;
+        unsigned reason = 0;
+        ~FailureReport() {
+            if (reason && failures.claim(reason)) forge_log_warn("[damage-numbers] %s; load a player save and retry Save settings", storage_status);
+        }
+    } report{failures};
     if (!valid(value)) return false;
     const FsAbortGuard guard;
     const SaveMount mount;
-    if (!mount) { storage_status="Player save storage unavailable; changes remain in this session"; return false; }
+    if (!mount) { storage_status="Player save storage unavailable; changes remain in this session"; report.reason=1; return false; }
     pending=false;
     SettingsText previous{}; Settings decoded{};
     // Preserve the previous valid primary before replacing it. If the primary
     // is already damaged, leave the existing recovery copy untouched.
     if (read_slot(0,previous,decoded) && !write_slot(1,previous)) {
-        storage_status="Settings backup failed; previous settings retained"; return false;
+        storage_status="Settings backup failed; previous settings retained"; report.reason=2; return false;
     }
     const SettingsText text=encode_settings(value);
     if (!write_slot(0,text) || dn_fs_commit("savedata")) {
-        storage_status="Settings save failed; changes remain in this session"; return false;
+        storage_status="Settings save failed; changes remain in this session"; report.reason=3; return false;
     }
     // Forge releases its counted save mount (and performs its normal commit).
-    storage_status="Settings saved beside Better Input"; return true;
+    storage_status="Settings saved beside Better Input";
+    if (!have_saved || value.enabled!=saved.enabled || value.style!=saved.style || value.scale!=saved.scale || value.lifetime!=saved.lifetime)
+        forge_log_info("[damage-numbers] Settings saved");
+    saved=value;have_saved=true;return true;
 }
 bool settings_pending() { return pending; }
 const char* settings_status() { return storage_status; }

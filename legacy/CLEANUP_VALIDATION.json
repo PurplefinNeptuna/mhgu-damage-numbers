@@ -1,0 +1,21 @@
+{
+  "version": "r18",
+  "prior_version": "r17",
+  "nro_sha256": "a569e1269160c9660a8d6e472d4ae7ebcee9ff8666bac650989d7ccb98d537a7",
+  "runtime_test": "NOT RUN",
+  "manual_evidence_scope": "Earlier reports apply only to their recorded payload/version. PDB r14 marker confirmed on Eden; r15 cleanup had static checks without a separate gameplay retest.",
+  "layout_checkpoint": "18ccbdc",
+  "source_base_commit": "7371ddc3b99ee6ac970397cc78ecb9d2c9c69904",
+  "panels": "Settings and save/reset feedback only; settings-free plugins have no panel.",
+  "logging": "One startup summary; committed preferences/availability changes and actionable fixed-reason failures; no normal hit/camera/geometry/counter logs.",
+  "formatter": "Forge fixed buffer bounded; integer/string ARM32 arguments tested in compiled fixtures; hot hooks call no formatter.",
+  "failure_deduplication": "Process-lifetime masks, distinct IDs and concurrent races checked.",
+  "overlays": "Damage numbers and gold reward markers continue with settings closed, covered by compiled fixtures.",
+  "isolated_export": "Same NRO bytes with only exported source snapshots and explicitly copied inputs; no parent Git, sibling tooling or installed emulator source needed.",
+  "prior_release": {
+    "archive": "damage-numbers-r17.zip",
+    "nro_sha256": "1eb78f3430f6c5c5ce1f60a382fa8bd4fc18ee56cf267649b95a94a462115ea4"
+  },
+  "forge_renderer": "Disclosed and unchanged",
+  "publication": "Local only; no install, activation, publication or push."
+}

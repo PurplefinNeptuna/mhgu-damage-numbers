@@ -795,3 +795,7 @@ status is `READY_TO_DISTRIBUTE`. This status update preserves the validated
 binary and recorded evidence, including the confirmed r17 gameplay on both
 emulators above. The label update ran no additional gameplay test. No public
 publication was performed.
+
+## r18 standalone/settings/log cleanup
+
+This binary has its own fresh compiled/static checks, recorded in CLEANUP_VALIDATION.json. No new gameplay test was run; the preceding observations retain their original version and scope. Forge remains unchanged.

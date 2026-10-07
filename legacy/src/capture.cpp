@@ -1,3 +1,4 @@
+#include "log_policy.h"
 #include "capture.h"
 #include "gateway.h"
 #include "hitzone.h"
@@ -273,6 +274,15 @@ extern "C" uint32_t dn_gateway_tap(uint32_t kind, RawFrame* frame) {
 }
 
 void capture_install() {
+    static bool attempted;
+    if (attempted) return;
+    attempted = true;
+    struct StartupReport {
+        ~StartupReport() {
+            if (load(active)) forge_log_info("[damage-numbers] r18 loaded");
+            else forge_log_warn("[damage-numbers] %s; check game/Forge inputs and conflicting mods, then restart", status);
+        }
+    } startup_report;
     base = forge_mem_getMainTextAddr();
     uint64_t title=0;
     if (!base || base>0xfe000000u || mwc_svc_get_info(&title,18,CUR_PROCESS_HANDLE,0) ||
@@ -314,12 +324,10 @@ void capture_install() {
             result==InstallResult::CleanupFailure ?
             "ERROR: arena cleanup failed; restart required" :
             "Capture inactive: hook transaction failed (restart required)";
-        forge_log_warn("[damage-numbers] Capture transaction result %u",unsigned(result));
         return;
     }
     __atomic_store_n(&active,1,__ATOMIC_RELEASE);
     status = "Damage numbers ready";
-    forge_log_info("[damage-numbers] Capture r11: %u hooks; automatic startup; one private arena/TLS slot; hit log limit 256",hook_count);
 }
 void capture_monitor() {
     if (!load(active)) return;
@@ -350,16 +358,8 @@ static void reset_display() {
 }
 void capture_consume() {
     if (!load(active)) return;
-    static uint32_t first;
-    uint32_t unlogged=0;
-    if (__atomic_compare_exchange_n(&first,&unlogged,1,true,__ATOMIC_RELAXED,__ATOMIC_RELAXED))
-        forge_log_info("[damage-numbers] First render consumer entered");
     Context* current = context();
     if (!current) return;
-    static uint32_t ready;
-    unlogged=0;
-    if (__atomic_compare_exchange_n(&ready,&unlogged,1,true,__ATOMIC_RELAXED,__ATOMIC_RELAXED))
-        forge_log_info("[damage-numbers] Render TLS context ready");
     const uint32_t id=uint32_t(current), expected=0;
     uint32_t initial=expected;
     __atomic_compare_exchange_n(&consumer,&initial,id,true,__ATOMIC_SEQ_CST,__ATOMIC_SEQ_CST);
@@ -407,12 +407,12 @@ void capture_consume() {
                 if (!display_model.capture(event)) ++preview_rejected;
             } else ++preview_rejected;
             ++hits; ++captured_hits;
-            if (captured_hits<=log_limit) {
+            if (mod_log::diagnostics && captured_hits<=log_limit) {
                 forge_log_info("[damage-numbers] Hit %u: damage %d; HZV %d; crit %u; effect %u; part %u; owner %u; thread %u; serial %u; type %u; flags %08x; tags %06x; pos %.2f %.2f %.2f",
                     captured_hits,r.damage,r.hzv,r.critical,r.effect,r.part,r.actor,i,r.serial,
                     r.damage_type,r.flags,r.source_tags,double(r.position.x),double(r.position.y),double(r.position.z));
                 if (captured_hits==log_limit)
-                    forge_log_info("[damage-numbers] Hit log limit reached (256); panel capture continues until restart");
+                    forge_log_info("[damage-numbers] Hit log limit reached (256); capture continues without further hit dumps");
             }
         } else if (r.kind==2 && player) {
             last_feedback=r;
@@ -445,7 +445,7 @@ void capture_render() {
                        io->DisplaySize.x,io->DisplaySize.y,view);
     display_model.update(time,ready);
     if (!ready) { placement.reset(); return; }
-    if (camera_logs<1) {
+    if (mod_log::diagnostics && camera_logs<1) {
         ++camera_logs;
         forge_log_info("[damage-numbers] Preview camera: rect %d %d %d %d; display %.0f %.0f; tick frequency %u",
             last_camera.rect[0],last_camera.rect[1],last_camera.rect[2],last_camera.rect[3],
@@ -470,7 +470,7 @@ void capture_render() {
         ++preview_drawn;
         bool projected_before=false;
         for (unsigned j=0;j<projection_logs;++j) projected_before=projected_before || projected_keys[j]==n.key;
-        if (!projected_before && projection_logs<4) {
+        if (mod_log::diagnostics && !projected_before && projection_logs<4) {
             projected_keys[projection_logs++]=n.key;
             forge_log_info("[damage-numbers] Preview projection: thread %u serial %u damage %s at %.2f %.2f",
                 n.key.application,n.key.serial,n.text,double(n.position.x+n.advance*0.5f),double(n.position.y));
@@ -482,14 +482,10 @@ struct PanelTreeScope { ~PanelTreeScope() { igTreePop(); } };
 void capture_panel() {
     if (!igTreeNode_Str("Damage numbers##damage-numbers")) return;
     const PanelTreeScope panel_tree;
-    igTextUnformatted(load(patch_error) ? "Capture disabled: external code change; restart required" : status,nullptr);
     if (!load(active)) return;
     capture_consume();
     Context* current=context();
-    if (!current || load(consumer)!=uint32_t(current)) {
-        igTextUnformatted("Capture panel deferred: a different render thread owns the consumer.",nullptr);
-        return;
-    }
+    if (!current || load(consumer)!=uint32_t(current)) return;
     Settings next=display_model.config();
     bool changed=igCheckbox("Show damage numbers",&next.enabled);
     int style=int(next.style);static const char* styles[]={"Wilds","Classic"};
@@ -500,33 +496,5 @@ void capture_panel() {
     if (changed && display_model.configure(next)) settings_changed();
     if (igButton("Save settings",{0,0})) settings_save(display_model.config());
     igTextUnformatted(settings_status(),nullptr);
-    if (!igTreeNode_Str("Diagnostics##damage-numbers")) return;
-    const PanelTreeScope diagnostics_tree;
-    igTextUnformatted("Capture r11: automatic startup; camera and combat hooks active.",nullptr);
-    igTextUnformatted("Shared counters are best-effort under contention; per-hit records remain separate.",nullptr);
-    igText("Collision %u; normalization %u; feedback %u; viewport %u",load(calls[0]),load(calls[1]),load(calls[2]),load(calls[3]));
-    igText("Camera uploads %u; HZV taps %u; melee queries %u; shot queries %u",load(calls[4]),load(calls[5]),load(calls[6]),load(calls[7]));
-    igText("TLS claims %u; scope drops %u; pool drops %u; orphan contributions %u",load(claimed),load(scope_drops),load(pool_drops),load(orphan_calls));
-    uint32_t overwritten=0;
-    for (const auto& c : contexts) overwritten+=c.records.overwritten;
-    igText("Old capture records discarded: %u",overwritten);
-    igText("Excluded %u; read failures %u; records consumed %u",load(excluded),load(bad_memory),consumed);
-    igText("Latest resolved feedback: %u (aggregate; not assigned to individual hits)",last_feedback.effect);
-    for (const auto& f : last_feedback.feedback)
-        igText("  Attack %08x: active %u; effect %u; crit %u; flags %08x",f.attack,f.active,f.effect,f.critical,f.flags);
-    igText("  Native attack counter: %u",last_feedback.attack_counter);
-    igText("Quest camera rectangle: %d %d %d %d",last_camera.rect[0],last_camera.rect[1],last_camera.rect[2],last_camera.rect[3]);
-    igText("Preview: camera records %u; visible last frame %u; frames %u; rejected hits %u",
-        camera_records,preview_drawn,preview_frames,preview_rejected);
-    igText("Matched bounced hits %u; ambiguous feedback keeps the HZV color",bounce_matches);
-    igSeparator();
-    igTextUnformatted("Last eight hits remain across quest/village transitions until restart.",nullptr);
-    igText("Captured hits %u; first %u written to Eden log (maximum 256 per restart)",captured_hits,
-        captured_hits<log_limit ? captured_hits : log_limit);
-    for (unsigned i=0;i<recent_count;++i) {
-        const auto& r=recent[i];
-        igText("Hit %u: damage %d; HZV %d; crit %u; effect %u; part %u; owner %u",r.serial,r.damage,r.hzv,r.critical,r.effect,r.part,r.actor);
-        igText("  Position %.2f %.2f %.2f; type %u; flags %08x; source tags %06x",r.position.x,r.position.y,r.position.z,r.damage_type,r.flags,r.source_tags);
-    }
 }
-} // namespace damage_numbers
+}

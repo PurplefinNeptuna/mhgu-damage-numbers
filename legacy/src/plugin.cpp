@@ -18,18 +18,16 @@ extern "C" void forge_onLoad(PluginInitParam* out) {
     auto* bytes=reinterpret_cast<volatile unsigned char*>(out);
     for (unsigned i=0;i<sizeof(*out);++i) bytes[i]=0;
     out->required_ver={1,4,1};
-    const char name[]="Damage numbers - projection preview";
+    const char name[]="Damage numbers";
     for (unsigned i=0;i<sizeof(name);++i) bytes[offsetof(PluginInitParam,name)+i]=name[i];
 }
 extern "C" void forge_onInit() { damage_numbers::capture_install(); }
 extern "C" void forge_onUpdate(float) { damage_numbers::capture_monitor(); }
 extern "C" void forge_onImGuiInit(void* ctx,void* alloc,void* free_fn) {
-    forge_log_info("[damage-numbers] ImGui context setup entered");
     igSetCurrentContext(static_cast<ImGuiContext*>(ctx));
     igSetAllocatorFunctions(reinterpret_cast<ImGuiMemAllocFunc>(alloc),reinterpret_cast<ImGuiMemFreeFunc>(free_fn),nullptr);
     damage_numbers::cosmetics_init(ctx);
     damage_numbers::capture_reset_placement();
-    forge_log_info("[damage-numbers] ImGui context setup complete");
 }
 extern "C" void forge_onImGuiRender() { damage_numbers::capture_panel(); }
 extern "C" void forge_onImGuiFreeRender() { damage_numbers::capture_render(); }

@@ -444,33 +444,26 @@ def main():
     retained=probe();retained.call('forge_onInit')
     retained.collision(amount=100);retained.consume();saved=retained.recent()
     hit_logs=lambda: [row for row in retained.logs if row[1]]
-    check(hit_logs()[0][1][:10]==(1,75,45,0,0,3,0,0,1,0),
-          'Render-side hit log retains native damage, HZV, outcomes, owner and per-thread serial')
-    check(hit_logs()[0][2]==(12.0,34.0,56.0),'Hit log retains copied impact position through ARM32 double varargs')
+    check(not hit_logs() and saved[-1][10]==75,'Release captures native damage without hit logs')
+    startup_logs=len(retained.logs)
     retained.write(MAIN+0x1885b58,0);retained.consume()
     check(retained.recent()==saved,'Last damage records survive disappearance of the local player table')
     retained.write(MAIN+0x1885b58,DATA+0xe1000);retained.write(DATA+0xe0030,1);retained.consume()
     check(retained.recent()==saved,'Last damage records survive a replacement local hunter context')
-    check(len(hit_logs())==1,'Transitions do not duplicate logged hit records')
     retained.collision(amount=80);retained.write(MAIN+0x1885b58,0);retained.consume()
-    check(retained.recent()[-1][10]==60 and len(hit_logs())==2,
-          'A queued owned hit is retained and logged when the player disappears before consumption')
+    check(retained.recent()[-1][10]==60,'A queued owned hit is retained when its player disappears before consumption')
     retained.write(MAIN+0x1885b58,DATA+0xe1000)
     for _ in range(12): retained.collision(amount=40)
     retained.consume()
-    check(len(hit_logs())==10,'A render callback logs at most eight new hits')
+    check(retained.read(retained.private('captured_hits'))==10,'A render callback consumes at most eight new hits')
     retained.consume()
-    check(len(hit_logs())==14 and len(retained.recent())==8,'Subsequent callback drains remaining hits and rolls the eight-record panel')
+    check(retained.read(retained.private('captured_hits'))==14 and len(retained.recent())==8,'Subsequent callback drains remaining hits into a bounded history')
     for _ in range(32):
         for _ in range(8): retained.collision(amount=24)
         retained.consume()
-    check(len(hit_logs())==256 and retained.read(retained.private('captured_hits'))==270,
-          'Hit logging stops at 256 while capture continues')
-    check(sum('Hit log limit reached' in row[0] for row in retained.logs)==1,
-          'Log limit emits one marker per process')
-    check([row[1][0] for row in hit_logs()]==list(range(1,257)),
-          'Persistent diagnostic ordinals stay separate and ordered without duplicate log entries')
-    check(all(row[10]==18 for row in retained.recent()),'Latest panel records continue updating after the log limit')
+    check(retained.read(retained.private('captured_hits'))==270 and len(retained.logs)==startup_logs,
+          '270 hits and transitions emit no routine release logs')
+    check(all(row[10]==18 for row in retained.recent()),'Latest safety records keep updating with logging disabled')
     fresh=probe();fresh.call('forge_onInit')
     check(not fresh.recent() and fresh.read(fresh.private('captured_hits'))==0,'Restart initializes an empty diagnostic history')
     for _ in range(12): fresh.collision(amount=12)
@@ -587,9 +580,9 @@ def main():
     delayed.collision();delayed.clock+=2*delayed.frequency;delayed.camera_record();delayed.render()
     check(not delayed.text_draws and delayed.read(delayed.private('preview_rejected'))==1,
           'Consumer never refreshes the lifetime of a hit delayed in a mailbox')
-    check(sum('Preview camera:' in row[0] for row in visual.logs)==1 and
-          sum('Preview projection:' in row[0] for row in visual.logs)<=4,
-          'Camera/matrix and projection diagnostics are bounded across render frames')
+    check(sum('Preview camera:' in row[0] for row in visual.logs)==0 and
+          sum('Preview projection:' in row[0] for row in visual.logs)==0,
+          'Release render frames emit no camera, matrix or projection diagnostics')
     # R4 logged these local-palico child sources but deliberately omitted them
     # from the preview. Exercise the producer's actual secondary-owner lookup.
     for subtype,zone,expected_color in ((4,80,0xff5bc4f2),(8,-1,0xffecf1f4)):
@@ -630,18 +623,18 @@ def main():
     check(len(compact.text_draws)==1,'Collapsed plugin row leaves floating damage rendering active')
     compact.changes={};compact.buttons=set();compact.tree_open={'Damage numbers##damage-numbers':True}
     compact.headers=[];compact.panel()
-    check(compact.headers==['Damage numbers##damage-numbers','Diagnostics##damage-numbers'] and compact.tree_pops==1,
+    check(compact.headers==['Damage numbers##damage-numbers'] and compact.tree_pops==1,
           'Open compact settings row balances one scope when diagnostics remain closed')
     compact.tree_open['Diagnostics##damage-numbers']=True;compact.panel()
-    check(compact.tree_pops==3,'Open nested diagnostics balance both compact tree scopes')
+    check(compact.tree_pops==2,'Developer tree requests cannot add a diagnostic panel')
     compact.write(compact.private('active'),0);compact.panel()
-    check(compact.tree_pops==4,'Inactive capture early return still balances the outer tree scope')
+    check(compact.tree_pops==3,'Inactive capture early return still balances the outer tree scope')
     other=probe();other.call('forge_onInit');other.render();other.thread=1;other.panel()
     check(other.tree_pops==1,'Different render-consumer early return balances the compact plugin tree')
     # Menu/source gates and r8 player-save INI persistence. Files are
     # explicit fixtures, never the host/emulator save or SD directories.
     options=probe();options.call('forge_onInit');options.panel()
-    check(options.headers==['Damage numbers##damage-numbers','Diagnostics##damage-numbers'],
+    check(options.headers==['Damage numbers##damage-numbers'],
           'Compact plugin tree opens with diagnostics collapsed independently')
     check(not options.files and not options.handles,'Unavailable player save mount does not open or write settings')
     check(options.fs_context==0x12340000 and options.fs_guard_depth==0,'Unavailable save mount restores original thread filesystem error policy')
@@ -891,10 +884,14 @@ def main():
     p.write(player+0x3074,2,'<B');p.write(player+0x30dd,0,'<B');p.write(player+0x30de,255,'<B')
     p.write(player+0x3108,1<<27);p.write(player+0x2522,12,'<H')
     check(p.call(MAIN+0x2a87a8,(player,))==0,'Compiled feedback gateway preserves original resolved bounce outcome')
-    p.consume();raw=p.private('last_feedback')
-    snapshot=struct.unpack('<IIBBBBIIBBBBI',p.uc.mem_read(raw+204,28))
-    check(snapshot==(player+0x3020,1<<18,1,0,2,0,player+0x30d8,1<<27,0,255,0,0,12),
+    # Inspect the published mailbox payload before consuming it. Optimized
+    # settings-only builds eliminate the unused last_feedback debug copy.
+    expected=struct.pack('<IIBBBBIIBBBBI',player+0x3020,1<<18,1,0,2,0,player+0x30d8,1<<27,0,255,0,0,12)
+    context_symbol='_ZN14damage_numbersL8contextsE'
+    published=bytes(p.uc.mem_read(p.private('contexts'),p.symbols[context_symbol][1]))
+    check(expected in published,
           'Compiled feedback record retains both native attack identities, flags, outcomes and counter for correlation')
+    p.consume()
     for _ in range(70): p.call(MAIN+0x2a87a8,(player,))
     before=p.read(p.private('consumed'));p.consume()
     check(p.read(p.private('consumed'))-before==64,'Render callback bounds total feedback/diagnostic drain to 64 records')

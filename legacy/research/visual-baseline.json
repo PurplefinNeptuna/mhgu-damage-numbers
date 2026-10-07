@@ -1,0 +1,36 @@
+{
+  "reference_version": "r15",
+  "reference_nro_sha256": "7c112c6bf497207f8bdf475687bab3b0056c0726ac4db1707db8f8adc01e07da",
+  "old_nro_bytes": 262144,
+  "bss_bytes": 1093632,
+  "font": {
+    "family": "Open Sans",
+    "weight": 600,
+    "revision": "9710da1eacb3be272583c3224dcb70f9da6eadbb",
+    "source_url": "https://raw.githubusercontent.com/google/fonts/9710da1eacb3be272583c3224dcb70f9da6eadbb/ofl/opensans/OpenSans%5Bwdth%2Cwght%5D.ttf",
+    "source_sha256": "36643644f318a812aab2d2ed3bb98f8cf0872527f835fe9398d95fe6b9adb878",
+    "license_sha256": "fbbbcfef55318de350562559b671360de6d597112ecc5c73881b05092db89602",
+    "fonttools_version": "4.66.1",
+    "glyphs": "0123456789 ?",
+    "original_path": "work/damage-numbers/font-source/opensans/OpenSans[wdth,wght].ttf",
+    "axes": {
+      "wdth": 100,
+      "wght": 600
+    },
+    "license_kind": "SIL Open Font License 1.1",
+    "source_kind": "Pinned upstream Google Fonts, no game-derived font",
+    "subset_family": "Damage Digits Open",
+    "license_path": "mods/damage-numbers/fonts/OFL.txt",
+    "subset_sha256": "24b1f1efddfd8107ec1cbb1ca866ab50632618794933989eed9968791d72c4ef",
+    "subset_bytes": 10676,
+    "height_scale": 1.1551339977851605,
+    "classic_height_reference_sha256": "9d0d55a303bfd13b79a87721f65185e93f235e2d77fe398b2dca67ac519915f5"
+  },
+  "sprites_rgba_sha256": "fe15190c98259443a01add264777b2b4bee994bbd58f9c8f5f12338abb399f2b",
+  "real_imgui": {
+    "draw.json": "11a5d17f5b906d6458442cbd7b970b6cd7c57c65967fa7043ea6ed4b073f72bb",
+    "preview.png": "5d0a624b7f2d0a00d323f289842a930cc1d034b8f60bb571f30f7a0ed298ab0c",
+    "texture-1.rgba": "27692c5e0967392c909bae81523010fd8ef2cf8725f6642623411aa4afd33105",
+    "texture-2.rgba": "fe15190c98259443a01add264777b2b4bee994bbd58f9c8f5f12338abb399f2b"
+  }
+}

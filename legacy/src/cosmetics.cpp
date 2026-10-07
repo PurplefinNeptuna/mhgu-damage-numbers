@@ -1,3 +1,4 @@
+#include "log_policy.h"
 #include "cosmetics.h"
 #include "preview.h"
 #include <forge/log.h>
@@ -51,10 +52,11 @@ void cosmetics_init(void* context) {
             } else {ImTextureData_destroy(sprite_texture);sprite_texture=nullptr;}
         }
     }
-    if(!sprite_texture)forge_log_info("[damage-numbers] Wilds effect texture unavailable; using crisp digits without sprite effects");
+    static mod_log::Once failures;
+    if(!sprite_texture && failures.claim(0))forge_log_warn("[damage-numbers] Wilds effect texture unavailable; using crisp digits without sprite effects");
     if(!wilds_font&&!font_warning) {
         font_warning=true;
-        forge_log_info("[damage-numbers] Wilds digit font unavailable; using Forge font with Wilds colors/stars");
+        forge_log_warn("[damage-numbers] Wilds digit font unavailable; using Forge font with Wilds colors/stars");
     }
 }
 static ImFont* selected_font(VisualStyle style) { return style==VisualStyle::Wilds&&wilds_font?wilds_font:igGetFont(); }

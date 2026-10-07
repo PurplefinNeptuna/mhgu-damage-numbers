@@ -25,7 +25,7 @@ arm-none-eabi-nm -n /output/gateway.elf > /output/symbols.txt
 arm-none-eabi-objdump -d /output/gateway.elf > /output/disassembly.txt
 """
     args = ['podman', '--root', CONTAINER_STORAGE, '--runroot',
-            f'/tmp/mhgu-forge-container-{os.getuid()}', '--storage-driver', 'vfs', 'run', '--rm',
+            f'/tmp/mhgu-forge-container-{os.getuid()}', '--storage-driver', 'vfs', 'run', '--pull=never', '--rm',
             '--network=none', '-v', f'{MOD}:/mod:ro', '-v', f'{ROOT}:/workspace:ro', '-v', f'{OUT}:/output:rw',
             baseline.IMAGE, 'bash', '-lc', command.replace('{diagnostics}', os.environ.get('MHGU_DIAGNOSTICS', '0'))]
     result = subprocess.run(list(map(str, args)), capture_output=True, text=True)

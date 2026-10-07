@@ -16,7 +16,7 @@ def main():
     output.mkdir(parents=True, exist_ok=True)
     stub = output / 'forge/log.h'
     stub.parent.mkdir(exist_ok=True)
-    stub.write_text('extern "C" void forge_log_info(const char*,...);\n')
+    stub.write_text('extern "C" void forge_log_info(const char*,...);\n#define forge_log_warn forge_log_info\n')
     cimgui = DEPS / 'libs/cimgui'
     sources = [MOD / 'tests/visual.cpp',
                MOD / 'src/cosmetics.cpp', cimgui / 'cimgui.cpp']
