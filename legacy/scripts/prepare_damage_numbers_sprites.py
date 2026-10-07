@@ -1,11 +1,11 @@
-from paths import MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path
+from paths import MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path, BUILD_ROOT, WORK_ROOT
 #!/usr/bin/env python3
 """Bake open-font effects and independently authored procedural crit sprites."""
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import hashlib, json, math
 from paths import ROOT, MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path
-OUT=ROOT/'work/damage-numbers/open-assets'
+OUT=WORK_ROOT/'open-assets'
 def original_marker(color):
     # Independently authored generic four-point sparkle, not traced or sampled.
     zoom=4;center=(44.5,24);rx,ry,wx,wy=24,10.5,3.5,1.5

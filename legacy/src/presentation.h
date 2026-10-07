@@ -45,14 +45,46 @@ inline float overlap(Rect a,Rect b,float margin) {
 }
 inline bool inside(Rect r,const View& v) { return r.left>=v.x&&r.top>=v.y&&r.right<=v.x+v.width&&r.bottom<=v.y+v.height; }
 static constexpr float base_pixels_720p=20.0f;
+static constexpr float rise_base_pixels_720p=25.0f;
+static constexpr float rise_glyph_width=1.08f;
+static constexpr float rise_slash_height=.75f; // User-selected total viewport extent.
 static constexpr float wilds_crit_scale=1.5f;
 static constexpr float wilds_star_height=.31612110f*wilds_crit_scale;
 inline Point glyph_origin(Point p,VisualStyle style) {
-    return style==VisualStyle::Wilds?Point{float(int(p.x)),float(int(p.y))}:p;
+    return style!=VisualStyle::Classic?Point{float(int(p.x)),float(int(p.y))}:p;
 }
 inline uint32_t star_rgb(Critical c) { return c==Critical::Positive?0xf1689b:0x68b9ff; }
+struct Slash {
+    Point origin;
+    float slope, extent, width, opacity;
+    Rect clip;
+};
+// Stable, affinity-independent direction; no frame seed or game pointer lookup.
+inline float slash_slope(const HitKey& key) {
+    uint32_t h=key.serial*0x9e3779b9u ^ key.epoch*0x85ebca6bu ^ key.target ^ key.application*0xc2b2ae35u;
+    h^=h>>16;h*=0x7feb352du;h^=h>>15;
+    return (float(h&65535u)/65535.0f-.5f)*.5f;
+}
+inline Slash rise_slash(Point origin,const HitKey& key,float age,const View& view,float fraction=rise_slash_height) {
+    // A UI approximation: expand for 50ms, thin/fade over 150ms, then expire.
+    const float grow=low(1,high(0,age/.05f));
+    const float fade=low(1,high(0,(age-.05f)/.15f));
+    return {origin,slash_slope(key),view.height*fraction*(.72f+.28f*grow),
+        view.height/720.0f*(24+24*grow)*(1-.8f*fade),
+        age<0?0:(.35f+.65f*grow)*(1-fade)*(1-fade),
+        {view.x,view.y,view.x+view.width,view.y+view.height}};
+}
+// The registered hit is the center; equal upward/downward reach, no ground cutoff.
+inline void slash_quad(const Slash& s,Point (&p)[4]) {
+    const float top=s.extent*.5f,bottom=s.extent*.5f,half=s.width*.5f;
+    p[0]={s.origin.x+s.slope*top-half,s.origin.y-top};
+    p[1]={s.origin.x+s.slope*top+half,s.origin.y-top};
+    p[2]={s.origin.x-s.slope*bottom+half,s.origin.y+bottom};
+    p[3]={s.origin.x-s.slope*bottom-half,s.origin.y+bottom};
+}
 struct DrawNumber {
     Point position, offset, star;
+    Slash slash;
     float pixels, opacity, advance, unit, classic_stroke;
     Rect ink, solid, reserve;
     uint32_t color;
@@ -62,7 +94,7 @@ struct DrawNumber {
     char text[12];
 };
 inline Rect marker_bounds(Rect ink,float pixels,float unit,Critical critical,VisualStyle style) {
-    if (critical==Critical::None) return ink;
+    if (critical==Critical::None || style==VisualStyle::Rise) return ink;
     const float cx=(ink.left+ink.right)*0.5f;
     const float halfh=style==VisualStyle::Wilds?pixels*wilds_star_height*.5f:2*unit;
     const float y=critical==Critical::Positive?ink.top-2*unit-halfh:ink.bottom+2*unit+halfh;
@@ -71,7 +103,7 @@ inline Rect marker_bounds(Rect ink,float pixels,float unit,Critical critical,Vis
 }
 inline Rect solid_bounds(Rect ink,Point pos,float pixels,float advance,float unit,Critical crit,VisualStyle style) {
     if(style==VisualStyle::Wilds)return marker_bounds(ink,pixels,unit,crit,style);
-    if(crit==Critical::None)return ink;
+    if(crit==Critical::None || style==VisualStyle::Rise)return ink;
     const float stroke=1.25f*unit;
     const float y=crit==Critical::Positive?pos.y-2*stroke:pos.y+pixels+2*stroke;
     return united(ink,{pos.x-2*stroke,y-2*stroke,pos.x+advance+2*stroke,y+2*stroke});
@@ -79,11 +111,23 @@ inline Rect solid_bounds(Rect ink,Point pos,float pixels,float advance,float uni
 // Wilds appearance uses the accepted open-font stamp/hold/exit timing.
 // Classic retains its original continuous drift.
 inline float peak_scale(VisualStyle style) {
+    if(style==VisualStyle::Rise)return 1.2f;
     if(style==VisualStyle::Wilds)return 1.2f;
     return 1.25f;
 }
 struct NumberMotion { float scale, opacity, rise; };
 inline NumberMotion number_motion(float age,float lifetime,VisualStyle style) {
+    if(style==VisualStyle::Rise) {
+        // Scale the authored 9/10-frame entrance/exit to a bounded UI lifetime.
+        const float entrance=low(.3f,lifetime*.3f),exit_time=low(10.0f/30,lifetime*.35f);
+        const float t=low(1,high(0,age/entrance));
+        const float scale=t<2.0f/9 ? .64f+(.56f*t*9/2) :
+            t<7.0f/9 ? 1.2f-.32f*(t*9-2)/5 : .88f+.12f*(t*9-7)/2;
+        const float exit=low(1,high(0,(age-(lifetime-exit_time))/exit_time));
+        const float kick=low(1,exit*10);
+        const float rise=exit<=.1f?-4*kick:-4+54*(exit-.1f)/.9f;
+        return {scale,1-exit,rise};
+    }
     if(style==VisualStyle::Wilds) {
         const float settle=low(1,high(0,age/.2f));
         const float stamp=1-settle;
@@ -110,7 +154,7 @@ inline unsigned layout(const Model& model,const View& view,float now,DrawNumber 
                        PlacementState& cache,Measure measure=approximate_measure) {
     const Settings& s=model.config();
     // Keep the selected 20px preview's marker gap and collision margin.
-    const float base=base_pixels_720p*view.height/720.0f*s.scale,unit=base/24.0f;
+    const float base=(s.style==VisualStyle::Rise?rise_base_pixels_720p:base_pixels_720p)*view.height/720.0f*s.scale,unit=base/24.0f;
     if (!finite(now)||!s.enabled||!valid(s)||!finite(unit)||unit<=0||!model.size()) { cache.reset();return 0; }
     const uint32_t epoch=model.at(0).event.key.epoch;
     if(cache.x!=view.x||cache.y!=view.y||cache.width!=view.width||cache.height!=view.height||
@@ -135,9 +179,11 @@ inline unsigned layout(const Model& model,const View& view,float now,DrawNumber 
         Point anchor{};if(!project(e.position,view,anchor))continue;
         DrawNumber d{};digits(e.total_damage,d.text);
         const NumberMotion motion=number_motion(age,s.lifetime,s.style);
-        const float peak_pixels=base*peak_scale(s.style);
-        d.pixels=base*motion.scale;d.unit=unit;d.classic_stroke=1.25f*view.height/720.0f;
+        const float settled=base*(s.style==VisualStyle::Rise&&tint(e,s)==Tint::Weak?1.4f:1);
+        const float peak_pixels=settled*peak_scale(s.style);
+        d.pixels=settled*motion.scale;d.unit=unit;d.classic_stroke=1.25f*view.height/720.0f;
         d.opacity=motion.opacity;
+        if(s.style==VisualStyle::Rise) d.slash=rise_slash(anchor,e.key,age,view);
         d.style=s.style;d.color=rgb(tint(e,s),s.style);d.critical=marker(e);d.key=e.key;
         TextMetrics current{},peak{};
         if(!measure(d.text,d.pixels,s.style,current)||!measure(d.text,peak_pixels,s.style,peak)||
@@ -148,8 +194,8 @@ inline unsigned layout(const Model& model,const View& view,float now,DrawNumber 
         Rect reserved=shifted(peak.ink,{anchor.x-peak.advance*.5f,cy});
         reserved=solid_bounds(reserved,{anchor.x-peak.advance*.5f,cy},peak_pixels,peak.advance,
             s.style==VisualStyle::Wilds?unit:view.height/720.0f,d.critical,s.style);
-        const float shadow=s.style==VisualStyle::Wilds?unit:1.25f*view.height/720.0f;
-        const float snap_pad=s.style==VisualStyle::Wilds?1.0f:0.0f;
+        const float shadow=s.style==VisualStyle::Rise?peak_pixels*.13f:s.style==VisualStyle::Wilds?unit:1.25f*view.height/720.0f;
+        const float snap_pad=s.style!=VisualStyle::Classic?1.0f:0.0f;
         reserved={reserved.left-shadow-snap_pad,reserved.top-shadow-snap_pad,reserved.right+shadow+snap_pad,reserved.bottom+shadow+snap_pad};
         PlacementState::Entry* entry=nullptr;
         for(auto& item:cache.entries)if(item.live&&item.key==d.key){entry=&item;break;}

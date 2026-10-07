@@ -1,4 +1,4 @@
-from paths import MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path
+from paths import MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path, BUILD_ROOT, WORK_ROOT
 #!/usr/bin/env python3
 """Exercise compiled ARM32 gateways with hostile callbacks and native damage.
 
@@ -17,7 +17,7 @@ from unicorn import UcError
 from unicorn import arm_const as arm
 from damage_numbers_arm_probe import Probe, ROOT, IMAGE_SHA, STACK, RETURN, START, END, STUBS, f32
 
-WORK = ROOT/'work/damage-numbers/gateway'
+WORK = WORK_ROOT/'gateway'
 NZCVQ_MASK = 0xf8000000
 GE_MASK = 0x000f0000
 FLAG_MASK = NZCVQ_MASK | GE_MASK
@@ -191,7 +191,7 @@ def hitzone_cases(image, code, names, check):
 
 def main():
     if unicorn.__version__ != '2.1.4': raise ValueError('Use pinned Unicorn 2.1.4')
-    image = (ROOT/'work/damage-numbers/inputs/main-memory.bin').read_bytes()
+    image = (WORK_ROOT/'inputs/main-memory.bin').read_bytes()
     if hashlib.sha256(image).hexdigest() != IMAGE_SHA: raise ValueError('Native image identity differs')
     manifest = json.loads((WORK/'manifest.json').read_text())
     code = (WORK/'gateway.bin').read_bytes()
@@ -275,7 +275,7 @@ def main():
                       f'NZCVQ restore leaves helper GE untouched: {label}, pattern {pattern}, gateway {kind}')
                 ge_calls += 1
     cases += ge_calls
-    out = ROOT/'build/damage-numbers/open-assets'; out.mkdir(parents=True, exist_ok=True)
+    out = BUILD_ROOT/'open-assets'; out.mkdir(parents=True, exist_ok=True)
     report = {'kind': 'Compiled ARM32 gateway and copied native damage in Unicorn; not Eden',
               'image_sha256': IMAGE_SHA, 'gateway_sha256': manifest['binary_sha256'],
               'calls': cases, 'checks': len(labels), 'passed': labels,

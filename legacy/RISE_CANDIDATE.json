@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "version": "r21-rise1",
+  "status": "DEVELOPMENT",
+  "date": "2026-10-08",
+  "accepted_distribution_version": "r20",
+  "accepted_nro_sha256": "318ee366acfd905451ddeec2c39d42b8587d24372f222ded3026907f8f9cc2c3",
+  "slash_height_viewport_fraction": 0.75,
+  "comparison_height_viewport_fraction": 0.5,
+  "height_means_total_vertical_extent": true,
+  "hit_origin_vertical_fraction": 0.5,
+  "ground_cutoff": false,
+  "scene_occlusion": false,
+  "viewport_clip": true,
+  "final_height_accepted": true,
+  "runtime_test": "NOT RUN",
+  "installed": false,
+  "published": false,
+  "validation_commands": [
+    "./build.sh doctor",
+    "./build.sh prepare",
+    "./build.sh build",
+    "./build.sh test --host",
+    "./build.sh test",
+    "./build.sh verify",
+    "./build.sh package"
+  ],
+  "candidate_output_namespace": "candidates/r21-rise1",
+  "build_validation_receipt": "standalone-tests.json",
+  "renderer_validation_receipt": "open-visual/rise-preview-manifest.json",
+  "limits": [
+    "Host and compiled ARM/static checks do not establish gameplay acceptance.",
+    "Known Forge menu/background rendering and incomplete NVN shutdown remain unchanged."
+  ],
+  "height_approval": "User selected the centered 3/4 renderer preview on 2026-10-08; visual acceptance only, no gameplay result"
+}

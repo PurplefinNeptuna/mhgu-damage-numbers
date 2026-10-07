@@ -7,7 +7,7 @@ enum class Source : uint8_t { Attack, Monster, Object, Tick };
 enum class Owner : uint8_t { LocalPlayer, LocalPalico, RemotePlayer, RemotePalico, Unknown };
 enum class Critical : uint8_t { None, Positive, Negative };
 enum class Tint : uint8_t { White, Gray, Weak };
-enum class VisualStyle : uint8_t { Wilds, Classic };
+enum class VisualStyle : uint8_t { Wilds, Classic, Rise };
 
 struct Vec3 { float x, y, z; };
 struct HitKey {
@@ -41,7 +41,7 @@ struct Settings {
 inline bool finite(float n) { return isfinite(n); }
 inline bool valid(Vec3 p) { return finite(p.x) && finite(p.y) && finite(p.z); }
 inline bool valid(const Settings& s) {
-    return unsigned(s.style)<=unsigned(VisualStyle::Classic) &&
+    return unsigned(s.style)<=unsigned(VisualStyle::Rise) &&
            finite(s.scale) && s.scale >= 0.5f && s.scale <= 3.0f &&
            finite(s.lifetime) && s.lifetime >= 0.4f && s.lifetime <= 2.0f;
 }
@@ -66,6 +66,13 @@ inline Critical marker(const Event& e) {
     return e.source == Source::Tick ? Critical::None : e.critical;
 }
 inline uint32_t rgb(Tint c, VisualStyle style=VisualStyle::Classic) {
+    if (style==VisualStyle::Rise) {
+        switch(c) {
+        case Tint::Gray: return 0x808080;
+        case Tint::Weak: return 0xf0b41e;
+        default: return 0xffffff;
+        }
+    }
     if (style==VisualStyle::Wilds) {
         switch(c) {
         case Tint::Gray: return 0x9a9a9a;

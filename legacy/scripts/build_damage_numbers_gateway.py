@@ -1,4 +1,4 @@
-from paths import MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path
+from paths import MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path, BUILD_ROOT, WORK_ROOT
 #!/usr/bin/env python3
 """Build the ARM32 gateway fixture offline; no NRO, installation or game writes."""
 from pathlib import Path
@@ -10,7 +10,7 @@ import subprocess
 import mhgu_binary as baseline
 
 from paths import ROOT, MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path
-OUT = ROOT/'work/damage-numbers/gateway'
+OUT = WORK_ROOT/'gateway'
 
 def main():
     OUT.mkdir(parents=True, exist_ok=True)

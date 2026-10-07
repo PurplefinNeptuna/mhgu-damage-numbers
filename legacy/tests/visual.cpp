@@ -9,6 +9,7 @@
 #include <cassert>
 #include <cmath>
 extern "C" void forge_log_info(const char*,...) {}
+void rise_visual(const std::string& root);
 int main(int argc,char** argv) {
     assert(argc==3);auto* ctx=igCreateContext(nullptr);auto* io=igGetIO_Nil();
     io->BackendFlags|=ImGuiBackendFlags_RendererHasTextures;
@@ -112,5 +113,20 @@ int main(int argc,char** argv) {
     igEndFrame();
     std::puts("Real ImGui font, selected RGBA sprites and draw commands passed");
     // Texture and font data have process/context lifetime, as in Forge.
+    rise_visual(argv[2]);
     igDestroyContext(ctx);
+    // A new context, including allocator address reuse, must rebuild live resources.
+    ctx=igCreateContext(nullptr);io=igGetIO_Nil();io->BackendFlags|=ImGuiBackendFlags_RendererHasTextures;
+    io->DisplaySize={620,220};io->DeltaTime=1.0f/60;io->IniFilename=nullptr;
+    ImFontAtlas_AddFontFromFileTTF(io->Fonts,argv[1],24,nullptr,nullptr);
+    cosmetics_init(ctx);cosmetics_init(ctx);igNewFrame();draw=igGetBackgroundDrawList_Nil();
+    DrawNumber renewed{};std::snprintf(renewed.text,sizeof(renewed.text),"155");
+    renewed.style=VisualStyle::Rise;renewed.pixels=25;renewed.opacity=1;renewed.position={30,40};
+    renewed.critical=Critical::Positive;renewed.color=rgb(Tint::Gray,renewed.style);
+    View renewed_view{};renewed_view.width=620;renewed_view.height=220;
+    renewed.slash=rise_slash({310,110},{7,900,20,0},.05f,renewed_view);
+    TextMetrics renewed_metrics{};assert(cosmetics_measure(renewed.text,25,renewed.style,renewed_metrics));
+    cosmetics_draw_effect(draw,renewed);cosmetics_draw(draw,renewed);igRender();
+    assert(igGetDrawData()->Textures->Size==3&&igGetDrawData()->CmdListsCount==1);
+    igDestroyContext(ctx);std::puts("Rise font and texture resources survive context teardown/recreation");
 }

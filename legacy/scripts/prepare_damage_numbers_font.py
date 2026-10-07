@@ -1,4 +1,4 @@
-from paths import MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path
+from paths import MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path, BUILD_ROOT, WORK_ROOT
 #!/usr/bin/env python3
 """Prepare the pinned digit font and C++ payload; never touch installed packages."""
 from pathlib import Path
@@ -11,7 +11,7 @@ from fontTools.varLib.instancer import instantiateVariableFont
 from fontTools import subset
 
 from paths import ROOT, MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path
-OUT = ROOT / 'work/damage-numbers/open-assets'
+OUT = WORK_ROOT/'open-assets'
 
 def prepare(profile='open'):
     from damage_numbers_assets import paths

@@ -1,4 +1,4 @@
-from paths import MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path
+from paths import MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path, BUILD_ROOT, WORK_ROOT
 #!/usr/bin/env python3
 """Execute the pinned SDK's thread-local filesystem abort guard; no host SD I/O."""
 import json
@@ -53,7 +53,7 @@ def main():
         assert call(0x51b64,0x195802)==1;checks+=1
         thread=0;call(0x4d080,previous)
         assert contexts[0]==previous and call(0x51b64,0x195802)==1;checks+=2
-    path=ROOT/'work/damage-numbers/open-assets/sdk-fs-guard-test.json'
+    path=WORK_ROOT/'open-assets/sdk-fs-guard-test.json'
     path.write_text(json.dumps({'checks':checks,'native_offsets':{
         'scoped_constructor':'0x4d004','context_setter':'0x4d080','abort_decision':'0x51b64',
         'all_return_handler':'0x4cffc'},'fixtures':'SDK FS slot 13, initialized context GOT/data, previous Abort callback, thread-local getter/setter; no mount or storage trial'},indent=2)+'\n')

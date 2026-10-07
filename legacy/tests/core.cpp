@@ -300,4 +300,58 @@ static void stamp_hold_exit() {
     layout(m,view(),1.8f,out,cache,varied_measure);check(std::fabs(out[0].opacity-.4f)<.001f,
           "Classic keeps its quarter-second fade");
 }
-int main() { policies();lifecycle();drawing();compact_spacing();aligned_markers();stamp_hold_exit();preview();settings_and_sources();std::printf("Passed %u core/presentation checks\n",cases); }
+static void rise_candidate() {
+    check(unsigned(VisualStyle::Wilds)==0&&unsigned(VisualStyle::Classic)==1&&unsigned(VisualStyle::Rise)==2,"style IDs append Rise without changing old IDs");
+    for(VisualStyle style:{VisualStyle::Wilds,VisualStyle::Classic,VisualStyle::Rise}) {
+        Settings s;s.style=style;Settings decoded{};auto text=encode_settings(s);
+        check(decode_settings(text.bytes,text.size,decoded)&&decoded.style==style,"version-2 styles round trip");
+        for(Owner owner:{Owner::LocalPlayer,Owner::LocalPalico}) for(int hz:{-1,44,45,100})
+            for(bool bounce:{false,true}) for(Critical crit:{Critical::None,Critical::Positive,Critical::Negative}) {
+                Event e=hit();e.owner=owner;e.physical_hzv=hz;e.bounced=bounce;e.critical=crit;
+                Tint expected=bounce?Tint::Gray:hz>=45?Tint::Weak:Tint::White;
+                check(tint(e,s)==expected&&marker(e)==crit,"all styles share bounce priority and HZV independently of ownership/affinity");
+                if(style==VisualStyle::Rise)check(rgb(tint(e,s),style)==(bounce?0x808080u:hz>=45?0xf0b41eu:0xffffffu),"Rise agreed palette, no companion gray");
+            }
+    }
+    for(float lifetime:{.4f,.9f,2.0f}) {
+        const float entrance=low(.3f,lifetime*.3f),exit_time=low(10.0f/30,lifetime*.35f),start=lifetime-exit_time;
+        auto a=number_motion(0,lifetime,VisualStyle::Rise);
+        auto b=number_motion(entrance*2/9,lifetime,VisualStyle::Rise);
+        auto c=number_motion(entrance*7/9,lifetime,VisualStyle::Rise);
+        auto d=number_motion(entrance,lifetime,VisualStyle::Rise);
+        check(std::fabs(a.scale-.64f)<.001f&&std::fabs(b.scale-1.2f)<.001f&&std::fabs(c.scale-.88f)<.001f&&std::fabs(d.scale-1)<.001f,"Rise grows/shrinks/settles");
+        check(number_motion(start,lifetime,VisualStyle::Rise).rise==0,"Rise holds to exit");
+        check(std::fabs(number_motion(start+exit_time*.1f,lifetime,VisualStyle::Rise).rise+4)<.001f,"brief downward kick");
+        check(number_motion(start+exit_time*.5f,lifetime,VisualStyle::Rise).rise>0,"exit rises after kick");
+        auto end=number_motion(lifetime,lifetime,VisualStyle::Rise);
+        check(std::fabs(end.rise-50)<.001f&&end.opacity<.001f,"authored exit reaches minus fifty and zero alpha");
+        for(unsigned i=0;i<unsigned(lifetime*30);++i) {
+            float t=float(i)/30;auto f30=number_motion(t,lifetime,VisualStyle::Rise),f60=number_motion(float(i*2)/60,lifetime,VisualStyle::Rise);
+            check(f30.scale==f60.scale&&f30.rise==f60.rise&&f30.opacity==f60.opacity,"30/60fps elapsed-time equivalence");
+        }
+    }
+    Settings s;s.style=VisualStyle::Rise;Model m;m.reset(7);m.configure(s);
+    for(unsigned i=1;i<=4;++i){Event e=hit(i);e.critical=i%2?Critical::Positive:Critical::Negative;m.capture(e);}
+    m.update(1,true);PlacementState cache;DrawNumber n[128]{};View v=view();
+    check(layout(m,v,1.05f,n,cache)==4,"Rise retains multiple same-frame finalized hits");
+    bool displaced=false;Point offsets[4];float slopes[4];
+    for(unsigned i=0;i<4;++i) {
+        offsets[i]=n[i].offset;slopes[i]=n[i].slash.slope;displaced|=offsets[i].x!=0||offsets[i].y!=0;
+        check(n[i].slash.origin.x==640&&n[i].slash.origin.y==360,"slash stays at raw hit despite digit collisions and anchor correction");
+        check(slopes[i]>=-.25f&&slopes[i]<=.25f,"stable hit tilt bounded to approximately fourteen degrees");
+        check(n[i].slash.opacity>0&&std::fabs(n[i].slash.extent-540)<.001f,"selected three-quarter-height peak slash uses gameplay viewport");
+    }
+    check(displaced,"crowded fixture actually displaces digits");
+    v.world_to_clip[3]=.1f;layout(m,v,1.1f,n,cache);
+    for(unsigned i=0;i<4;++i)check(std::fabs(n[i].slash.origin.x-704)<.001f&&n[i].slash.origin.y==360&&n[i].slash.slope==slopes[i]&&n[i].offset.x==offsets[i].x&&n[i].offset.y==offsets[i].y,"camera reprojection moves registered hit while cached digit placement and tilt persist");
+    layout(m,v,1.3f,n,cache);for(unsigned i=0;i<4;++i)check(n[i].opacity==1&&n[i].slash.opacity==0,"slash expires independently while digits held");
+    Event e=hit();Model weak;weak.reset(7);weak.configure(s);e.physical_hzv=45;weak.capture(e);weak.update(1,true);
+    layout(weak,view(),1.3f,n,cache);check(n[0].pixels==35,"orange settles at thirty five versus normal twenty five");
+    Slash beam=rise_slash({640,360},hit().key,.05f,view(),.75f);Point quad[4];slash_quad(beam,quad);
+    check(quad[2].y-quad[0].y==540&&std::fabs(quad[0].x+beam.width*.5f-640-beam.slope*540*.5f)<.001f,"three-quarter height tilted quad centers equal upward/downward reach");
+    check(std::fabs((quad[0].y+quad[2].y)*.5f-360)<.001f,"crit beam is centered at the registered hit, without a ground cutoff");
+    v=view();v.world_to_clip[15]=-1;check(layout(m,v,1.3f,n,cache)==0,"Rise rejects behind-camera hit");
+    for(unsigned i=1;i<2048;++i)check(std::fabs(slash_slope({7,i,20,0}))<=.25f,"all deterministic tilt samples in bounds");
+}
+
+int main() {rise_candidate(); policies();lifecycle();drawing();compact_spacing();aligned_markers();stamp_hold_exit();preview();settings_and_sources();std::printf("Passed %u core/presentation checks\n",cases); }

@@ -464,6 +464,7 @@ void capture_render() {
     ImDrawList* draw=igGetBackgroundDrawList_Nil();
     if (!draw) return;
     ImDrawList_PushClipRect(draw,{view.x,view.y},{view.x+view.width,view.y+view.height},true);
+    for (unsigned i=0;i<count;++i) cosmetics_draw_effect(draw,numbers[i]);
     for (unsigned i=0;i<count;++i) {
         const DrawNumber& n=numbers[i];
         cosmetics_draw(draw,n);
@@ -488,8 +489,8 @@ void capture_panel() {
     if (!current || load(consumer)!=uint32_t(current)) return;
     Settings next=display_model.config();
     bool changed=igCheckbox("Show damage numbers",&next.enabled);
-    int style=int(next.style);static const char* styles[]={"Wilds","Classic"};
-    if(igCombo_Str_arr("Style##damage-numbers",&style,styles,2,-1)) { next.style=VisualStyle(style);changed=true; }
+    int style=int(next.style);static const char* styles[]={"Wilds","Classic","Rise"};
+    if(igCombo_Str_arr("Style##damage-numbers",&style,styles,3,-1)) { next.style=VisualStyle(style);changed=true; }
     changed=igSliderFloat("Number size",&next.scale,0.5f,3.0f,"%.2fx",ImGuiSliderFlags_AlwaysClamp) || changed;
     changed=igSliderFloat("Duration",&next.lifetime,0.4f,2.0f,"%.2f seconds",ImGuiSliderFlags_AlwaysClamp) || changed;
     if (igButton("Restore defaults",{0,0})) { next=Settings{}; changed=true; }

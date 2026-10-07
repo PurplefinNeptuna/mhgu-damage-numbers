@@ -1,4 +1,4 @@
-from paths import MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path
+from paths import MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path, BUILD_ROOT, WORK_ROOT
 #!/usr/bin/env python3
 """Execute original MHGU damage normalization in bounded Unicorn fixtures.
 
@@ -38,7 +38,7 @@ def f32(n):
 def camera_cases(data):
     """Native look-at, perspective and multiplication; tanf is a named stub."""
     src=MOD
-    lib_path=ROOT/'work/damage-numbers/tests/camera_bridge.so'
+    lib_path=WORK_ROOT/'tests/camera_bridge.so'
     lib_path.parent.mkdir(parents=True,exist_ok=True)
     subprocess.run(['c++','-std=c++17','-Wall','-Wextra','-Werror','-O2',
                     '-ffp-contract=off','-shared','-fPIC','-I'+str(src/'src'),
@@ -105,7 +105,7 @@ def camera_cases(data):
             'stub':'tanf import uses math.tan rounded to float32; no camera selection or live viewport acceptance'}
 
 def ownership_cases(data):
-    src=MOD;lib_path=ROOT/'work/damage-numbers/tests/ownership_bridge.so'
+    src=MOD;lib_path=WORK_ROOT/'tests/ownership_bridge.so'
     subprocess.run(['c++','-std=c++17','-Wall','-Wextra','-Werror','-O2','-shared','-fPIC',
                     '-I'+str(src/'src'),str(src/'tests/ownership_bridge.cpp'),'-o',str(lib_path)],check=True)
     lib=ctypes.CDLL(str(lib_path));read_type=ctypes.CFUNCTYPE(ctypes.c_uint32,ctypes.c_uint32,ctypes.c_uint32)
@@ -237,7 +237,7 @@ def critical_cases(data):
 def feedback_cases(data):
     """Original two-attack feedback getter; not per-impact bounce attribution."""
     src = MOD
-    lib_path = ROOT/'work/damage-numbers/tests/feedback_bridge.so'
+    lib_path = WORK_ROOT/'tests/feedback_bridge.so'
     subprocess.run(['c++', '-std=c++17', '-Wall', '-Wextra', '-Werror', '-O2',
                     '-shared', '-fPIC', '-I'+str(src/'src'),
                     str(src/'tests/feedback_bridge.cpp'), '-o', str(lib_path)], check=True)
@@ -378,7 +378,7 @@ class Probe:
 
 def main():
     if unicorn.__version__!='2.1.4':raise ValueError('Use the pinned Unicorn 2.1.4 analysis environment')
-    data=(ROOT/'work/damage-numbers/inputs/main-memory.bin').read_bytes()
+    data=(WORK_ROOT/'inputs/main-memory.bin').read_bytes()
     if hashlib.sha256(data).hexdigest()!=IMAGE_SHA:raise ValueError('Native image identity differs')
     results=[]
     def check(ok,label):

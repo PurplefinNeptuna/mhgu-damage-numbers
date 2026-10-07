@@ -1,4 +1,4 @@
-from paths import MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path
+from paths import MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path, BUILD_ROOT, WORK_ROOT
 #!/usr/bin/env python3
 """Package the supported open-only damage numbers; never install."""
 import argparse
@@ -7,7 +7,7 @@ from source_provenance import verify as verify_source
 from damage_numbers_package_helpers import digest, require, load, ROOT
 
 RECIPE = MOD
-BUILD = ROOT/'build/damage-numbers/open-assets'
+BUILD = BUILD_ROOT/'open-assets'
 PLUGIN = 'romfs/nativeNX/plugins/damage_numbers_capture.nro'
 
 
@@ -19,7 +19,7 @@ def main(refresh_support=False):
     comparison = load(BUILD/'compression-render-comparison.json')
     ge = load(BUILD/'ge-compatibility.json')
     gateway = load(BUILD/'gateway-probe.json')
-    gateway_manifest = load(ROOT/'work/damage-numbers/gateway/manifest.json')
+    gateway_manifest = load(WORK_ROOT/'gateway/manifest.json')
     require(built['asset_profile'] == 'open', 'Expected isolated open build')
     require(audit['status'] == 'PASSED_OPEN_ASSET_PROVENANCE', 'Open asset audit missing')
     for name, expected in built['sources'].items():
@@ -69,7 +69,7 @@ def main(refresh_support=False):
     require(comparison['appearance_baseline_sha256']==digest((RECIPE/'research/readability-r20.json').read_bytes()),
             'Reviewed appearance baseline changed')
     for name,record in comparison['real_imgui'].items():
-        require(digest((ROOT/'work/damage-numbers/open-visual'/name).read_bytes())==record['sha256'],
+        require(digest((WORK_ROOT/'open-visual'/name).read_bytes())==record['sha256'],
                 'Verified real ImGui output changed: '+name)
     release = load(RECIPE/'RELEASE.json')
     require(release['status'] in ('READY_TO_DISTRIBUTE', 'PUBLISHED') and

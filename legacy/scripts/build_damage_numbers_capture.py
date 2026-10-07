@@ -1,4 +1,4 @@
-from paths import MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path
+from paths import MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path, BUILD_ROOT, WORK_ROOT
 #!/usr/bin/env python3
 """Build and inspect the automatically active damage-number NRO; never install it."""
 from pathlib import Path
@@ -16,8 +16,8 @@ from mhgu_binary import Nro
 
 from paths import ROOT, MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path
 RECIPE = MOD
-NATIVE = ROOT/'work/damage-numbers/open-assets'
-OUT = ROOT/'build/damage-numbers/open-assets'
+NATIVE = WORK_ROOT/'open-assets'
+OUT = BUILD_ROOT/'open-assets'
 SDK_SHA = '9a9b7035266637ee693a32da6b0fde54bda00e897bef05b1c8d8cda30f8ac8b0'
 OFFSETS = (0x170968,0x9d6f8,0x2a87a8,0xb8909c,0x885844,0x16dd7c,0x16dc6c,0x178660,
            0x172e52c,0x276278,0x285c6c)
@@ -32,8 +32,12 @@ def main():
     check_dependencies()
     revision=baseline.REVISION
     forge=FORGE
-    main_path = ROOT/'work/damage-numbers/inputs/main'
+    main_path = WORK_ROOT/'inputs/main'
     image,_ = baseline.main_image(main_path.read_bytes())
+    memory_path=WORK_ROOT/'inputs/main-memory.bin'
+    if memory_path.exists() and memory_path.read_bytes()!=image:
+        raise ValueError('Preserving differing normalized main input')
+    memory_path.write_bytes(image)
     rows = re.findall(r'\{(0x[0-9a-f]+), \{([^}]+)\}\}', (RECIPE/'src/signatures.h').read_text())
     if tuple(int(offset,16) for offset,_ in rows) != OFFSETS: raise ValueError('Unexpected signature recipe')
     for offset, values in rows:
@@ -44,6 +48,8 @@ def main():
     if sha(sdk)!=SDK_SHA: raise ValueError('SDK fingerprint changed')
     font_manifest=prepare(profile)
     sprite_manifest=prepare_sprites(profile)
+    from prepare_damage_numbers_rise import prepare as prepare_rise
+    rise_manifest=prepare_rise()
     NATIVE.mkdir(parents=True,exist_ok=True)
     command = """set -eu
 export PATH=/opt/devkitpro/devkitARM/bin:$PATH
@@ -94,7 +100,7 @@ arm-none-eabi-objdump -d /output/plugin.elf > /output/disassembly.txt
     shutil.copy2(RECIPE/'fonts/OFL.txt',OUT/'candidate-package/FONT_LICENSE.txt')
     (OUT/'candidate-package/OPEN_ASSETS.txt').write_text(
         'Supported build: OFL Open Sans digits and independently authored crit sprites.\n'
-        'No extracted Wilds font or texture is embedded.\n')
+        'No extracted Wilds or Rise font or texture is embedded.\n')
     for name in ('Roboto-OFL.txt','RobotoCondensed-OFL.txt'):
         old_license=OUT/'candidate-package'/name
         if old_license.exists():
@@ -118,12 +124,12 @@ arm-none-eabi-objdump -d /output/plugin.elf > /output/disassembly.txt
     sources=sorted(p for p in RECIPE.rglob('*') if p.is_file() and not any(x in p.relative_to(RECIPE).parts for x in ('build','work','tools','.venv','__pycache__','history')) and p.name!='build.local.json')+[Path(__file__),SCRIPTS / 'prepare_damage_numbers_font.py',SCRIPTS / 'prepare_damage_numbers_sprites.py',SCRIPTS / 'render_damage_numbers_visual.py',SCRIPTS / 'test_damage_numbers_visual.py',SCRIPTS / 'damage_numbers_capture_probe.py',
         SCRIPTS / 'test_damage_numbers.py',SCRIPTS / 'damage_numbers_assets.py',SCRIPTS / 'damage_numbers_sprite_codec.py',SCRIPTS / 'test_damage_numbers_sprite_codec.py',SCRIPTS / 'verify_damage_numbers_compression.py',SCRIPTS / 'verify_damage_numbers_ge_compat.py',SCRIPTS / 'build_damage_numbers_gateway.py',SCRIPTS / 'damage_numbers_gateway_probe.py',SCRIPTS / 'audit_damage_numbers_open_assets.py',SCRIPTS / 'package_damage_numbers.py',SCRIPTS / 'damage_numbers_package_helpers.py',MOD / 'vendor' / 'modern-weapon-controls' / 'src/native_platform.cpp',
         MOD / 'vendor' / 'modern-weapon-controls' / 'src/native_platform.h',MOD / 'vendor' / 'modern-weapon-controls' / 'src/svc.S']
-    manifest={'asset_profile':profile,'status':'R20_LARGER_CRIT_STARS','nro_sha256':sha(target),
+    manifest={'asset_profile':profile,'status':'RISE_STYLE_CANDIDATE','nro_sha256':sha(target),
         'package':str(target.parent.parent.parent.parent),'main_sha256':baseline.MAIN_SHA,'sdk_sha256':SDK_SHA,
         'forge_sha256':sha(live_forge),'forge_revision':revision,
         'hook_offsets':[hex(o) for o in OFFSETS[:8]],
         'default_hook_offsets':[hex(o) for o in OFFSETS[:8]],
-        'recovery_revision':20,'base_font_pixels_720p':20.0,
+        'recovery_revision':21,'base_font_pixels_720p':20.0,
         'apsr_restore':'NZCVQ only; GE remains as left by helper',
         'ge_liveness_audit':'mods/damage-numbers/GE_PRESERVATION_AUDIT.md',
         'wilds_animation':{'peak_scale':1.2,'settle_seconds':0.2,'rise_fade_seconds':0.2,'rise_pixels_720p':30,'duration_is_total':True},'camera_capture_default':True,'activation_flags_required':False,
@@ -137,7 +143,7 @@ arm-none-eabi-objdump -d /output/plugin.elf > /output/disassembly.txt
         'bounce_requires_same_native_thread_and_counter':True,
         'settings_save_paths':['savedata:/damage_numbers.ini','savedata:/damage_numbers_backup.ini'],
         'settings_format':'INI version 2 only; five required fields; bounded 255 bytes; transactional primary and backup',
-        'appearance_default':'Wilds','appearance_styles':['Wilds','Classic'],'font':font_manifest,'sprites':sprite_manifest,
+        'appearance_default':'Wilds','appearance_styles':['Wilds','Classic','Rise'],'rise':rise_manifest,'font':font_manifest,'sprites':sprite_manifest,
         'spacing_candidates':17,'spacing_max_font_sizes':[1.6,1.0],'spacing_offsets_cached':True,
         'plugin_panel_style':'compact unframed TreeNode; closed by default; settings only',
         'settings_load_retry_seconds':1,'settings_sd_migration':False,'settings_save_requires_button':True,

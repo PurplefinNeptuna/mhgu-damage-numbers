@@ -1,4 +1,4 @@
-from paths import MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path
+from paths import MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path, BUILD_ROOT, WORK_ROOT
 #!/usr/bin/env python3
 """Load the compiled capture NRO in Unicorn with explicit SDK/kernel fixtures.
 
@@ -19,8 +19,8 @@ from damage_numbers_arm_probe import ROOT, IMAGE_SHA, f32
 MAIN, MODULE, DATA, STACK, RETURN = 0x04000000,0x10000000,0x30000000,0x30100000,0x30200000
 MONSTER, PARAM, VTABLE, HIT, POSITION = DATA,DATA+0x10000,DATA+0x20000,DATA+0x90000,DATA+0x94000
 REGS = [getattr(arm,'UC_ARM_REG_R'+str(i)) for i in range(4)]
-WORK = ROOT/'work/damage-numbers/open-assets'
-OUT = ROOT/'build/damage-numbers/open-assets'
+WORK = WORK_ROOT/'open-assets'
+OUT = BUILD_ROOT/'open-assets'
 
 def elf_symbols(data):
     start = struct.unpack_from('<I',data,32)[0]
@@ -75,8 +75,8 @@ class CaptureProbe:
         self.write(DATA+0x1e0000+self.font_abi[5],16)
         self.uc.mem_map(0x34000000,0x100000)
         self.sprite_abi=struct.unpack('<4I',self.uc.mem_read(self.address('dn_sprite_abi'),16))
-        self.texture_registrations=0;self.texture_destroyed=0
-        self.sprite_decodes=0
+        self.texture_registrations=0;self.texture_destroyed=0;self.texture_allocations=0;self.texture_sizes={};self.quads=[]
+        self.sprite_decodes=0;self.context_hooks=[];self.texture_unregistrations=0
         self.codec_address=self.address(next(name for name in self.symbols if name.startswith('_ZN14damage_numbers13decode_sprite')))
         self.uc.mem_write(DATA+0x1e0008,struct.pack('<2f',1280,720))
         self.collision_body=gateway_names['dn_probe_collision_body']
@@ -221,19 +221,34 @@ class CaptureProbe:
                 self.write(glyph+self.font_abi[3],pixels*width,'<f')
                 u.mem_write(glyph+self.font_abi[4],struct.pack('<4f',0,pixels*.15,pixels*width,pixels*.85));self.ret(glyph)
             elif name=='ImTextureData_ImTextureData':
-                u.mem_write(DATA+0x1e8000,bytes(self.sprite_abi[0]));self.ret(DATA+0x1e8000)
+                ptr=DATA+0x1e8000+self.texture_allocations*0x100;self.texture_allocations+=1
+                u.mem_write(ptr,bytes(self.sprite_abi[0]));self.ret(ptr)
             elif name=='ImTextureData_Create':
-                if args[1:4]!=[0,512,256]:raise ValueError('Sprite texture format/dimensions changed')
-                self.write(args[0]+self.sprite_abi[1],0x34000000);self.ret()
+                if args[1:4] not in ([0,512,256],[0,64,512]):raise ValueError('Sprite texture format/dimensions changed')
+                self.texture_sizes[args[0]]=tuple(args[2:4])
+                self.write(args[0]+self.sprite_abi[1],0x34000000 if args[2]==512 else 0x34080000);self.ret()
             elif name=='ImTextureData_GetPixels':self.ret(self.read(args[0]+self.sprite_abi[1]))
             elif name=='ImTextureData_destroy':self.texture_destroyed+=1;self.ret()
             elif name=='igRegisterUserTexture':
-                data=bytes(u.mem_read(0x34000000,512*256*4))
-                expected=json.loads((WORK/'sprite-manifest.json').read_text())['rgba_sha256']
+                width,height=self.texture_sizes[args[0]]
+                data=bytes(u.mem_read(self.read(args[0]+self.sprite_abi[1]),width*height*4))
+                expected=json.loads((WORK/('sprite-manifest.json' if width==512 else 'rise-manifest.json')).read_text())['rgba_sha256']
                 if hashlib.sha256(data).hexdigest()!=expected:raise ValueError('Compiled lossless decoder corrupted profile sprite/effect pixels')
                 self.texture_registrations+=1;self.ret()
             elif name=='ImTextureData_GetTexRef':
                 u.mem_write(args[0],struct.pack('<IIQ',args[1],0,0));self.ret(args[0])
+            elif name=='igAddContextHook':
+                size,typ,callback,user=struct.unpack('<4I',u.mem_read(self.address('dn_context_hook_abi'),16))
+                self.context_hooks.append((args[0],bytes(u.mem_read(args[1],size)),self.read(args[1]+callback)))
+                if self.read(args[1]+typ)!=6:raise ValueError('Expected shutdown texture hook')
+                self.ret(len(self.context_hooks))
+            elif name=='igUnregisterUserTexture':self.texture_unregistrations+=1;self.ret()
+            elif name=='ImDrawList_AddImageQuad':
+                sp=u.reg_read(arm.UC_ARM_REG_SP)
+                points=[tuple(self.read(sp+8+8*j+4*i,'<f') for i in range(2)) for j in range(4)]
+                uv=[tuple(self.read(sp+40+8*j+4*i,'<f') for i in range(2)) for j in range(4)]
+                self.quads.append({'points':points,'uv':uv,'color':self.read(sp+72)})
+                self.ret()
             elif name=='ImDrawList_AddImage':
                 sp=u.reg_read(arm.UC_ARM_REG_SP)
                 self.images.append({'min':tuple(self.read(sp+8+4*i,'<f') for i in range(2)),
@@ -302,7 +317,7 @@ class CaptureProbe:
                 self.ret()
             elif name=='igCombo_Str_arr':
                 label=self.string(args[0]);self.widgets.append(label)
-                if args[3]!=2 or [self.string(self.read(args[2]+4*i)) for i in range(2)]!=['Wilds','Classic']:
+                if args[3]!=3 or [self.string(self.read(args[2]+4*i)) for i in range(3)]!=['Wilds','Classic','Rise']:
                     raise ValueError('Unexpected style selector ABI')
                 if label in self.changes: self.write(args[1],self.changes.pop(label));self.ret(1)
                 else: self.ret()
@@ -385,7 +400,7 @@ class CaptureProbe:
         self.call('forge_onImGuiRender')
         if self.tree_depth: raise ValueError('Plugin panel leaked a TreeNode scope')
     def render(self):
-        self.text_draws=[];self.lines=[];self.triangles=[];self.images=[]
+        self.text_draws=[];self.lines=[];self.triangles=[];self.images=[];self.quads=[]
         self.write(self.draw_vector,0)
         self.call('forge_onImGuiFreeRender',budget=8000000)
     def camera_record(self,rect=(0,0,1280,720),view=None,projection=None,camera_delta=0):
@@ -409,15 +424,15 @@ def main():
     global WORK, OUT
     WORK, OUT=paths(argument())
     if unicorn.__version__!='2.1.4': raise ValueError('Use pinned Unicorn 2.1.4')
-    image=(ROOT/'work/damage-numbers/inputs/main-memory.bin').read_bytes()
+    image=(WORK_ROOT/'inputs/main-memory.bin').read_bytes()
     if hashlib.sha256(image).hexdigest()!=IMAGE_SHA: raise ValueError('Native image differs')
     manifest=json.loads((OUT/'candidate-manifest.json').read_text())
     for name,sha in manifest['sources'].items():
         if hashlib.sha256((ROOT/name).read_bytes()).hexdigest()!=sha: raise ValueError(f'Source changed; rebuild capture: {name}')
     nro_bytes=(OUT/'candidate-package/romfs/nativeNX/plugins/damage_numbers_capture.nro').read_bytes()
     if hashlib.sha256(nro_bytes).hexdigest()!=manifest['nro_sha256']: raise ValueError('Candidate NRO differs')
-    gateway=json.loads((ROOT/'work/damage-numbers/gateway/manifest.json').read_text())
-    gateway_bytes=(ROOT/'work/damage-numbers/gateway/gateway.bin').read_bytes()
+    gateway=json.loads((WORK_ROOT/'gateway/manifest.json').read_text())
+    gateway_bytes=(WORK_ROOT/'gateway/gateway.bin').read_bytes()
     if hashlib.sha256(gateway_bytes).hexdigest()!=gateway['binary_sha256']: raise ValueError('Gateway fixture differs')
     checks=[]
     def check(ok,label):
@@ -776,6 +791,53 @@ def main():
             bounce.clock+=bounce.frequency;bounce.camera_record();bounce.collision(zone=20,attack=attack)
             bounce.thread=1;bounce.call(MAIN+0x2a87a8,(player,));bounce.thread=0;bounce.render()
             check(bounce.text_draws[-1]['color']==0xffecf1f4,'Feedback on a different native thread cannot claim a hit')
+    rise=probe();rise.call('forge_onInit');rise.panel()
+    rise.changes={'Style##damage-numbers':2};rise.panel()
+    rise.uc.mem_write(POSITION,struct.pack('<3f',.25,0,.5));rise.write(HIT+0x54,2,'<B')
+    rise.camera_record();rise.collision(zone=45);rise.render()
+    check(len(rise.quads)==1 and len(rise.text_draws)==9 and not rise.lines,
+          'Rise ARM draws one separate tilted slash and thick outlined digits without stars')
+    quad=rise.quads[0];points=quad['points'];center_x=(points[0][0]+points[1][0])*.5*.5+(points[2][0]+points[3][0])*.5*.5
+    center_y=(points[0][1]+points[2][1])*.5
+    check(abs(center_x-800)<.002 and abs(center_y-360)<.002,
+          'Rise ARM slash originates at registered projection without digit anchor correction')
+    check(quad['uv']==[(0,0),(1,0),(1,.5),(0,.5)] and rise.text_draws[-1]['color']==0xff1eb4f0,
+          'Rise ARM positive slash selects red artwork independently of shared orange tint')
+    check(rise.sprite_decodes==rise.texture_registrations==2,
+          'Rise ARM lazily decodes and registers its independent open beam once per context')
+    rise.clock+=int(.06*rise.frequency);rise.camera_record();rise.render()
+    check(rise.sprite_decodes==2 and len(rise.quads)==1 and abs(rise.quads[0]['points'][2][1]-rise.quads[0]['points'][0][1]-540)<.002,
+          'Rise ARM peak selected three-quarter-height slash uses elapsed-time expansion without repeat decoding')
+    slope=(points[0][0]+points[1][0]-points[2][0]-points[3][0])*.5/(points[2][1]-points[0][1])
+    later=rise.quads[0]['points'];slope2=(later[0][0]+later[1][0]-later[2][0]-later[3][0])*.5/(later[2][1]-later[0][1])
+    check(abs(slope-slope2)<.0001 and abs(slope)<=.25,'Rise ARM tilt remains stable throughout beam expansion')
+    rise.clock+=int(.24*rise.frequency);rise.camera_record();rise.render()
+    check(not rise.quads and len(rise.text_draws)==9 and rise.text_draws[-1]['color']==0xff1eb4f0,
+          'Rise ARM slash expires while outlined orange digits remain opaque and held')
+    check(abs(rise.text_draws[-1]['pixels']-35*font_scale)<.001,
+          'Rise ARM orange settles at 35 design units')
+    rise.save_available=True;rise.buttons={'Save settings'};rise.panel()
+    check(b'style=rise' in rise.files[primary] and b'version=2' in rise.files[primary],
+          'Rise ARM settings save style=rise without changing version-2 format')
+    restarted=probe();restarted.files=rise.files.copy();restarted.save_available=True;restarted.call('forge_onInit')
+    restarted.uc.mem_write(POSITION,struct.pack('<3f',0,0,.5));restarted.write(HIT+0x54,1,'<B');restarted.camera_record();restarted.collision(zone=44);restarted.render()
+    check(len(restarted.quads)==1 and restarted.quads[0]['uv'][0]==(0,.5) and restarted.text_draws[-1]['color']==0xffffffff,
+          'Rise ARM saved-style restart restores white digits and independent violet negative slash')
+    check(rise.clip_depth==restarted.clip_depth==0,'Rise ARM effect and gameplay clip scopes balance')
+    check(len(rise.context_hooks)==1,'Rise ARM registers one context shutdown cleanup with lazy texture')
+    context,hook_bytes,callback=rise.context_hooks[0];hook_ptr=DATA+0x1d8000
+    rise.uc.mem_write(hook_ptr,hook_bytes);rise.call(callback,(context,hook_ptr))
+    check(rise.texture_unregistrations==rise.texture_destroyed==1 and rise.read(rise.private('rise_texture'))==0 and rise.read(rise.private('font_context'))==0,
+          'Rise ARM shutdown unregisters and frees its CPU texture resource')
+    broken_rise=probe();broken_rise.call('forge_onInit');broken_rise.panel()
+    broken_rise.uc.mem_write(broken_rise.address('_ZL14rise_sprite_lz'),b'\x80\x00\x00')
+    broken_rise.changes={'Style##damage-numbers':2};broken_rise.panel()
+    broken_rise.uc.mem_write(POSITION,struct.pack('<3f',0,0,.5));broken_rise.write(HIT+0x54,2,'<B')
+    broken_rise.camera_record();broken_rise.collision();broken_rise.render();broken_rise.render()
+    check(not broken_rise.quads and len(broken_rise.text_draws)==9 and broken_rise.texture_destroyed==1,
+          'Rise ARM malformed beam falls back to outlined digits and frees unregistered texture')
+    check(broken_rise.sprite_decodes==2 and sum('Rise slash texture unavailable' in x[0] for x in broken_rise.logs)==1,
+          'Rise ARM failed beam is attempted once per context and logs once across repeated frames')
     font=probe();font.call('forge_onInit');font.call('forge_onImGuiInit',(DATA+0x1e9000,RETURN,RETURN))
     check(font.font_registrations==font.font_released==1,'Repeated ImGui init registers embedded font once and disables atlas ownership')
     check(font.texture_registrations==font.sprite_decodes==1,'Lossless sprite decode and texture registration run once per ImGui context')

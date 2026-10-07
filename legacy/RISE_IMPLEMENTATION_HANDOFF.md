@@ -5,6 +5,13 @@ built, installed or runtime-tested. The next session should implement a Rise
 style candidate in the existing Damage Numbers plugin and produce visual
 comparisons before settling the remaining appearance choices.
 
+Implementation follow-up: [r21-rise1 candidate](RISE_CANDIDATE.md). During
+implementation on 2026-10-08, the user corrected the slash to equal upward and
+downward reach from the registered hit center, with no ground cutoff. This
+supersedes the short lower-tail direction below. The comparison still uses
+one-half and three-quarter total viewport heights. The user then selected
+three-quarter height only for Rise; r20 remains the accepted distribution.
+
 ## Start here
 
 1. Read the applicable workspace/mod `AGENTS.md`, `README.md`, `DEVELOPMENT.md`,

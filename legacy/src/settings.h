@@ -17,7 +17,7 @@ inline SettingsText encode_settings(const Settings& s) {
         out.bytes[out.size++]='\n';
     };
     text("[DamageNumbers]\nversion=2\nenabled="); text(s.enabled?"1\n":"0\n");
-    text("style="); text(s.style==VisualStyle::Wilds?"wilds\n":"classic\n");
+    text("style="); text(s.style==VisualStyle::Wilds?"wilds\n":s.style==VisualStyle::Rise?"rise\n":"classic\n");
     text("scale="); decimal(s.scale); text("lifetime="); decimal(s.lifetime);
     return out;
 }
@@ -52,6 +52,7 @@ inline bool decode_settings(const char* data,unsigned size,Settings& out) {
         } else if (key==2) {
             if (equal(data+value,end-value,"wilds")) next.style=VisualStyle::Wilds;
             else if (equal(data+value,end-value,"classic")) next.style=VisualStyle::Classic;
+            else if (equal(data+value,end-value,"rise")) next.style=VisualStyle::Rise;
             else return false;
         } else {
             if (value==end) return false;

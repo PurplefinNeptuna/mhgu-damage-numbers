@@ -1,4 +1,4 @@
-from paths import MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path
+from paths import MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path, BUILD_ROOT, WORK_ROOT
 #!/usr/bin/env python3
 """Execute original SDK TLS and clock ABI bytes; no Eden or SDK allocation."""
 from pathlib import Path
@@ -112,7 +112,7 @@ def main():
               'native_functions':['0x9d7f8 GetTlsValue','0x9d80c void SetTlsValue'],
               'clock_functions':['0x9e640 C Tick wrapper returns u64','0x9d840 tick frequency 19200000'],
               'limits':['SDK allocation and scheduler not executed','Synthetic TLS/thread storage and hardware counter, no Eden trial']}
-    output=ROOT/'build/damage-numbers/open-assets/sdk-tls-probe.json'
+    output=BUILD_ROOT/'open-assets/sdk-tls-probe.json'
     output.parent.mkdir(parents=True,exist_ok=True)
     output.write_text(json.dumps(report,indent=2)+'\n')
     print(f'Passed {checks} original SDK TLS/clock ABI checks; no Eden trial')

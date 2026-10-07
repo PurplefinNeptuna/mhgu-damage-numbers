@@ -1,4 +1,4 @@
-from paths import MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path
+from paths import MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path, BUILD_ROOT, WORK_ROOT
 #!/usr/bin/env python3
 """Host policy and presentation checks. No Eden or in-game validation."""
 from pathlib import Path
@@ -12,7 +12,7 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--thread-sanitizer',action='store_true',help='Also exercise mailbox concurrency with ThreadSanitizer')
     args=parser.parse_args()
-    out = ROOT / 'work/damage-numbers/tests'
+    out = WORK_ROOT/'tests'
     out.mkdir(parents=True, exist_ok=True)
     src = MOD
     exe = out / 'core'

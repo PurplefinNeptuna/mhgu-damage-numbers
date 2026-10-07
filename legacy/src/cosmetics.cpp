@@ -8,12 +8,26 @@
 #include <cstddef>
 #include "wilds_font_data.h"
 #include "wilds_sprite_data.h"
+#include "rise_sprite_data.h"
 #include "sprite_codec.h"
 namespace damage_numbers {
 static void* font_context;
 static ImFont* wilds_font;
 static bool font_warning;
 static ImTextureData* sprite_texture;
+static ImTextureData* rise_texture;
+static bool rise_texture_attempted;
+extern "C" __attribute__((used)) const uint32_t dn_context_hook_abi[]={
+    sizeof(ImGuiContextHook),offsetof(ImGuiContextHook,Type),offsetof(ImGuiContextHook,Callback),offsetof(ImGuiContextHook,UserData)};
+static void rise_shutdown(ImGuiContext* context,ImGuiContextHook* hook) {
+    auto* texture=static_cast<ImTextureData*>(hook->UserData);
+    igUnregisterUserTexture(texture);
+    ImTextureData_destroy(texture);
+    if(font_context==context) {
+        font_context=nullptr;wilds_font=nullptr;sprite_texture=nullptr;
+        rise_texture=nullptr;rise_texture_attempted=false;
+    }
+}
 extern "C" __attribute__((used)) const uint32_t dn_sprite_abi[]={
     sizeof(ImTextureData),offsetof(ImTextureData,Pixels),offsetof(ImTextureData,Status),offsetof(ImTextureData,RefCount)};
 // The fixture reads compiler-derived ABI offsets, then checks actual ARM calls.
@@ -29,7 +43,7 @@ static_assert(offsetof(ImFontBaked,Size)==16 && offsetof(ImFontGlyph,AdvanceX)==
 #endif
 void cosmetics_init(void* context) {
     if(font_context==context)return;
-    font_context=context;wilds_font=nullptr;
+    font_context=context;wilds_font=nullptr;rise_texture=nullptr;rise_texture_attempted=false;
     ImGuiIO* io=igGetIO_Nil();
     if(io&&io->Fonts) {
         ImFontConfig* config=ImFontConfig_ImFontConfig();
@@ -61,10 +75,10 @@ void cosmetics_init(void* context) {
         forge_log_warn("[damage-numbers] Wilds digit font unavailable; using Forge font with Wilds colors/stars");
     }
 }
-static ImFont* selected_font(VisualStyle style) { return style==VisualStyle::Wilds&&wilds_font?wilds_font:igGetFont(); }
+static ImFont* selected_font(VisualStyle style) { return style!=VisualStyle::Classic&&wilds_font?wilds_font:igGetFont(); }
 bool cosmetics_measure(const char* text,float pixels,VisualStyle style,TextMetrics& out) {
     ImFont* font=selected_font(style);if(!font)return false;
-    if(style==VisualStyle::Wilds&&wilds_font)pixels*=wilds_font_scale;
+    if(style!=VisualStyle::Classic&&wilds_font)pixels*=wilds_font_scale;
     ImFontBaked* baked=ImFont_GetFontBaked(font,pixels,-1);if(!baked||baked->Size<=0)return false;
     const float ratio=pixels/baked->Size;float advance=0;Rect ink{};bool found=false;
     for(const char* p=text;*p;++p) {
@@ -73,6 +87,7 @@ bool cosmetics_measure(const char* text,float pixels,VisualStyle style,TextMetri
         if(glyph->Visible&&valid(r)){ink=found?united(ink,r):r;found=true;}
         advance+=glyph->AdvanceX*ratio;
     }
+    if(style==VisualStyle::Rise) { advance*=rise_glyph_width;ink.left*=rise_glyph_width;ink.right*=rise_glyph_width; }
     out={advance,ink};return found&&finite(advance)&&advance>0;
 }
 static void sprite(ImDrawList* draw,unsigned index,Rect target,uint32_t color) {
@@ -91,20 +106,57 @@ static void glyph_effects(ImDrawList* draw,const DrawNumber& n,ImFont* font,floa
         if(*p<'0'||*p>'9')return;
         ImFontGlyph* g=ImFontBaked_FindGlyph(baked,ImWchar(*p));if(!g)return;
         const unsigned index=unsigned(*p-'0');const auto* r=wilds_sprite_rects[index];
-        const float sx=(g->X1-g->X0)*ratio/r[6],sy=(g->Y1-g->Y0)*ratio/r[7];
-        const float x=n.position.x+advance+g->X0*ratio-r[4]*sx;
+        const float width=n.style==VisualStyle::Rise?rise_glyph_width:1;
+        const float sx=(g->X1-g->X0)*ratio*width/r[6],sy=(g->Y1-g->Y0)*ratio/r[7];
+        const float x=n.position.x+(advance+g->X0*ratio)*width-r[4]*sx;
         const float y=n.position.y+g->Y0*ratio-r[5]*sy;
         const Rect target={x,y,x+r[2]*sx,y+r[3]*sy};
         // Keep the centered shadow; the crisp edge replaces the warm gold halo.
-        sprite(draw,index,target,imgui_color(0,n.opacity*.22f));
+        sprite(draw,index,target,imgui_color(0,n.opacity*(n.style==VisualStyle::Rise?.55f:.22f)));
         advance+=g->AdvanceX*ratio;
     }
 }
+void cosmetics_draw_effect(void* list,const DrawNumber& n) {
+    auto* draw=static_cast<ImDrawList*>(list);
+    if(!draw||n.style!=VisualStyle::Rise||n.critical==Critical::None||n.slash.opacity<=0)return;
+    if(!rise_texture_attempted) {
+        rise_texture_attempted=true;
+        auto* io=igGetIO_Nil();
+        if(io&&(io->BackendFlags&ImGuiBackendFlags_RendererHasTextures)) {
+            rise_texture=ImTextureData_ImTextureData();
+            if(rise_texture) {
+                ImTextureData_Create(rise_texture,ImTextureFormat_RGBA32,rise_sprite_width,rise_sprite_height);
+                auto* pixels=static_cast<uint8_t*>(ImTextureData_GetPixels(rise_texture));
+                if(pixels&&decode_sprite(rise_sprite_lz,sizeof(rise_sprite_lz),pixels,
+                        rise_sprite_width*rise_sprite_height*4)) {
+                    igRegisterUserTexture(rise_texture);
+                    ImGuiContextHook hook{};hook.Type=ImGuiContextHookType_Shutdown;
+                    hook.Callback=rise_shutdown;hook.UserData=rise_texture;
+                    igAddContextHook(static_cast<ImGuiContext*>(font_context),&hook);
+                }
+                else {ImTextureData_destroy(rise_texture);rise_texture=nullptr;}
+            }
+        }
+        static mod_log::Once failures;
+        if(!rise_texture&&failures.claim(0))forge_log_warn("[damage-numbers] Rise slash texture unavailable; digits remain enabled");
+    }
+    if(!rise_texture)return;
+    Point p[4];slash_quad(n.slash,p);
+    const float v=n.critical==Critical::Positive?0:.5f;
+    ImDrawList_PushClipRect(draw,{n.slash.clip.left,n.slash.clip.top},{n.slash.clip.right,n.slash.clip.bottom},true);
+    ImDrawList_AddImageQuad(draw,ImTextureData_GetTexRef(rise_texture),
+        {p[0].x,p[0].y},{p[1].x,p[1].y},{p[2].x,p[2].y},{p[3].x,p[3].y},
+        {0,v},{1,v},{1,v+.5f},{0,v+.5f},imgui_color(0xffffff,n.slash.opacity));
+    ImDrawList_PopClipRect(draw);
+}
 void cosmetics_draw(void* list,const DrawNumber& n) {
     auto* draw=static_cast<ImDrawList*>(list);ImFont* font=selected_font(n.style);if(!draw||!font)return;
-    const float pixels=n.style==VisualStyle::Wilds&&wilds_font?n.pixels*wilds_font_scale:n.pixels;
+    const float pixels=n.style!=VisualStyle::Classic&&wilds_font?n.pixels*wilds_font_scale:n.pixels;
     auto text=[&](float x,float y,uint32_t color) {
+        const int first=draw->VtxBuffer.Size;
         ImDrawList_AddText_FontPtr(draw,font,pixels,{n.position.x+x,n.position.y+y},color,n.text,nullptr,0,nullptr);
+        if(n.style==VisualStyle::Rise) for(int i=first;i<draw->VtxBuffer.Size;++i)
+            draw->VtxBuffer.Data[i].pos.x=n.position.x+(draw->VtxBuffer.Data[i].pos.x-n.position.x)*rise_glyph_width;
     };
     const uint32_t color=imgui_color(n.color,n.opacity);
     if(n.style==VisualStyle::Classic) {
@@ -119,8 +171,8 @@ void cosmetics_draw(void* list,const DrawNumber& n) {
         return;
     }
     glyph_effects(draw,n,font,pixels);
-    const float stroke=.5f*n.pixels/base_pixels_720p;
-    const uint32_t edge=imgui_color(0x17130f,n.opacity*.9f);
+    const float stroke=n.style==VisualStyle::Rise?.10f*n.pixels:.5f*n.pixels/base_pixels_720p;
+    const uint32_t edge=imgui_color(n.style==VisualStyle::Rise?0:0x17130f,n.opacity*(n.style==VisualStyle::Rise?1:.9f));
     for(int x=-1;x<=1;++x)for(int y=-1;y<=1;++y)if(x||y) {
         const int first=draw->VtxBuffer.Size;
         text(0,0,edge);
@@ -132,7 +184,7 @@ void cosmetics_draw(void* list,const DrawNumber& n) {
         }
     }
     text(0,0,color);
-    if(n.critical==Critical::None)return;
+    if(n.style==VisualStyle::Rise||n.critical==Critical::None)return;
     // Procedural sprites include the complete colored bloom and pale core.
     const float scale=n.pixels*wilds_sprite_font_scale/60.0f*wilds_crit_scale;
     const float height=48*scale;
