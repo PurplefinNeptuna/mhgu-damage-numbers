@@ -2,6 +2,10 @@
 
 Current release: **r20**. Wilds crit stars are 1.5× their previous size; digits retain the 0.5 px dark outline and no gold halo. Fresh host/ARM/static checks passed; no new gameplay test was run. Earlier manual reports retain their original version. See [crit-size validation](CRIT_SIZE.md) and [r19 readability validation](READABILITY.md) and [development workflow](DEVELOPMENT.md).
 
+Proposed Rise style: [implementation handoff](RISE_IMPLEMENTATION_HANDOFF.md),
+with agreed behavior and remaining preview choices. Research only; Rise is not
+part of the r20 runtime.
+
 ## Build this mod
 
 Run `./build.sh doctor`, `./build.sh prepare`, `./build.sh build`,
