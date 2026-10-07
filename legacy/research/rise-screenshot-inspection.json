@@ -1,0 +1,394 @@
+{
+  "schema_version": 1,
+  "inspection_date": "2026-10-08",
+  "kind": "user screenshot research; runtime unchanged",
+  "source": "User-supplied hit_screenshots directory; paths below are relative to it",
+  "reported_capture_fps": 30,
+  "inputs": [
+    {
+      "path": "norm_orange/1.png",
+      "sha256": "93efe4ed0fc53a551ae7be567e0c234df404fd1f0a5dc69fa5a4bb79fbaf7473",
+      "dimensions": [
+        1919,
+        1080
+      ]
+    },
+    {
+      "path": "norm_orange/2.png",
+      "sha256": "461139c4bbde4dc68b55789da2a46a42c2c5f9a7f6b7c9a7fa77d5c0b8adb6a7",
+      "dimensions": [
+        1919,
+        1080
+      ]
+    },
+    {
+      "path": "norm_orange/3.png",
+      "sha256": "84966c87efa884868c4083756e31799e46846f842648a07295b76aee995bfa94",
+      "dimensions": [
+        1919,
+        1080
+      ]
+    },
+    {
+      "path": "norm_orange/before_go.png",
+      "sha256": "7cd750b75f303689eb39586b998265904abee2fed6e7acd8296bc2f24b96b34f",
+      "dimensions": [
+        1919,
+        1080
+      ]
+    },
+    {
+      "path": "positive_crit_orange/1.png",
+      "sha256": "135f75b93321f735a2013329aa4d2de7e71270d01aee788e836e404201ef1738",
+      "dimensions": [
+        1919,
+        1080
+      ]
+    },
+    {
+      "path": "positive_crit_orange/2.png",
+      "sha256": "03cfeff8183e3653f232753bc60e38ee5c3f4eff54fd5562c514d6a63e4f4979",
+      "dimensions": [
+        1919,
+        1080
+      ]
+    },
+    {
+      "path": "positive_crit_orange/3.png",
+      "sha256": "fd7201b45821f68b3e8a2f95e6a7d50eaf40ad8f096537decf87562819e115e9",
+      "dimensions": [
+        1919,
+        1080
+      ]
+    },
+    {
+      "path": "positive_crit_orange/4.png",
+      "sha256": "b7ba41e1309b975e264bdef87aaef319460d50496ac6467df145db178a3a5016",
+      "dimensions": [
+        1919,
+        1080
+      ]
+    },
+    {
+      "path": "positive_crit_orange/5.png",
+      "sha256": "055c0fca8d22d08b8a8035528ebea13f1eab6cb0a1307450bcd20d29ed392c94",
+      "dimensions": [
+        1919,
+        1080
+      ]
+    },
+    {
+      "path": "positive_crit_orange/6.png",
+      "sha256": "153adcfc2778b4c6d648678a476737843c8dd364324c5d089dcadd74a29d5151",
+      "dimensions": [
+        1919,
+        1080
+      ]
+    },
+    {
+      "path": "positive_crit_orange/before_go.png",
+      "sha256": "fb9045357c9fd8b05a6d1beb9e64027f797f170d13a12b661a8c75ae1e877b79",
+      "dimensions": [
+        1919,
+        1080
+      ]
+    },
+    {
+      "path": "negative_crit_orange/1.png",
+      "sha256": "32eefa789a6597ef991ca091129411bbddfc3adbdbc6145f3afaae20c41be13d",
+      "dimensions": [
+        1919,
+        1080
+      ]
+    },
+    {
+      "path": "negative_crit_orange/2.png",
+      "sha256": "2d5127bc4bf46c07d45e59b5fab404ec597dda8ff5de316450d6be4ad141684e",
+      "dimensions": [
+        1919,
+        1080
+      ]
+    },
+    {
+      "path": "negative_crit_orange/3.png",
+      "sha256": "5174e49be55e23e3ecbc6042e5360f2567a73bd3a53f145b2b55b4a9e0e45d6d",
+      "dimensions": [
+        1919,
+        1080
+      ]
+    },
+    {
+      "path": "negative_crit_orange/4.png",
+      "sha256": "aa86152cd53fb25961fad2c3738c58e2a6c42cc93133212154a6cb3dd861d4fb",
+      "dimensions": [
+        1919,
+        1080
+      ]
+    },
+    {
+      "path": "negative_crit_orange/5.png",
+      "sha256": "475a5ba77771f285d7f9c3d76be9e872c93ba6b56fb04a5233fb3b8c710a0f2e",
+      "dimensions": [
+        1919,
+        1080
+      ]
+    },
+    {
+      "path": "negative_crit_orange/6.png",
+      "sha256": "08004157826850882cd131daf6c85a2b48682189aecc55695cfc9ba222a26115",
+      "dimensions": [
+        1919,
+        1080
+      ]
+    }
+  ],
+  "measurement_limits": [
+    "Orange ROIs include antialiasing and possible reticle interference; bboxes are approximate fill extents, not full glyph metrics.",
+    "before_go is a user-labeled exit transition sample, not necessarily adjacent to the previous numbered PNG.",
+    "Slash fits use colored glow medians above the hit, not exact engine geometry; bloom affects the positive estimate.",
+    "Only one positive and one negative crit are supplied; the random angle range/distribution is unverified.",
+    "No full exit sequence or hold timestamps are supplied; total lifetime and runtime clip tick rate are unmeasured.",
+    "Orange is the only measured digit color; shared motion for other colors is user direction.",
+    "Local Rise size-mod activation and effective render scaling are unverified."
+  ],
+  "orange_mask": "R>170, 145<G<205, B<65; exclusive maximum coordinates",
+  "exit_bounce": [
+    {
+      "group": "norm_orange",
+      "settled_sample": "3.png",
+      "exit_sample": "before_go.png",
+      "roi_xyxy": [
+        954,
+        548,
+        1008,
+        590
+      ],
+      "settled_orange_bbox_xyxy": [
+        961,
+        551,
+        999,
+        580
+      ],
+      "exit_orange_bbox_xyxy": [
+        960,
+        555,
+        999,
+        585
+      ],
+      "top_delta_pixels": 4,
+      "bottom_delta_pixels": 5
+    },
+    {
+      "group": "positive_crit_orange",
+      "settled_sample": "6.png",
+      "exit_sample": "before_go.png",
+      "roi_xyxy": [
+        940,
+        520,
+        991,
+        561
+      ],
+      "settled_orange_bbox_xyxy": [
+        945,
+        524,
+        984,
+        554
+      ],
+      "exit_orange_bbox_xyxy": [
+        945,
+        528,
+        983,
+        557
+      ],
+      "top_delta_pixels": 4,
+      "bottom_delta_pixels": 3
+    }
+  ],
+  "slash_fits": [
+    {
+      "path": "positive_crit_orange/3.png",
+      "roi_xyxy": [
+        800,
+        120,
+        1120,
+        450
+      ],
+      "colored_rows": 201,
+      "retained_rows": 201,
+      "dx_per_downward_pixel": 0.2575,
+      "angle_from_downward_vertical_degrees": 14.44,
+      "p95_horizontal_fit_residual_pixels": 5.35
+    },
+    {
+      "path": "positive_crit_orange/4.png",
+      "roi_xyxy": [
+        800,
+        120,
+        1120,
+        450
+      ],
+      "colored_rows": 330,
+      "retained_rows": 329,
+      "dx_per_downward_pixel": 0.2332,
+      "angle_from_downward_vertical_degrees": 13.13,
+      "p95_horizontal_fit_residual_pixels": 6.82
+    },
+    {
+      "path": "positive_crit_orange/5.png",
+      "roi_xyxy": [
+        800,
+        120,
+        1120,
+        450
+      ],
+      "colored_rows": 330,
+      "retained_rows": 330,
+      "dx_per_downward_pixel": 0.2279,
+      "angle_from_downward_vertical_degrees": 12.84,
+      "p95_horizontal_fit_residual_pixels": 5.95
+    },
+    {
+      "path": "negative_crit_orange/3.png",
+      "roi_xyxy": [
+        800,
+        120,
+        1120,
+        450
+      ],
+      "colored_rows": 138,
+      "retained_rows": 138,
+      "dx_per_downward_pixel": -0.1388,
+      "angle_from_downward_vertical_degrees": -7.9,
+      "p95_horizontal_fit_residual_pixels": 1.01
+    },
+    {
+      "path": "negative_crit_orange/4.png",
+      "roi_xyxy": [
+        800,
+        120,
+        1120,
+        450
+      ],
+      "colored_rows": 330,
+      "retained_rows": 330,
+      "dx_per_downward_pixel": -0.1337,
+      "angle_from_downward_vertical_degrees": -7.62,
+      "p95_horizontal_fit_residual_pixels": 1.81
+    },
+    {
+      "path": "negative_crit_orange/5.png",
+      "roi_xyxy": [
+        800,
+        120,
+        1120,
+        450
+      ],
+      "colored_rows": 324,
+      "retained_rows": 324,
+      "dx_per_downward_pixel": -0.1345,
+      "angle_from_downward_vertical_degrees": -7.66,
+      "p95_horizontal_fit_residual_pixels": 1.02
+    }
+  ],
+  "outline_row_profile": {
+    "path": "norm_orange/before_go.png",
+    "y": 566,
+    "pixels": [
+      {
+        "x": 996,
+        "rgb": [
+          223,
+          176,
+          30
+        ]
+      },
+      {
+        "x": 997,
+        "rgb": [
+          202,
+          165,
+          45
+        ]
+      },
+      {
+        "x": 998,
+        "rgb": [
+          109,
+          87,
+          12
+        ]
+      },
+      {
+        "x": 999,
+        "rgb": [
+          9,
+          2,
+          0
+        ]
+      },
+      {
+        "x": 1000,
+        "rgb": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "x": 1001,
+        "rgb": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "x": 1002,
+        "rgb": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "x": 1003,
+        "rgb": [
+          6,
+          0,
+          0
+        ]
+      },
+      {
+        "x": 1004,
+        "rgb": [
+          32,
+          24,
+          4
+        ]
+      },
+      {
+        "x": 1005,
+        "rgb": [
+          44,
+          38,
+          12
+        ]
+      }
+    ],
+    "interpretation": "Gold/antialiased edge at x996-998, near-black band x999-1003, then background transition. Roughly 4-5 px dark edge at this row."
+  },
+  "visual_observations": {
+    "normal": "38; common blue-white burst in 1/2, orange digits with thick black edge in 3 and before_go; no long crit slash.",
+    "positive": "48; red glow with bright pale core in 3/4, thin fading slash in 5, beam gone in 6; digits stay orange.",
+    "negative": "58; purple/violet glow with bright pale core in 3/4, thin fading slash in 5, beam gone in 6; older nearby 78 is a separate event.",
+    "slash_geometry": "Long tapered streak through the impact, behind digits, extending much farther above than below; longest samples are clipped by top screen edge."
+  },
+  "mhgu_design_direction": {
+    "omit": "Shared blue-white hit flash in first two samples; MHGU already supplies hit effects. Preserve digit entrance.",
+    "digits": "Broad rendered digits with thick nearly solid black outline and lightly softened outer edge; calibrate full outlined glyphs.",
+    "motion": "Grow/shrink/settle, hold, small +4 reference-unit downward kick at exit, then upward alpha fade; time based, not one rendered frame at every FPS.",
+    "affinity": "Red positive slash, purple negative slash, none for noncrit; digit palette remains independent of affinity.",
+    "angle": "Proposed slope s in [-3/8,+3/8], approximately +/-20.56 degrees. Choose once per hit; upward direction (s,-1) needs no trig.",
+    "other_colors": "Share animation and outline behavior, per user direction; retain existing MHGU damage-color classification."
+  }
+}

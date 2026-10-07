@@ -42,7 +42,8 @@
     "style": "DB",
     "weight": 600,
     "slot": "Slot1",
-    "decrypted_sha256": "f8938990b20efddd35db433ae8f1f9db381fb4ed6f3203eabe6ff1a73e96bcae"
+    "decrypted_sha256": "f8938990b20efddd35db433ae8f1f9db381fb4ed6f3203eabe6ff1a73e96bcae",
+    "rendering_followup": "2026-10-08 user hit screenshots show broad outlined digits and a thick nearly solid black edge. Unoutlined FreeType advances do not justify selecting a narrower replacement face. See rise-screenshot-inspection.json."
   },
   "list": {
     "source_url": "https://raw.githubusercontent.com/Ekey/REE.PAK.Tool/main/Projects/MHR_STM_Release.list",

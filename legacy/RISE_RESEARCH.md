@@ -1,7 +1,8 @@
 # Rise damage-number feasibility
 
 Inspected 2026-10-07 against the supplied Steam Rise installation and the
-current MHGU Damage Numbers r20 source. A Rise style is feasible within the
+current MHGU Damage Numbers r20 source; updated 2026-10-08 with the user's
+30 fps hit screenshots. A Rise style is feasible within the
 existing Forge plugin. Its damage capture, ownership, camera projection and
 individual-hit queue already supply the required data. The work belongs in
 presentation, font/effects and settings; no additional native damage hooks are
@@ -10,7 +11,10 @@ needed for the proposed appearance.
 This is a research result. No runtime code, accepted NRO, release package,
 installed mod, emulator configuration or save was changed. Neither game was
 launched. [Inspection record](research/rise-ui-inspection.json) retains the
-resource locations, hashes, decoded curves and evidence limits.
+resource locations, hashes, decoded curves and evidence limits. The
+[screenshot record](research/rise-screenshot-inspection.json) adds hashes for
+all 17 supplied PNGs, approximate pixel measurements and corrected design
+directions.
 
 ## What Rise contains
 
@@ -34,10 +38,14 @@ false. Rise therefore uses its glow facility for the dark text edge; the word
 "glow" here does not imply a persistent colored halo. The animation briefly
 changes the glow color before settling back to black.
 
-The native font is narrower than r20's Open Sans Semibold. At the same measured
-48-pixel ink height, FreeType advances for `0123456789` are 303.4375 pixels for
-Rise and 365.9375 for r20, a ratio of about 0.829. This measures font geometry;
-it does not establish matching pixels between FreeType, Forge/STB and RE Engine.
+At the same measured 48-pixel ink height, unoutlined FreeType advances for
+`0123456789` are 303.4375 pixels for the extracted font and 365.9375 for r20,
+a ratio of about 0.829. This measures isolated font geometry. The supplied
+screenshots show broad rendered digits with thick black outlines. My earlier
+recommendation to choose a narrower face from that preview was incorrect;
+judge glyph shape and width with the complete outline at the target scale.
+The native font-slot identity above remains an asset finding, while matching
+FreeType, Forge/STB and RE Engine pixels remains unverified.
 
 ## Authored animation
 
@@ -82,16 +90,93 @@ the native conditions for each display type.
 The saved configuration says enabled and sets all width/height multipliers to
 0.6. Loading/activation was not verified. Consequently, a later comparison
 with this installation must distinguish stock asset values from the user's
-potentially reduced display size. Existing screenshot samples inspected were
-cinematic/scenery views and did not verify damage-number rendering.
+potentially reduced display size. The new hit screenshots establish rendered
+appearance for their capture, without establishing whether this size mod was
+active.
+
+## User's 30 fps hit screenshots
+
+Inspected all 17 supplied 1919 by 1080 PNGs in `hit_screenshots`: four
+`norm_orange` samples (38), seven `positive_crit_orange` samples (48) and six
+`negative_crit_orange` samples (58). The older 78 beside the negative crit is
+a separate number already rising/fading; it must not be used to measure 58's
+entrance, scale or anchor. Numbered filenames identify samples; `before_go`
+is the user's exit-transition marker and has no timestamp or guaranteed
+adjacency to the previous numbered file.
+
+| Samples | Observed effect |
+| --- | --- |
+| 1 and 2, all three groups | Shared blue-white impact burst/horizontal flare; digits are strongly washed out, with a transient orange/red edge in sample 2 |
+| Noncrit 3 | Orange digits with thick black outline, no long crit slash |
+| Positive 3 and 4 | Long red glow slash with bright pale core behind the orange digits; sample 4 reaches beyond the top screen edge |
+| Negative 3 and 4 | Long violet/purple glow slash with bright pale core behind the orange digits; sample 4 reaches beyond the top screen edge |
+| Both crits 5 | Thin residual slash and sparks as the beam fades |
+| Both crits 6 | Long beam gone; orange digits remain |
+
+The crit effect stretches through the impact, with considerably more length
+above it than below. It expands/brightens and then thins/fades. Its short
+lifetime is independent of the number's later hold/exit. Assuming consecutive
+30 fps numbered samples, the three intervals from 3 to 6 cover approximately
+100 ms; this does not establish a complete native effect duration. These
+screenshots locate the slash in the rendered scene but do not identify which
+native GUI/effect resource creates it. A single slash direction per polarity
+does not show a polarity-specific lean rule.
+
+Colored beam fits above the impact estimate the positive sample at roughly
+13 degrees from vertical and the negative sample at roughly 8 degrees, leaning
+opposite ways. Bloom makes the positive fit less precise. The two hits are
+consistent with the user's proposed approximate +/-20 degree range, but do
+not establish its endpoints, distribution or whether the game randomizes it.
+
+At `before_go`, the masked orange top moves down 4 pixels in both the normal
+and positive samples; the bottom moves down 5 and 3 pixels respectively.
+Antialiasing and reticle overlap limit precision. This agrees with the decoded
+exit transition from main y=0 to exit y=+4, followed by upward motion toward
+-50 with fading alpha. Reproduce the brief downward kick before the rise;
+use elapsed time so it resembles one 30 fps sample without changing speed
+with the emulator's frame rate. The supplied set has no complete exit tail
+and does not measure the hold duration or native animation tick rate.
+
+The normal exit sample has roughly 30 pixels of orange fill height. A scan
+through the right edge of its 8 at y=566 has gold/antialiased pixels at x996-998,
+a near-black band at x999-1003, then the background transition. This gives an
+approximate 4-5 pixel dark edge at that row, around 13-17% of fill height as a
+starting proportion for previews. It is a thick nearly solid outline with a
+lightly softened outside edge; r20's 0.5 px outline is insufficient as a Rise
+reference. This local scan is not an exact global stroke radius or proof of
+stock scaling. Font preview candidates must include the outline, counters,
+spacing and overall outlined width, including multi-digit numbers.
+
+Orange survives unchanged across noncrit, positive and negative examples;
+affinity is expressed by the separate slash. Only orange was supplied.
+Shared motion and outline behavior for the other colors is the user's design
+direction, not a measurement of additional color samples.
 
 ## Proposed MHGU implementation
 
 Add `Rise` as a third style while retaining the accepted Wilds and Classic
-choices. Keep the current capture and finalized totals. Use a narrower open
-digit face or independently authored digits, the measured white/orange
-palette, black soft edge, brief entrance flash, bounce/hold/rise/fade sequence
-and style-specific maximum bounds for collision placement.
+choices. Keep the current capture and finalized totals. Use an open digit face
+or independently authored digits calibrated to the screenshots' broad shapes
+and thick black outlines, the measured white/orange palette, entrance size
+bounce, hold, downward exit kick and upward fade. Reserve style-specific
+maximum outlined dimensions for collision placement.
+
+Per the user's direction, omit the blue-white impact flash visible in the
+first two samples: MHGU already has its own hit effects. Keep the digit
+entrance animation and use a black outline; suppressing the hit flash must
+not hide or delay the number. Positive/negative affinity can select an
+independently authored red/purple tapered slash with a pale core and fading
+colored glow behind the digits. Noncrit gets no slash. The short effect
+expires separately from the held number; do not carry it into the exit fade.
+
+For the proposed approximate angle range, choose slope `s` in `[-3/8,+3/8]`
+once per hit and retain it for the effect's lifetime. An upward vector `(s,-1)`
+has a maximum tilt `atan(3/8)`, approximately 20.56 degrees. Build endpoints
+as `(x+s*dy, y-dy)`, and a perpendicular along `(1,s)`; normalize once per hit
+if consistent physical width/length is needed. This avoids per-frame sine,
+cosine or degree conversion. Radians alone do not remove that work. An
+existing stable hit identity can seed a small hash for varied tilts, separate
+from polarity. This is a proposed approximation, not a recovered Rise RNG.
 
 The proposed initial rule is to retain MHGU's physical HZV >=45 selection for
 orange and confirmed-bounce selection for gray. This is an MHGU design choice,
@@ -106,9 +191,9 @@ Implementation points:
 - `src/model.h`: new style value and palette; distinguish HZV from affinity.
 - `src/presentation.h`: Rise motion, larger orange bounds, anchor alignment and
   maximum entrance dimensions; retain fixed per-hit placement.
-- `src/cosmetics.cpp`: digit font, black edge and flash. Existing Forge/ImGui
+- `src/cosmetics.cpp`: digit font, thick black outline and red/purple slash. Existing Forge/ImGui
   font, texture and draw facilities cover these operations. An independently
-  generated alpha texture can approximate the blur; matching RE Engine's blur
+  generated alpha texture can provide the softened edge/glow; matching RE Engine's blur
   and blend math requires renderer comparison.
 - `src/settings.h` and `src/capture.cpp`: encode/decode `style=rise`, extend the
   style selector, and retain existing version-2 preferences.
@@ -133,8 +218,22 @@ limitation still needs to be considered when assessing a live visual defect.
 Ignored local research files are under `work/damage-numbers/rise-research/` in
 the coordinating workspace: extraction script and path list, source copies,
 GUI/CLIP inspection scripts, decoded attributes/keys, compressed-range hashes
-and `font-reference.png`. The PNG shows extracted glyphs and the settled
-palette, without simulating engine effects. They are not export dependencies.
+and `font-reference.png`. That PNG shows unoutlined extracted glyphs and the
+settled palette; use the user screenshots to judge actual presentation.
+Inputs and generated crop sheets remain local research references, outside
+source exports.
+
+Reproduce the screenshot measurements from the independently exportable mod
+folder, supplying a copy of the user's screenshot directory:
+
+```sh
+python3 scripts/inspect_rise_hit_screenshots.py /path/to/hit_screenshots /tmp/rise-screenshot-inspection.json
+```
+
+The script uses sample-specific ROIs and color masks, records input hashes,
+and leaves PNGs untouched. It is an analysis helper, not a general HUD detector
+or an automated gameplay test. Outline thickness and phase descriptions still
+require visual interpretation.
 
 The parser checks GUI/CLIP magic/version, table dimensions, property/key bounds,
 and decoded sizes. The final three relevant copies were rehashed against their
