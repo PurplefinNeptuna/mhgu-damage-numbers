@@ -1,6 +1,6 @@
 # Damage numbers
 
-Current release: **r23-config2**, with Rise, Wilds and Classic styles and
+Current release: **r24-savehint**, with Rise, Wilds and Classic styles and
 primary-only configs. [Release details](RELEASE.md) and [installation guide](DISTRIBUTION_README.md).
 The preceding r22-config1 release was confirmed on Eden on 2026-10-08.
 This config simplification has host/ARM32 validation; no fresh game run is claimed.
@@ -103,7 +103,7 @@ The compact **Damage numbers** tree under Forge's **Plugin UI** starts closed.
 It contains enable, Style, Number size, Duration, Save settings, Restore defaults
 and brief preference feedback. Runtime failures use concise Forge logs. Rendering continues while the panel is closed.
 
-Settings use only `savedata:/damage_numbers.ini`, beside Better Input. The INI requires
+Settings use only `savedata:/damage_numbers.ini`, in the root of MHGU's player save folder. The INI requires
 `enabled`, `style`, `scale` and `lifetime`, within 255 bytes. No version marker
 is written or required. Existing files with `version=2` still load their settings;
 the marker is omitted on the next explicit save. Obsolete setting keys are rejected. Missing or invalid primary files

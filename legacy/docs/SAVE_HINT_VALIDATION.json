@@ -1,0 +1,62 @@
+{
+  "status": "PASSED_STRING_ONLY_CHANGE",
+  "nro_sha256": "2c0e89e721ea50e0d0b4f9962d2d694c28f9d8cbec1069f8de37caadd8e53e5b",
+  "success_message": "Saved damage_numbers.ini in MHGU's save folder",
+  "previous_version": "r23-config2",
+  "objects": {
+    "plugin": {
+      "old_sha256": "4a9f253dfab1f6f5602be58999975eeec470af2559820818804ddd054402ffa4",
+      "new_sha256": "4a9f253dfab1f6f5602be58999975eeec470af2559820818804ddd054402ffa4",
+      "object_identical": true
+    },
+    "capture": {
+      "old_sha256": "f49fe791a9168b5f8136c2b144afe505afffd40ea2e15f5ce84073403724cc86",
+      "new_sha256": "f49fe791a9168b5f8136c2b144afe505afffd40ea2e15f5ce84073403724cc86",
+      "object_identical": true
+    },
+    "settings": {
+      "old_sha256": "b03694be1b8a8a4c0b8dda8bd08cdb50b0ffcded45f0c9d7ca10d88544136c01",
+      "new_sha256": "e9b57b05aa9b3b84900e584b70460e926a47a13d3c3bfeae57d872cd900cfd0b",
+      "object_identical": false,
+      "instructions_and_relocation_targets_identical": true
+    },
+    "cosmetics": {
+      "old_sha256": "cdf046c5ae2115e373d6ead09c8d70baca5692a8c78f791905dffb0415f38520",
+      "new_sha256": "cdf046c5ae2115e373d6ead09c8d70baca5692a8c78f791905dffb0415f38520",
+      "object_identical": true
+    },
+    "native_platform": {
+      "old_sha256": "c7630d59d2141ca2ae141796f69f545de753e25c10605d7bf8eed2054ff270dd",
+      "new_sha256": "c7630d59d2141ca2ae141796f69f545de753e25c10605d7bf8eed2054ff270dd",
+      "object_identical": true
+    },
+    "gateway": {
+      "old_sha256": "27b75aed456806fbd72725cce7cae4fcf7f01413568ff745da4f8c91ddd6e05b",
+      "new_sha256": "27b75aed456806fbd72725cce7cae4fcf7f01413568ff745da4f8c91ddd6e05b",
+      "object_identical": true
+    },
+    "start": {
+      "old_sha256": "028e4c0e2b8cfe455d0b9c39e45d39b5de3b0852b2365021c550b82c564cd063",
+      "new_sha256": "028e4c0e2b8cfe455d0b9c39e45d39b5de3b0852b2365021c550b82c564cd063",
+      "object_identical": true
+    },
+    "svc": {
+      "old_sha256": "8a5a2ff229be2518c241086f7524bfe1fc2fdcee1b902526efe0d4b0c68d4786",
+      "new_sha256": "8a5a2ff229be2518c241086f7524bfe1fc2fdcee1b902526efe0d4b0c68d4786",
+      "object_identical": true
+    }
+  },
+  "compiled_capture_rerun": false,
+  "scope": "Host production persistence plus unchanged instructions/relocation targets and identical other native objects; no fresh GPU/gameplay test",
+  "date": "2026-10-08",
+  "version": "r24-savehint",
+  "installed": false,
+  "published": false,
+  "native_source_change": "src/settings.cpp: success string only",
+  "public_guides": "MHGU player save folder and this plugin INI; no Better Input location reference",
+  "reports": {
+    "runtime-policy.json": "ade8accde6acfd102ed98ca171bcd91eed347f95129c029cdd9ff1ab9066a651",
+    "open-assets/asset-audit.json": "9220b1c17df4b3ae71a54dece2245ae62052d7c9cefb7b6fd1429728ec8ec5f8",
+    "open-assets/ge-compatibility.json": "e7c357329a6ed79c22d5fb6c7e158b6e47b77ff01ab3281bf4096d1a4e39fdad"
+  }
+}

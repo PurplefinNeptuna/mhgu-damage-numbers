@@ -2,22 +2,22 @@
   "schema_version": 1,
   "mod": "damage-numbers",
   "status": "READY_TO_DISTRIBUTE",
-  "reason": "Validated config simplification requested by the user; no version marker is required or saved. Previous runtime acceptance remains scoped to r22-config1.",
+  "reason": "Standalone save-location wording requested by the user; UI and public guides name the plugin INI and MHGU save folder. Persistence and gameplay behavior are unchanged.",
   "publication": {
     "published": false,
     "url": null,
     "date": null
   },
-  "version": "r23-config2",
+  "version": "r24-savehint",
   "package_name": "damage-number",
-  "archive": "damage-numbers-r23-config2.zip",
+  "archive": "damage-numbers-r24-savehint.zip",
   "approval": {
     "date": "2026-10-08",
-    "basis": "User requested removal of unnecessary INI versions for Damage Numbers and Please do Better; existing ready status retained after host/ARM32 validation."
+    "basis": "User reported Better Input save wording was confusing for standalone use; ready status retained after scoped validation of the wording correction."
   },
   "target": "MHGU Nintendo Switch 1.4.0; Forge 1.4.1 on the user-confirmed Eden/Linux setup.",
   "limitations": [
-    "This config simplification passed host/ARM32 fixtures but has no fresh in-game validation; prior user confirmation is for r22-config1.",
+    "Save-message wording validated by host/ARM32/static checks; not a new in-game test of this binary.",
     "User confirmation is scoped to the tested Eden setup; not exhaustive feature, persistence-restart, clean-shutdown, new Ryujinx or native Switch validation.",
     "Standard Forge builds without the multi-list renderer fix can blank/corrupt menus while dropdowns or overlays are active.",
     "Requires the audited MHGU 1.4.0 eight-site layout.",
@@ -33,37 +33,33 @@
   "support": {},
   "payloads": {
     "romfs/nativeNX/plugins/damage_numbers_capture.nro": {
-      "source": "build/damage-numbers/candidates/r23-config2/open-assets/candidate-package/romfs/nativeNX/plugins/damage_numbers_capture.nro",
-      "sha256": "31646800b1bbfb5aa80d0d968b60d1c171b4aebaa1e5662b473eaa2b530312b1"
+      "source": "build/damage-numbers/candidates/r24-savehint/open-assets/candidate-package/romfs/nativeNX/plugins/damage_numbers_capture.nro",
+      "sha256": "2c0e89e721ea50e0d0b4f9962d2d694c28f9d8cbec1069f8de37caadd8e53e5b"
     }
   },
   "evidence": {
     "static": [
-      "build/damage-numbers/candidates/r23-config2/open-assets/candidate-manifest.json",
-      "build/damage-numbers/candidates/r23-config2/open-assets/compiled-capture-probe.json",
-      "build/damage-numbers/candidates/r23-config2/open-assets/asset-audit.json",
-      "build/damage-numbers/candidates/r23-config2/open-assets/ge-compatibility.json",
-      "build/damage-numbers/candidates/r23-config2/open-assets/gateway-probe.json",
-      "build/damage-numbers/candidates/r23-config2/open-assets/compression-render-comparison.json",
-      "build/damage-numbers/candidates/r23-config2/open-assets/sprite-codec-test.json",
-      "build/damage-numbers/candidates/r23-config2/standalone-tests.json",
-      "build/damage-numbers/candidates/r23-config2/runtime-policy.json",
-      "mods/damage-numbers/docs/PRIMARY_ONLY_CONFIG_VALIDATION.json",
-      "mods/damage-numbers/docs/FORGE_RENDERER_VALIDATION.json",
-      "mods/damage-numbers/docs/CONFIG_WITHOUT_VERSION.json"
+      "build/damage-numbers/candidates/r24-savehint/open-assets/candidate-manifest.json",
+      "build/damage-numbers/candidates/r24-savehint/save-hint-validation.json",
+      "build/damage-numbers/candidates/r24-savehint/open-assets/asset-audit.json",
+      "build/damage-numbers/candidates/r24-savehint/open-assets/ge-compatibility.json",
+      "build/damage-numbers/candidates/r24-savehint/standalone-host.json",
+      "build/damage-numbers/candidates/r24-savehint/runtime-policy.json",
+      "mods/damage-numbers/docs/SAVE_HINT_VALIDATION.json"
     ],
     "manual": [
       "mods/damage-numbers/RUNTIME.md",
       "mods/damage-numbers/docs/CONFIG_RELEASE_RUNTIME.json"
     ],
-    "manual_summary": "No fresh game run; preceding r22-config1 user-confirmed Eden report remains scoped to those bytes.",
+    "manual_summary": "No new game run for the save-message correction. Earlier gameplay confirmation keeps its recorded version and bytes.",
     "static_summary": {
-      "compiled_capture_checks": 365,
-      "gateway_checks": 9287,
       "host_core_presentation_checks": 3315,
       "transactional_hook_scenarios": 23,
+      "compiled_capture_rerun": false,
+      "prior_compiled_capture_checks": 365,
+      "native_object_equivalence": "Seven identical native objects; settings instructions and relocation targets identical",
       "asset_audit": "PASSED_OPEN_ASSET_PROVENANCE",
-      "real_imgui_preview": "PASSED"
+      "imports_and_GE_audit": "PASSED"
     },
     "prior_runtime_confirmation": {
       "date": "2026-10-06",
@@ -75,11 +71,11 @@
       "scope": "User-confirmed gameplay on the two tested installations; not all emulator forks, exhaustive feature retesting or clean emulator shutdown."
     },
     "runtime_confirmation": {
-      "version": "r23-config2",
+      "version": "r24-savehint",
       "fresh_gameplay_test": false,
       "user_confirmed": false,
-      "nro_sha256": "31646800b1bbfb5aa80d0d968b60d1c171b4aebaa1e5662b473eaa2b530312b1",
-      "scope": "No fresh game run; preceding r22-config1 user-confirmed Eden report remains scoped to those bytes."
+      "nro_sha256": "2c0e89e721ea50e0d0b4f9962d2d694c28f9d8cbec1069f8de37caadd8e53e5b",
+      "scope": "No new game run for the save-message correction. Earlier gameplay confirmation keeps its recorded version and bytes."
     },
     "prior_dependencies": [
       {
@@ -106,7 +102,21 @@
       "eden": true,
       "nro_sha256": "c9e1f0740e12bb2806926ef985f575221aa2785384be6a064fd8181b47567f70",
       "scope": "User-confirmed tested Eden setup; screenshot shows visible Forge menu alongside PDB reward highlights. No exhaustive feature, save-restart, clean-shutdown, new Ryujinx or native Switch claim."
-    }
+    },
+    "previous_release_static": [
+      "build/damage-numbers/candidates/r23-config2/open-assets/candidate-manifest.json",
+      "build/damage-numbers/candidates/r23-config2/open-assets/compiled-capture-probe.json",
+      "build/damage-numbers/candidates/r23-config2/open-assets/asset-audit.json",
+      "build/damage-numbers/candidates/r23-config2/open-assets/ge-compatibility.json",
+      "build/damage-numbers/candidates/r23-config2/open-assets/gateway-probe.json",
+      "build/damage-numbers/candidates/r23-config2/open-assets/compression-render-comparison.json",
+      "build/damage-numbers/candidates/r23-config2/open-assets/sprite-codec-test.json",
+      "build/damage-numbers/candidates/r23-config2/standalone-tests.json",
+      "build/damage-numbers/candidates/r23-config2/runtime-policy.json",
+      "mods/damage-numbers/docs/PRIMARY_ONLY_CONFIG_VALIDATION.json",
+      "mods/damage-numbers/docs/FORGE_RENDERER_VALIDATION.json",
+      "mods/damage-numbers/docs/CONFIG_WITHOUT_VERSION.json"
+    ]
   },
   "dependencies": [
     {

@@ -68,7 +68,7 @@ bool settings_save(const Settings& value) {
         storage_status="Settings save failed; changes remain in this session"; report.reason=3; return false;
     }
     // Forge releases its counted save mount (and performs its normal commit).
-    storage_status="Settings saved beside Better Input";
+    storage_status="Saved damage_numbers.ini in MHGU's save folder";
     if (!have_saved || value.enabled!=saved.enabled || value.style!=saved.style || value.scale!=saved.scale || value.lifetime!=saved.lifetime)
         forge_log_info("[damage-numbers] Settings saved");
     saved=value;have_saved=true;return true;

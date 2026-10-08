@@ -11,7 +11,7 @@ MHGU 1.4.0 for Nintendo Switch and Forge 1.4.1.
 ## Installation
 
 1. Close the emulator.
-2. Extract `damage-numbers-r23-config2.zip`.
+2. Extract `damage-numbers-r24-savehint.zip`.
 3. Copy the `damage-number` folder into your MHGU mod directory:
    - Eden: `~/.local/share/eden/load/0100770008DD8000/`
    - Ryujinx: `mods/contents/0100770008dd8000/` inside its data directory.
@@ -32,8 +32,8 @@ critical slashes. The default is Wilds, with number size **1.0** and duration
 White digits indicate physical hitzone values below 45 or unknown values.
 Gold digits indicate 45 or higher. Bounced attacks appear gray.
 
-Select **Save settings** to keep your choices in `damage_numbers.ini` beside
-Better Input's config in player save storage. **Restore defaults** changes the
+Select **Save settings** to keep your choices in `damage_numbers.ini` in the
+root of your MHGU player save folder. **Restore defaults** changes the
 current settings; select **Save settings** afterward to keep the defaults.
 If saving fails, the current choices remain active for the session. Load a
 player save and retry **Save settings**.
@@ -45,7 +45,7 @@ You can change settings without opening Forge's menu.
 1. Stop the game. Use your emulator's save-folder option for MHGU to open the
    save folder for the user profile you play with.
 2. Open `damage_numbers.ini` in a plain text editor. It belongs in the root of
-   that save folder, beside Better Input's config. If it does not exist, create
+   that save folder. If it does not exist, create
    it there using the complete example below. Keep the filename exactly
    `damage_numbers.ini`, without an extra `.txt` extension.
 3. Edit the values, save the file, then launch MHGU and load your player save.
