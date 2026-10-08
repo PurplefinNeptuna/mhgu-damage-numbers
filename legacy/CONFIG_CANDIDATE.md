@@ -9,3 +9,10 @@ disk contents. Accepted r20 and r21-rise1 artifacts remain preserved.
 Outputs use `build/damage-numbers/candidates/r22-config1/`. Host and ARM32
 fixtures cover persistence; real save restart and Forge GPU acceptance are
 separate manual checks. This candidate is not installed or accepted.
+
+## Release promotion, 2026-10-08
+
+r22-config1 is now READY_TO_DISTRIBUTE following the user's tested-Eden
+confirmation. The preceding candidate-stage notes describe preparation before
+that report. The candidate NRO is preserved unchanged; the immutable release
+lives under `build/damage-numbers/releases/r22-config1/`. Forge remains LOCAL_ONLY.

@@ -1,12 +1,10 @@
 # Damage numbers
 
-Current release: **r20**. Wilds crit stars are 1.5× their previous size; digits retain the 0.5 px dark outline and no gold halo. Fresh host/ARM/static checks passed; no new gameplay test was run. Earlier manual reports retain their original version. See [crit-size validation](CRIT_SIZE.md) and [r19 readability validation](READABILITY.md) and [development workflow](DEVELOPMENT.md).
-
-Current config candidate: **r22-config1**, retaining the Rise style work from **r21-rise1**, [implementation and previews](RISE_CANDIDATE.md).
-The current source builds the candidate in isolated versioned outputs.
-`DISTRIBUTION.json` and the accepted delivery remain r20; the candidate is
-DEVELOPMENT, with no gameplay acceptance. [The handoff](RISE_IMPLEMENTATION_HANDOFF.md)
-records the agreed design and research limits.
+Current release: **r22-config1**, with Rise, Wilds and Classic styles and
+primary-only configs. [Release details](RELEASE.md) and [installation guide](DISTRIBUTION_README.md).
+The user confirmed the tested Eden setup on 2026-10-08. Forge remains LOCAL_ONLY.
+The versioned build outputs retain the `candidate` path setting to preserve
+previous artifacts; `DISTRIBUTION.json` is authoritative for release status.
 
 ## Build this mod
 

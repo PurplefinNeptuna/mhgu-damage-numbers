@@ -2,25 +2,25 @@
   "schema_version": 1,
   "mod": "damage-numbers",
   "status": "READY_TO_DISTRIBUTE",
-  "reason": "User selected the real-renderer 1.5x crit-size preview and requested a ready local release. Fresh host/ARM/static checks cover r20; no new gameplay run.",
+  "reason": "User confirmed the tested plugins work and requested ready-to-distribute promotion. Tested candidate runtime bytes are preserved.",
   "publication": {
     "published": false,
     "url": null,
     "date": null
   },
-  "version": "r20",
+  "version": "r22-config1",
   "package_name": "damage-number",
-  "archive": "damage-numbers-r20.zip",
+  "archive": "damage-numbers-r22-config1.zip",
   "approval": {
-    "date": "2026-10-07",
-    "basis": "Explicit user instruction: choose 1.5x crit size and make it ready to distribute directly."
+    "date": "2026-10-08",
+    "basis": "all works well, except forge-patched which is LOCAL_ONLY; promote the others to ready to distribute"
   },
-  "target": "MHGU Nintendo Switch 1.4.0; Eden/Linux and Ryujinx-based emulators with Forge; open assets only.",
+  "target": "MHGU Nintendo Switch 1.4.0; Forge 1.4.1 on the user-confirmed Eden/Linux setup.",
   "limitations": [
-    "r20 enlarged crits are host-rendered and statically/computationally validated; no separate Eden, Ryujinx or Switch gameplay run was performed.",
-    "Separate Forge overlay menu/popups corruption remains unresolved.",
-    "Requires Forge; only the audited MHGU 1.4.0 eight-site layout is supported.",
-    "Forge's known ImGui/background renderer issue remains disclosed and unchanged."
+    "User confirmation is scoped to the tested Eden setup; not exhaustive feature, persistence-restart, clean-shutdown, new Ryujinx or native Switch validation.",
+    "Standard Forge builds without the multi-list renderer fix can blank/corrupt menus while dropdowns or overlays are active; the tested render1 loader stays LOCAL_ONLY.",
+    "Requires the audited MHGU 1.4.0 eight-site layout.",
+    "Rise slashes are a screen-space approximation; viewport clipping does not provide scene occlusion."
   ],
   "readme": "mods/damage-numbers/DISTRIBUTION_README.md",
   "notices": [
@@ -29,37 +29,36 @@
     "mods/damage-numbers/OPEN_ART_LICENSE.txt",
     "mods/damage-numbers/THIRD_PARTY.md"
   ],
-  "support": {
-    "DEVELOPMENT.md": "mods/damage-numbers/DEVELOPMENT.md",
-    "READABILITY.md": "mods/damage-numbers/READABILITY.md",
-    "CRIT_SIZE.md": "mods/damage-numbers/CRIT_SIZE.md"
-  },
+  "support": {},
   "payloads": {
     "romfs/nativeNX/plugins/damage_numbers_capture.nro": {
-      "source": "build/damage-numbers/open-assets/candidate-package/romfs/nativeNX/plugins/damage_numbers_capture.nro",
-      "sha256": "318ee366acfd905451ddeec2c39d42b8587d24372f222ded3026907f8f9cc2c3"
+      "source": "build/damage-numbers/candidates/r22-config1/open-assets/candidate-package/romfs/nativeNX/plugins/damage_numbers_capture.nro",
+      "sha256": "c9e1f0740e12bb2806926ef985f575221aa2785384be6a064fd8181b47567f70"
     }
   },
   "evidence": {
     "static": [
-      "build/damage-numbers/open-assets/candidate-manifest.json",
-      "build/damage-numbers/open-assets/compiled-capture-probe.json",
-      "build/damage-numbers/open-assets/asset-audit.json",
-      "build/damage-numbers/open-assets/ge-compatibility.json",
-      "build/damage-numbers/open-assets/gateway-probe.json",
-      "build/damage-numbers/open-assets/compression-render-comparison.json",
-      "build/damage-numbers/open-assets/sprite-codec-test.json",
-      "build/damage-numbers/standalone-tests.json",
-      "build/damage-numbers/runtime-policy.json"
+      "build/damage-numbers/candidates/r22-config1/open-assets/candidate-manifest.json",
+      "build/damage-numbers/candidates/r22-config1/open-assets/compiled-capture-probe.json",
+      "build/damage-numbers/candidates/r22-config1/open-assets/asset-audit.json",
+      "build/damage-numbers/candidates/r22-config1/open-assets/ge-compatibility.json",
+      "build/damage-numbers/candidates/r22-config1/open-assets/gateway-probe.json",
+      "build/damage-numbers/candidates/r22-config1/open-assets/compression-render-comparison.json",
+      "build/damage-numbers/candidates/r22-config1/open-assets/sprite-codec-test.json",
+      "build/damage-numbers/candidates/r22-config1/standalone-tests.json",
+      "build/damage-numbers/candidates/r22-config1/runtime-policy.json",
+      "mods/damage-numbers/docs/PRIMARY_ONLY_CONFIG_VALIDATION.json",
+      "mods/damage-numbers/docs/FORGE_RENDERER_VALIDATION.json"
     ],
     "manual": [
-      "mods/damage-numbers/RUNTIME.md"
+      "mods/damage-numbers/RUNTIME.md",
+      "mods/damage-numbers/docs/CONFIG_RELEASE_RUNTIME.json"
     ],
-    "manual_summary": "The user approved the host real-renderer 1.5x positive/negative crit preview on a bright screenshot. This is visual-design acceptance, not a new gameplay run; historical r17 gameplay reports remain scoped to that payload.",
+    "manual_summary": "User-confirmed tested Eden setup; screenshot shows visible Forge menu alongside PDB reward highlights. No exhaustive feature, save-restart, clean-shutdown, new Ryujinx or native Switch claim.",
     "static_summary": {
-      "compiled_capture_checks": 347,
+      "compiled_capture_checks": 361,
       "gateway_checks": 9287,
-      "host_core_presentation_checks": 919,
+      "host_core_presentation_checks": 3302,
       "transactional_hook_scenarios": 23,
       "asset_audit": "PASSED_OPEN_ASSET_PROVENANCE",
       "real_imgui_preview": "PASSED"
@@ -74,9 +73,13 @@
       "scope": "User-confirmed gameplay on the two tested installations; not all emulator forks, exhaustive feature retesting or clean emulator shutdown."
     },
     "runtime_confirmation": {
-      "version": "r20",
-      "fresh_gameplay_test": false,
-      "scope": "Fresh host/ARM/static and renderer checks only; earlier runtime reports remain scoped to their original payloads."
+      "version": "r22-config1",
+      "date": "2026-10-08",
+      "fresh_gameplay_test": true,
+      "user_confirmed": true,
+      "eden": true,
+      "nro_sha256": "c9e1f0740e12bb2806926ef985f575221aa2785384be6a064fd8181b47567f70",
+      "scope": "User-confirmed tested Eden setup; screenshot shows visible Forge menu alongside PDB reward highlights. No exhaustive feature, save-restart, clean-shutdown, new Ryujinx or native Switch claim."
     },
     "prior_dependencies": [
       {
@@ -88,9 +91,14 @@
   },
   "dependencies": [
     {
-      "name": "forge-patched",
+      "name": "forge-patched 1.4.1-render1",
+      "sha256": "f22f4be84163deba14a2bd086d76065a4baa0b3943aba78b5c1aac15f2f94eee",
+      "scope": "External LOCAL_ONLY loader used in the tested Eden setup; not bundled. Its renderer fix permits menu/dropdowns and gameplay overlays together."
+    },
+    {
+      "name": "Forge 1.4.1 compiler/import baseline",
       "sha256": "9d472d56f81f834f366171426dbd0131af19c7697e132c731c3fd3f335af53d0",
-      "scope": "Current pinned compiler/import-validation input; external maintained loader, not bundled. Known renderer limitation unchanged."
+      "scope": "Unchanged pinned build/import-validation input; runtime also resolves against render1."
     }
   ]
 }

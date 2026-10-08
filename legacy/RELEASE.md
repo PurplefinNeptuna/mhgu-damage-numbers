@@ -1,19 +1,21 @@
-# Damage numbers r20
+# Damage Numbers r22-config1
 
-Local delivery: `build/damage-numbers/releases/r20/damage-numbers-r20.zip`.
-The named `damage-number` package contains one plugin NRO. Keep its adjacent
-README, notices, release manifest and checksums with it.
+READY_TO_DISTRIBUTE, locally packaged and unpublished. The release preserves the
+tested candidate NRO SHA-256
+`c9e1f0740e12bb2806926ef985f575221aa2785384be6a064fd8181b47567f70`.
+ZIP: `build/damage-numbers/releases/r22-config1/damage-numbers-r22-config1.zip`.
 
-Wilds positive and negative crit stars use the selected 1.5× size. Their solid
-placement bounds grow to match, while the core gap from the digits is unchanged.
-R19's 0.5 px outline and removed gold halo are retained. Font, digit colors,
-shadow, crit artwork, animation and Classic appearance are unchanged.
+Includes Wilds, Classic and Rise, retaining the r21 Rise visual work and r20
+Wilds rendering. Configs use only the primary INI with explicit saves; old
+backups are unused. Host and ARM32 persistence failures, 361 compiled capture
+checks, GE/import/asset audits and standalone byte parity passed.
 
-Fresh host, compiled ARM32, ABI/import, GE, asset and real-renderer fixtures
-passed. [Crit-size evidence](CRIT_SIZE.md) describes the checks and limits.
-No new gameplay run was performed; earlier reports retain their original
-payload/version. Forge's known menu/background issue remains unresolved.
-Forge is a separate dependency. This work did not install, activate or publish.
+The user reported the tested plugins working on Eden on 2026-10-08 and requested
+promotion. Installed bytes match this payload. [Runtime scope](RUNTIME.md) and
+[release evidence](docs/CONFIG_RELEASE_RUNTIME.json) distinguish that report
+from exhaustive testing or new Ryujinx validation. Forge render1 stays LOCAL_ONLY
+and is an external dependency. Distribution preparation rebuilds no runtime and
+performs no installation, activation, publication or push.
 
-The immutable r19 delivery and prior build evidence are preserved under
-`backups/damage-numbers/crit-size-r20-20261007/`, with per-file hashes.
+The previous r20 delivery is preserved byte-for-byte under
+`backups/release-promotion-20261008/`, with verified hashes.

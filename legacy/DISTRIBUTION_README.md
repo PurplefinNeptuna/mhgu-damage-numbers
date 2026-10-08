@@ -1,41 +1,45 @@
 # Damage Numbers
 
 Displays a separate damage number at each impact, including elemental damage,
-attacks from your hunter or Prowler and Palicoes, bombs, and monster-to-monster
+attacks from your hunter or Prowler and Palicoes, bombs and monster-to-monster
 hits.
 
 ## Requirements
 
-MHGU 1.4.0 for Nintendo Switch and Forge 1.4.1.
+MHGU 1.4.0 for Nintendo Switch and Forge 1.4.1. Use Forge 1.4.1-render1 for
+visible dropdowns and menus while gameplay overlays are active.
 
 ## Installation
 
 1. Close the emulator.
-2. Extract `damage-numbers-r20.zip`.
+2. Extract `damage-numbers-r22-config1.zip`.
 3. Copy the `damage-number` folder into your MHGU mod directory:
    - Eden: `~/.local/share/eden/load/0100770008DD8000/`
    - Ryujinx: `mods/contents/0100770008dd8000/` inside its data directory.
 4. Enable `damage-number` in the emulator and launch the game.
 
+To update, replace the existing `damage-number` folder with the extracted folder.
+To remove the mod, disable or remove `damage-number` in the emulator's mod directory.
+
 ## Settings
 
 Open **Plugin UI > Damage numbers** in Forge's overlay.
 
-The default appearance is Wilds style, with number size **1.0** and duration
-**0.9 seconds**. Adjust the size and duration to suit your screen, or select
-Classic style for outlined numbers with straight critical-hit markers.
-
-Wilds style uses outlined digits and glowing critical stars. Numbers settle
-into place, then rise and fade. Positive critical stars appear above the number;
-negative stars appear below it.
+Choose Wilds, Classic or Rise style. Wilds uses outlined digits and glowing
+critical stars; Classic uses straight critical-hit markers; Rise uses slanted
+critical slashes. The default is Wilds, with number size **1.0** and duration
+**0.9 seconds**. Adjust size and duration to suit your screen.
 
 White digits indicate physical hitzone values below 45 or unknown values.
 Gold digits indicate 45 or higher. Bounced attacks appear gray.
 
-Select **Save settings** to keep your choices. **Restore defaults** resets the
+Select **Save settings** to keep your choices in `damage_numbers.ini` beside
+Better Input's config in player save storage. **Restore defaults** changes the
 current settings; select **Save settings** afterward to keep the defaults.
+If saving fails, the current choices remain active for the session. Load a
+player save and retry **Save settings**.
 
-## Known issue
+## Compatibility
 
-Forge's menu can show visual corruption while damage popups are visible.
-Close the overlay menu when playing.
+Older Forge loaders can blank or corrupt the menu while dropdowns or damage
+popups are visible. Use Forge 1.4.1-render1 for these menus and overlays together.
