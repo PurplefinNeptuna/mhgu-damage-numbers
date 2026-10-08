@@ -11,7 +11,7 @@ MHGU 1.4.0 for Nintendo Switch and Forge 1.4.1.
 ## Installation
 
 1. Close the emulator.
-2. Extract `damage-numbers-r24-savehint.zip`.
+2. Extract `damage-numbers-r25.zip`.
 3. Copy the `damage-number` folder into your MHGU mod directory:
    - Eden: `~/.local/share/eden/load/0100770008DD8000/`
    - Ryujinx: `mods/contents/0100770008dd8000/` inside its data directory.
@@ -27,7 +27,9 @@ Open **Plugin UI > Damage numbers** in Forge's overlay.
 Choose Wilds, Classic or Rise style. Wilds uses outlined digits and glowing
 critical stars; Classic uses straight critical-hit markers; Rise uses slanted
 critical slashes. The default is Wilds, with number size **1.0** and duration
-**0.9 seconds**. Adjust size and duration to suit your screen.
+**0.9 seconds**. At size **1.0** and 1080p, Wilds and Classic use a 36 px
+base; Rise uses a 30 px base, enlarged to 42 px for gold weak-point numbers.
+Sizes scale with screen height. Adjust size and duration to suit your screen.
 
 White digits indicate physical hitzone values below 45 or unknown values.
 Gold digits indicate 45 or higher. Bounced attacks appear gray.

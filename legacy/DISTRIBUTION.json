@@ -2,22 +2,22 @@
   "schema_version": 1,
   "mod": "damage-numbers",
   "status": "READY_TO_DISTRIBUTE",
-  "reason": "Standalone save-location wording requested by the user; UI and public guides name the plugin INI and MHGU save folder. Persistence and gameplay behavior are unchanged.",
+  "reason": "User-approved style bases: 24 px Wilds/Classic and 20 px Rise at 720p. Built and locally packaged r25; additional test suites and gameplay skipped at user request.",
   "publication": {
     "published": false,
     "url": null,
     "date": null
   },
-  "version": "r24-savehint",
+  "version": "r25",
   "package_name": "damage-number",
-  "archive": "damage-numbers-r24-savehint.zip",
+  "archive": "damage-numbers-r25.zip",
   "approval": {
     "date": "2026-10-08",
-    "basis": "User reported Better Input save wording was confusing for standalone use; ready status retained after scoped validation of the wording correction."
+    "basis": "User accepted the real-renderer 1080p preview and explicitly requested r25 ready to distribute without additional testing."
   },
   "target": "MHGU Nintendo Switch 1.4.0; Forge 1.4.1 on the user-confirmed Eden/Linux setup.",
   "limitations": [
-    "Save-message wording validated by host/ARM32/static checks; not a new in-game test of this binary.",
+    "Additional host/compiled behavior suites and gameplay were not rerun for r25 at the user's request; build/static/package checks are recorded separately.",
     "User confirmation is scoped to the tested Eden setup; not exhaustive feature, persistence-restart, clean-shutdown, new Ryujinx or native Switch validation.",
     "Standard Forge builds without the multi-list renderer fix can blank/corrupt menus while dropdowns or overlays are active.",
     "Requires the audited MHGU 1.4.0 eight-site layout.",
@@ -33,33 +33,37 @@
   "support": {},
   "payloads": {
     "romfs/nativeNX/plugins/damage_numbers_capture.nro": {
-      "source": "build/damage-numbers/candidates/r24-savehint/open-assets/candidate-package/romfs/nativeNX/plugins/damage_numbers_capture.nro",
-      "sha256": "2c0e89e721ea50e0d0b4f9962d2d694c28f9d8cbec1069f8de37caadd8e53e5b"
+      "source": "build/damage-numbers/candidates/r25/open-assets/candidate-package/romfs/nativeNX/plugins/damage_numbers_capture.nro",
+      "sha256": "292f15916687a2fe86a4e4155d1a5ef246f3981503c62dc5a9a15e4545799b03"
     }
   },
   "evidence": {
     "static": [
-      "build/damage-numbers/candidates/r24-savehint/open-assets/candidate-manifest.json",
-      "build/damage-numbers/candidates/r24-savehint/save-hint-validation.json",
-      "build/damage-numbers/candidates/r24-savehint/open-assets/asset-audit.json",
-      "build/damage-numbers/candidates/r24-savehint/open-assets/ge-compatibility.json",
-      "build/damage-numbers/candidates/r24-savehint/standalone-host.json",
-      "build/damage-numbers/candidates/r24-savehint/runtime-policy.json",
-      "mods/damage-numbers/docs/SAVE_HINT_VALIDATION.json"
+      "build/damage-numbers/candidates/r25/open-assets/candidate-manifest.json",
+      "build/damage-numbers/candidates/r25/standalone-build.json",
+      "build/damage-numbers/candidates/r25/open-assets/asset-audit.json",
+      "build/damage-numbers/candidates/r25/open-assets/ge-compatibility.json",
+      "mods/damage-numbers/docs/R25_SIZE_CHANGE.json"
     ],
     "manual": [
       "mods/damage-numbers/RUNTIME.md",
       "mods/damage-numbers/docs/CONFIG_RELEASE_RUNTIME.json"
     ],
-    "manual_summary": "No new game run for the save-message correction. Earlier gameplay confirmation keeps its recorded version and bytes.",
+    "manual_summary": "User-approved real-renderer size preview; no fresh r25 gameplay run. Earlier Eden/Ryujinx evidence retains its recorded version and binary scope.",
     "static_summary": {
-      "host_core_presentation_checks": 3315,
-      "transactional_hook_scenarios": 23,
-      "compiled_capture_rerun": false,
-      "prior_compiled_capture_checks": 365,
-      "native_object_equivalence": "Seven identical native objects; settings instructions and relocation targets identical",
-      "asset_audit": "PASSED_OPEN_ASSET_PROVENANCE",
-      "imports_and_GE_audit": "PASSED"
+      "build": "Pinned offline ARM32 build, NRO callback/import checks",
+      "emitted_restore_audit": "Nine NZCVQ-only gateways; original assembly and signatures unchanged",
+      "asset_provenance": "Compiled licensed Open Sans digits and complete procedural artwork audited",
+      "unchanged_native_objects": [
+        "gateway.o",
+        "native_platform.o",
+        "plugin.o",
+        "settings.o",
+        "start.o",
+        "svc.o"
+      ],
+      "host_tests": "NOT RUN at user request",
+      "compiled_behavior_fixtures": "NOT RUN at user request"
     },
     "prior_runtime_confirmation": {
       "date": "2026-10-06",
@@ -71,11 +75,11 @@
       "scope": "User-confirmed gameplay on the two tested installations; not all emulator forks, exhaustive feature retesting or clean emulator shutdown."
     },
     "runtime_confirmation": {
-      "version": "r24-savehint",
+      "version": "r25",
       "fresh_gameplay_test": false,
       "user_confirmed": false,
-      "nro_sha256": "2c0e89e721ea50e0d0b4f9962d2d694c28f9d8cbec1069f8de37caadd8e53e5b",
-      "scope": "No new game run for the save-message correction. Earlier gameplay confirmation keeps its recorded version and bytes."
+      "nro_sha256": "292f15916687a2fe86a4e4155d1a5ef246f3981503c62dc5a9a15e4545799b03",
+      "scope": "User accepted the size preview. No r25 game run."
     },
     "prior_dependencies": [
       {
@@ -104,19 +108,18 @@
       "scope": "User-confirmed tested Eden setup; screenshot shows visible Forge menu alongside PDB reward highlights. No exhaustive feature, save-restart, clean-shutdown, new Ryujinx or native Switch claim."
     },
     "previous_release_static": [
-      "build/damage-numbers/candidates/r23-config2/open-assets/candidate-manifest.json",
-      "build/damage-numbers/candidates/r23-config2/open-assets/compiled-capture-probe.json",
-      "build/damage-numbers/candidates/r23-config2/open-assets/asset-audit.json",
-      "build/damage-numbers/candidates/r23-config2/open-assets/ge-compatibility.json",
-      "build/damage-numbers/candidates/r23-config2/open-assets/gateway-probe.json",
-      "build/damage-numbers/candidates/r23-config2/open-assets/compression-render-comparison.json",
-      "build/damage-numbers/candidates/r23-config2/open-assets/sprite-codec-test.json",
-      "build/damage-numbers/candidates/r23-config2/standalone-tests.json",
-      "build/damage-numbers/candidates/r23-config2/runtime-policy.json",
-      "mods/damage-numbers/docs/PRIMARY_ONLY_CONFIG_VALIDATION.json",
-      "mods/damage-numbers/docs/FORGE_RENDERER_VALIDATION.json",
-      "mods/damage-numbers/docs/CONFIG_WITHOUT_VERSION.json"
-    ]
+      "build/damage-numbers/candidates/r24-savehint/open-assets/candidate-manifest.json",
+      "build/damage-numbers/candidates/r24-savehint/save-hint-validation.json",
+      "build/damage-numbers/candidates/r24-savehint/open-assets/asset-audit.json",
+      "build/damage-numbers/candidates/r24-savehint/open-assets/ge-compatibility.json",
+      "build/damage-numbers/candidates/r24-savehint/standalone-host.json",
+      "build/damage-numbers/candidates/r24-savehint/runtime-policy.json",
+      "mods/damage-numbers/docs/SAVE_HINT_VALIDATION.json"
+    ],
+    "preview_acceptance": {
+      "date": "2026-10-08",
+      "record": "mods/damage-numbers/docs/R25_SIZE_CHANGE.json"
+    }
   },
   "dependencies": [
     {

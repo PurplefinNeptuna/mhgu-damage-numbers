@@ -1,20 +1,20 @@
-# Damage Numbers r24-savehint
+# Damage Numbers r25
 
-READY_TO_DISTRIBUTE, locally packaged and unpublished. Save feedback now says
-"Saved damage_numbers.ini in MHGU's save folder". The public guide uses the
-plugin's own filename and MHGU's player save folder as its location.
+READY_TO_DISTRIBUTE, locally packaged and unpublished. Size 1.0 now uses a
+24 px base for Wilds and Classic and a 20 px base for Rise at 720p. Rise keeps
+its 1.4× weak-point boost. At 1080p, settled weak-point numbers measure
+36 px for Wilds/Classic and 42 px for Rise, matching the user-approved preview.
 
-NRO SHA-256: `2c0e89e721ea50e0d0b4f9962d2d694c28f9d8cbec1069f8de37caadd8e53e5b`.
-ZIP: `build/damage-numbers/releases/r24-savehint/damage-numbers-r24-savehint.zip`.
+NRO SHA-256: `292f15916687a2fe86a4e4155d1a5ef246f3981503c62dc5a9a15e4545799b03`.
+ZIP: `build/damage-numbers/releases/r25/damage-numbers-r25.zip`.
 
-The only native source change is the success string. Seven other native objects
-are byte-identical to r23-config2; settings instructions and relocation targets
-also match. Fresh host checks cover production save/load, failure cleanup and
-3,315 core/presentation cases. NRO imports, GE restoration and the asset audit
-passed. The preceding 365 compiled capture checks are recorded for r23-config2;
-they were not rerun for this text correction. Rendering, config parsing and
-persistence operations are unchanged. [Validation](docs/SAVE_HINT_VALIDATION.json)
-records this scope. No fresh game run, installation or publication occurred.
+The ARM32 build, import/signature checks, emitted NZCVQ-only gateway audit,
+compiled asset provenance and distribution check cover the new package.
+Additional host/compiled behavior suites and gameplay were skipped at the
+user's request. Six native objects, including gateway and settings, match r24
+byte for byte. Existing scale preferences continue to multiply each style base.
+[Size-change record](docs/R25_SIZE_CHANGE.json) preserves preview approval and
+exact evidence. Earlier runtime confirmations keep their original binary scope.
 
-The previous delivery is archived with verified hashes under
-`backups/config-save-hints-20261008/`. Forge remains LOCAL_ONLY.
+The previous r24 delivery is preserved with hashes under
+`backups/damage-numbers/base-size-r25-20261008/`. This release preparation performed no installation or publication.

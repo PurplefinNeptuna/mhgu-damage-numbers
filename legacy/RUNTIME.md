@@ -851,3 +851,13 @@ instructions use the same location without referencing another plugin.
 Persistence, config fields, hooks and gameplay behavior are unchanged.
 Scoped validation is recorded in [SAVE_HINT_VALIDATION.json](docs/SAVE_HINT_VALIDATION.json).
 No new gameplay run or installation was performed for this wording revision.
+
+## 2026-10-08: r25 user-approved base sizes
+
+The user accepted the 1080p renderer preview and requested r25 ready to
+distribute without further testing. At scale 1.0, 720p bases are 24 px for
+Wilds/Classic and 20 px for Rise; Rise keeps its 1.4× weak-point boost.
+At 1080p, settled weak-point numbers are 36/42/36 px in Wilds/Rise/Classic order.
+Build/static/package audits are recorded in [R25_SIZE_CHANGE.json](docs/R25_SIZE_CHANGE.json).
+No fresh host/compiled behavior suite, game run or installation was performed.
+Earlier gameplay reports retain their original version and bytes.

@@ -58,8 +58,8 @@ int main(int argc,char** argv) {
             for(int j=0;j<glyph_vertices;++j) {
                 const auto& v=draw->VtxBuffer.Data[shadow_vertices+pass*glyph_vertices+j];
                 const auto& f=draw->VtxBuffer.Data[fill+j];
-                assert(std::abs(v.pos.x-f.pos.x-x*.5f*n.pixels/20)<.0001f);
-                assert(std::abs(v.pos.y-f.pos.y-y*.5f*n.pixels/20)<.0001f);
+                assert(std::abs(v.pos.x-f.pos.x-x*.5f*n.pixels/base_pixels_720p)<.0001f);
+                assert(std::abs(v.pos.y-f.pos.y-y*.5f*n.pixels/base_pixels_720p)<.0001f);
                 assert(v.uv.x==f.uv.x&&v.uv.y==f.uv.y);
                 assert(v.col==imgui_color(0x17130f,n.opacity*.9f));
                 assert(f.col==imgui_color(n.color,n.opacity));

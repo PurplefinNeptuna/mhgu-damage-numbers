@@ -18,7 +18,7 @@ def main():
   assert len(restores)==1 and not any(w==0xe12cf002 for p,w in words)
   sites.append({'gateway':name,'offset':hex(restores[0]),'new':'e128f002'})
  assert not re.search(r'\bmsr\b.*(?:APSR_g|APSR_nzcvqg)',(work/'disassembly.txt').read_text(),re.I)
- report={'status':'PASSED_NZCVQ_ONLY_GATEWAYS','nro_sha256':hashlib.sha256(raw).hexdigest(),'restore_sites':sites,'assembly_source_unchanged_from_r17':True,'gateway_contract':'NZCVQ preserved; GE liveness audited for every site and continuation in GE_PRESERVATION_AUDIT.md','scope':'Static emitted instructions plus compiled gateway state fixtures; no new gameplay test.'}
+ report={'status':'PASSED_NZCVQ_ONLY_GATEWAYS','nro_sha256':hashlib.sha256(raw).hexdigest(),'restore_sites':sites,'assembly_source_unchanged_from_r17':True,'gateway_contract':'NZCVQ preserved; GE liveness audited for every site and continuation in GE_PRESERVATION_AUDIT.md','scope':'Static emitted instructions and unchanged audited gateway assembly; no compiled gateway fixtures or gameplay run by this audit.'}
  (out/'ge-compatibility.json').write_text(json.dumps(report,indent=2)+'\n')
  print('PASS: nine NZCVQ-only gateways, unchanged r17 assembly and no unsupported GE writes')
 if __name__=='__main__':main()

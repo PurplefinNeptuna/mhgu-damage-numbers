@@ -1,6 +1,6 @@
 # Damage numbers
 
-Current release: **r24-savehint**, with Rise, Wilds and Classic styles and
+Current release: **r25**, with Rise, Wilds and Classic styles and
 primary-only configs. [Release details](RELEASE.md) and [installation guide](DISTRIBUTION_README.md).
 The preceding r22-config1 release was confirmed on Eden on 2026-10-08.
 This config simplification has host/ARM32 validation; no fresh game run is claimed.
@@ -71,7 +71,7 @@ draw calls. [Compression evidence](COMPRESSION.md) records the checks and timing
 
 Wilds appearance uses the licensed Open Sans digit subset, normalized to the
 accepted visible height. Digits have a smooth centered shadow and a near-black outline measuring 0.5 px
-at the default 20 px size, scaled with size, resolution and animation. The gold
+at the default 24 px size, scaled with size, resolution and animation. The gold
 halo is removed. Original procedural stars include colored bloom and a
 pale center, now drawn uniformly at 1.5× their r19 size. Their solid placement
 bounds grow with them; the gap to the digits is unchanged. They align to actual pixel-rounded glyph bounds and fade with the
@@ -82,7 +82,7 @@ Forge's font, outlined digits and straight critical lines.
 [asset provenance](OPEN_ASSETS.md) describe the supported sources. No extracted
 Wilds font or texture is read, embedded or packaged.
 
-Both styles preserve the accepted impact anchor, visible digit height and size.
+All three styles preserve the accepted impact anchor.
 Wilds stamps from 1.2x to normal size over 0.2 seconds, holds still, then rises
 30 pixels at 720p during the final 0.2-second fade. Duration is the total lifetime:
 0.9 seconds gives a 0.7-second hold. Classic retains its original pop and drift. Measured glyph bounds and solid markers
@@ -92,8 +92,9 @@ solid overlap before displacement. Glow may overlap. Offsets stay cached until
 expiry; crowded bursts may overlap instead of growing a tall stack. Camera,
 context, viewport, style and size changes reset placement caches.
 
-Defaults: enabled, Wilds, scale 1.0, duration 0.9 seconds; 20-pixel font size at
-720p. Wilds uses the stamp/hold/exit timing above. Invalid, behind-camera and off-screen projections are hidden.
+Defaults: enabled, Wilds, scale 1.0, duration 0.9 seconds. At 720p, Wilds and
+Classic use a 24 px base; Rise uses a 20 px base and enlarges gold weak-point
+numbers to 28 px. At 1080p these sizes are 36 px, 30 px and 42 px respectively. Wilds uses the stamp/hold/exit timing above. Invalid, behind-camera and off-screen projections are hidden.
 Limits: 256 queued events, 128 visible numbers and 512 recent identities.
 Overflow drops oldest entries without adding their values together.
 
@@ -161,15 +162,15 @@ python3 scripts/audit_damage_numbers_open_assets.py
 python3 scripts/package_damage_numbers.py
 ```
 
-Current ZIP: `build/damage-numbers/releases/r18/damage-numbers-r18.zip`.
-Package: `build/damage-numbers/releases/r18/damage-number/`.
-Source manifest: `build/damage-numbers/open-assets/candidate-manifest.json`.
+Current ZIP: `build/damage-numbers/releases/r25/damage-numbers-r25.zip`.
+Package: `build/damage-numbers/releases/r25/damage-number/`.
+Source manifest: `build/damage-numbers/candidates/r25/open-assets/candidate-manifest.json`.
 The ZIP contains only the runtime NRO. README, combined redistribution notices,
 provenance/audit manifest and checksums remain beside it. Keep `NOTICES.txt`
 with the ZIP when redistributing. NRO and archive hashes are recorded there.
 
-The user approved the open appearance and selected 20px at 720p as size 1.0
-from the real-renderer comparison. This is 30px at 1080p and 40px at 1440p.
-Existing version-2 scale values remain multipliers of the new base; no save is
-changed. Installation is separate from packaging. Historical gameplay evidence
-is retained; final-size verification uses host and compiled ARM32 fixtures.
+The user approved the r25 size comparison rendered at 1080p: 36 px for
+Wilds/Classic weak-point numbers and 42 px for Rise weak-point numbers.
+Existing scale settings remain multipliers of each style base. The r25 release
+was built and packaged without rerunning test suites or gameplay at the user's
+request. Earlier gameplay evidence retains its recorded version and bytes.

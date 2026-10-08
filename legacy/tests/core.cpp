@@ -104,8 +104,8 @@ static void drawing() {
     Model m;m.reset(7);Event e=hit();e.critical=Critical::Positive;m.capture(e);m.update(1,true);
     DrawNumber commands[128]{};
     check(layout(m,view(),1,commands)==1,"initial draw");
-    check(std::fabs(commands[0].pixels-20*peak_scale(VisualStyle::Wilds))<.001f&&commands[0].opacity==1&&commands[0].critical==Critical::Positive,"pop and overscore command");
-    check(layout(m,view(),1.2f,commands)==1&&commands[0].pixels==20,"pop settles");
+    check(std::fabs(commands[0].pixels-24*peak_scale(VisualStyle::Wilds))<.001f&&commands[0].opacity==1&&commands[0].critical==Critical::Positive,"pop and overscore command");
+    check(layout(m,view(),1.2f,commands)==1&&commands[0].pixels==24,"pop settles");
     const float old_y=commands[0].position.y;
     check(layout(m,view(),1.8f,commands)==1&&commands[0].position.y<old_y,"upward drift");
     check(std::fabs(commands[0].opacity-number_motion(.8f,.9f,VisualStyle::Wilds).opacity)<0.00001f,"last quarter-second fade");
@@ -114,13 +114,13 @@ static void drawing() {
     check(layout(m,view(),1,commands)==2,"same-position multi-hit preserved");
     check(commands[1].critical==Critical::Negative&&commands[1].star.y>commands[1].ink.bottom,"negative star below visible glyphs");
     check(commands[0].star.y<commands[0].ink.top,"positive star above visible glyphs");
-    check(std::fabs(commands[1].offset.x)<=32.0f&&std::fabs(commands[1].offset.y)<=20,"bounded nearby placement");
+    check(std::fabs(commands[1].offset.x)<=38.4f&&std::fabs(commands[1].offset.y)<=24,"bounded nearby placement");
     v=view();v.height=1440;v.width=2560;
-    check(layout(m,v,1.2f,commands)==2&&commands[0].pixels==40,"resolution-scaled text");
+    check(layout(m,v,1.2f,commands)==2&&commands[0].pixels==48,"resolution-scaled text");
     v=view();v.height=1080;v.width=1920;
-    check(layout(m,v,1.2f,commands)==2&&commands[0].pixels==30,"default 1x is 30 pixels at 1080p");
+    check(layout(m,v,1.2f,commands)==2&&commands[0].pixels==36,"default 1x is 36 pixels at 1080p");
     Settings resized=m.config();resized.scale=1.2f;m.configure(resized);
-    check(layout(m,view(),1.2f,commands)==2&&commands[0].pixels==24,"1.2x restores the former 24-pixel size");
+    check(layout(m,view(),1.2f,commands)==2&&std::fabs(commands[0].pixels-28.8f)<.001f,"1.2x multiplies the 24-pixel base");
     const float native_view[16]={1,0,0,0,0,1,0,0,0,0,1,0,0,0,-10,1};
     const float native_projection[16]={1,0,0,0,0,1,0,0,0,0,-2,-1,0,0,-2,0};
     check(from_native_camera(native_view,native_projection,0,0,1280,720,v),"native matrix convention converted");
@@ -243,14 +243,14 @@ static void compact_spacing() {
     check(layout(m,view(),1,commands,state,varied_measure)==1,"measured narrow digits draw");
     const Point first=commands[0].offset;
     check(first.x==0&&first.y==0,"isolated hit retains its original anchor");
-    check(std::fabs(commands[0].advance-(20*peak_scale(VisualStyle::Wilds)*.28f*3))<.001f,"actual advances used instead of digit count estimate");
+    check(std::fabs(commands[0].advance-(24*peak_scale(VisualStyle::Wilds)*.28f*3))<.001f,"actual advances used instead of digit count estimate");
     check(commands[0].color==0xf4f1ec&&star_rgb(commands[0].critical)==0xf1689b,"nonweak positive crit keeps white digits and red star");
     for(unsigned i=2;i<=128;++i) { e=hit(i);e.total_damage=i%2?888:1;e.critical=i%3?Critical::Negative:Critical::Positive;m.capture(e); }
     m.update(1,true);check(layout(m,view(),1,commands,state,varied_measure)==128,"dense bursts retain all 128 separate numbers");
     Point offsets[128];
     for(unsigned i=0;i<128;++i) {
         offsets[i]=commands[i].offset;
-        check(std::fabs(offsets[i].x)<=32.0001f&&std::fabs(offsets[i].y)<=20.0001f,"dense placement remains inside horizontal and vertical bounds");
+        check(std::fabs(offsets[i].x)<=38.4001f&&std::fabs(offsets[i].y)<=24.0001f,"dense placement remains inside horizontal and vertical bounds");
         check(inside(commands[i].solid,view()),"solid label inside viewport");
     }
     check(layout(m,view(),1.07f,commands,state,varied_measure)==128,"burst animates without losses");
@@ -284,12 +284,12 @@ static void stamp_hold_exit() {
     Model m;m.reset(7);Event e=hit();e.critical=Critical::Positive;m.capture(e);m.update(1,true);
     Settings s=m.config();s.lifetime=1.2f;m.configure(s);
     PlacementState cache{};DrawNumber out[128]{};
-    check(layout(m,view(),1,out,cache,varied_measure)==1&&std::fabs(out[0].pixels-24.0f)<.001f,
+    check(layout(m,view(),1,out,cache,varied_measure)==1&&std::fabs(out[0].pixels-28.8f)<.001f,
           "open Wilds starts with 1.2x stamp");
     const float start_y=out[0].position.y;const Point offset=out[0].offset;
-    check(layout(m,view(),1.1f,out,cache,varied_measure)==1&&std::fabs(out[0].pixels-21.0f)<.001f,
+    check(layout(m,view(),1.1f,out,cache,varied_measure)==1&&std::fabs(out[0].pixels-25.2f)<.001f,
           "stamp eases down halfway through the 0.2-second settlement");
-    check(layout(m,view(),1.2f,out,cache,varied_measure)==1&&out[0].pixels==20,
+    check(layout(m,view(),1.2f,out,cache,varied_measure)==1&&out[0].pixels==24,
           "stamp reaches normal size at 0.2 seconds");
     for(float age:{.25f,.5f,.75f,.95f,1.0f}) {
         check(layout(m,view(),1+age,out,cache,varied_measure)==1&&out[0].position.y==start_y&&out[0].opacity>.999f,
@@ -298,20 +298,20 @@ static void stamp_hold_exit() {
     }
     check(layout(m,view(),2.1f,out,cache,varied_measure)==1&&std::fabs(out[0].position.y-(start_y-15))<=1&&std::fabs(out[0].opacity-.5f)<.001f,
           "final 0.2 seconds rises fast while fading, halfway at 15 pixels and half alpha");
-    check(out[0].pixels==20&&out[0].star.y<out[0].ink.top,"exit keeps settled size and positive star attached");
+    check(out[0].pixels==24&&out[0].star.y<out[0].ink.top,"exit keeps settled size and positive star attached");
     check(layout(m,view(),2.2f,out,cache,varied_measure)==0,"label disappears at total duration");
     s.lifetime=.9f;m.configure(s);layout(m,view(),1.65f,out,cache,varied_measure);
     check(out[0].position.y==start_y&&out[0].opacity==1,"default duration holds beyond half a second");
     s.lifetime=.4f;m.configure(s);layout(m,view(),1.3f,out,cache,varied_measure);
-    check(std::fabs(out[0].opacity-.5f)<.001f&&out[0].pixels==20,"minimum duration fits stamp and exit without negative hold");
+    check(std::fabs(out[0].opacity-.5f)<.001f&&out[0].pixels==24,"minimum duration fits stamp and exit without negative hold");
     s.lifetime=1.2f;m.configure(s);View large=view();large.width*=2;large.height*=2;
     layout(m,large,1.5f,out,cache,varied_measure);const float large_y=out[0].position.y;
     layout(m,large,2.1f,out,cache,varied_measure);
     check(std::fabs(out[0].position.y-(large_y-30))<=1,"exit distance scales with viewport resolution");
     s.style=VisualStyle::Classic;s.lifetime=.9f;m.configure(s);
     layout(m,view(),1,out,cache,varied_measure);const float classic_y=out[0].position.y;
-    check(out[0].pixels==25,"Classic keeps 1.25x pop");
-    layout(m,view(),1.1f,out,cache,varied_measure);check(out[0].pixels==20&&out[0].position.y<classic_y,
+    check(out[0].pixels==30,"Classic keeps 1.25x pop");
+    layout(m,view(),1.1f,out,cache,varied_measure);check(out[0].pixels==24&&out[0].position.y<classic_y,
           "Classic keeps 0.1-second settlement and continuous upward drift");
     layout(m,view(),1.8f,out,cache,varied_measure);check(std::fabs(out[0].opacity-.4f)<.001f,
           "Classic keeps its quarter-second fade");
@@ -362,7 +362,7 @@ static void rise_candidate() {
     for(unsigned i=0;i<4;++i)check(std::fabs(n[i].slash.origin.x-704)<.001f&&n[i].slash.origin.y==360&&n[i].slash.slope==slopes[i]&&n[i].offset.x==offsets[i].x&&n[i].offset.y==offsets[i].y,"camera reprojection moves registered hit while cached digit placement and tilt persist");
     layout(m,v,1.3f,n,cache);for(unsigned i=0;i<4;++i)check(n[i].opacity==1&&n[i].slash.opacity==0,"slash expires independently while digits held");
     Event e=hit();Model weak;weak.reset(7);weak.configure(s);e.physical_hzv=45;weak.capture(e);weak.update(1,true);
-    layout(weak,view(),1.3f,n,cache);check(n[0].pixels==35,"orange settles at thirty five versus normal twenty five");
+    layout(weak,view(),1.3f,n,cache);check(n[0].pixels==28,"orange settles at twenty eight versus normal twenty");
     Slash beam=rise_slash({640,360},hit().key,.05f,view(),.75f);Point quad[4];slash_quad(beam,quad);
     check(quad[2].y-quad[0].y==540&&std::fabs(quad[0].x+beam.width*.5f-640-beam.slope*540*.5f)<.001f,"three-quarter height tilted quad centers equal upward/downward reach");
     check(std::fabs((quad[0].y+quad[2].y)*.5f-360)<.001f,"crit beam is centered at the registered hit, without a ground cutoff");

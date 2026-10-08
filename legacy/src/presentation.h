@@ -44,8 +44,8 @@ inline float overlap(Rect a,Rect b,float margin) {
            high(0,low(a.bottom,b.bottom)+margin-high(a.top,b.top));
 }
 inline bool inside(Rect r,const View& v) { return r.left>=v.x&&r.top>=v.y&&r.right<=v.x+v.width&&r.bottom<=v.y+v.height; }
-static constexpr float base_pixels_720p=20.0f;
-static constexpr float rise_base_pixels_720p=25.0f;
+static constexpr float base_pixels_720p=24.0f;
+static constexpr float rise_base_pixels_720p=20.0f;
 static constexpr float rise_glyph_width=1.08f;
 static constexpr float rise_slash_height=.75f; // User-selected total viewport extent.
 static constexpr float wilds_crit_scale=1.5f;
@@ -153,7 +153,7 @@ inline bool approximate_measure(const char* text,float pixels,VisualStyle,TextMe
 inline unsigned layout(const Model& model,const View& view,float now,DrawNumber (&out)[128],
                        PlacementState& cache,Measure measure=approximate_measure) {
     const Settings& s=model.config();
-    // Keep the selected 20px preview's marker gap and collision margin.
+    // Scale marker gaps and collision margins with the selected style base.
     const float base=(s.style==VisualStyle::Rise?rise_base_pixels_720p:base_pixels_720p)*view.height/720.0f*s.scale,unit=base/24.0f;
     if (!finite(now)||!s.enabled||!valid(s)||!finite(unit)||unit<=0||!model.size()) { cache.reset();return 0; }
     const uint32_t epoch=model.at(0).event.key.epoch;

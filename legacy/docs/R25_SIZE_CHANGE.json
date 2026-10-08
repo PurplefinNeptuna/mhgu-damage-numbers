@@ -1,0 +1,87 @@
+{
+  "version": "r25",
+  "approval_date": "2026-10-08",
+  "approval": "User accepted the 1080p comparison and requested r25 ready to distribute without additional tests.",
+  "base_pixels_720p": {
+    "wilds": 24,
+    "classic": 24,
+    "rise": 20
+  },
+  "weakpoint_pixels_1080p": {
+    "wilds": 36,
+    "classic": 36,
+    "rise": 42
+  },
+  "rise_weakpoint_multiplier": 1.4,
+  "user_scale": 1.0,
+  "preview": {
+    "path": "work/damage-numbers/weakpoint-size-24-20-preview/weakpoint-1080p-comparison.png",
+    "sha256": "1f8cc1a9867147e9e8d2d1680b9eddc45f9f36c5b9a06085c023c5ca5956377f",
+    "receipt_sha256": "e637446bb3b09b51b74beb92985e1d707d9798d62f99d58cf2168632123cc6d8",
+    "renderer": "Pinned real ImGui with copied mod sources and the approved style base constants",
+    "viewport": [
+      1920,
+      1080
+    ]
+  },
+  "nro_sha256": "292f15916687a2fe86a4e4155d1a5ef246f3981503c62dc5a9a15e4545799b03",
+  "native_objects": {
+    "capture.o": {
+      "r25_sha256": "7d93c16796eeba2b03b032f08f391e4e9792a93291b1589fc009225a8905c309",
+      "r24_sha256": "f49fe791a9168b5f8136c2b144afe505afffd40ea2e15f5ce84073403724cc86",
+      "identical": false
+    },
+    "cosmetics.o": {
+      "r25_sha256": "6dcc72594866bf766732e2a4b6e72a91b2526ddc28194522dae3fb03e8af8485",
+      "r24_sha256": "cdf046c5ae2115e373d6ead09c8d70baca5692a8c78f791905dffb0415f38520",
+      "identical": false
+    },
+    "gateway.o": {
+      "r25_sha256": "27b75aed456806fbd72725cce7cae4fcf7f01413568ff745da4f8c91ddd6e05b",
+      "r24_sha256": "27b75aed456806fbd72725cce7cae4fcf7f01413568ff745da4f8c91ddd6e05b",
+      "identical": true
+    },
+    "native_platform.o": {
+      "r25_sha256": "c7630d59d2141ca2ae141796f69f545de753e25c10605d7bf8eed2054ff270dd",
+      "r24_sha256": "c7630d59d2141ca2ae141796f69f545de753e25c10605d7bf8eed2054ff270dd",
+      "identical": true
+    },
+    "plugin.o": {
+      "r25_sha256": "4a9f253dfab1f6f5602be58999975eeec470af2559820818804ddd054402ffa4",
+      "r24_sha256": "4a9f253dfab1f6f5602be58999975eeec470af2559820818804ddd054402ffa4",
+      "identical": true
+    },
+    "settings.o": {
+      "r25_sha256": "e9b57b05aa9b3b84900e584b70460e926a47a13d3c3bfeae57d872cd900cfd0b",
+      "r24_sha256": "e9b57b05aa9b3b84900e584b70460e926a47a13d3c3bfeae57d872cd900cfd0b",
+      "identical": true
+    },
+    "start.o": {
+      "r25_sha256": "028e4c0e2b8cfe455d0b9c39e45d39b5de3b0852b2365021c550b82c564cd063",
+      "r24_sha256": "028e4c0e2b8cfe455d0b9c39e45d39b5de3b0852b2365021c550b82c564cd063",
+      "identical": true
+    },
+    "svc.o": {
+      "r25_sha256": "8a5a2ff229be2518c241086f7524bfe1fc2fdcee1b902526efe0d4b0c68d4786",
+      "r24_sha256": "8a5a2ff229be2518c241086f7524bfe1fc2fdcee1b902526efe0d4b0c68d4786",
+      "identical": true
+    }
+  },
+  "runtime_changes": [
+    "Style base constants: Wilds/Classic 20 -> 24 px; Rise 25 -> 20 px at 720p",
+    "Startup version label: r20 -> r25"
+  ],
+  "host_tests": "NOT RUN at user request",
+  "compiled_behavior_fixtures": "NOT RUN at user request",
+  "gameplay": "NOT RUN",
+  "static_build_audits": [
+    "Pinned input/dependency fingerprints",
+    "Original hook signatures",
+    "NRO structure and Forge callback/import resolution",
+    "Emitted NZCVQ-only gateway restore audit",
+    "Compiled licensed font and procedural asset provenance"
+  ],
+  "previous_release_archive": "backups/damage-numbers/base-size-r25-20261008/release-r24-savehint",
+  "installed": false,
+  "published": false
+}
