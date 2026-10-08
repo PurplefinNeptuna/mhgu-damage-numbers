@@ -168,7 +168,9 @@ Source manifest: `build/damage-numbers/candidates/r25/open-assets/candidate-mani
 The ZIP contains `README.md` beside the `damage-number/` runtime folder.
 The same README, combined redistribution notices,
 provenance/audit manifest and checksums remain beside it. Keep `NOTICES.txt`
-with the ZIP when redistributing. NRO and archive hashes are recorded there.
+with the ZIP when redistributing. The adjacent `NOTICES.html` is a notices-only
+HTML alternative formatted for GameBanana. Notices remain outside the ZIP.
+NRO and archive hashes are recorded there.
 
 The user approved the r25 size comparison rendered at 1080p: 36 px for
 Wilds/Classic weak-point numbers and 42 px for Rise weak-point numbers.
