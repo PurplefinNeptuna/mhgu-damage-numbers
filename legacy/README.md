@@ -165,7 +165,8 @@ python3 scripts/package_damage_numbers.py
 Current ZIP: `build/damage-numbers/releases/r25/damage-numbers-r25.zip`.
 Package: `build/damage-numbers/releases/r25/damage-number/`.
 Source manifest: `build/damage-numbers/candidates/r25/open-assets/candidate-manifest.json`.
-The ZIP contains only the runtime NRO. README, combined redistribution notices,
+The ZIP contains `README.md` beside the `damage-number/` runtime folder.
+The same README, combined redistribution notices,
 provenance/audit manifest and checksums remain beside it. Keep `NOTICES.txt`
 with the ZIP when redistributing. NRO and archive hashes are recorded there.
 
