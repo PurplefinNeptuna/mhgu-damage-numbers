@@ -711,9 +711,9 @@ def main():
     check(primary in save.files and backup not in save.files and not save.handles and not save.save_mounts,
           'Save button writes primary INI beside Better Input and releases all handles/mounts')
     text=save.files[primary].decode()
-    check('[DamageNumbers]' in text and 'version=2' in text and 'enabled=0' in text and 'style=classic' in text and
+    check('[DamageNumbers]' in text and 'version=' not in text and 'enabled=0' in text and 'style=classic' in text and
           'scale=1.500000' in text and not any(key in text for key in ('objects','monsters','bounce_gray')),
-          'Version-2 INI stores only visibility, style, size and lifetime')
+          'Versionless INI stores only visibility, style, size and lifetime')
     check(all(save.files[p]==value for p,value in unrelated.items()),'Saving preserves Better Input, game files and old SD configs')
     restarted=probe();restarted.save_available=True;restarted.files=first_files.copy();restarted.call('forge_onInit')
     restarted.uc.mem_write(POSITION,struct.pack('<3f',.25,0,.5));restarted.camera_record();restarted.collision();restarted.render()
@@ -721,6 +721,23 @@ def main():
     restarted.changes={'Show damage numbers':True};restarted.panel();restarted.camera_record();restarted.collision();restarted.render()
     check(len(restarted.text_draws)==9 and restarted.text_draws[-1]['pixels']==37.5,
           'Loaded size setting remains effective when display is re-enabled')
+    legacy=probe();legacy.save_available=True
+    legacy.uc.mem_write(POSITION,struct.pack('<3f',.25,0,.5))
+    legacy.files={primary:b'[DamageNumbers]\nversion=2\nenabled=0\nstyle=classic\nscale=1.5\nlifetime=1.2\n'}
+    legacy.call('forge_onInit');legacy.camera_record();legacy.collision();legacy.render()
+    check(not legacy.text_draws,'Existing version-2 file preserves disabled preference in compiled startup')
+    legacy.changes={'Show damage numbers':True};legacy.panel();legacy.camera_record();legacy.collision();legacy.render()
+    check(len(legacy.text_draws)==9 and legacy.text_draws[-1]['pixels']==37.5,
+          'Existing version-2 file preserves Classic style and size in compiled rendering')
+    legacy.buttons={'Save settings'};legacy.panel()
+    migrated=legacy.files[primary]
+    check(b'version=' not in migrated and b'style=classic' in migrated and b'scale=1.500000' in migrated and b'lifetime=1.200000' in migrated,
+          'Compiled explicit save removes obsolete version marker and preserves remaining preferences')
+    reread=probe();reread.save_available=True;reread.files=legacy.files.copy();reread.call('forge_onInit')
+    reread.uc.mem_write(POSITION,struct.pack('<3f',.25,0,.5))
+    reread.camera_record();reread.collision();reread.render()
+    check(len(reread.text_draws)==9 and reread.text_draws[-1]['pixels']==37.5 and not reread.handles and not reread.save_mounts,
+          'Compiled restart reads migrated versionless preferences with balanced storage cleanup')
     save.files[backup]=b'legacy backup untouched'
     save.buttons={'Restore defaults','Save settings'};save.panel()
     check(save.files[backup]==b'legacy backup untouched' and save.files[primary]!=first_files[primary],
@@ -815,8 +832,8 @@ def main():
     check(abs(rise.text_draws[-1]['pixels']-35*font_scale)<.001,
           'Rise ARM orange settles at 35 design units')
     rise.save_available=True;rise.buttons={'Save settings'};rise.panel()
-    check(b'style=rise' in rise.files[primary] and b'version=2' in rise.files[primary],
-          'Rise ARM settings save style=rise without changing version-2 format')
+    check(b'style=rise' in rise.files[primary] and b'version=' not in rise.files[primary],
+          'Rise ARM settings save style=rise without a version marker')
     restarted=probe();restarted.files=rise.files.copy();restarted.save_available=True;restarted.call('forge_onInit')
     restarted.uc.mem_write(POSITION,struct.pack('<3f',0,0,.5));restarted.write(HIT+0x54,1,'<B');restarted.camera_record();restarted.collision(zone=44);restarted.render()
     check(len(restarted.quads)==1 and restarted.quads[0]['uv'][0]==(0,.5) and restarted.text_draws[-1]['color']==0xffffffff,
@@ -930,7 +947,7 @@ def main():
     old_files=old.files.copy();old.call('forge_onInit');old.uc.mem_write(POSITION,struct.pack('<3f',0,0,.5));old.camera_record();old.collision();old.render()
     check(old.files==old_files and len(old.text_draws)==9 and abs(old.text_draws[-1]['pixels']-start_pixels*font_scale)<.001,'Version-1 primary and backup are ignored without migration, deletion or automatic writes')
     old.buttons={'Save settings'};old.panel()
-    check(b'version=2' in old.files[primary] and old.files[backup]==old_files[backup],'Explicit Save replaces primary with fresh v2 and does not preserve old v1 preferences')
+    check(b'version=' not in old.files[primary] and b'style=wilds' in old.files[primary] and old.files[backup]==old_files[backup],'Explicit Save replaces invalid primary with versionless defaults and leaves old backup untouched')
     p=probe();p.call('forge_onInit')
     check(p.read(p.private('active'))==1 and p.allocations==p.tls_allocations==1,'Compiled adapter installs one arena and one native TLS slot')
     for i,offset in enumerate(manifest['hook_offsets']):

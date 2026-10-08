@@ -28,8 +28,12 @@ uint32_t dn_fs_commit(const char* p){assert(std::strcmp(p,"savedata")==0);++comm
 static void balanced(){assert(!mounts&&!handles&&!guards&&backup=="untouched legacy backup");}
 int main(){using namespace damage_numbers;
  Settings session{};session.style=VisualStyle::Rise;session.scale=1.5f;
- assert(settings_save(session));balanced();assert(exists);
+ assert(settings_save(session));balanced();assert(exists&&primary.find("version=")==std::string::npos);
  Settings restarted{};assert(settings_load(restarted)&&restarted.style==VisualStyle::Rise&&restarted.scale==1.5f);balanced();
+ primary="[DamageNumbers]\nversion=2\nenabled=0\nstyle=rise\nscale=1.75\nlifetime=1.5\n";
+ Settings legacy{};assert(settings_load(legacy)&&!legacy.enabled&&legacy.style==VisualStyle::Rise&&legacy.scale==1.75f&&legacy.lifetime==1.5f);balanced();
+ assert(settings_save(legacy)&&primary.find("version=")==std::string::npos);balanced();
+ Settings migrated{};assert(settings_load(migrated)&&!migrated.enabled&&migrated.style==VisualStyle::Rise&&migrated.scale==1.75f&&migrated.lifetime==1.5f);balanced();
  session.style=VisualStyle::Classic;assert(settings_save(session)&&settings_save(session));balanced();
  for(failure=1;failure<=9;++failure){exists=failure!=9;assert(!settings_save(session));balanced();assert(session.style==VisualStyle::Classic&&std::strstr(settings_status(),"session"));}
  failure=0;available=false;assert(!settings_save(session));balanced();available=true;
@@ -37,5 +41,5 @@ int main(){using namespace damage_numbers;
  exists=false;assert(!settings_load(defaults));balanced();
  auto invalid=session;invalid.scale=99;auto before=accesses;assert(!settings_save(invalid)&&accesses==before);balanced();
  assert(settings_save(session));Settings again{};assert(settings_load(again)&&again.style==VisualStyle::Classic);balanced();
- std::printf("PASS: production primary-only persistence, restart/repeated saves, ignored backup, invalid input and nine storage failures (%u accesses, %u commits)\n",accesses,commits);
+ std::printf("PASS: production primary-only persistence, versionless restart/repeated saves, existing version-2 migration, ignored backup, invalid input and nine storage failures (%u accesses, %u commits)\n",accesses,commits);
 }

@@ -162,6 +162,7 @@ static void settings_and_sources() {
     Settings s{}; s.enabled=false;s.style=VisualStyle::Classic;
     s.scale=1.75f; s.lifetime=1.5f;
     const auto saved=encode_settings(s);
+    check(!std::strstr(saved.bytes,"version="),"new INI omits the version marker");
     Settings decoded{};
     check(decode_settings(saved.bytes,saved.size,decoded) && !decoded.enabled && decoded.style==VisualStyle::Classic && decoded.scale==1.75f && decoded.lifetime==1.5f,"INI settings round trip");
     const char* invalid[]={"", "[DamageNumbers]\nversion=1\n", "garbage", "[Other]\nversion=1\n"};
@@ -169,7 +170,7 @@ static void settings_and_sources() {
     const char* values[]={"NaN","inf","-1","4.0","1e0","1.1234567",".","1..2"};
     for (const char* value:values) {
         char text[256]; const int size=std::snprintf(text,sizeof(text),
-            "[DamageNumbers]\nversion=2\nenabled=1\nstyle=wilds\nscale=%s\nlifetime=0.9\n",value);
+            "[DamageNumbers]\nenabled=1\nstyle=wilds\nscale=%s\nlifetime=0.9\n",value);
         check(!decode_settings(text,unsigned(size),decoded),"invalid INI numeric value rejected");
     }
     auto corrupt=saved; corrupt.bytes[corrupt.size++]='\0';
@@ -177,7 +178,7 @@ static void settings_and_sources() {
     char duplicate[256]; std::memcpy(duplicate,saved.bytes,saved.size);
     std::memcpy(duplicate+saved.size,"enabled=1\n",10);
     check(!decode_settings(duplicate,saved.size+10,decoded),"duplicate config key rejected");
-    const char* edited="; user settings\r\n[DamageNumbers]\r\nversion = 2\r\nenabled = 0\r\nstyle=wilds\r\nscale=2.5\r\nlifetime=1\r\n";
+    const char* edited="; user settings\r\n[DamageNumbers]\r\nenabled = 0\r\nstyle=wilds\r\nscale=2.5\r\nlifetime=1\r\n";
     check(decode_settings(edited,unsigned(std::strlen(edited)),decoded) && decoded.scale==2.5f && decoded.lifetime==1,
           "INI whitespace and Windows line endings supported");
     for (float scale:{0.5f,1.0f,1.751234f,3.0f}) for (float lifetime:{0.4f,0.9f,1.231234f,2.0f}) {
@@ -189,8 +190,23 @@ static void settings_and_sources() {
         auto bad=saved;const unsigned n=std::strlen(key);std::memcpy(bad.bytes+bad.size,key,n);bad.size+=n;
         check(!decode_settings(bad.bytes,bad.size,decoded),"legacy, duplicate and invalid fields rejected");
     }
-    auto old=saved;for(unsigned k=0;k<old.size;++k)if(old.bytes[k]=='2'){old.bytes[k]='1';break;}
-    Settings fresh{};check(!decode_settings(old.bytes,old.size,fresh)&&fresh.enabled&&fresh.style==VisualStyle::Wilds&&fresh.scale==1,"v1 cannot preserve old preferences");
+    for (const char* style:{"wilds","classic","rise"}) {
+        char legacy[256]; const int size=std::snprintf(legacy,sizeof(legacy),
+            "[DamageNumbers]\nversion = 2\nenabled=0\nstyle=%s\nscale=1.75\nlifetime=1.5\n",style);
+        check(decode_settings(legacy,unsigned(size),decoded) && !decoded.enabled && decoded.scale==1.75f && decoded.lifetime==1.5f,
+              "existing version-2 config keeps all settings");
+        const auto rewritten=encode_settings(decoded);
+        check(!std::strstr(rewritten.bytes,"version=") && decode_settings(rewritten.bytes,rewritten.size,decoded),
+              "existing config saves without a version marker");
+        std::strcat(legacy,"version=2\n");
+        check(!decode_settings(legacy,unsigned(std::strlen(legacy)),decoded),"duplicate obsolete version marker rejected");
+    }
+    for (const char* key:{"enabled=", "style=", "scale=", "lifetime="}) {
+        char missing[256]; std::memcpy(missing,saved.bytes,saved.size+1);
+        char* begin=std::strstr(missing,key); char* end=std::strchr(begin,'\n')+1;
+        std::memmove(begin,end,std::strlen(end)+1);
+        check(!decode_settings(missing,unsigned(std::strlen(missing)),decoded),"each of four settings remains required");
+    }
     Source source=Source::Attack;
     check(source_outcome(0x000102,Owner::LocalPlayer,source) && source==Source::Attack,"hunter projectile remains owned attack");
     check(source_outcome(0x030802,Owner::LocalPalico,source) && source==Source::Attack,"palico support barrel remains owned attack");
@@ -304,7 +320,7 @@ static void rise_candidate() {
     check(unsigned(VisualStyle::Wilds)==0&&unsigned(VisualStyle::Classic)==1&&unsigned(VisualStyle::Rise)==2,"style IDs append Rise without changing old IDs");
     for(VisualStyle style:{VisualStyle::Wilds,VisualStyle::Classic,VisualStyle::Rise}) {
         Settings s;s.style=style;Settings decoded{};auto text=encode_settings(s);
-        check(decode_settings(text.bytes,text.size,decoded)&&decoded.style==style,"version-2 styles round trip");
+        check(decode_settings(text.bytes,text.size,decoded)&&decoded.style==style,"versionless styles round trip");
         for(Owner owner:{Owner::LocalPlayer,Owner::LocalPalico}) for(int hz:{-1,44,45,100})
             for(bool bounce:{false,true}) for(Critical crit:{Critical::None,Critical::Positive,Critical::Negative}) {
                 Event e=hit();e.owner=owner;e.physical_hzv=hz;e.bounced=bounce;e.critical=crit;

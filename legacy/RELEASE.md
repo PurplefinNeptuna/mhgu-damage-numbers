@@ -1,21 +1,22 @@
-# Damage Numbers r22-config1
+# Damage Numbers r23-config2
 
-READY_TO_DISTRIBUTE, locally packaged and unpublished. The release preserves the
-tested candidate NRO SHA-256
-`c9e1f0740e12bb2806926ef985f575221aa2785384be6a064fd8181b47567f70`.
-ZIP: `build/damage-numbers/releases/r22-config1/damage-numbers-r22-config1.zip`.
+READY_TO_DISTRIBUTE, locally packaged and unpublished. The INI requires only
+`enabled`, `style`, `scale` and `lifetime` under `[DamageNumbers]`. No version
+marker is required or written. Existing `version=2` files still load their
+preferences; the next explicit save omits the marker. Primary-only storage,
+validation, explicit saves and ignored backups remain in place.
 
-Includes Wilds, Classic and Rise, retaining the r21 Rise visual work and r20
-Wilds rendering. Configs use only the primary INI with explicit saves; old
-backups are unused. Host and ARM32 persistence failures, 361 compiled capture
-checks, GE/import/asset audits and standalone byte parity passed.
+NRO SHA-256: `31646800b1bbfb5aa80d0d968b60d1c171b4aebaa1e5662b473eaa2b530312b1`.
+ZIP: `build/damage-numbers/releases/r23-config2/damage-numbers-r23-config2.zip`.
 
-The user reported the tested plugins working on Eden on 2026-10-08 and requested
-promotion. Installed bytes match this payload. [Runtime scope](RUNTIME.md) and
-[release evidence](docs/CONFIG_RELEASE_RUNTIME.json) distinguish that report
-from exhaustive testing or new Ryujinx validation. Forge render1 stays LOCAL_ONLY
-and is an external dependency. Distribution preparation rebuilds no runtime and
-performs no installation, activation, publication or push.
+Host validation passed 3,315 core/presentation checks and production storage
+load/save/restart, old-file migration and failure paths. All 365 compiled capture
+checks, 9,287 gateway checks, SDK/GE/import audits and real-ImGui/asset checks
+passed. Font and sprite hashes, rendering and native hooks are unchanged.
+[Config validation](docs/CONFIG_WITHOUT_VERSION.json) records the exact payload
+and reports. The r22-config1 Eden confirmation remains in [RUNTIME.md](RUNTIME.md);
+no fresh game run is claimed for this config revision. Forge stays LOCAL_ONLY.
+Nothing was installed, activated or published.
 
-The previous r20 delivery is preserved byte-for-byte under
-`backups/release-promotion-20261008/`, with verified hashes.
+The r22-config1 delivery is preserved with hashes under
+`backups/config-no-version-20261008/`.

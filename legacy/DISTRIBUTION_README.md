@@ -11,7 +11,7 @@ MHGU 1.4.0 for Nintendo Switch and Forge 1.4.1.
 ## Installation
 
 1. Close the emulator.
-2. Extract `damage-numbers-r22-config1.zip`.
+2. Extract `damage-numbers-r23-config2.zip`.
 3. Copy the `damage-number` folder into your MHGU mod directory:
    - Eden: `~/.local/share/eden/load/0100770008DD8000/`
    - Ryujinx: `mods/contents/0100770008dd8000/` inside its data directory.
@@ -52,7 +52,6 @@ You can change settings without opening Forge's menu.
 
 ```ini
 [DamageNumbers]
-version=2
 enabled=1
 style=wilds
 scale=1.000000
@@ -61,13 +60,12 @@ lifetime=0.900000
 
 | Setting | Supported values |
 | --- | --- |
-| `version` | Keep `2`. |
 | `enabled` | `1` shows damage numbers; `0` hides them. |
 | `style` | `wilds`, `classic` or `rise`, in lowercase. |
 | `scale` | Number size from `0.5` to `3.0`; default `1.0`. |
 | `lifetime` | Duration in seconds from `0.4` to `2.0`; default `0.9`. |
 
-Keep the section name and all five settings, with each key appearing once.
+Keep the section name and all four settings, with each key appearing once.
 Use a dot for decimals and no more than six decimal places. Save as plain
 UTF-8 text without a byte-order mark. Invalid or incomplete files load the
 mod's defaults. Changes are read when you next launch the game and load your

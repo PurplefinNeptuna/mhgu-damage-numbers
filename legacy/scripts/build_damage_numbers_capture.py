@@ -142,7 +142,7 @@ arm-none-eabi-objdump -d /output/plugin.elf > /output/disassembly.txt
         'bounce_match_max_age_seconds':0.10,'bounce_requires_unique_active_attack':True,
         'bounce_requires_same_native_thread_and_counter':True,
         'settings_save_paths':['savedata:/damage_numbers.ini'],
-        'settings_format':'INI version 2 only; five required fields; bounded 255 bytes; verified primary only; legacy backups ignored',
+        'settings_format':'INI without version marker; four required fields; existing version=2 accepted; bounded 255 bytes; verified primary only; legacy backups ignored',
         'appearance_default':'Wilds','appearance_styles':['Wilds','Classic','Rise'],'rise':rise_manifest,'font':font_manifest,'sprites':sprite_manifest,
         'spacing_candidates':17,'spacing_max_font_sizes':[1.6,1.0],'spacing_offsets_cached':True,
         'plugin_panel_style':'compact unframed TreeNode; closed by default; settings only',

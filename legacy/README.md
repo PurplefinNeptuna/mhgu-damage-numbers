@@ -1,8 +1,10 @@
 # Damage numbers
 
-Current release: **r22-config1**, with Rise, Wilds and Classic styles and
+Current release: **r23-config2**, with Rise, Wilds and Classic styles and
 primary-only configs. [Release details](RELEASE.md) and [installation guide](DISTRIBUTION_README.md).
-The user confirmed the tested Eden setup on 2026-10-08. Forge remains LOCAL_ONLY.
+The preceding r22-config1 release was confirmed on Eden on 2026-10-08.
+This config simplification has host/ARM32 validation; no fresh game run is claimed.
+Forge remains LOCAL_ONLY.
 The versioned build outputs retain the `candidate` path setting to preserve
 previous artifacts; `DISTRIBUTION.json` is authoritative for release status.
 
@@ -101,9 +103,10 @@ The compact **Damage numbers** tree under Forge's **Plugin UI** starts closed.
 It contains enable, Style, Number size, Duration, Save settings, Restore defaults
 and brief preference feedback. Runtime failures use concise Forge logs. Rendering continues while the panel is closed.
 
-Settings use only `savedata:/damage_numbers.ini`, beside Better Input. Version 2
-requires `version`, `enabled`, `style`, `scale` and `lifetime`, within 255 bytes.
-Legacy formats and obsolete keys are rejected. Missing or invalid primary files
+Settings use only `savedata:/damage_numbers.ini`, beside Better Input. The INI requires
+`enabled`, `style`, `scale` and `lifetime`, within 255 bytes. No version marker
+is written or required. Existing files with `version=2` still load their settings;
+the marker is omitted on the next explicit save. Obsolete setting keys are rejected. Missing or invalid primary files
 use defaults. Existing `_backup.ini` files are ignored and left untouched.
 **Save settings** validates, writes, flushes, verifies and commits the primary;
 Restore defaults changes the session until saved. Save failures retain session

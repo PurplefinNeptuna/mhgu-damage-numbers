@@ -1,0 +1,53 @@
+{
+  "date": "2026-10-08",
+  "version": "r23-config2",
+  "status": "PASSED_HOST_AND_ARM32",
+  "runtime_test": "NOT RUN",
+  "installed": false,
+  "published": false,
+  "policy": "Four settings required; no version marker written or required. Existing version=2 configs load and omit the marker on the next explicit save. Primary INI only; backups untouched and unused.",
+  "codec_fixture": "tests/core.cpp: versionless roundtrip, all styles and range boundaries, old files, duplicate/unknown/incomplete/invalid rejection; 3315 core/presentation checks.",
+  "production_storage_fixture": "tests/settings.cpp: old file load, explicit versionless save and restart, repeated saves and nine storage failures with balanced cleanup.",
+  "compiled_fixture": "scripts/damage_numbers_capture_probe.py: old disabled Classic mode and size load, explicit marker removal preserving lifetime, migrated restart; 365 checks.",
+  "payload_sha256": "31646800b1bbfb5aa80d0d968b60d1c171b4aebaa1e5662b473eaa2b530312b1",
+  "reports": {
+    "open-assets/compiled-capture-probe.json": {
+      "sha256": "a8bf515ef7f06deb34db3d6faa88d14e2cf8e652ae1f96e8e8e95b6f87299024",
+      "checks": 365
+    },
+    "open-assets/gateway-probe.json": {
+      "sha256": "af6326595d58fb68feb3f86659e9968861b59292b7ccffda155c3196a3588d57",
+      "checks": 9287
+    },
+    "open-assets/asset-audit.json": {
+      "sha256": "141a006ad4b298ef5846af0c2a066e1a68be6c722d19935c90d4ff49b5c7e2ef",
+      "checks": [
+        "Open asset generation succeeds with proprietary visual reads blocked",
+        "Pinned Open Sans source and OFL hashes verified",
+        "Compiled renamed digit subset equals open font payload",
+        "Compiled full OFL notice is embedded",
+        "Compiled DN-LZ1 sprite equals independently generated art/effect payload",
+        "Lossless decoding reproduces every accepted RGBA byte",
+        "Compiled procedural Rise beam equals complete open RGBA payload; Rise proprietary reads blocked"
+      ],
+      "status": "PASSED_OPEN_ASSET_PROVENANCE"
+    },
+    "open-assets/ge-compatibility.json": {
+      "sha256": "a433c566aaefad5d16070617b8e21947052525ec88dbeeb5ba16f5389b2c9126",
+      "status": "PASSED_NZCVQ_ONLY_GATEWAYS"
+    },
+    "open-assets/compression-render-comparison.json": {
+      "sha256": "16908d6b90fdaafa6e2f49d83d4d4dffccbeb5b36ab12e93669545c8fffb930a",
+      "status": "PASSED_R20_CRIT_SIZE_ASSET_EQUIVALENCE"
+    },
+    "open-assets/sprite-codec-test.json": {
+      "sha256": "77c049a18100557a8773c3d22f308ea4734eab2ca838339309a38f916a481271",
+      "status": "PASSED_LOSSLESS_SPRITE_CODEC"
+    },
+    "runtime-policy.json": {
+      "sha256": "ade8accde6acfd102ed98ca171bcd91eed347f95129c029cdd9ff1ab9066a651",
+      "checks": 14,
+      "status": "PASSED"
+    }
+  }
+}

@@ -16,7 +16,7 @@ inline SettingsText encode_settings(const Settings& s) {
         for (uint32_t place=100000;place;place/=10) out.bytes[out.size++]=char('0'+(fixed/place)%10);
         out.bytes[out.size++]='\n';
     };
-    text("[DamageNumbers]\nversion=2\nenabled="); text(s.enabled?"1\n":"0\n");
+    text("[DamageNumbers]\nenabled="); text(s.enabled?"1\n":"0\n");
     text("style="); text(s.style==VisualStyle::Wilds?"wilds\n":s.style==VisualStyle::Rise?"rise\n":"classic\n");
     text("scale="); decimal(s.scale); text("lifetime="); decimal(s.lifetime);
     return out;
@@ -38,18 +38,19 @@ inline bool decode_settings(const char* data,unsigned size,Settings& out) {
         if (split==end) return false;
         unsigned key_end=split; while (key_end>begin && space(data[key_end-1])) --key_end;
         unsigned value=split+1; while (value<end && space(data[value])) ++value;
-        const char* names[]={"version","enabled","style","scale","lifetime"};
+        const char* names[]={"enabled","style","scale","lifetime","version"};
         unsigned key=0; while (key<5 && !equal(data+begin,key_end-begin,names[key])) ++key;
         if (key==5) return false; // No legacy keys or formats.
         if (seen&(1u<<key)) return false;
         seen|=1u<<key;
-        if (key==0) {
+        if (key==4) {
+            // Read existing files, but never write this obsolete format marker.
             if (!equal(data+value,end-value,"2")) return false;
-        } else if (key==1) {
+        } else if (key==0) {
             if (end-value!=1 || (data[value]!='0' && data[value]!='1')) return false;
             const bool yes=data[value]=='1';
             next.enabled=yes;
-        } else if (key==2) {
+        } else if (key==1) {
             if (equal(data+value,end-value,"wilds")) next.style=VisualStyle::Wilds;
             else if (equal(data+value,end-value,"classic")) next.style=VisualStyle::Classic;
             else if (equal(data+value,end-value,"rise")) next.style=VisualStyle::Rise;
@@ -68,10 +69,10 @@ inline bool decode_settings(const char* data,unsigned size,Settings& out) {
             if (!digits) return false;
             uint32_t divisor=1; for (unsigned i=0;i<places;++i) divisor*=10;
             const float number=float(whole)+float(fraction)/float(divisor);
-            if (key==3) next.scale=number; else next.lifetime=number;
+            if (key==2) next.scale=number; else next.lifetime=number;
         }
     }
-    if (seen!=0x1fu || !valid(next)) return false;
+    if ((seen&0x0fu)!=0x0fu || !valid(next)) return false;
     out=next; return true;
 }
 bool settings_load(Settings& out);
