@@ -3,7 +3,7 @@ from paths import NAME, BUILD_ROOT, WORK_ROOT
 """Build one owned mod; never install, activate or publish."""
 import argparse, ast, hashlib, importlib, json, os, shutil, subprocess, sys, zipfile
 from pathlib import Path
-from paths import ROOT, MOD, SCRIPTS, WORKSPACE, CONFIG, PYTHON, FORGE, DEPS, CONTAINER_STORAGE, input_path, check_dependencies
+from paths import ROOT, MOD, SCRIPTS, WORKSPACE, CONFIG, PYTHON, FORGE, DEPS, CONTAINER_STORAGE, input_path, check_dependencies, BUILD_ROOT, WORK_ROOT
 
 def digest(p): return hashlib.sha256(p.read_bytes()).hexdigest()
 def run(args, **kwargs): return subprocess.run(list(map(str,args)),check=True,**kwargs)

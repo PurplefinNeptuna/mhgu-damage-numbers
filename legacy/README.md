@@ -2,7 +2,7 @@
 
 Current release: **r20**. Wilds crit stars are 1.5× their previous size; digits retain the 0.5 px dark outline and no gold halo. Fresh host/ARM/static checks passed; no new gameplay test was run. Earlier manual reports retain their original version. See [crit-size validation](CRIT_SIZE.md) and [r19 readability validation](READABILITY.md) and [development workflow](DEVELOPMENT.md).
 
-Rise style candidate: **r21-rise1**, [implementation and previews](RISE_CANDIDATE.md).
+Current config candidate: **r22-config1**, retaining the Rise style work from **r21-rise1**, [implementation and previews](RISE_CANDIDATE.md).
 The current source builds the candidate in isolated versioned outputs.
 `DISTRIBUTION.json` and the accepted delivery remain r20; the candidate is
 DEVELOPMENT, with no gameplay acceptance. [The handoff](RISE_IMPLEMENTATION_HANDOFF.md)
@@ -103,13 +103,14 @@ The compact **Damage numbers** tree under Forge's **Plugin UI** starts closed.
 It contains enable, Style, Number size, Duration, Save settings, Restore defaults
 and brief preference feedback. Runtime failures use concise Forge logs. Rendering continues while the panel is closed.
 
-Settings live beside Better Input in `savedata:/damage_numbers.ini`; the
-transactional recovery copy is `savedata:/damage_numbers_backup.ini`. Version 2
-requires only `version`, `enabled`, `style`, `scale` and `lifetime`, within 255
-bytes. Legacy versions and obsolete source/bounce keys are rejected. Old primary,
-backup and SD files preserve no preferences and are not migrated or deleted.
-**Save settings** explicitly writes version 2; Restore defaults changes the
-session until saved. Game payloads and Better Input's INI are preserved.
+Settings use only `savedata:/damage_numbers.ini`, beside Better Input. Version 2
+requires `version`, `enabled`, `style`, `scale` and `lifetime`, within 255 bytes.
+Legacy formats and obsolete keys are rejected. Missing or invalid primary files
+use defaults. Existing `_backup.ini` files are ignored and left untouched.
+**Save settings** validates, writes, flushes, verifies and commits the primary;
+Restore defaults changes the session until saved. Save failures retain session
+settings but may have changed the primary file. Other configs and game saves
+are preserved.
 
 Loading retries at most once per second if the player-save mount is unavailable.
 Manual edits cancel deferred loading. Filesystem operations use Forge's counted
@@ -133,7 +134,7 @@ Host fixtures check policies, measured spacing, animation, codecs and fixed
 storage under ASan/UBSan. ARM32 fixtures execute the compiled NRO with explicit
 SDK/kernel/font/draw stubs and original HZV/damage routines. They inspect font
 registration, draw arguments, colors, marker geometry, fades, burst limits,
-source filtering and config recovery. They do not run Forge's GPU renderer.
+source filtering and primary-only config failures. They do not run Forge's GPU renderer.
 A separate host harness executes the pinned real ImGui font/texture/draw code,
 then composites its actual draw commands into
 `work/damage-numbers/open-visual/preview.png` with linear texture sampling.

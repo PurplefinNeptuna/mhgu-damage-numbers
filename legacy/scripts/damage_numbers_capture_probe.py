@@ -162,7 +162,7 @@ class CaptureProbe:
                 elif name=='_ZN2nn2fs8OpenFileEPNS0_10FileHandleEPKci':
                     path=self.string(args[1])
                     self.fs_paths.append(path)
-                    if path not in ('savedata:/damage_numbers.ini','savedata:/damage_numbers_backup.ini'):
+                    if path != 'savedata:/damage_numbers.ini':
                         raise ValueError('Settings accessed an unrelated file')
                     if path not in self.files: self.ret(1)
                     else:
@@ -721,27 +721,25 @@ def main():
     restarted.changes={'Show damage numbers':True};restarted.panel();restarted.camera_record();restarted.collision();restarted.render()
     check(len(restarted.text_draws)==9 and restarted.text_draws[-1]['pixels']==37.5,
           'Loaded size setting remains effective when display is re-enabled')
+    save.files[backup]=b'legacy backup untouched'
     save.buttons={'Restore defaults','Save settings'};save.panel()
-    check(save.files[backup]==first_files[primary] and save.files[primary]!=first_files[primary],
-          'Subsequent save backs up the previous valid primary before replacing it')
-    good_files=save.files.copy();save.fail_write_path=backup;save.buttons={'Save settings'};save.panel()
-    check(save.files[primary]==good_files[primary] and not save.handles and not save.save_mounts,
-          'Failed backup write leaves the primary settings untouched')
+    check(save.files[backup]==b'legacy backup untouched' and save.files[primary]!=first_files[primary],
+          'Repeated save changes only primary and leaves legacy backup unused')
     save.fail_write_path=primary;save.buttons={'Save settings'};save.panel();damaged=save.files.copy()
-    check(damaged[backup]==good_files[primary] and not save.handles and not save.save_mounts,
-          'Partial primary write retains the last valid config in backup and closes all handles')
+    check(damaged[backup]==b'legacy backup untouched' and not save.handles and not save.save_mounts,
+          'Partial primary write leaves legacy backup untouched and closes all handles')
     recovered=probe();recovered.save_available=True;recovered.files=damaged;recovered.call('forge_onInit')
     recovered.uc.mem_write(POSITION,struct.pack('<3f',.25,0,.5));recovered.camera_record();recovered.collision();recovered.render()
     check(len(recovered.text_draws)==9 and abs(recovered.text_draws[-1]['pixels']-start_pixels*font_scale)<.001,
-          'Restart rejects a partial primary and recovers the previous saved defaults')
+          'Restart rejects partial primary and uses defaults without backup recovery')
     recovered.changes={'Show damage numbers':False};recovered.panel();recovered.render()
     check(not recovered.text_draws,'Disabling display immediately clears already visible numbers')
     save.fail_write_path=None;save.fail_commit=True;save.buttons={'Save settings'};save.panel()
     check('save failed' in save.string(save.read(save.private('storage_status'))) and not save.save_mounts,
-          'Explicit save commit failure reports failure and releases the counted mount')
-    check(save.save_commits>0 and set(save.fs_paths)=={primary,backup},
-          'Config saves commit only the player save mount and access only our two INI files')
-    check(save.fs_context==0x12340000 and save.fs_guard_depth==0,'Save read/write and failure paths restore original SDK thread context')
+          'Explicit save commit failure reports failure and releases counted mount')
+    check(save.save_commits>0 and set(save.fs_paths)=={primary},
+          'Config save commits player save mount and accesses only primary INI')
+    check(save.fs_context==0x12340000 and save.fs_guard_depth==0,'All settings paths restore original SDK thread context')
     late=probe();late.files=first_files.copy();late.call('forge_onInit')
     late.uc.mem_write(POSITION,struct.pack('<3f',.25,0,.5))
     check(late.read(late.private('pending'),'<B')==1,'Unavailable startup mount leaves preference load pending')

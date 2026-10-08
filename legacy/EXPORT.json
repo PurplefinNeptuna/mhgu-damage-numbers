@@ -8,6 +8,7 @@
     "CAPTURE_TRIAL.md",
     "CLEANUP_VALIDATION.json",
     "COMPRESSION.md",
+    "CONFIG_CANDIDATE.md",
     "CRIT_SIZE.md",
     "DEVELOPMENT.md",
     "DISTRIBUTION.json",
@@ -125,6 +126,7 @@
     "tests/ownership_bridge.cpp",
     "tests/rise_visual.cpp",
     "tests/runtime_policy.cpp",
+    "tests/settings.cpp",
     "tests/sprite_codec.cpp",
     "tests/transaction.cpp",
     "tests/visual.cpp",
@@ -173,8 +175,8 @@
     "vendor/forge/libs/nnsdk/include/forge/nn/os.h",
     "vendor/forge/libs/nnsdk/include/forge/nn/ro.h",
     "vendor/forge/libs/nnsdk/include/forge/nn/socket.h",
-    "vendor/forge/source/forge/graphics.cpp",
     "vendor/forge/source/forge/graphics/imgui_impl_nvn.cpp",
+    "vendor/forge/source/forge/graphics.cpp",
     "vendor/forge/source/forge/log.c",
     "vendor/forge/source/main.c",
     "vendor/modern-weapon-controls/THIRD_PARTY.md",
@@ -199,7 +201,6 @@
     "vendor/sdk/libs/cimgui/imgui/imstb_textedit.h",
     "vendor/sdk/libs/cimgui/imgui/imstb_truetype.h",
     "vendor/sdk/libs/libnx/LICENSE-MIT",
-    "vendor/sdk/libs/libnx/nx/include/switch.h",
     "vendor/sdk/libs/libnx/nx/include/switch/applets/album_la.h",
     "vendor/sdk/libs/libnx/nx/include/switch/applets/error.h",
     "vendor/sdk/libs/libnx/nx/include/switch/applets/friends_la.h",
@@ -376,6 +377,7 @@
     "vendor/sdk/libs/libnx/nx/include/switch/sf/sessionmgr.h",
     "vendor/sdk/libs/libnx/nx/include/switch/sf/tipc.h",
     "vendor/sdk/libs/libnx/nx/include/switch/types.h",
+    "vendor/sdk/libs/libnx/nx/include/switch.h",
     "vendor/sdk/libs/libnx/nx/source/kernel/svc32.s"
   ]
 }

@@ -1,4 +1,3 @@
-from paths import MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path, BUILD_ROOT, WORK_ROOT
 #!/usr/bin/env python3
 """Host policy and presentation checks. No Eden or in-game validation."""
 from pathlib import Path
@@ -6,7 +5,7 @@ import os
 import subprocess
 import argparse
 
-from paths import ROOT, MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path
+from paths import ROOT, MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path, WORK_ROOT
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
@@ -34,6 +33,14 @@ def main():
                     '-fsanitize=address,undefined','-fno-omit-frame-pointer',
                     '-I'+str(src/'src'),str(src/'tests/transaction.cpp'),'-o',str(transaction)],check=True)
     subprocess.run([str(transaction)],check=True,env=env)
+    mock=out/'mock/forge';mock.mkdir(parents=True,exist_ok=True)
+    (mock/'fs.h').write_text('#pragma once\nbool forge_fs_mountSaveData();\nvoid forge_fs_unmountSaveData();\n')
+    (mock/'log.h').write_text('#pragma once\nvoid forge_log_warn(const char*,...);\nvoid forge_log_info(const char*,...);\n')
+    settings=out/'settings'
+    subprocess.run(['c++','-std=c++17','-Wall','-Wextra','-Werror','-O1','-g',
+                    '-fsanitize=address,undefined','-fno-omit-frame-pointer','-fno-pie','-no-pie',
+                    '-I'+str(mock.parent),str(src/'tests/settings.cpp'),'-o',str(settings)],check=True)
+    subprocess.run([str(settings)],check=True,env=env)
     if args.thread_sanitizer:
         tsan=out/'mailbox-tsan'
         subprocess.run(['c++','-std=c++17','-Wall','-Wextra','-Werror','-O1','-g',
