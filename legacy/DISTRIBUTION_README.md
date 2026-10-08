@@ -6,8 +6,7 @@ hits.
 
 ## Requirements
 
-MHGU 1.4.0 for Nintendo Switch and Forge 1.4.1. Use Forge 1.4.1-render1 for
-visible dropdowns and menus while gameplay overlays are active.
+MHGU 1.4.0 for Nintendo Switch and Forge 1.4.1.
 
 ## Installation
 
@@ -39,7 +38,13 @@ current settings; select **Save settings** afterward to keep the defaults.
 If saving fails, the current choices remain active for the session. Load a
 player save and retry **Save settings**.
 
-## Compatibility
+## Known issue
 
-Older Forge loaders can blank or corrupt the menu while dropdowns or damage
-popups are visible. Use Forge 1.4.1-render1 for these menus and overlays together.
+Forge can blank or corrupt its menu while a dropdown or damage popups are
+visible. Click outside an open dropdown to cancel it and restore the menu.
+Close Forge's menu while playing.
+
+If the Style dropdown is unreadable, select **Save settings** once, close the
+game, then edit `style=wilds`, `style=classic` or `style=rise` in
+`damage_numbers.ini` in MHGU's player save folder. The chosen style loads when
+you next launch the game.

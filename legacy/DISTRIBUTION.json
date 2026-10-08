@@ -18,7 +18,7 @@
   "target": "MHGU Nintendo Switch 1.4.0; Forge 1.4.1 on the user-confirmed Eden/Linux setup.",
   "limitations": [
     "User confirmation is scoped to the tested Eden setup; not exhaustive feature, persistence-restart, clean-shutdown, new Ryujinx or native Switch validation.",
-    "Standard Forge builds without the multi-list renderer fix can blank/corrupt menus while dropdowns or overlays are active; the tested render1 loader stays LOCAL_ONLY.",
+    "Standard Forge builds without the multi-list renderer fix can blank/corrupt menus while dropdowns or overlays are active.",
     "Requires the audited MHGU 1.4.0 eight-site layout.",
     "Rise slashes are a screen-space approximation; viewport clipping does not provide scene occlusion."
   ],
@@ -87,18 +87,23 @@
         "sha256": "374684063adb939b389f0e4d1c8766c09e52339bfe9eaedadd4a8f44635252a7",
         "scope": "Recorded build baseline; external dependency, not bundled."
       }
-    ]
-  },
-  "dependencies": [
-    {
+    ],
+    "local_test_loader": {
       "name": "forge-patched 1.4.1-render1",
       "sha256": "f22f4be84163deba14a2bd086d76065a4baa0b3943aba78b5c1aac15f2f94eee",
       "scope": "External LOCAL_ONLY loader used in the tested Eden setup; not bundled. Its renderer fix permits menu/dropdowns and gameplay overlays together."
     },
-    {
+    "compiler_import_baseline": {
       "name": "Forge 1.4.1 compiler/import baseline",
       "sha256": "9d472d56f81f834f366171426dbd0131af19c7697e132c731c3fd3f335af53d0",
       "scope": "Unchanged pinned build/import-validation input; runtime also resolves against render1."
+    }
+  },
+  "dependencies": [
+    {
+      "name": "Forge",
+      "version": "1.4.1",
+      "scope": "Public loader API dependency; external and unbundled."
     }
   ]
 }
