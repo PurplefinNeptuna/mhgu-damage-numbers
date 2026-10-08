@@ -40,11 +40,6 @@ player save and retry **Save settings**.
 
 ## Known issue
 
-Forge can blank or corrupt its menu while a dropdown or damage popups are
-visible. Click outside an open dropdown to cancel it and restore the menu.
-Close Forge's menu while playing.
-
-If the Style dropdown is unreadable, select **Save settings** once, close the
-game, then edit `style=wilds`, `style=classic` or `style=rise` in
-`damage_numbers.ini` in MHGU's player save folder. The chosen style loads when
-you next launch the game.
+Opening a dropdown or displaying gameplay overlays can make Forge's entire
+ImGui window blank. If this happens, click random places inside that ImGui
+window until the menu reappears.
