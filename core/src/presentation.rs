@@ -6,6 +6,8 @@ pub struct Point {
     pub x: f32,
     pub y: f32,
 }
+// Screen-space rectangle in pixels; right/bottom are edges, not width/height.
+// The same representation describes visible ink and reserved placement bounds.
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Rect {
@@ -31,6 +33,8 @@ impl Rect {
             bottom: self.bottom + p.y,
         }
     }
+    // Smallest rectangle containing both shapes, used to include critical markers
+    // and every visible glyph in the number's bounding box.
     pub fn united(self, b: Self) -> Self {
         Self {
             left: self.left.min(b.left),
@@ -53,11 +57,15 @@ impl Rect {
             && self.right <= v.x + v.width
             && self.bottom <= v.y + v.height
     }
+    // Score overlap area in square pixels. margin penalizes nearly touching
+    // numbers too; min/max compute intersection edges and max(0) rejects gaps.
     fn overlap(self, b: Self, margin: f32) -> f32 {
         (self.right.min(b.right) + margin - self.left.max(b.left)).max(0.0)
             * (self.bottom.min(b.bottom) + margin - self.top.max(b.top)).max(0.0)
     }
 }
+// A copied world-to-clip matrix and its screen viewport. No native camera
+// object is needed after this value has been constructed.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct View {
     pub world_to_clip: [f32; 16],
@@ -66,11 +74,16 @@ pub struct View {
     pub width: f32,
     pub height: f32,
 }
+// advance is where the next character would start, including glyph spacing.
+// ink is the actual visible glyph rectangle relative to the text origin;
+// centering uses advance while clipping/collision checks use visible ink.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct TextMetrics {
     pub advance: f32,
     pub ink: Rect,
 }
+// Rise critical effect geometry, independent of the digits' placement offset.
+// origin is the raw projected impact; clip limits the long slash to the viewport.
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Slash {
@@ -81,6 +94,11 @@ pub struct Slash {
     pub opacity: f32,
     pub clip: Rect,
 }
+// One ready-to-draw number. position is the displaced text origin; offset is
+// the cached displacement from its projected anchor. star/slash locate effects.
+// pixels/opacity are the current animation state, ink/solid are current bounds,
+// and reserve is the larger peak-size rectangle used to place later hits.
+// text is a fixed NUL-terminated digit buffer understood by raw ImGui calls.
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default)]
 pub struct DrawNumber {
@@ -102,6 +120,8 @@ pub struct DrawNumber {
     pub key: HitKey,
     pub text: [u8; 12],
 }
+// r25 sizes at a 720-pixel-high viewport. layout scales by height/720 and the
+// user's size setting. Rise's smaller base is separate from its width stretch.
 pub const BASE_PIXELS: f32 = 24.0;
 pub const RISE_BASE_PIXELS: f32 = 20.0;
 pub const RISE_GLYPH_WIDTH: f32 = 1.08;
@@ -115,6 +135,8 @@ pub fn native_camera(
     width: f32,
     height: f32,
 ) -> Option<View> {
+    // Admit only the full native viewport with a matching display aspect ratio
+    // (within 2%). A subview or stale rectangle would misplace every projected hit.
     if rect[0] != 0
         || rect[1] != 0
         || rect[2] <= 0
@@ -133,6 +155,9 @@ pub fn native_camera(
         height,
         ..View::default()
     };
+    // For each output element, sum four products from view and projection.
+    // The swapped row/column indices also transpose the native row-vector result,
+    // so project can multiply column vectors with ordinary row-major indexing.
     for row in 0..4 {
         for col in 0..4 {
             let mut value = 0.0;
@@ -147,6 +172,9 @@ pub fn native_camera(
     }
     Some(result)
 }
+// Transform an impact from world coordinates to clip coordinates, reject
+// points outside the camera, then divide by w to obtain normalized coordinates.
+// Option lets layout skip clipped/invalid points without drawing at (0,0).
 pub fn project(p: Vec3, v: &View) -> Option<Point> {
     if !p.valid()
         || ![v.x, v.y, v.width, v.height].iter().all(|x| x.is_finite())
@@ -157,10 +185,14 @@ pub fn project(p: Vec3, v: &View) -> Option<Point> {
         return None;
     }
     let m = &v.world_to_clip;
+    // Each matrix row multiplies [world_x, world_y, world_z, 1]. w carries
+    // perspective depth; x/y/z are not screen pixels until divided by w.
     let x = m[0] * p.x + m[1] * p.y + m[2] * p.z + m[3];
     let y = m[4] * p.x + m[5] * p.y + m[6] * p.z + m[7];
     let z = m[8] * p.x + m[9] * p.y + m[10] * p.z + m[11];
     let w = m[12] * p.x + m[13] * p.y + m[14] * p.z + m[15];
+    // Require positive w and the native clip volume: x/y in [-w,w], z in [0,w].
+    // This avoids dividing by zero and drawing hits behind/outside the camera.
     if ![x, y, z, w].iter().all(|x| x.is_finite())
         || w <= 0.00001
         || x < -w
@@ -172,6 +204,8 @@ pub fn project(p: Vec3, v: &View) -> Option<Point> {
     {
         return None;
     }
+    // Map normalized x from [-1,1] to the viewport's horizontal pixel range.
+    // Invert y because screen pixels increase downward while clip y increases up.
     let point = Point {
         x: v.x + (x / w + 1.0) * v.width * 0.5,
         y: v.y + (1.0 - y / w) * v.height * 0.5,
@@ -184,6 +218,8 @@ pub fn digits(mut value: i32) -> [u8; 12] {
     if value <= 0 {
         return out;
     }
+    // Modulo 10 extracts digits right-to-left; reverse them into the output.
+    // The unused zero bytes supply the terminator required by ImGui text calls.
     let mut reverse = [0; 10];
     let mut n = 0;
     while value != 0 {
@@ -196,14 +232,21 @@ pub fn digits(mut value: i32) -> [u8; 12] {
     }
     out
 }
+// scale multiplies settled font size; opacity controls alpha. rise is upward
+// travel measured in 720p reference pixels and is scaled by layout.
 #[derive(Clone, Copy, Debug)]
 pub struct Motion {
     pub scale: f32,
     pub opacity: f32,
     pub rise: f32,
 }
+// age is seconds since capture, so late consumption starts partway through
+// the animation. Each style reproduces r25's timing instead of a shared tween.
 pub fn motion(age: f32, lifetime: f32, style: Style) -> Motion {
     if style == Style::Rise {
+        // Rise entrance splits nine timing units into 2/5/2: grow 0.64 to 1.20,
+        // shrink to 0.88, then settle at 1.00. Cap entrance/exit by lifetime fractions
+        // so a short configured lifetime still leaves a readable middle phase.
         let entrance = 0.3f32.min(lifetime * 0.3);
         let exit_time = (10.0f32 / 30.0).min(lifetime * 0.35);
         let t = (age / entrance).clamp(0.0, 1.0);
@@ -215,6 +258,8 @@ pub fn motion(age: f32, lifetime: f32, style: Style) -> Motion {
             0.88 + 0.12 * (t * 9.0 - 7.0) / 2.0
         };
         let exit = ((age - (lifetime - exit_time)) / exit_time).clamp(0.0, 1.0);
+        // The first tenth of Rise's exit nudges downward by four reference pixels
+        // (negative rise), then travels upward while fading through the remaining exit.
         let kick = (exit * 10.0).min(1.0);
         return Motion {
             scale,
@@ -227,6 +272,8 @@ pub fn motion(age: f32, lifetime: f32, style: Style) -> Motion {
         };
     }
     if style == Style::Wilds {
+        // Wilds starts 20% oversized and eases quadratically to its settled size.
+        // Its final 0.2 seconds fade out while rising 30 reference pixels.
         let stamp = 1.0 - (age / 0.2).clamp(0.0, 1.0);
         let exit = ((age - (lifetime - 0.2)) / 0.2).clamp(0.0, 1.0);
         return Motion {
@@ -235,6 +282,8 @@ pub fn motion(age: f32, lifetime: f32, style: Style) -> Motion {
             rise: 30.0 * exit,
         };
     }
+    // Classic starts 25% oversized, settles in 0.1 seconds, rises throughout
+    // its lifetime and fades only during the last 0.25 seconds.
     Motion {
         scale: if age < 0.1 {
             1.0 + 0.25 * (1.0 - age / 0.1)
@@ -249,6 +298,8 @@ pub fn motion(age: f32, lifetime: f32, style: Style) -> Motion {
         rise: age / lifetime * 30.0,
     }
 }
+// Hash the hit identity for a stable slight lean. This avoids per-frame random
+// changes; the same hit always produces the same slash orientation.
 pub fn rise_slash(origin: Point, key: HitKey, age: f32, view: &View) -> Slash {
     let mut hash = key.serial.wrapping_mul(0x9e3779b9)
         ^ key.epoch.wrapping_mul(0x85ebca6b)
@@ -257,6 +308,8 @@ pub fn rise_slash(origin: Point, key: HitKey, age: f32, view: &View) -> Slash {
     hash ^= hash >> 16;
     hash = hash.wrapping_mul(0x7feb352d);
     hash ^= hash >> 15;
+    // Grow for 0.05 seconds, then fade over 0.15. The slash stays centered on the
+    // original impact and spans roughly three quarters of the viewport height.
     let grow = (age / 0.05).clamp(0.0, 1.0);
     let fade = ((age - 0.05) / 0.15).clamp(0.0, 1.0);
     Slash {
@@ -277,6 +330,9 @@ pub fn rise_slash(origin: Point, key: HitKey, age: f32, view: &View) -> Slash {
         },
     }
 }
+// Construct clockwise corners around the center: the slope shifts the top
+// and bottom in opposite horizontal directions, while width expands each edge.
+// Renderer maps one half of the positive/negative critical atlas onto this quad.
 pub fn slash_quad(s: Slash) -> [Point; 4] {
     let half = s.extent * 0.5;
     let width = s.width * 0.5;
@@ -299,6 +355,9 @@ pub fn slash_quad(s: Slash) -> [Point; 4] {
         },
     ]
 }
+// Include critical-marker geometry in the number bounds. Rise has a separate
+// viewport-clipped slash, so its slash does not enlarge the digit placement box.
+// Wilds reserves stars; Classic reserves its top/bottom critical line.
 fn solid_bounds(
     ink: Rect,
     pos: Point,
@@ -341,6 +400,8 @@ fn solid_bounds(
     })
 }
 #[derive(Clone, Copy, Default)]
+// Remember one offset for each live hit identity. Reusing it across frames
+// prevents numbers from jumping around as neighbors appear, fade or expire.
 struct PlacementEntry {
     key: HitKey,
     offset: Point,
@@ -382,6 +443,8 @@ pub fn layout(
     mut measure: impl FnMut(&[u8; 12], f32, Style) -> Option<TextMetrics>,
 ) -> usize {
     let s = model.settings;
+    // Convert r25's reference size into this viewport's pixels, then apply user
+    // scale. unit is the spacing unit used for margins and Wilds critical markers.
     let base = (if s.style == Style::Rise {
         RISE_BASE_PIXELS
     } else {
@@ -402,6 +465,8 @@ pub fn layout(
     }
     let epoch = model.numbers[0].key.epoch;
     let viewport = [view.x, view.y, view.width, view.height];
+    // A changed viewport/style/scale/epoch invalidates previous offsets because
+    // their boxes were measured under different geometry or a different session.
     if cache.viewport != viewport
         || cache.scale != s.scale
         || cache.style != s.style
@@ -413,6 +478,8 @@ pub fn layout(
     cache.scale = s.scale;
     cache.style = s.style;
     cache.epoch = epoch;
+    // Free cached slots after their matching live event expires. Surviving keys
+    // retain their offsets; an unrelated new hit may reuse an inactive slot.
     for item in &mut cache.entries {
         if item.live
             && !model.numbers[..model.count].iter().any(|e| {
@@ -422,6 +489,8 @@ pub fn layout(
             item.live = false;
         }
     }
+    // Try a fixed set of nearby offsets in base-size units. The centered choice
+    // comes first; area/distance scoring later chooses the least crowded valid box.
     const CANDIDATES: [(f32, f32); 17] = [
         (0.0, 0.0),
         (-0.8, 0.0),
@@ -451,12 +520,16 @@ pub fn layout(
             continue;
         };
         let m = motion(age, s.lifetime, s.style);
+        // Rise weak-hitzone digits are 1.4 times the ordinary settled size. Other
+        // styles indicate weak hitzones with tint while keeping their base size.
         let settled = base
             * if s.style == Style::Rise && tint(e) == Tint::Weak {
                 1.4
             } else {
                 1.0
             };
+        // Reserve the entrance's largest size before choosing an offset. Placement
+        // based only on the current shrinking glyphs would admit overlapping new hits.
         let peak_pixels = settled * if s.style == Style::Classic { 1.25 } else { 1.2 };
         let mut d = DrawNumber {
             pixels: settled * m.scale,
@@ -474,9 +547,13 @@ pub fn layout(
             text: digits(e.total_damage),
             ..DrawNumber::default()
         };
+        // Keep the slash anchored to the world impact before applying digit offsets.
+        // Moving digits to avoid overlap must not move the critical slash with them.
         if s.style == Style::Rise {
             d.slash = rise_slash(anchor, e.key, age, view);
         }
+        // Measure actual baked glyph ink at both animated and peak sizes. An absent
+        // font/glyph prevents drawing this number; guessed widths would change layout.
         let (Some(current), Some(peak)) = (
             measure(&d.text, d.pixels, s.style),
             measure(&d.text, peak_pixels, s.style),
@@ -490,6 +567,8 @@ pub fn layout(
         {
             continue;
         }
+        // Place text above the impact by eight reference pixels and subtract upward
+        // animation travel. Horizontal centering uses total advance, including spacing.
         let cy = anchor.y - 8.0 * view.height / 720.0 - m.rise * view.height / 720.0;
         d.position = Point {
             x: anchor.x - current.advance * 0.5,
@@ -500,11 +579,15 @@ pub fn layout(
             x: anchor.x - peak.advance * 0.5,
             y: cy,
         };
+        // Wilds marker gaps follow the user-scaled number size. Classic marker
+        // spacing/stroke follows viewport scale independently, matching r25.
         let marker_unit = if s.style == Style::Wilds {
             unit
         } else {
             view.height / 720.0
         };
+        // The reservation contains peak digit ink, critical markers and shadow
+        // padding. Later hits compare against this box rather than just text width.
         let reserved = solid_bounds(
             peak.ink.shifted(peak_pos),
             peak_pos,
@@ -524,6 +607,9 @@ pub fn layout(
             .entries
             .iter()
             .position(|item| item.live && item.key == d.key);
+        // An existing hit keeps its offset. For a new hit, score candidates against
+        // numbers already laid out this frame; choose less overlap first, then less
+        // distance from the original anchor. Reject boxes outside the viewport.
         let entry = if let Some(index) = existing {
             index
         } else {
@@ -541,6 +627,8 @@ pub fn layout(
                     .iter()
                     .map(|n| r.overlap(n.reserve, unit))
                     .sum::<f32>();
+                // Squared distance orders candidates without a square root. Ties preserve
+                // the fixed candidate ordering because only strictly better scores replace best.
                 let distance = offset.x * offset.x + offset.y * offset.y;
                 if best.is_none_or(|(_, a, b)| area < a || (area == a && distance < b)) {
                     best = Some((offset, area, distance));
@@ -562,6 +650,8 @@ pub fn layout(
         d.offset = cache.entries[entry].offset;
         d.position.x += d.offset.x;
         d.position.y += d.offset.y;
+        // Wilds/Rise truncate text origins to whole pixels for their atlas effects.
+        // Classic retains subpixel positioning from the projected/animated coordinates.
         if s.style != Style::Classic {
             d.position.x = d.position.x as i32 as f32;
             d.position.y = d.position.y as i32 as f32;
@@ -578,6 +668,8 @@ pub fn layout(
             s.style,
         )
         .expand(shadow);
+        // Even a cached placement is skipped if current motion pushes its visible
+        // bounds offscreen; the offset itself remains stable for the hit.
         if !d.solid.inside(view) {
             continue;
         }
@@ -586,6 +678,8 @@ pub fn layout(
         } else {
             2.0 * unit
         };
+        // Positive critical markers go above the visible ink; negative markers go
+        // below. Center on ink rather than advance so asymmetric digits stay aligned.
         d.star = Point {
             x: (d.ink.left + d.ink.right) * 0.5,
             y: if d.critical == Critical::Positive {

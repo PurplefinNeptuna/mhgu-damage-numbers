@@ -6,6 +6,9 @@ pub mod presentation;
 use core::fmt;
 use core::str::FromStr;
 
+// Source describes which native damage family produced the finalized amount.
+// Owner describes who controls an attack. Keeping them separate allows
+// monster/object damage while filtering remote hunter and Palico attacks.
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum Source {
@@ -33,6 +36,8 @@ pub enum Critical {
     Positive,
     Negative,
 }
+// Tint is the shared damage classification. Each visual style supplies its
+// own RGB palette without changing ownership or weak-hitzone rules.
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum Tint {
@@ -49,6 +54,8 @@ pub enum Style {
     Classic,
     Rise,
 }
+// These lowercase names are the stable INI values; Display writes the same
+// names so a save/load round trip preserves the selected style.
 impl FromStr for Style {
     type Err = ();
     fn from_str(s: &str) -> Result<Self, ()> {
@@ -81,6 +88,9 @@ impl Vec3 {
         self.x.is_finite() && self.y.is_finite() && self.z.is_finite()
     }
 }
+// A serial is unique only within one producer. application identifies that
+// mailbox; target identifies the monster. epoch separates camera/player
+// sessions so an old queued hit cannot become a hit in a new display session.
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct HitKey {
@@ -89,6 +99,8 @@ pub struct HitKey {
     pub target: u32,
     pub application: u32,
 }
+// A self-contained hit snapshot after native filtering. It has no borrowed
+// game pointers, so the display can retain it until its lifetime expires.
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Event {
@@ -128,6 +140,9 @@ impl Settings {
             && (0.4..=2.0).contains(&self.lifetime)
     }
 }
+// Apply the same admission rules to pending events and already shown numbers.
+// Unknown hitzones (-1) are allowed; invalid positions/times and zero damage
+// are rejected. Tick damage is outside the displayed r25 damage families.
 pub fn visible(e: Event, s: Settings) -> bool {
     s.enabled
         && s.valid()
@@ -143,6 +158,8 @@ pub fn visible(e: Event, s: Settings) -> bool {
             Source::Tick => false,
         }
 }
+// Bounce feedback takes precedence over the weak-hitzone threshold of 45.
+// An unavailable hitzone falls through to ordinary white digits.
 pub fn tint(e: Event) -> Tint {
     if e.bounced {
         Tint::Gray
@@ -168,6 +185,8 @@ pub fn rgb(t: Tint, style: Style) -> u32 {
 pub fn damage_outcome(native_type: u8, contribution: i32) -> bool {
     native_type != 0x1d && contribution > 0
 }
+// The native encoding uses 1 for negative and 2 for positive critical.
+// Other flag values produce no critical marker.
 pub fn critical_outcome(flag: u8) -> Critical {
     match flag {
         1 => Critical::Negative,
@@ -179,6 +198,8 @@ pub fn critical_outcome(flag: u8) -> Critical {
 /// Ownership keeps remote projectiles and unknown generic impacts out of the local attack family.
 pub fn source_outcome(tags: u32, owner: Owner) -> Option<Source> {
     let (primary, subtype, secondary) = (tags as u8, (tags >> 8) as u8, (tags >> 16) as u8);
+    // Accept the audited direct and secondary-source attack tag combinations
+    // only with a resolved owner. The visibility rule later decides local/remote.
     if ((primary == 0 || primary == 3)
         || (primary == 2
             && ((subtype == 1 && secondary == 0)
@@ -188,6 +209,8 @@ pub fn source_outcome(tags: u32, owner: Owner) -> Option<Source> {
     {
         return Some(Source::Attack);
     }
+    // Monster-origin damage does not need a hunter owner. The object case below
+    // still requires ownership evidence to identify its admitted native family.
     if subtype == 2 && (primary == 1 || (primary == 2 && secondary == 1)) {
         return Some(Source::Monster);
     }
@@ -198,6 +221,9 @@ pub fn source_outcome(tags: u32, owner: Owner) -> Option<Source> {
 }
 /// Consumer-owned bounded histories. Each impact remains independent; nearby hits are never summed.
 pub struct Model {
+    // queue is the pending ring: head is its oldest item, pending its length.
+    // numbers is a packed array of visible events. recent is a separate ring of
+    // identities already admitted, preventing repeated publication of one hit.
     queue: [Event; 256],
     head: usize,
     pending: usize,
@@ -234,6 +260,8 @@ impl Default for Model {
     }
 }
 impl Model {
+    // Clear queue, visible numbers and deduplication together. Counters and user
+    // settings survive this display reset; no old epoch entries are retained.
     pub fn reset(&mut self, epoch: u32) {
         self.epoch = epoch;
         self.count = 0;
@@ -246,6 +274,8 @@ impl Model {
         self.pending
     }
     fn push(&mut self, e: Event) {
+        // When full, discard the oldest pending hit before appending the newest.
+        // Fixed storage keeps the event path free of per-hit heap allocation.
         if self.pending == 256 {
             self.head = (self.head + 1) % 256;
             self.pending -= 1;
@@ -263,6 +293,9 @@ impl Model {
         self.pending -= 1;
         Some(e)
     }
+    // Accept a validated snapshot, then compact both collections under the new
+    // visibility policy. Disabling clears hits immediately; it does not merely
+    // hide them until the switch is enabled again.
     pub fn configure(&mut self, next: Settings) -> bool {
         if !next.valid() {
             return false;
@@ -276,6 +309,8 @@ impl Model {
             }
         }
         self.count = kept;
+        // Visit only the original pending count. Accepted hits go back to the tail
+        // in their original order, without being processed again by this loop.
         let n = self.pending;
         for _ in 0..n {
             let e = self.pop().unwrap();
@@ -285,6 +320,8 @@ impl Model {
         }
         true
     }
+    // Check epoch/visibility first, then remember the complete identity before
+    // queuing. Deduplication compares keys, never damage amount or proximity.
     pub fn capture(&mut self, e: Event) -> bool {
         if e.key.epoch != self.epoch || !visible(e, self.settings) {
             self.filtered = self.filtered.wrapping_add(1);
@@ -300,6 +337,8 @@ impl Model {
         self.push(e);
         true
     }
+    // Feedback can arrive before or after a hit becomes visible. Find that exact
+    // identity in either collection and update its tint without adding a new hit.
     pub fn bounce(&mut self, key: HitKey) -> bool {
         if key.epoch != self.epoch {
             return false;
@@ -319,6 +358,8 @@ impl Model {
         }
         false
     }
+    // One display frame: clear if drawing is unavailable, expire old numbers,
+    // then admit still-fresh queued hits. Age starts at capture, not dequeue time.
     pub fn update(&mut self, now: f32, ready: bool) {
         if !ready || !now.is_finite() || !self.settings.enabled {
             self.reset(self.epoch);
@@ -343,6 +384,8 @@ impl Model {
             {
                 continue;
             }
+            // At the visible limit, shift out the oldest event to keep the newest 128.
+            // Individual hits remain separate even when their screen positions coincide.
             if self.count == 128 {
                 self.numbers.copy_within(1..128, 0);
                 self.count -= 1;
@@ -358,11 +401,15 @@ pub fn imgui_color(rgb: u32, opacity: f32) -> u32 {
     if !opacity.is_finite() {
         return 0;
     }
+    // Input is 0xRRGGBB. ImGui's packed value puts R in the low byte and alpha
+    // in the high byte; adding 0.5 reproduces r25's byte rounding.
     ((rgb >> 16) & 255)
         | (rgb & 0xff00)
         | ((rgb & 255) << 16)
         | (((opacity.clamp(0.0, 1.0) * 255.0 + 0.5) as u32) << 24)
 }
+// Convert an integer clock difference to seconds only after subtraction.
+// Option signals an invalid clock/order instead of fabricating an event age.
 pub fn seconds(tick: u64, origin: u64, frequency: u32) -> Option<f32> {
     if frequency == 0 || tick < origin {
         return None;
@@ -370,6 +417,8 @@ pub fn seconds(tick: u64, origin: u64, frequency: u32) -> Option<f32> {
     let value = (tick - origin) as f32 / frequency as f32;
     value.is_finite().then_some(value)
 }
+// A zero stamp means no captured sample. Reject future or expired samples
+// using the same age conversion as visible events.
 pub fn fresh(tick: u64, now: u64, frequency: u32, limit: f32) -> bool {
     tick != 0 && seconds(now, tick, frequency).is_some_and(|age| age < limit)
 }
@@ -379,6 +428,7 @@ pub fn decode_sprite(source: &[u8], pixels: &mut [u8]) -> bool {
     while at < source.len() {
         let control = source[at];
         at += 1;
+        // Controls 0..127 copy the following control+1 literal bytes.
         if control < 128 {
             let n = control as usize + 1;
             if n > source.len() - at || n > pixels.len() - written {
@@ -388,6 +438,8 @@ pub fn decode_sprite(source: &[u8], pixels: &mut [u8]) -> bool {
             at += n;
             written += n;
         } else {
+            // Controls 128..254 repeat control-125 bytes from an earlier output offset.
+            // 255 carries a two-byte extended length; both forms then store distance.
             let mut n = control as usize - 125;
             if control == 255 {
                 if source.len() - at < 2 {
@@ -404,6 +456,8 @@ pub fn decode_sprite(source: &[u8], pixels: &mut [u8]) -> bool {
             if distance == 0 || distance > written || n > pixels.len() - written {
                 return false;
             }
+            // Copy one byte at a time because a backreference may overlap its output:
+            // repeating the newly written bytes is how runs longer than distance expand.
             for _ in 0..n {
                 pixels[written] = pixels[written - distance];
                 written += 1;

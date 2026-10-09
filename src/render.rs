@@ -3,13 +3,21 @@ use core::{
     ptr,
     sync::atomic::{AtomicU32, Ordering},
 };
+// Texture shutdown hooks advance this generation counter. Comparing both
+// pointer and generation prevents reuse of a dead context's resource pointers
+// if a new context is later allocated at the same address.
 static CONTEXT_EPOCH: AtomicU32 = AtomicU32::new(0);
 use damage_numbers_core::{presentation::*, *};
 use forge::{
     imgui::{DrawList, ImFont as Font},
     sys::imgui::*,
 };
+// build.rs copies generated constants into Cargo's output directory. They
+// contain compressed RGBA atlases, rectangle metadata and font scale metrics.
 include!(concat!(env!("OUT_DIR"), "/assets.rs"));
+// font is an atlas-owned font handle, and texture pointers are registered
+// ImGui resources owned until context shutdown. rise_attempted records the
+// single lazy slash-load attempt; repeated frames do not allocate or retry.
 #[derive(Default)]
 pub struct Resources {
     font: Option<Font>,
@@ -27,6 +35,8 @@ impl Resources {
     pub fn initialize(&mut self) {
         let context = forge::imgui::get_current_context() as *mut _;
         let epoch = CONTEXT_EPOCH.load(Ordering::Relaxed);
+        // Repeated initialization of this live context keeps its existing assets.
+        // A different context/generation clears handles before loading fresh ones.
         if self.context == context && self.context_epoch == epoch {
             return;
         }
@@ -36,6 +46,8 @@ impl Resources {
         self.wilds = ptr::null_mut();
         self.rise = ptr::null_mut();
         self.rise_attempted = false;
+        // Use Forge's actual RomFS mount prefix rather than assuming app:.
+        // CString supplies the NUL-terminated path required by the native font loader.
         let path = alloc::ffi::CString::new(alloc::format!(
             "{}:/nativeNX/plugins/damage-numbers-rs/wilds-digits.ttf",
             forge::fs::romfs::mount_point()
@@ -46,6 +58,9 @@ impl Resources {
             let cfg = ImFontConfig_ImFontConfig();
             if !cfg.is_null() {
                 (*cfg).FontDataOwnedByAtlas = true;
+                // Glyph-range pairs cover space, digits 0..9 and fallback '?'; zero ends
+                // this static list. FontDataOwnedByAtlas transfers loaded file data to ImGui,
+                // so only the temporary configuration object is destroyed after loading.
                 static RANGES: [ImWchar; 7] = [32, 32, 48, 57, 63, 63, 0];
                 self.font = Font::load_with(&path, 24.0 * FONT_SCALE, &*cfg, Some(&RANGES));
                 ImFontConfig_destroy(cfg);
@@ -64,6 +79,8 @@ impl Resources {
         // SAFETY: only called with an active Forge context. Constructor-allocated texture owns its pixel buffer and shutdown callback.
         unsafe {
             let io = forge::imgui::get_io();
+            // ImGui's backend must support dynamic texture uploads. Registration below
+            // requests upload; the plugin does not create an emulator-specific GPU texture.
             if (io.BackendFlags.0 & ImGuiBackendFlags::RendererHasTextures.0) == 0 {
                 return ptr::null_mut();
             }
@@ -71,6 +88,8 @@ impl Resources {
             if texture.is_null() {
                 return texture;
             }
+            // Allocate width*height*4 bytes of RGBA pixels, then decode the embedded
+            // stream directly into that owned buffer. Failed decode destroys the allocation.
             ImTextureData_Create(texture, ImTextureFormat::RGBA32, width, height);
             let pixels = ImTextureData_GetPixels(texture).cast::<u8>();
             if pixels.is_null()
@@ -83,6 +102,8 @@ impl Resources {
                 return ptr::null_mut();
             }
             igRegisterUserTexture(texture);
+            // Store the texture as callback user data. At context shutdown, shutdown
+            // unregisters and destroys it using the same native allocator that created it.
             let mut hook = ImGuiContextHook {
                 HookId: 0,
                 Type: ImGuiContextHookType::Shutdown,
@@ -94,6 +115,8 @@ impl Resources {
             texture
         }
     }
+    // Classic uses Forge's current font. Wilds/Rise use the namespaced digit
+    // font when available, falling back to the current font if loading failed.
     fn selected_font(&self, style: Style) -> Font {
         if style != Style::Classic {
             if let Some(font) = self.font {
@@ -102,6 +125,8 @@ impl Resources {
         }
         Font::current()
     }
+    // The generated digit font's em size differs from its visible digit height.
+    // FONT_SCALE makes the requested presentation height match the actual glyphs.
     fn font_pixels(&self, pixels: f32, style: Style) -> f32 {
         if style != Style::Classic && self.font.is_some() {
             pixels * FONT_SCALE
@@ -118,6 +143,9 @@ impl Resources {
             if baked.is_null() || (*baked).Size <= 0.0 {
                 return None;
             }
+            // ImGui may supply metrics baked at another size. ratio converts those
+            // metrics to requested pixels. Accumulate spacing separately from visible ink,
+            // so layout and text drawing agree on both origin and bounding rectangle.
             let ratio = pixels / (*baked).Size;
             let mut advance = 0.0;
             let mut ink: Option<Rect> = None;
@@ -127,6 +155,8 @@ impl Resources {
                     return None;
                 }
                 let g = &*glyph;
+                // X0/Y0/X1/Y1 are the glyph ink relative to its pen origin. Add the
+                // current advance horizontally, then union this glyph with earlier ink.
                 let bounds = Rect {
                     left: advance + g.X0 * ratio,
                     top: g.Y0 * ratio,
@@ -139,6 +169,8 @@ impl Resources {
                 advance += g.AdvanceX * ratio;
             }
             let mut ink = ink?;
+            // Rise stretches digits horizontally by 1.08. Measurement must apply the
+            // same stretch as the vertex edit in number, or placement would be too narrow.
             if style == Style::Rise {
                 advance *= RISE_GLYPH_WIDTH;
                 ink.left *= RISE_GLYPH_WIDTH;
@@ -150,6 +182,9 @@ impl Resources {
             Some(TextMetrics { advance, ink })
         }
     }
+    // Requirements: draw is the current context's live draw list, and the atlas
+    // is registered with that context. Each RECTS row begins [x,y,width,height];
+    // dividing by atlas dimensions converts its pixel rectangle to normalized UVs.
     unsafe fn sprite(&self, draw: *mut ImDrawList, index: usize, target: Rect, color: u32) {
         if self.wilds.is_null() || index >= 22 {
             return;
@@ -168,6 +203,9 @@ impl Resources {
             );
         }
     }
+    // Draw atlas shadows behind the font's real glyphs. Requirements: draw/font
+    // belong to the active context and n's text is terminated within its buffer.
+    // Metadata stores the shadow rectangle plus its embedded glyph ink rectangle.
     unsafe fn glyph_effects(&self, draw: *mut ImDrawList, n: &DrawNumber, font: Font, pixels: f32) {
         if self.wilds.is_null() {
             return;
@@ -196,6 +234,9 @@ impl Resources {
                 } else {
                     1.0
                 };
+                // r[4..8] describes the glyph's inset x/y and ink width/height inside the
+                // shadow sprite. Scale by real glyph ink, then subtract that inset so the
+                // sprite's internal glyph matches the font glyph at exactly the same origin.
                 let sx = (g.X1 - g.X0) * ratio * width / r[6] as f32;
                 let sy = (g.Y1 - g.Y0) * ratio / r[7] as f32;
                 let x = n.position.x + (advance + g.X0 * ratio) * width - r[4] as f32 * sx;
@@ -218,6 +259,9 @@ impl Resources {
             }
         }
     }
+    // Submit Rise's critical slash only; ordinary hits have no slash texture work.
+    // Requirements: draw and resources belong to the active context. The first
+    // visible critical lazily creates the shared atlas for all later Rise hits.
     unsafe fn effect(&mut self, draw: *mut ImDrawList, n: &DrawNumber) {
         if n.style != Style::Rise || n.critical == Critical::None || n.slash.opacity <= 0.0 {
             return;
@@ -235,6 +279,8 @@ impl Resources {
                 return;
             }
             let points = slash_quad(n.slash);
+            // Positive and negative critical artwork occupies the top/bottom half of
+            // the same atlas. v selects that half; the quad keeps the projected anchor.
             let v = if n.critical == Critical::Positive {
                 0.0
             } else {
@@ -262,12 +308,17 @@ impl Resources {
             ImDrawList_PopClipRect(draw);
         }
     }
+    // Requirements: current draw/font/texture context and valid digit buffer.
+    // Draw outlines before fills, then the style's critical marker. All alpha
+    // comes from the copied command, so rendering never reads native hit objects.
     unsafe fn number(&self, draw: *mut ImDrawList, n: &DrawNumber) {
         let font = self.selected_font(n.style);
         let pixels = self.font_pixels(n.pixels, n.style);
         // SAFETY: draw list and font belong to this context. Only vertices emitted by this text call are edited, within VtxBuffer.Size.
         unsafe {
             let text = |x: f32, y: f32, color: u32| {
+                // Remember the first new vertex so Rise's width stretch touches only this
+                // text call. Earlier outlines, effects and unrelated UI vertices stay intact.
                 let first = (*draw).VtxBuffer.Size;
                 ImDrawList_AddText_FontPtr(
                     draw,
@@ -289,6 +340,8 @@ impl Resources {
                 }
             };
             let color = imgui_color(n.color, n.opacity);
+            // Classic outlines are eight neighboring black text copies plus one fill.
+            // Its critical marker is a two-stroke line above/below the text, not a star.
             if n.style == Style::Classic {
                 let stroke = n.classic_stroke;
                 let edge = imgui_color(0, n.opacity);
@@ -323,6 +376,8 @@ impl Resources {
                 }
                 return;
             }
+            // Wilds/Rise start with per-digit atlas shadows, then add a text outline.
+            // Rise's thicker black outline and width stretch share the same fill metrics.
             self.glyph_effects(draw, n, font, pixels);
             let stroke = if n.style == Style::Rise {
                 0.10 * n.pixels
@@ -337,6 +392,9 @@ impl Resources {
                 for y in -1..=1 {
                     if x != 0 || y != 0 {
                         let first = (*draw).VtxBuffer.Size;
+                        // Emit at the normal origin, apply Rise stretch there, then shift these
+                        // new vertices by the outline offset. Shifting first would stretch stroke
+                        // spacing too and break the intended outline thickness.
                         text(0.0, 0.0, edge);
                         for i in first..(*draw).VtxBuffer.Size {
                             let vertex = &mut *(*draw).VtxBuffer.Data.add(i as usize);
@@ -348,6 +406,8 @@ impl Resources {
             }
             text(0.0, 0.0, color);
             if n.style != Style::Rise && n.critical != Critical::None {
+                // Atlas entries 20/21 are positive/negative Wilds stars. The 60-pixel
+                // reference and 1.5 multiplier reproduce r25's enlarged critical marker.
                 let scale = n.pixels / 60.0 * WILDS_CRIT_SCALE;
                 let height = 48.0 * scale;
                 self.sprite(
@@ -372,6 +432,8 @@ impl Resources {
         if numbers.is_empty() {
             return;
         }
+        // Use the background list so numbers are independent of the settings window.
+        // Render all slash effects first, then all digits, retaining r25 layering.
         let draw = DrawList::background().raw();
         if draw.is_null() {
             return;
@@ -394,6 +456,9 @@ impl Resources {
         }
     }
 }
+// Called by ImGui while the context and registered texture still exist.
+// The resource owner discards these raw pointers on the next initialization;
+// this callback performs the actual unregister/free exactly once per texture.
 unsafe extern "C" fn shutdown(_context: *mut ImGuiContext, hook: *mut ImGuiContextHook) {
     // SAFETY: registration supplies this owned texture exactly once at context shutdown.
     CONTEXT_EPOCH.fetch_add(1, Ordering::Relaxed);

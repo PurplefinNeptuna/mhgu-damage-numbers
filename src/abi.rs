@@ -3,6 +3,9 @@ core::arch::global_asm!(".hidden dn_abi");
 use core::mem::{offset_of, size_of};
 use damage_numbers_core::capture::RawFrame;
 use forge::sys::{hook::Hook, imgui::*};
+// used keeps this verification table even though gameplay never reads it.
+// Each entry is calculated by the ARM Rust compiler, in the same order as the
+// C++ table in scripts/verify.py. A mismatched field offset fails verification.
 #[used]
 #[unsafe(no_mangle)]
 #[unsafe(link_section = ".rodata.dn_abi")]

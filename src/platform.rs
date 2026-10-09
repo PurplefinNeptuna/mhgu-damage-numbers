@@ -5,7 +5,11 @@ use core::sync::atomic::{AtomicU32, Ordering};
 use damage_numbers_core::capture::Memory;
 use forge::singleton::SingletonManager;
 pub static BASE: AtomicU32 = AtomicU32::new(0);
+// Horizon's pseudo-handle denotes this running process; no handle ownership
+// or closing is required for the mapping and cache operations below.
 const CURRENT_PROCESS: u32 = 0xffff8001;
+// Match the kernel's query-memory output layout exactly, including padding.
+// repr(C) fixes field order and C alignment for the assembly SVC wrapper.
 #[repr(C)]
 #[derive(Default)]
 struct MemoryInfo {
@@ -31,17 +35,24 @@ pub fn tick() -> u64 {
     // SAFETY: fixed SDK export with the verified ARM32 integer-return signature.
     unsafe { nnosGetSystemTick() }
 }
+// Return a shared time origin and ticks-per-second. Event ages are measured
+// against this origin, so capture time and render time use the same clock.
 pub fn clock() -> Option<(u64, u32)> {
     // SAFETY: fixed SDK export, no arguments or borrowed memory.
     let frequency = unsafe { nnosGetSystemTickFrequency() };
     (frequency > 0 && frequency <= u32::MAX as i64).then(|| (tick(), frequency as u32))
 }
+// GetInfo selector 18 supplies the program ID. Exact instruction signatures
+// in hooks.rs then distinguish the expected executable code.
 pub fn correct_program() -> bool {
     let mut title = 0; // SAFETY: writable output and current-process pseudo-handle match the pinned SVC ABI.
     unsafe {
         mwc_svc_get_info(&mut title, 18, CURRENT_PROCESS, 0) == 0 && title == 0x0100770008dd8000
     }
 }
+// Reject null/wrapped ARM32 spans, then require the whole copy to fit in one
+// readable mapping. This checks address access; it does not take ownership of
+// the game object or extend its lifetime beyond the synchronous native call.
 pub fn readable(address: u32, bytes: usize) -> bool {
     if address == 0 || address as u64 + bytes as u64 > 0x1_0000_0000 {
         return false;
@@ -56,6 +67,8 @@ pub fn readable(address: u32, bytes: usize) -> bool {
             && address as u64 + bytes as u64 <= info.address + info.size
     }
 }
+// After writing or restoring instructions, flush process caches and execute
+// ARM barriers before those addresses can be used as code.
 pub fn sync_code(address: u32, bytes: usize) -> bool {
     // SAFETY: caller supplies a validated executable span. This is the tested ARM32 process cache-flush contract.
     let result = unsafe { mwc_svc_flush(CURRENT_PROCESS, address as u64, bytes as u64) };
@@ -63,6 +76,8 @@ pub fn sync_code(address: u32, bytes: usize) -> bool {
     unsafe { core::arch::asm!("dsb sy", "isb", options(nostack, preserves_flags)) };
     result == 0
 }
+// The portable capture code talks to the Memory trait. This adapter performs
+// real checked reads; tests substitute a map of bytes with the same interface.
 pub struct NativeMemory;
 impl Memory for NativeMemory {
     fn base(&self) -> u32 {
@@ -72,6 +87,8 @@ impl Memory for NativeMemory {
         readable(address, bytes)
     }
     fn word(&self, address: u32) -> u32 {
+        // word requires four-byte alignment. Returning zero on a failed read lets
+        // callers treat unavailable pointers/fields as missing capture evidence.
         if !readable(address, 4) || address & 3 != 0 {
             return 0;
         }
@@ -103,6 +120,8 @@ impl Memory for NativeMemory {
 pub fn singleton(name: &str) -> Option<u32> {
     SingletonManager::get_by_name(name).map(|object| object as *mut _ as *mut c_void as u32)
 }
+// The save-data singleton and MtFile runtime type must both exist before the
+// stock INI loader can mount storage and open files.
 pub fn storage_ready() -> bool {
     use forge::mt::dti::CacheDti;
     singleton("sSavedata").is_some() && forge::mt::fs::MtFile::dti().is_some()

@@ -1,5 +1,9 @@
 //! Pinned MHGU 1.4.0 signatures: eight hook windows plus build and ownership evidence.
+// Each tuple is (offset from main .text, exact 64 bytes at that location).
+// Entries 0..7 follow gateway kind order and are patched only after all windows
+// match. Entries 8..10 are verification evidence and are never hooked.
 pub const SIGNATURES: &[(u32, [u8; 64])] = &[
+    // 0: collision entry; records hit, monster and impact position.
     (
         0x170968,
         [
@@ -10,6 +14,7 @@ pub const SIGNATURES: &[(u32, [u8; 64])] = &[
             0x08, 0x40, 0x40, 0xe2, 0x02, 0x00, 0x54, 0xe3,
         ],
     ),
+    // 1: finalized damage; observes the native result through the return gateway.
     (
         0x9d6f8,
         [
@@ -20,6 +25,7 @@ pub const SIGNATURES: &[(u32, [u8; 64])] = &[
             0x00, 0x60, 0xa0, 0xe3, 0x58, 0x00, 0x00, 0xea,
         ],
     ),
+    // 2: local-player feedback; associates bounce state with finalized damage.
     (
         0x2a87a8,
         [
@@ -30,6 +36,7 @@ pub const SIGNATURES: &[(u32, [u8; 64])] = &[
             0x26, 0x10, 0x03, 0xe3, 0x00, 0x70, 0xa0, 0xe3,
         ],
     ),
+    // 3: viewport entry; provides the enclosing scope for the camera tap.
     (
         0xb8909c,
         [
@@ -40,6 +47,7 @@ pub const SIGNATURES: &[(u32, [u8; 64])] = &[
             0x3c, 0x00, 0x95, 0xe5, 0x14, 0x01, 0x8d, 0xe5,
         ],
     ),
+    // 4: camera tap; copies the live matrix and viewport arguments.
     (
         0x885844,
         [
@@ -50,6 +58,7 @@ pub const SIGNATURES: &[(u32, [u8; 64])] = &[
             0xf0, 0x01, 0x8d, 0xe5, 0x10, 0x0a, 0x01, 0xee,
         ],
     ),
+    // 5: interior melee hitzone tap; reads floats before native register restoration.
     (
         0x16dd7c,
         [
@@ -60,6 +69,7 @@ pub const SIGNATURES: &[(u32, [u8; 64])] = &[
             0x01, 0x00, 0x50, 0xe3, 0x05, 0x00, 0x00, 0x1a,
         ],
     ),
+    // 6: melee hitzone entry; identifies the monster for the interior tap.
     (
         0x16dc6c,
         [
@@ -70,6 +80,7 @@ pub const SIGNATURES: &[(u32, [u8; 64])] = &[
             0x00, 0x10, 0xa0, 0xe1, 0x38, 0x00, 0x9d, 0xe5,
         ],
     ),
+    // 7: shot hitzone calculation; reads its output factor after native return.
     (
         0x178660,
         [
@@ -80,6 +91,7 @@ pub const SIGNATURES: &[(u32, [u8; 64])] = &[
             0x00, 0x00, 0x87, 0xe5, 0x41, 0x00, 0x00, 0xea,
         ],
     ),
+    // 8: build-note evidence for the expected MHGU 1.4.0 executable.
     (
         0x172e52c,
         [
@@ -90,6 +102,7 @@ pub const SIGNATURES: &[(u32, [u8; 64])] = &[
             0x30, 0x2d, 0x41, 0x47, 0x51, 0x00, 0x53, 0x44,
         ],
     ),
+    // 9: supporting native player-lookup code; signature check only.
     (
         0x276278,
         [
@@ -100,6 +113,7 @@ pub const SIGNATURES: &[(u32, [u8; 64])] = &[
             0x03, 0x20, 0xa0, 0xe3, 0x00, 0x30, 0x85, 0xe0,
         ],
     ),
+    // 10: supporting native ownership code; signature check only.
     (
         0x285c6c,
         [
