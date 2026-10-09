@@ -1,8 +1,8 @@
 # Components used by damage numbers
 
 Build dependencies: maintained Forge, pinned libnx/cimgui headers and offline
-devkitARM. The supported r18 embeds only OFL Open Sans digits and independently
-authored procedural crit artwork. No game executable or extracted visual asset
+devkitARM. The supported build embeds OFL Open Sans digits and independently
+authored procedural crit stars and Rise beams. No game executable or extracted visual asset
 is delivered.
 
 `src/start.S` / `src/plugin.ld`: project-owned Long Sword scaffold.
@@ -42,15 +42,23 @@ history. R12 does not embed or package the Roboto digit subset/OFL notice.
 
 FontTools and Pillow/NumPy are preparation/fixture dependencies, not linked into
 the NRO. Their upstream notices remain in the local tool checkouts. Retired
-PAK/font-conversion notices and provenance are archived under `history/r12/`.
+PAK/font-conversion notices and provenance remain in Git history.
 
 ## Supported open assets
 
-The only supported r18 profile embeds an Open Sans Semibold 600 digit subset from pinned Google
+The supported profile embeds an Open Sans Semibold 600 digit subset from pinned Google
 Fonts; the NRO embeds the full SIL OFL notice. The release also supplies full
 font/art/dependency notices in `NOTICES.txt` beside the runtime-only ZIP. It is renamed Damage Digits Open;
 [source/axes/license hashes](fonts/open-source.json) document the modified
 subset. Independently authored procedural crit artwork uses the separate
 [notice](OPEN_ART_LICENSE.txt). Its binary and ZIP include no extracted
 Wilds font/texture payload and do not include the Wilds extraction tools.
-Forge remains an external dependency. See [OPEN_ASSETS.md](OPEN_ASSETS.md).
+Forge remains an external dependency. [Font registration and asset preparation](fonts/README.md)
+describe the build flow; [COMPRESSION.md](COMPRESSION.md) specifies the codec.
+
+Google Fonts revision: `9710da1eacb3be272583c3224dcb70f9da6eadbb`.
+Open Sans source SHA-256:
+`36643644f318a812aab2d2ed3bb98f8cf0872527f835fe9398d95fe6b9adb878`.
+The subset retains digits, space and question mark. The asset audit blocks
+proprietary visual input reads and compares compiled font, license and
+procedural RGBA payloads with the generated open assets.

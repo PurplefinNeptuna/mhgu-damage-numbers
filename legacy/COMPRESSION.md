@@ -73,8 +73,8 @@ The equivalence verifier uses the hashed r15 snapshot at
 reports live in `build/damage-numbers/open-assets/`; provenance and performance
 results accompany the clean r16 ZIP in its adjacent release manifest.
 
-Prior gameplay confirmations remain recorded in [TEST_RESULTS.md](TEST_RESULTS.md).
+Prior gameplay confirmations remain recorded in [RUNTIME.md](RUNTIME.md).
 No new gameplay run is claimed. If installing this trial, one normal boot and a
 few hits in Wilds style are enough for a brief smoke check; combat coverage needs
 no full repeat. The known Forge menu/damage-popup corruption is unchanged:
-[handoff](docs/FORGE_IMGUI_DAMAGE_CORRUPTION_HANDOFF.md).
+[handoff](DEVELOPMENT.md).

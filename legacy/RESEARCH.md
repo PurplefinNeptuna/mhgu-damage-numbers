@@ -214,7 +214,6 @@ Remaining coverage:
 - Special affinity outcomes, particularly Bitter Affinity's positive native result.
 - Additional blended cameras, viewports and render scales.
 - Broader hook/rollback/thread/import behavior beyond fixture and accepted trials.
-- Cosmetic rapid-fire spacing and compact-row appearance.
 
 ## R6 source, bounce and storage bindings
 
@@ -239,10 +238,13 @@ resolves `sSavedata`, calls main `0x878da0`, releases with normal
 commit. Saved DTI: 4,000-byte `cSystem` descendant. Builder checks
 `CommitSaveData`; no new dump.
 
-Open only `savedata:/damage_numbers.ini` and `savedata:/damage_numbers_backup.ini`, versioned/range-checked
-text ≤255 bytes. Back up valid primary, replace/read-verify, explicitly
-SDK-commit, then release (Forge commits too). Partial primary falls back to
-backup. No game/Better Input payload or SD API.
+Current storage opens only `savedata:/damage_numbers.ini`, range-checked text
+within 255 bytes. Required fields are `enabled`, `style`, `scale` and `lifetime`.
+No version marker is written/required; old `version=2` remains readable until
+an explicit save drops it. Missing/invalid primary uses defaults. Backup files
+are ignored and untouched. Validate, write, flush, read-verify and explicitly
+commit through Forge's counted mount. Balance handles/mounts on every failure;
+keep session settings, without promising previous disk contents survive.
 
 Load at initialization, retry unavailable storage at most once/second on the
 single render consumer; manual edits cancel retries. Only Save settings writes,
@@ -290,22 +292,51 @@ markers and small shadows, excluding glow. New hits retain bounded offsets;
 existing hits retain theirs until expiry or context/style/size/viewport reset.
 Classic collision bounds include its existing straight outlined markers.
 
-## R11 screenshot refinement
+## Current presentation and Rise implementation
 
-The supplied Wilds reference shows wider/heavier digits and a fuller star core
-than r10. Full-width Roboto Bold 700 replaces Condensed Semibold 600; this is
-still an approximation. The pinned preparation recipe preserves visible digit
-height. Star solid height changes from 0.24 to 0.30 font sizes, with a fuller
-waist and pale center; width and two-pixel default gap remain unchanged.
+Wilds uses Open Sans Semibold digits, a centered soft shadow and a near-black
+outline of 0.5 px at the default 24 px size. Its gold halo is removed. Procedural
+positive/negative stars scale to 1.5× their R19 dimensions, with pixel-rounded
+solid bounds and unchanged digit gap. Wilds stamps from 1.2× over 0.2 seconds,
+holds, then rises 30 px at 720p during its final 0.2-second fade. Classic retains
+Forge's font, outlined digits, crit lines and original pop/drift.
 
-ImGui's pinned RenderText truncates text origins. Wilds layout now matches that
-origin before computing visible glyph bounds/star centers. Signed glow offsets
-are rounded symmetrically before rendering. Only weakspot digits receive an
-eight-pass warm halo behind the crisp fill; no black shadow is drawn there.
-White and gray retain a small dark shadow. Classic is unchanged.
+R25's 720p bases are Wilds/Classic 24 px and Rise 20 px. Rise weak points use a
+1.4× boost; all bases scale with resolution and saved size. Stable placement
+reserves maximum entrance bounds, checks 17 nearby positions within 1.6 font
+sizes horizontally and one vertically, and caches offsets until expiry. Crowded
+bursts may overlap. Camera/context/viewport/style/size changes reset caches.
 
-Solid placement bounds include the thicker star and one pixel of reservation
-slack for origin rounding, excluding the soft halo. Cached offsets and the
-17-candidate bounds remain unchanged. The installed NVN backend advertises and
-uses RendererHasVtxOffset, so increased halo vertices remain supported in dense
-bursts; ARM fixtures still do not execute that GPU backend.
+Rise preserves `tint()`: confirmed bounce wins, then physical HZV at least 45
+selects weak color, otherwise white. Its colors are `#808080`, `#F0B41E` and
+`#FFFFFF`. Companion ownership does not select gray; affinity affects only
+the slash. Open Sans glyphs widen by 1.08, with eight opaque black outline
+passes at radius 0.10 of font size and the open glyph shadow underneath.
+
+Rise entrance follows 0.64 -> 1.20 -> 0.88 -> 1.00 over the smaller of 0.30 seconds
+and 30 percent of Duration. Exit uses the smaller of 10/30 seconds and 35 percent
+of Duration: its first tenth kicks down +4 design units, then rises to -50 while
+fading. These are authored UI timings. Duration remains the complete lifetime.
+
+Positive crit uses an original red beam/pale core; negative uses violet. It
+expands for 0.05 seconds, thins/fades for 0.15 seconds, then expires independently
+of digits. Peak bounding width is 48 px at 720p. The sole selected slash is
+three-quarter height, centered on the projected raw `Event.position`, with equal
+upward/downward reach and no ground cutoff. It inherits no digit pop, slider,
+collision offset or exit fade. All four `HitKey` fields determine a stable slope
+within [-0.25,+0.25], approximately +/-14.04 degrees. Slashes draw before digits,
+clip to the viewport and remain outside the collision solver. Terrain/scene
+occlusion is unavailable.
+
+`fonts/rise-open.json` and `scripts/prepare_damage_numbers_rise.py` own the beam
+recipe. No Rise/Wilds screenshot pixels, proprietary font or effect asset enters
+the build. DN-LZ1 decode runs once per ImGui context; failure is attempted once
+per context and logged once per process while digits continue. An ImGui shutdown
+hook unregisters/frees CPU texture data. Forge's NVN shutdown still has no complete
+GPU teardown facility. No new native hook, CodeMemory arena or TLS slot was added.
+
+Real pinned ImGui previews exercise tilted indexed triangles, bilinear sampling,
+RGBA interpolation, shared-edge coverage and command clipping. Dark/bright height
+comparisons and 40-frame timelines remain under the versioned R21 work output.
+They cover polarity, color, crowded hits and independent beam expiry without an
+MHGU GPU/gameplay result. Native GE/signature audits remain required.

@@ -4,7 +4,7 @@ The only supported font is **Open Sans Semibold 600**, instantiated at width
 100 and weight 600 from pinned Google Fonts. [open-source.json](open-source.json)
 records source, license, axes and FontTools hashes/version. The digit subset is
 renamed **Damage Digits Open**, with the full [SIL OFL notice](OFL.txt) embedded
-in the NRO and included in its ZIP. Digits, space and question mark are retained.
+in the NRO and included in adjacent release notices. Digits, space and question mark are retained.
 Visible height is normalized against Forge's existing Roboto Medium.
 
 The 512x256 effect atlas uses this licensed font for soft glyph shading and
@@ -22,7 +22,7 @@ python3 scripts/test_damage_numbers_visual.py
 Work outputs remain under `work/damage-numbers/open-assets/`; real-ImGui preview
 is `work/damage-numbers/open-visual/preview.png`. `--assets open` is optional;
 `--assets local` is rejected. The old extraction/conversion entry points have
-been removed. Archived r12 provenance is historical evidence, not a build recipe.
+been removed. R12 provenance remains in Git history.
 
 ## Forge registration
 

@@ -130,7 +130,7 @@ Eden gameplay tests.
 
 The audited change is now applied in the production `gateway.S` restore macro.
 The original r16/scratch evidence above remains a historical record.
-[R17 compatibility notes](RYUJINX_COMPATIBILITY.md) document the reduced
+[R17 compatibility notes](RUNTIME.md) document the reduced
 contract, production binary comparison, fresh fixtures and user-confirmed
 Eden/Ryujinx gameplay. The stale entries-6/7 comment is corrected; all eight entries
 remain production hooks. No hook location or captured frame layout changes.
