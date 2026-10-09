@@ -1,0 +1,9 @@
+[package]
+name = "mhgu-forge"
+version = "0.1.0"
+edition = "2024"
+[dependencies]
+mhgu-forge-macros = { path = "../../vendor/forge-rs/forge-macros", features = ["config"] }
+damage-numbers-core = { path = "../../core" }
+ini_core = "0.2.0"
+[workspace]

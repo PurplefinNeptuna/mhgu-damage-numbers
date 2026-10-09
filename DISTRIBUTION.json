@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "mod": "damage-numbers-rs",
+  "status": "DEVELOPMENT",
+  "reason": "Rust r1 candidate built and statically verified; gameplay not run. Preserved C++ r25 releases remain separate.",
+  "publication": {
+    "published": false,
+    "url": null,
+    "date": null
+  },
+  "version": "r1",
+  "package_name": "damage-numbers-rs",
+  "archive": "damage-numbers-rs-r1-candidate.zip",
+  "candidate": "build/damage-numbers-rs/candidates/r1/delivery/",
+  "runtime_test": "NOT RUN",
+  "gamebanana": {
+    "ai_code": {
+      "used": true,
+      "software": [
+        {
+          "name": "OpenAI Codex",
+          "url": "https://openai.com/codex/"
+        }
+      ],
+      "scope": "Implementing the Rust port, tests, build and packaging scripts, and explanatory code comments."
+    },
+    "ai_assets": [],
+    "credits": [
+      {
+        "name": "Forge",
+        "author": "Jeffi",
+        "url": "https://github.com/jeffi6375/forge",
+        "scope": "Plugin loading and rendering."
+      },
+      {
+        "name": "forge-rs",
+        "author": "Fexty",
+        "url": "https://github.com/Fexty12573/forge-rs",
+        "scope": "Rust runtime, callbacks, configuration, TLS and API helpers."
+      },
+      {
+        "name": "libnx",
+        "author": "Hydrosphere Developers",
+        "url": "https://github.com/switchbrew/libnx",
+        "scope": "MIT-licensed ARM32 system-call code."
+      },
+      {
+        "name": "Open Sans",
+        "author": "The Open Sans Project Authors",
+        "url": "https://github.com/googlefonts/opensans",
+        "scope": "SIL Open Font License 1.1. The modified digit subset is named Damage Digits Open."
+      }
+    ]
+  }
+}

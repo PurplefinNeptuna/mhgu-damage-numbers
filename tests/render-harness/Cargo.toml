@@ -1,0 +1,11 @@
+[package]
+name="damage-numbers-render-harness"
+version="0.1.0"
+edition="2024"
+[lib]
+crate-type=["staticlib"]
+[dependencies]
+sys={package="forge-sys-host",path="../sys-host"}
+damage-numbers-core={path="../../core"}
+log="0.4"
+[workspace]

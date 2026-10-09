@@ -1,0 +1,6 @@
+{
+  "source_sha256": "91438457912a25107948045f43c05e9003299259ad5851853a929cbcf3405a0d",
+  "reference_version": "r17",
+  "reference_nro_sha256": "1eb78f3430f6c5c5ce1f60a382fa8bd4fc18ee56cf267649b95a94a462115ea4",
+  "scope": "Same assembly and hook signatures as accepted r17; GE liveness follows GE_PRESERVATION_AUDIT.md, not a new emulator prerequisite."
+}
