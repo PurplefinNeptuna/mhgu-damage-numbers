@@ -7,11 +7,11 @@ GE is deliberately excluded from equality because it is dead at these eight audi
 import json,struct,subprocess,sys
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts'))
-from paths import MOD,BUILD_ROOT,CONFIG
+from paths import MOD,BUILD_ROOT,CARGO_TARGET,CONFIG
 import unicorn
 from unicorn import arm_const as arm
 MODULE,ENGINE,RETURN,STACK=0x31000000,0x32000000,0x32000100,0x41010000
-elf=MOD/'target/armv7a-none-eabi/release/libdamage_numbers_rs.so'
+elf=CARGO_TARGET/'armv7a-none-eabi/release/libdamage_numbers_rs.so'
 nm=Path(CONFIG['devkitarm'])/'bin/arm-none-eabi-nm'
 names={}
 for line in subprocess.check_output([nm,'-n',elf],text=True).splitlines():

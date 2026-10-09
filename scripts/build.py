@@ -10,7 +10,7 @@ import sys
 import zipfile
 from html import escape
 from pathlib import Path
-from paths import MOD, ROOT, CONFIG, BUILD_ROOT, WORK_ROOT, PYTHON
+from paths import MOD, ROOT, CONFIG, BUILD_ROOT, WORK_ROOT, CARGO_TARGET, PYTHON
 
 
 def digest(path):
@@ -32,7 +32,7 @@ def environment():
         raise ValueError('Set devkitarm in build.local.json or DEVKITARM')
     env.update(CARGO_HOME=str(cargo_home), RUSTUP_HOME=str(runtime / 'rustup'),
                RUSTUP_TOOLCHAIN='nightly', CARGO_NET_OFFLINE='true', DEVKITARM=str(compiler),
-               DN_ASSETS=str(WORK_ROOT / 'open-assets'))
+               DN_ASSETS=str(WORK_ROOT / 'open-assets'), CARGO_TARGET_DIR=str(CARGO_TARGET))
     env['PATH'] = os.pathsep.join([str(rust), str(Path(compiler) / 'bin'), env.get('PATH', '')])
     return env, rust
 
@@ -76,12 +76,28 @@ def build():
     prepare()
     env, _ = environment()
     lock_before = digest(MOD / 'Cargo.lock')
-    run([converter(), 'forge', 'build', '--release'], cwd=MOD, env=env)
+    # Pinned cargo-forge looks up ./target and writes its NRO beside Cargo.toml.
+    # Bridge that lookup only while it runs; keep Cargo's cache and converter
+    # output in work/ even when conversion fails. Do not replace unknown files.
+    target_link = MOD / 'target'
+    converter_output = MOD / 'damage_numbers_rs.nro'
+    if target_link.exists() or target_link.is_symlink() or converter_output.exists():
+        raise ValueError('Move existing target/ or loose NRO out of the source folder before building')
+    cargo_target = Path(env['CARGO_TARGET_DIR'])
+    cargo_target.mkdir(parents=True, exist_ok=True)
+    generated_nro = cargo_target / 'damage_numbers_rs.nro'
+    target_link.symlink_to(cargo_target, target_is_directory=True)
+    try:
+        run([converter(), 'forge', 'build', '--release'], cwd=MOD, env=env)
+    finally:
+        target_link.unlink()
+        if converter_output.exists():
+            shutil.move(converter_output, generated_nro)
     if digest(MOD / 'Cargo.lock') != lock_before:
         raise ValueError('Cargo.lock changed during build; pin dependencies before retrying')
     plugins = BUILD_ROOT / 'package/romfs/nativeNX/plugins'
     plugins.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(MOD / 'damage_numbers_rs.nro', plugins / 'damage_numbers_rs.nro')
+    shutil.copy2(generated_nro, plugins / 'damage_numbers_rs.nro')
     assets = plugins / 'damage-numbers-rs'
     assets.mkdir(exist_ok=True)
     shutil.copy2(WORK_ROOT / 'open-assets/wilds-digits.ttf', assets / 'wilds-digits.ttf')

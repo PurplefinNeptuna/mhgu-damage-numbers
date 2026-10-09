@@ -8,6 +8,7 @@ ROOT=MOD.parent.parent if WORKSPACE else MOD
 CONFIG=json.loads((MOD/'build.local.json').read_text()) if (MOD/'build.local.json').exists() else {}
 BUILD_ROOT=ROOT/'build/damage-numbers-rs/candidates/r1'
 WORK_ROOT=ROOT/'work/damage-numbers-rs/candidates/r1'
+CARGO_TARGET=WORK_ROOT/'cargo-target'
 FORGE=MOD/'vendor/forge-rs'
 DEPS=MOD/'vendor'
 PYTHON=Path(CONFIG.get('python',sys.executable))

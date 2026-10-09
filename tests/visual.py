@@ -3,7 +3,7 @@
 import json,math,subprocess,sys,hashlib,shutil
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts'))
-from paths import MOD,BUILD_ROOT,WORK_ROOT
+from paths import MOD,BUILD_ROOT,WORK_ROOT,CARGO_TARGET
 from build import environment
 from compositor import render
 env,rust=environment();assets=WORK_ROOT/'open-assets';out=WORK_ROOT/'visual';out.mkdir(parents=True,exist_ok=True)
@@ -11,7 +11,7 @@ font=out/'app:/nativeNX/plugins/damage-numbers-rs/wilds-digits.ttf';font.parent.
 subprocess.run([rust/'cargo','build','--release','--config',MOD/'.cargo/vendor.toml','--manifest-path',MOD/'tests/render-harness/Cargo.toml','--target','x86_64-unknown-linux-gnu'],cwd=MOD.parent,env=env,check=True)
 cimgui=MOD/'vendor/cimgui';stub=out/'forge/log.h';stub.parent.mkdir(exist_ok=True);stub.write_text('extern "C" void forge_log_info(const char*,...);\n#define forge_log_warn forge_log_info\n')
 sources=[MOD/'tests/visual.cpp',MOD/'tests/oracle/cosmetics.cpp',cimgui/'cimgui.cpp',*[cimgui/'imgui'/name for name in ['imgui.cpp','imgui_draw.cpp','imgui_tables.cpp','imgui_widgets.cpp','imgui_demo.cpp']]]
-library=MOD/'tests/render-harness/target/x86_64-unknown-linux-gnu/release/libdamage_numbers_render_harness.a'
+library=CARGO_TARGET/'x86_64-unknown-linux-gnu/release/libdamage_numbers_render_harness.a'
 subprocess.run(['c++','-std=c++17','-O2','-DDAMAGE_NUMBERS_HOST_VISUAL',*['-I'+str(p)for p in [cimgui,out,assets,MOD/'tests/oracle']],*map(str,sources),str(library),'-ldl','-lpthread','-lm','-o',str(out/'visual')],check=True)
 subprocess.run([out/'visual',MOD/'vendor/fonts/Roboto-Medium.ttf',out],cwd=out,check=True)
 scenes=[]

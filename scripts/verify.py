@@ -6,7 +6,7 @@ import re
 import struct
 import subprocess
 from pathlib import Path
-from paths import MOD, BUILD_ROOT, WORK_ROOT, CONFIG, input_path
+from paths import MOD, BUILD_ROOT, WORK_ROOT, CARGO_TARGET, CONFIG, input_path
 from mhgu_binary import Nro, main_image
 from native_support import nso_exports
 from build import doctor, digest
@@ -88,7 +88,7 @@ def verify():
     if digest(MOD / 'src/gateway.S') != lock['gateway_sha256']:
         raise ValueError('Audited gateway source changed')
     compiler = Path(CONFIG['devkitarm']) / 'bin'
-    elf = MOD / 'target/armv7a-none-eabi/release/libdamage_numbers_rs.so'
+    elf = CARGO_TARGET / 'armv7a-none-eabi/release/libdamage_numbers_rs.so'
     names = symbols(compiler, elf)
     for name in [*[f'dn_gateway_{site}' for site in range(8)], 'dn_gateway_after']:
         address = names[name]
