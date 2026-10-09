@@ -1,3 +1,6 @@
+# Checked NSO/ELF/NRO parsing and conversion helpers for the pinned ARM32 build.
+# Offsets, section bounds, hashes, symbols, and relocations are validated explicitly.
+
 from paths import MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path
 """Shared verified ARM32 NSO/ELF/NRO helpers and pinned native build inputs."""
 import ctypes
@@ -23,6 +26,7 @@ WINDOWS = {
     "long_sword_new_instance": 0x2b489c,
 }
 
+
 def sha(data):
     return hashlib.sha256(data).hexdigest()
 
@@ -40,6 +44,7 @@ def write_json(path, data):
     path.write_text(json.dumps(data, indent=2) + "\n")
 
 
+# Validate the supported NSO/build/segment hashes before constructing the memory image.
 def main_image(data):
     if sha(data) != MAIN_SHA or data[:4] != b"NSO0" or data[0x40:0x60].hex() != BUILD_ID:
         raise ValueError("Wrong main NSO: exact source SHA and full build ID are required")
@@ -61,48 +66,50 @@ def main_image(data):
             if decompress(raw, dest, len(raw), size) != size:
                 raise ValueError("NSO segment decompression failed")
             raw = dest.raw
-        if flags & (1 << (i + 3)) and hashlib.sha256(raw).digest() != data[0xa0 + 32*i:0xc0 + 32*i]:
+        if flags & (1 << (i + 3)) and hashlib.sha256(raw).digest() != data[0xa0 + 32 * i:0xc0 + 32 * i]:
             raise ValueError("NSO segment content hash failed")
         if segments and address < segments[-1][0] + len(segments[-1][1]):
             raise ValueError("NSO segment overlap")
         segments.append((address, raw, name))
     image = bytearray(segments[-1][0] + len(segments[-1][1]))
     for address, raw, _ in segments:
-        image[address:address+len(raw)] = raw
+        image[address:address + len(raw)] = raw
     return bytes(image), segments
 
 
+# Repackage checked ARM ELF load segments and MOD0 metadata into the NRO layout.
 def elf_to_nro(data):
     if data[:7] != b"\x7fELF\x01\x01\x01" or struct.unpack_from("<H", data, 18)[0] != 40:
         raise ValueError("Expected ELF32 little-endian ARM")
     phoff = struct.unpack_from("<I", data, 28)[0]
     phsize, count = struct.unpack_from("<HH", data, 42)
-    if phsize != 32 or phoff + count*phsize > len(data):
+    if phsize != 32 or phoff + count * phsize > len(data):
         raise ValueError("Invalid ELF program headers")
-    segments = [struct.unpack_from("<8I", data, phoff+i*32) for i in range(count)]
+    segments = [struct.unpack_from("<8I", data, phoff + i * 32) for i in range(count)]
     segments = [s for s in segments if s[0] == 1]
-    if len(segments) != 3 or [s[6] for s in segments] != [5,4,6]:
+    if len(segments) != 3 or [s[6] for s in segments] != [5, 4, 6]:
         raise ValueError("Expected RX/R/RW load segments")
-    align = lambda x: (x+4095)&~4095
+    align = lambda x: (x + 4095) & ~4095
     cursor = 0
     for s in segments:
-        if s[2] != cursor or s[1]+s[4] > len(data) or s[4] > s[5]:
+        if s[2] != cursor or s[1] + s[4] > len(data) or s[4] > s[5]:
             raise ValueError("Unexpected ELF segment layout or bounds")
         cursor += align(s[4])
     image = bytearray(cursor)
     for s in segments:
-        image[s[2]:s[2]+s[4]] = data[s[1]:s[1]+s[4]]
+        image[s[2]:s[2] + s[4]] = data[s[1]:s[1] + s[4]]
     image[16:128] = bytes(112)
     image[16:20] = b"NRO0"
     struct.pack_into("<I", image, 24, len(image))
-    for i,s in enumerate(segments):
-        struct.pack_into("<II", image, 32+i*8, s[2], align(s[4]))
-    struct.pack_into("<I", image, 56, align(max(0,segments[2][5]-align(segments[2][4]))))
+    for i, s in enumerate(segments):
+        struct.pack_into("<II", image, 32 + i * 8, s[2], align(s[4]))
+    struct.pack_into("<I", image, 56, align(max(0, segments[2][5] - align(segments[2][4]))))
     # Deterministic content fingerprint in the NRO build-id field.
     image[64:96] = hashlib.sha256(data).digest()
     return bytes(image)
 
 
+# Compute the SysV ELF symbol-name hash used by the module's dynamic lookup table.
 def elf_hash(name):
     value = 0
     for byte in name:
@@ -114,6 +121,7 @@ def elf_hash(name):
     return value & 0xFFFFFFFF
 
 
+# Parse module regions, dynamic tables, symbols, and relocations within checked bounds.
 class Nro:
     def __init__(self, data):
         self.data = data
@@ -187,6 +195,7 @@ class Nro:
                 seen.add(bucket)
                 bucket = raw[self.buckets + bucket]
 
+    # Reject a declared span that falls outside the NRO's file bounds.
     def region(self, offset, size):
         if offset < 0 or size < 0 or offset + size > len(self.data):
             raise ValueError("NRO range out of bounds")
@@ -195,6 +204,7 @@ class Nro:
         self.region(offset, 4)
         return struct.unpack_from("<I", self.data, offset)[0]
 
+    # Rebuild the SysV buckets/chains from the module's dynamic symbol names.
     def rebuild_hash(self):
         buckets = [0] * self.buckets
         chains = [0] * self.count
@@ -211,6 +221,7 @@ class Nro:
                            self.buckets, self.count, *buckets, *chains)
 
 
+# Collect defined dynamic symbols from a checked ARM32 ELF symbol table.
 def dynamic_exports(elf):
     if elf[:7] != b"\x7fELF\x01\x01\x01" or struct.unpack_from("<H", elf, 18)[0] != 40:
         raise ValueError("Expected ELF32 little-endian ARM")
@@ -220,21 +231,25 @@ def dynamic_exports(elf):
     tables = [s for s in sections if s[1] == 11]
     if len(tables) != 1:
         raise ValueError("Expected one ELF dynamic symbol table")
-    table = tables[0]; strings = sections[table[6]]
+    table = tables[0]
+    strings = sections[table[6]]
     names = elf[strings[4]:strings[4] + strings[5]]
     exports = {}
     for index in range(table[5] // 16):
-        name, value, length, info, visibility, defined = struct.unpack_from("<IIIBBH", elf, table[4] + index * 16)
+        name, value, length, info, visibility, defined = struct.unpack_from(
+            "<IIIBBH", elf, table[4] + index * 16)
         if defined and info >> 4 in (1, 2) and visibility & 3 == 0:
             exports[names[name:].split(b"\0", 1)[0]] = (value, length)
     return exports
 
 
+# Validate NSO segment sizes, compression bounds, and recorded segment hashes.
 def nso_segments(nso):
     if nso[:4] != b"NSO0" or len(nso) < 256:
         raise ValueError("Invalid rebuilt NSO")
     lib = ctypes.CDLL(ctypes.util.find_library("lz4"))
-    lib.LZ4_decompress_safe.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_int]
+    lib.LZ4_decompress_safe.argtypes = [ctypes.c_void_p,
+                                        ctypes.c_void_p, ctypes.c_int, ctypes.c_int]
     flags = struct.unpack_from("<I", nso, 12)[0]
     results = []
     for i, name in enumerate(("text", "rodata", "data")):

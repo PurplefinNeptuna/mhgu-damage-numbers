@@ -21,7 +21,7 @@ struct FeedbackInput {
     bool move_prevents_bounce_8 = false, move_prevents_bounce_14 = false;
 };
 
-inline uint8_t resolved_feedback(const FeedbackInput& in) {
+inline uint8_t resolved_feedback(const FeedbackInput &in) {
     uint8_t effect = 0xff;
     uint32_t flags = 0;
     if (in.first.active && in.first.effect != 0xff) {
@@ -42,8 +42,8 @@ inline uint8_t resolved_feedback(const FeedbackInput& in) {
         effect = 2;
     if (effect == 0 && !force && in.stance_result == 1 && in.weapon_level > 1)
         effect = 2;
-    else if (effect == 0 && (in.move_prevents_bounce_8 ||
-             in.move_prevents_bounce_14 || (flags & (1u << 27))))
+    else if (effect == 0 &&
+             (in.move_prevents_bounce_8 || in.move_prevents_bounce_14 || (flags & (1u << 27))))
         effect = 2;
     return effect;
 }

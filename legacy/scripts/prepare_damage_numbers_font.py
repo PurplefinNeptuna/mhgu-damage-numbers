@@ -1,4 +1,17 @@
-from paths import MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path, BUILD_ROOT, WORK_ROOT
+# Validate the licensed source font, pin its axes, subset required glyphs, and
+# write an embedded header with the scale needed to match Forge digit height.
+
+from paths import (
+    MOD,
+    SCRIPTS,
+    FORGE,
+    DEPS,
+    PYTHON,
+    CONTAINER_STORAGE,
+    input_path,
+    BUILD_ROOT,
+    WORK_ROOT,
+)
 #!/usr/bin/env python3
 """Prepare the pinned digit font and C++ payload; never touch installed packages."""
 from pathlib import Path
@@ -11,8 +24,11 @@ from fontTools.varLib.instancer import instantiateVariableFont
 from fontTools import subset
 
 from paths import ROOT, MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path
-OUT = WORK_ROOT/'open-assets'
+OUT = WORK_ROOT / 'open-assets'
 
+
+# Keep font axes, glyph inventory, naming, and timestamps deterministic.
+# Validate the emitted subset before embedding its bytes in a C++ header.
 def prepare(profile='open'):
     from damage_numbers_assets import paths
     global OUT
@@ -21,11 +37,11 @@ def prepare(profile='open'):
     manifest = json.loads((recipe / 'open-source.json').read_text())
     if fontTools.__version__ != manifest['fonttools_version']:
         raise ValueError('Use the pinned FontTools version recorded in fonts/open-source.json')
-    source = MOD/'vendor/fonts/OpenSans.ttf'
+    source = MOD / 'vendor/fonts/OpenSans.ttf'
     raw = source.read_bytes()
     if hashlib.sha256(raw).hexdigest() != manifest['source_sha256']:
         raise ValueError('Digit font source fingerprint changed')
-    license_data = (MOD/'fonts/OFL.txt').read_bytes()
+    license_data = (MOD / 'fonts/OFL.txt').read_bytes()
     if hashlib.sha256(license_data).hexdigest() != manifest['license_sha256']:
         raise ValueError('Open font license fingerprint changed')
     font = TTFont(io.BytesIO(raw), recalcTimestamp=False)
@@ -45,6 +61,7 @@ def prepare(profile='open'):
         if record.nameID in names:
             record.string = names[record.nameID].encode(record.getEncoding())
     # Match visible digit height to the existing Forge font at the same size.
+
     def cap_fraction(f):
         g = f['glyf'][f.getBestCmap()[ord('0')]]
         return (g.yMax - g.yMin) / (f['hhea'].ascent - f['hhea'].descent)
@@ -61,8 +78,9 @@ def prepare(profile='open'):
         raise ValueError('Subset is not a static complete digit font')
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / 'wilds-digits.ttf').write_bytes(data)
+
     def array(name, value):
-        rows = [','.join(str(b) for b in value[i:i+24]) for i in range(0,len(value),24)]
+        rows = [','.join(str(b) for b in value[i:i + 24]) for i in range(0, len(value), 24)]
         return f'static const unsigned char {name}[] __attribute__((used))={{\n' + ',\n'.join(rows) + '\n};\n'
     header = '#pragma once\n' + array('wilds_font_data', data)
     header += array('wilds_font_license', license_data + b'\0')
@@ -71,8 +89,9 @@ def prepare(profile='open'):
     report = dict(manifest, subset_sha256=hashlib.sha256(data).hexdigest(),
                   subset_bytes=len(data), height_scale=scale,
                   classic_height_reference_sha256=hashlib.sha256(classic_path.read_bytes()).hexdigest())
-    (OUT / 'font-manifest.json').write_text(json.dumps(report,indent=2)+'\n')
+    (OUT / 'font-manifest.json').write_text(json.dumps(report, indent=2) + '\n')
     return report
+
 
 if __name__ == '__main__':
     from damage_numbers_assets import argument

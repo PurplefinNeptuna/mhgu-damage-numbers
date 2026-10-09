@@ -1,3 +1,6 @@
+/* Native leaf/recursive/collision fixtures used by the gateway probes.
+ * Leaf arithmetic deliberately changes flags and VFP values to test restoration. */
+
 .syntax unified
 .arm
 .fpu crypto-neon-fp-armv8

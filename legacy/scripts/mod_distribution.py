@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# Distribution policy shared by the standalone tools: validate records, render
+# release guides/notices, assemble deterministic archives, and verify deliveries.
+
 """Create and verify local mod distributions. Never install or publish."""
 import argparse
 from datetime import datetime, timezone
@@ -19,7 +22,8 @@ from paths import ROOT
 STATES = {'DEVELOPMENT', 'LOCAL_ONLY', 'RETIRED', 'READY_TO_DISTRIBUTE', 'PUBLISHED'}
 READY = {'READY_TO_DISTRIBUTE', 'PUBLISHED'}
 ARCHIVED_SUPPORT = ('README.md',)
-DELIVERY_DOCUMENTS = ('README.md', 'README.html', 'GAMEBANANA_README.html', 'NOTICES.txt', 'NOTICES.html')
+DELIVERY_DOCUMENTS = ('README.md', 'README.html', 'GAMEBANANA_README.html',
+                      'NOTICES.txt', 'NOTICES.html')
 GAMEBANANA_POLICY = 'https://gamebanana.com/wikis/2175'
 
 
@@ -36,6 +40,7 @@ def json_bytes(value):
     return (json.dumps(value, indent=2, sort_keys=True) + '\n').encode()
 
 
+# Require a safe relative distribution path before resolving it under a root.
 def relative(value):
     require(isinstance(value, str) and value and '\\' not in value,
             f'Invalid relative path: {value!r}')
@@ -45,12 +50,15 @@ def relative(value):
     return path
 
 
+# Resolve an output/input path while rejecting symlinks and directory escapes.
 def local(root, value):
     name = relative(value)
-    if (root/'mod.json').is_file() and (root/'DISTRIBUTION.json').is_file():
-        mod=json.loads((root/'mod.json').read_text())['mod'];prefix=f'mods/{mod}/'
-        if value.startswith(prefix):name=relative(value[len(prefix):])
-    path = root/name
+    if (root / 'mod.json').is_file() and (root / 'DISTRIBUTION.json').is_file():
+        mod = json.loads((root / 'mod.json').read_text())['mod']
+        prefix = f'mods/{mod}/'
+        if value.startswith(prefix):
+            name = relative(value[len(prefix):])
+    path = root / name
     require(not root.is_symlink(), f'Symlink root: {root}')
     for part in [path, *path.parents]:
         require(not part.is_symlink(), f'Symlink path: {part}')
@@ -60,18 +68,21 @@ def local(root, value):
     return path
 
 
+# Load the mod's authoritative distribution record from its standalone folder.
 def read(root, value):
     path = local(root, value)
     require(path.is_file(), f'Missing file: {path}')
     return path.read_bytes()
 
 
+# Validate distribution identity, status, declared payloads, and required support fields.
 def spec_for(mod, root=ROOT):
     require(re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', mod), f'Invalid mod name: {mod}')
     spec = json.loads(read(root, f'mods/{mod}/DISTRIBUTION.json'))
     require(spec.get('schema_version') == 1 and spec.get('mod') == mod, f'Invalid identity: {mod}')
     require(spec.get('status') in STATES, f'Invalid distribution status: {mod}')
-    require(isinstance(spec.get('reason'), str) and spec['reason'].strip(), f'Missing status reason: {mod}')
+    require(isinstance(spec.get('reason'), str)
+            and spec['reason'].strip(), f'Missing status reason: {mod}')
     require(isinstance(spec.get('publication'), dict), f'Missing publication record: {mod}')
     publication = spec['publication']
     if spec['status'] == 'PUBLISHED':
@@ -91,7 +102,8 @@ def spec_for(mod, root=ROOT):
     if runtime.is_file():
         record = json.loads(read(root, str(runtime.relative_to(root))))
         if 'release_status' in record:
-            require(record['release_status'] == spec['status'], f'Stale runtime release status: {mod}')
+            require(record['release_status'] == spec['status'],
+                    f'Stale runtime release status: {mod}')
     if spec['status'] not in READY:
         return spec
     for field in ('version', 'package_name'):
@@ -130,14 +142,17 @@ def spec_for(mod, root=ROOT):
                  'release-manifest.json', 'sha256sums'),
                 f'Support file declared as runtime: {path}')
         relative(record['source'])
-        require(re.fullmatch(r'[0-9a-f]{64}', record.get('sha256', '')), f'Missing pinned hash: {path}')
+        require(re.fullmatch(r'[0-9a-f]{64}', record.get('sha256', '')),
+                f'Missing pinned hash: {path}')
     evidence = spec.get('evidence', {})
-    require(evidence.get('static') and evidence.get('manual_summary'), f'Missing validation evidence: {mod}')
+    require(evidence.get('static') and evidence.get(
+        'manual_summary'), f'Missing validation evidence: {mod}')
     for path in evidence['static'] + evidence.get('manual', []):
         relative(path)
     return spec
 
 
+# Select the versioned active release directory from the validated record.
 def release_dir(spec, root=ROOT):
     return local(root, f'build/{spec["mod"]}/releases/{spec["version"]}')
 
@@ -167,7 +182,8 @@ def notices_html(sources):
               'OPEN_ART_LICENSE.txt': 'Artwork license', 'DISTRIBUTION_NOTICES.md': 'Credits and component licenses'}
     blocks = ['<h2>Notices and licenses</h2>']
     for name, blob in sources:
-        blocks.append(f'<h3>{escape(labels.get(PurePosixPath(name).name, PurePosixPath(name).name))}</h3>')
+        blocks.append(
+            f'<h3>{escape(labels.get(PurePosixPath(name).name, PurePosixPath(name).name))}</h3>')
         # Keep line breaks and all original wording, including legal capitalization.
         for paragraph in re.split(r'\n\s*\n', blob.decode('utf-8').strip()):
             heading = re.fullmatch(r'#{1,6} (.+)', paragraph) if name.endswith('.md') else None
@@ -225,7 +241,8 @@ def readme_html(blob):
                 while end < len(lines) and lines[end].strip() != '```':
                     end += 1
                 require(end < len(lines), 'Unclosed README code block')
-                output.append('<pre><code>' + escape('\n'.join(lines[index + 1:end])) + '</code></pre>')
+                output.append('<pre><code>' + \
+                              escape('\n'.join(lines[index + 1:end])) + '</code></pre>')
                 index = end + 1
             elif table_start(lines, index):
                 headers = cells(line)
@@ -235,7 +252,8 @@ def readme_html(blob):
                 while index < len(lines) and lines[index].strip().startswith('|'):
                     row = cells(lines[index])
                     require(len(row) == len(headers), 'README table row differs from its headers')
-                    output.append('<tr>' + ''.join('<td>' + readme_inline(cell) + '</td>' for cell in row) + '</tr>')
+                    output.append('<tr>' + ''.join('<td>' + readme_inline(cell) + \
+                                  '</td>' for cell in row) + '</tr>')
                     index += 1
                 output.append('</tbody>\n</table>')
             elif item:
@@ -328,7 +346,8 @@ def gamebanana_readme_html(blob, profile):
                    '<p>AI assistance from ' + ', '.join(link(tool) for tool in code['software']) + ': ' +
                    escape(code['scope']) + '</p>']
     for asset in profile['ai_assets']:
-        output += ['<h2><strong>AI-generated assets</strong></h2>', '<p>' + escape(asset['description']) + '</p>']
+        output += ['<h2><strong>AI-generated assets</strong></h2>',
+                   '<p>' + escape(asset['description']) + '</p>']
         for group, heading in (('software', 'AI software'), ('inputs', 'Input credits'),
                                ('datasets', 'Dataset credits')):
             output += ['<h3>' + heading + '</h3>', '<ul>']
@@ -344,6 +363,7 @@ def gamebanana_readme_html(blob, profile):
     return ('\n'.join(output) + '\n').encode('ascii', 'xmlcharrefreplace')
 
 
+# Use fixed archive metadata and sorted entries for reproducible delivery bytes.
 def make_zip(payloads, package_name, support):
     entries = {f'{package_name}/{name}': blob for name, blob in payloads.items()}
     entries.update(support)
@@ -357,11 +377,13 @@ def make_zip(payloads, package_name, support):
     return stream.getvalue()
 
 
+# Assemble expected runtime, guide, notices, manifest, and checksum bytes.
 def expected_files(spec, root=ROOT):
     payloads = {}
     for name, record in spec['payloads'].items():
         blob = read(root, record['source'])
-        require(blob and digest(blob) == record['sha256'], f'Pinned runtime payload changed: {name}')
+        require(blob and digest(blob) == record['sha256'],
+                f'Pinned runtime payload changed: {name}')
         payloads[name] = blob
     notices = [(p, read(root, p)) for p in spec['notices']]
     support = {'README.md': read(root, spec['readme']),
@@ -394,6 +416,7 @@ def expected_files(spec, root=ROOT):
     return files
 
 
+# Collect regular runtime payload files and their hashes for manifest verification.
 def inventory(directory):
     if not directory.exists():
         return {}
@@ -408,6 +431,7 @@ def inventory(directory):
     return result
 
 
+# Compare delivered files with their expected bytes and validate the archive entries.
 def verify_release(spec, root=ROOT):
     expected = expected_files(spec, root)
     directory = release_dir(spec, root)
@@ -427,6 +451,7 @@ def verify_release(spec, root=ROOT):
     return directory / spec['archive']
 
 
+# Stage or refresh the declared delivery under the distribution preservation rules.
 def package(mod, root=ROOT, refresh_support=False):
     spec = spec_for(mod, root)
     require(spec['status'] in READY, f'Mod is not approved for distribution: {mod}')
@@ -441,10 +466,10 @@ def package(mod, root=ROOT, refresh_support=False):
         prefix = spec['package_name'] + '/'
         payloads = {p[len(prefix):]: files[p] for p in runtime}
         require(actual.get(spec['archive']) in (
-                    make_zip(payloads, spec['package_name'],
-                             {p: actual[p] for p in ARCHIVED_SUPPORT if p in actual}),
-                    make_zip(payloads, spec['package_name'], {})),
-                'Existing ZIP differs from its runtime/documentation; preserve/migrate it explicitly')
+            make_zip(payloads, spec['package_name'],
+                     {p: actual[p] for p in ARCHIVED_SUPPORT if p in actual}),
+            make_zip(payloads, spec['package_name'], {})),
+            'Existing ZIP differs from its runtime/documentation; preserve/migrate it explicitly')
         require(refresh_support, 'Support files changed; use --refresh-support to back up and refresh them')
         require(actual.keys() <= files.keys() and files.keys() - actual.keys() <=
                 {'README.html', 'GAMEBANANA_README.html', 'NOTICES.html'},
@@ -464,12 +489,14 @@ def package(mod, root=ROOT, refresh_support=False):
     return verify_release(spec, root)
 
 
+# Discover records and validate source requirements plus every active ready release.
 def check(root=ROOT, source_only=False):
     result = []
-    for directory in ([root] if (root/'mod.json').is_file() else sorted((root/'mods').iterdir())):
+    for directory in ([root] if (root / 'mod.json').is_file() else sorted((root / 'mods').iterdir())):
         if not directory.is_dir():
             continue
-        mod = json.loads((directory/'mod.json').read_text())['mod'] if directory==root else directory.name
+        mod = json.loads((directory / 'mod.json').read_text()
+                         )['mod'] if directory == root else directory.name
         spec = spec_for(mod, root)
         require(spec['status'] != 'RETIRED',
                 f'Retired mod must be removed from the workspace: {directory.name}')
@@ -518,15 +545,20 @@ def check_staged(root=ROOT):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest='command', required=True)
-    checker = commands.add_parser('check', help='Check every current mod, including future directories')
-    checker.add_argument('--source-only', action='store_true', help='Validate tracked records without generated artifacts')
-    checker.add_argument('--staged', action='store_true', help='Validate the actual Git index and staged support sources')
-    packager = commands.add_parser('package', help='Package approved, pinned inputs after mod-specific validation')
+    checker = commands.add_parser(
+        'check', help='Check every current mod, including future directories')
+    checker.add_argument('--source-only', action='store_true',
+                         help='Validate tracked records without generated artifacts')
+    checker.add_argument('--staged', action='store_true',
+                         help='Validate the actual Git index and staged support sources')
+    packager = commands.add_parser(
+        'package', help='Package approved, pinned inputs after mod-specific validation')
     packager.add_argument('mod')
     packager.add_argument('--refresh-support', action='store_true')
     initializer = commands.add_parser('init', help='Register a new mod as DEVELOPMENT')
     initializer.add_argument('mod')
-    initializer.add_argument('--kind', choices=('plugin','resource','cheat','tool'), default='plugin')
+    initializer.add_argument('--kind', choices=('plugin', 'resource',
+                             'cheat', 'tool'), default='plugin')
     args = parser.parse_args()
     if args.command == 'check':
         require(not (args.source_only and args.staged), 'Choose --source-only or --staged')
@@ -540,9 +572,10 @@ def main():
         archive = package(args.mod, refresh_support=args.refresh_support)
         print(f'Verified: {archive}\nSHA-256: {digest(archive.read_bytes())}')
     else:
-        require(not (ROOT/'mod.json').exists(), 'This source repo is already registered; initialize new mods from the coordinating workspace')
+        require(not (ROOT / 'mod.json').exists(),
+                'This source repo is already registered; initialize new mods from the coordinating workspace')
         from standalone_mods import scaffold
-        path = scaffold(ROOT/'mods'/args.mod, args.mod, args.kind)
+        path = scaffold(ROOT / 'mods' / args.mod, args.mod, args.kind)
         print(f'Scaffolded standalone {args.kind}: {path}')
 
 

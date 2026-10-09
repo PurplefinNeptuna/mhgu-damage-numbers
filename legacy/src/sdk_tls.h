@@ -1,3 +1,5 @@
+// Verified native thread-local storage declarations used by capture contexts.
+
 #pragma once
 #include <cstdint>
 
@@ -5,6 +7,6 @@
 // declaration for SetTlsValue. The C wrapper resolves to the void native setter
 // at SDK + 0x9d80c; r0 remains a computed TLS address, not a Result.
 using TlsSlot = int;
-extern "C" uint32_t nnosAllocateTlsSlot(TlsSlot*, void (*)(void*));
-extern "C" void* nnosGetTlsValue(TlsSlot);
-extern "C" void nnosSetTlsValue(TlsSlot, void*);
+extern "C" uint32_t nnosAllocateTlsSlot(TlsSlot *, void (*)(void *));
+extern "C" void *nnosGetTlsValue(TlsSlot);
+extern "C" void nnosSetTlsValue(TlsSlot, void *);

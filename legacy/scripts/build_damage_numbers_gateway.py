@@ -1,4 +1,17 @@
-from paths import MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path, BUILD_ROOT, WORK_ROOT
+# Build a separately linked ARM32 gateway fixture for register/stack probes.
+# Its binary is test input and is separate from the runtime NRO.
+
+from paths import (
+    MOD,
+    SCRIPTS,
+    FORGE,
+    DEPS,
+    PYTHON,
+    CONTAINER_STORAGE,
+    input_path,
+    BUILD_ROOT,
+    WORK_ROOT,
+)
 #!/usr/bin/env python3
 """Build the ARM32 gateway fixture offline; no NRO, installation or game writes."""
 from pathlib import Path
@@ -10,8 +23,10 @@ import subprocess
 import mhgu_binary as baseline
 
 from paths import ROOT, MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path
-OUT = WORK_ROOT/'gateway'
+OUT = WORK_ROOT / 'gateway'
 
+
+# Link gateways against fixed helper addresses, then record fixture symbols and bytes.
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     command = """set -eu
@@ -29,11 +44,11 @@ arm-none-eabi-objdump -d /output/gateway.elf > /output/disassembly.txt
             '--network=none', '-v', f'{MOD}:/mod:ro', '-v', f'{ROOT}:/workspace:ro', '-v', f'{OUT}:/output:rw',
             baseline.IMAGE, 'bash', '-lc', command.replace('{diagnostics}', os.environ.get('MHGU_DIAGNOSTICS', '0'))]
     result = subprocess.run(list(map(str, args)), capture_output=True, text=True)
-    (OUT/'build.log').write_text(result.stdout+result.stderr)
+    (OUT / 'build.log').write_text(result.stdout + result.stderr)
     if result.returncode:
         raise RuntimeError(f'ARM32 gateway fixture build failed; inspect {OUT / "build.log"}')
     names = {}
-    for line in (OUT/'symbols.txt').read_text().splitlines():
+    for line in (OUT / 'symbols.txt').read_text().splitlines():
         columns = line.split()
         if len(columns) == 3 and columns[2].startswith('dn_'):
             names[columns[2]] = int(columns[0], 16)
@@ -41,11 +56,12 @@ arm-none-eabi-objdump -d /output/gateway.elf > /output/disassembly.txt
                SCRIPTS / 'damage_numbers_gateway_probe.py', Path(__file__)]
     report = {'kind': 'ARM32 gateway fixture only; no NRO or package', 'base': 0x31000000,
               'container_image': baseline.IMAGE, 'symbols': names,
-              'apsr_restore':'NZCVQ only; GE remains as left by helper',
-              'binary_sha256': hashlib.sha256((OUT/'gateway.bin').read_bytes()).hexdigest(),
+              'apsr_restore': 'NZCVQ only; GE remains as left by helper',
+              'binary_sha256': hashlib.sha256((OUT / 'gateway.bin').read_bytes()).hexdigest(),
               'sources': {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in sources}}
-    (OUT/'manifest.json').write_text(json.dumps(report, indent=2)+'\n')
+    (OUT / 'manifest.json').write_text(json.dumps(report, indent=2) + '\n')
     print(f'Built ARM32 gateway fixture in {OUT}; installed packages untouched')
+
 
 if __name__ == '__main__':
     main()

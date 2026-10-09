@@ -1,3 +1,6 @@
+# Shared deterministic serialization and ZIP helpers. Existing output must
+# match byte-for-byte before it can be reused.
+
 from paths import MOD, SCRIPTS, FORGE, DEPS, PYTHON, CONTAINER_STORAGE, input_path
 #!/usr/bin/env python3
 """Deterministic, non-overwriting package helpers for open damage numbers."""
@@ -27,6 +30,7 @@ def json_bytes(value):
     return (json.dumps(value, indent=2, sort_keys=True) + '\n').encode()
 
 
+# Sort entries and fix timestamp/permissions so the same payload makes the same ZIP.
 def make_zip(payloads):
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, 'w') as archive:
@@ -38,6 +42,7 @@ def make_zip(payloads):
     return buffer.getvalue()
 
 
+# Reuse identical regular files; refuse symlinks or differing existing output.
 def preserve_or_write(path, blob):
     require(not path.is_symlink(), f'Refusing symlink output: {path}')
     if path.exists():

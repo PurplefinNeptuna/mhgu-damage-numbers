@@ -1,3 +1,5 @@
+/* Export only the Forge lifecycle callbacks; keep internal symbols local. */
+
 {
     global:
         forge_onLoad;

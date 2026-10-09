@@ -1,3 +1,6 @@
+/* Minimal ARM32 module header and MOD0 offsets for Forge loading.
+ * The runtime workspace is BSS; every encoded relative offset is unchanged. */
+
 .syntax unified
 .arm
 .section .text.crt0,"ax",%progbits

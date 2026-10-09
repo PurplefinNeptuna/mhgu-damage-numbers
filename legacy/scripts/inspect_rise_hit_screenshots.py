@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# Measure digit-colored regions and slash direction from supplied screenshots.
+# Results are image observations used by the Rise presentation research.
+
 """Measure the supplied 30 fps Rise samples; never modify input PNGs.
 
 These masks/ROIs are specific to this screenshot set, not a general HUD detector.
@@ -14,11 +17,13 @@ import numpy as np
 from PIL import Image
 
 
+# Load screenshot pixels into an array for region and color analysis.
 def pixels(path):
     with Image.open(path) as image:
         return np.asarray(image.convert("RGB"), dtype=float)
 
 
+# Locate the digit-colored pixels and return their measured bounding box.
 def orange_bbox(image, roi):
     x0, y0, x1, y1 = roi
     data = image[y0:y1, x0:x1]
@@ -31,6 +36,7 @@ def orange_bbox(image, roi):
             int(x.max()) + x0 + 1, int(y.max()) + y0 + 1]
 
 
+# Fit a slash direction from qualifying pixels in the supplied hit crop.
 def slash_fit(image, positive):
     data = image[120:450, 800:1120]
     red, green, blue = data[..., 0], data[..., 1], data[..., 2]
@@ -58,6 +64,7 @@ def slash_fit(image, positive):
     }
 
 
+# Collect image measurements and source hashes for the declared hit regions.
 def inspect(source):
     inputs = []
     for group in ["norm_orange", "positive_crit_orange", "negative_crit_orange"]:
@@ -83,7 +90,8 @@ def inspect(source):
     beams = []
     for group in ["positive_crit_orange", "negative_crit_orange"]:
         for frame in [3, 4, 5]:
-            result = slash_fit(pixels(source / group / f"{frame}.png"), group.startswith("positive"))
+            result = slash_fit(
+                pixels(source / group / f"{frame}.png"), group.startswith("positive"))
             beams.append({"path": f"{group}/{frame}.png", **result})
     outline = pixels(source / "norm_orange/before_go.png")
     return {
@@ -130,7 +138,8 @@ def inspect(source):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("source", type=Path, help="Directory containing the three supplied screenshot groups")
+    parser.add_argument("source", type=Path,
+                        help="Directory containing the three supplied screenshot groups")
     parser.add_argument("output", type=Path, help="Destination JSON; source PNGs are untouched")
     args = parser.parse_args()
     result = inspect(args.source)

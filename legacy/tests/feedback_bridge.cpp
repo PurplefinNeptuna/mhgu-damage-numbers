@@ -1,5 +1,8 @@
+// Expose the copied-value native feedback mirror for probe comparisons.
+
 #include "feedback.h"
-extern "C" uint32_t dn_feedback(const uint32_t* v) {
+
+extern "C" uint32_t dn_feedback(const uint32_t *v) {
     damage_numbers::FeedbackInput in{};
     in.first = {v[0] != 0, uint8_t(v[1]), v[2]};
     in.second = {v[3] != 0, uint8_t(v[4]), v[5]};
