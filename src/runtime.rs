@@ -75,7 +75,7 @@ pub fn start() {
         match Installed::install() {
             Ok(value) => {
                 log::info!(
-                    "[damage-numbers-rs] r1 loaded: {} Forge hooks",
+                    "[damage-numbers-rs] r2 loaded: {} Forge hooks",
                     value.count()
                 );
                 Some(value)

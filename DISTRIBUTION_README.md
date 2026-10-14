@@ -4,12 +4,12 @@ Displays separate numbers at each impact, including total physical and elemental
 
 ## Requirements
 
-MHGU 1.4.0 for Nintendo Switch, and Forge 1.4.1 with the maintained multi-list ImGui renderer fix.
+MHGU 1.4.0 for Nintendo Switch, and Forge 1.5.0 with the MHGU SDK mutex import correction. This r2 DEVELOPMENT candidate has passed static tests; gameplay has not been tested.
 
 ## Installation
 
 1. Close the emulator and disable the C++ Damage Numbers package.
-2. Extract `damage-numbers-rs-r1-candidate.zip`.
+2. Extract `damage-numbers-rs-r2-candidate.zip`.
 3. Copy `damage-numbers-rs` into the MHGU mod directory:
    - Eden: `~/.local/share/eden/load/0100770008DD8000/`
    - Ryujinx: `mods/contents/0100770008dd8000/` inside its data directory.
@@ -52,4 +52,4 @@ lifetime = 0.9
 
 ## Known issues
 
-Use the maintained Forge renderer if opening dropdowns blanks or corrupts the menu. Rise slashes are screen-space effects and may extend across foreground scenery.
+Rise slashes are screen-space effects and may extend across foreground scenery.

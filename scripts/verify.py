@@ -23,10 +23,11 @@ def symbols(compiler, elf):
 
 def native_layouts(compiler):
     # Compile the pinned native declarations instead of reconstructing their layouts by hand.
-    jit = re.search(r'typedef enum \{.*?\} Jit;', (MOD / 'research/native-jit.h').read_text(), re.S).group(0)
     hook = re.search(r'typedef struct Hook \{.*?\} Hook;', (MOD / 'research/native-hook.h').read_text(), re.S).group(0)
     expressions = [
-        'sizeof(Hook)', 'offsetof(Hook,context)', 'sizeof(damage_numbers::RawFrame)',
+        'sizeof(Hook)', 'alignof(Hook)',
+        *[f'offsetof(Hook,{field})' for field in ['target', 'detour', 'original', 'context', 'ctx_cell']],
+        'sizeof(damage_numbers::RawFrame)',
         *[f'offsetof(damage_numbers::RawFrame,{field})' for field in ['cpsr', 'fpscr', 'high_d', 'low_d', 'r']],
         *[f'offsetof(ImGuiIO,{field})' for field in ['Fonts', 'BackendFlags']],
         'offsetof(ImFontConfig,FontDataOwnedByAtlas)', 'offsetof(ImFontBaked,Size)',
@@ -40,9 +41,9 @@ def native_layouts(compiler):
     folder.mkdir(parents=True, exist_ok=True)
     source = folder / 'native.cpp'
     source.write_text('#include <stdarg.h>\n#include <stdint.h>\n#include <stddef.h>\n'
-                      'typedef uint32_t Handle;struct VirtmemReservation;\n' + jit + '\n' + hook + '\n'
+                      + hook + '\n'
                       '#define CIMGUI_DEFINE_ENUMS_AND_STRUCTS\n#include <cimgui.h>\n#include "gateway.h"\n'
-                      'static_assert(sizeof(Jit)==28);\n'
+                      'static_assert(sizeof(Hook)==24 && alignof(Hook)==4 && offsetof(Hook,has_ctx)==20);\n'
                       'extern "C" __attribute__((used,section(".dn_native")))const uint32_t native[]={'
                       + ','.join(expressions) + '};\n')
     subprocess.run([compiler / 'arm-none-eabi-g++', '-std=c++17', '-march=armv8-a', '-marm', '-mfloat-abi=soft',
@@ -103,16 +104,17 @@ def verify():
     address = names['dn_abi']
     actual = data[address:address + len(native)]
     if actual != native:
-        raise ValueError('Rust/native ARM32 layout mismatch: ' + str((struct.unpack('<24I', actual), struct.unpack('<24I', native))))
+        raise ValueError('Rust/native ARM32 layout mismatch: ' + str((struct.unpack('<29I', actual), struct.unpack('<29I', native))))
     build = json.loads((BUILD_ROOT / 'build.json').read_text())
     if digest(package / 'damage_numbers_rs.nro') != build['nro_sha256'] or digest(package / 'damage-numbers-rs/wilds-digits.ttf') != build['font_sha256']:
         raise ValueError('Staged bytes differ from build receipt')
     report = {'status': 'PASSED', 'nro_sha256': digest(package / 'damage_numbers_rs.nro'), 'elf_sha256': digest(elf),
               'exports': sorted(exports), 'strong_imports': sorted(imports), 'native_inputs': inputs,
-              'signature_windows': windows, 'layouts': dict(zip(expressions, struct.unpack('<24I', native))),
+              'signature_windows': windows, 'layouts': dict(zip(expressions, struct.unpack('<29I', native))),
               'gateway_sha256': lock['gateway_sha256'], 'nzcvq_restores': 9, 'compiled_status_writes': msr,
               'nro_bytes': len(data), 'bss_bytes': struct.unpack_from('<I', data, 56)[0],
-              'ordinary_hook_jit_bytes': 8 * 4096, 'ordinary_hook_code_memory_objects': 8, 'runtime_test': 'NOT RUN'}
+              'ordinary_hook_slot_bytes': 8 * 16, 'forge_pool_chunk_bytes': 16384,
+              'forge_pool_max_chunks': 2, 'allocation_evidence': 'native host fixture; runtime allocation not measured', 'runtime_test': 'NOT RUN'}
     (BUILD_ROOT / 'verify.json').write_text(json.dumps(report, indent=2) + '\n')
     print(f'PASS: ARM32 layouts, {len(imports)} resolved imports, callbacks, 11 game windows and nine NZCVQ restores')
 

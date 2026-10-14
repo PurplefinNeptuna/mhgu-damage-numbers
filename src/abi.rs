@@ -1,6 +1,6 @@
 //! Compiler-derived native layouts retained in the NRO so verification checks the shipped target build.
 core::arch::global_asm!(".hidden dn_abi");
-use core::mem::{offset_of, size_of};
+use core::mem::{align_of, offset_of, size_of};
 use damage_numbers_core::capture::RawFrame;
 use forge::sys::{hook::Hook, imgui::*};
 // used keeps this verification table even though gameplay never reads it.
@@ -9,9 +9,14 @@ use forge::sys::{hook::Hook, imgui::*};
 #[used]
 #[unsafe(no_mangle)]
 #[unsafe(link_section = ".rodata.dn_abi")]
-pub static dn_abi: [u32; 24] = [
+pub static dn_abi: [u32; 29] = [
     size_of::<Hook>() as u32,
+    align_of::<Hook>() as u32,
+    offset_of!(Hook, target) as u32,
+    offset_of!(Hook, detour) as u32,
+    offset_of!(Hook, original) as u32,
     offset_of!(Hook, context) as u32,
+    offset_of!(Hook, ctx_cell) as u32,
     size_of::<RawFrame>() as u32,
     offset_of!(RawFrame, cpsr) as u32,
     offset_of!(RawFrame, fpscr) as u32,

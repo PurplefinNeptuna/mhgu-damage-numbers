@@ -66,7 +66,7 @@ checksum = "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98"
 
 [[package]]
 name = "mhgu-forge"
-version = "1.4.1"
+version = "1.5.0"
 dependencies = [
  "ini_core",
  "log",
@@ -77,7 +77,7 @@ dependencies = [
 
 [[package]]
 name = "mhgu-forge-macros"
-version = "1.4.1"
+version = "1.5.0"
 dependencies = [
  "proc-macro-crate",
  "proc-macro2",
@@ -87,14 +87,14 @@ dependencies = [
 
 [[package]]
 name = "mhgu-forge-rt"
-version = "1.4.1"
+version = "1.5.0"
 dependencies = [
  "mhgu-forge-sys",
 ]
 
 [[package]]
 name = "mhgu-forge-sys"
-version = "1.4.1"
+version = "1.5.0"
 
 [[package]]
 name = "proc-macro-crate"

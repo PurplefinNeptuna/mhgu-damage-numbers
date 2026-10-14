@@ -1,0 +1,16 @@
+{
+  "status": "PASSED",
+  "offline": true,
+  "initial_cargo_home": "empty",
+  "source_only_cargo_configuration": true,
+  "no_sibling_mod_source": true,
+  "steps": [
+    "build",
+    "test",
+    "verify",
+    "package"
+  ],
+  "export_manifest_sha256": "6c8ff11c591461b8693a27efc94659079e527970150e23bf7870a514210947e0",
+  "nro_sha256": "aa85c646f2d0d50e352558a70bd393173aaadb96df617ed05410563d8ada0055",
+  "runtime_test": "NOT RUN"
+}

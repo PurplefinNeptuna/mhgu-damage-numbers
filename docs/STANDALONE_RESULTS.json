@@ -1,16 +1,22 @@
 {
   "status": "PASSED",
+  "version": "r2",
   "offline": true,
   "initial_cargo_home": "empty",
   "source_only_cargo_configuration": true,
   "no_sibling_mod_source": true,
   "steps": [
+    "doctor",
     "build",
     "test",
     "verify",
     "package"
   ],
-  "export_manifest_sha256": "6c8ff11c591461b8693a27efc94659079e527970150e23bf7870a514210947e0",
-  "nro_sha256": "aa85c646f2d0d50e352558a70bd393173aaadb96df617ed05410563d8ada0055",
+  "export_manifest_sha256": "2a10efd1597fb5e789de1ebdc4b77575af10e0cb4caf633d50cbf21c795534cc",
+  "nro_sha256": "92df31e47dc0ce7bb9f5ccb70f286307aef2f3a92587ada6cbd5ddd21faef74a",
+  "workspace_nro_sha256": "b4649573e9865ca1f707dd6bced8341110b2ff11e0035c79288e33685b3b2bb7",
+  "byte_identical_nro": false,
+  "reproducibility": "Different NRO bytes across build roots; both exact artifacts passed complete validation. No byte-identical build guarantee.",
+  "archive_sha256": "37a6bd315a8101995f89e043159bfd06179296895a5c6ed5e67a7f970d95ce28",
   "runtime_test": "NOT RUN"
 }

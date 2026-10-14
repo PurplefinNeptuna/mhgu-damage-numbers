@@ -53,7 +53,7 @@ pub fn correct_program() -> bool {
 // Reject null/wrapped ARM32 spans, then require the whole copy to fit in one
 // readable mapping. This checks address access; it does not take ownership of
 // the game object or extend its lifetime beyond the synchronous native call.
-pub fn readable(address: u32, bytes: usize) -> bool {
+fn mapped(address: u32, bytes: usize, permissions: u32) -> bool {
     if address == 0 || address as u64 + bytes as u64 > 0x1_0000_0000 {
         return false;
     }
@@ -62,10 +62,18 @@ pub fn readable(address: u32, bytes: usize) -> bool {
     // SAFETY: outputs are initialized, naturally aligned structs of the kernel's declared size.
     unsafe {
         mwc_svc_query(&mut info, &mut page, address as u64) == 0
-            && (info.permissions & 1) != 0
+            && (info.permissions & permissions) == permissions
             && info.address <= address as u64
             && address as u64 + bytes as u64 <= info.address + info.size
     }
+}
+pub fn readable(address: u32, bytes: usize) -> bool {
+    mapped(address, bytes, 1)
+}
+// Horizon permission bits 1 (read) and 4 (execute) must both cover the complete
+// trampoline. The RX alias belongs to Forge and remains live until process exit.
+pub fn executable(address: u32, bytes: usize) -> bool {
+    mapped(address, bytes, 5)
 }
 // After writing or restoring instructions, flush process caches and execute
 // ARM barriers before those addresses can be used as code.

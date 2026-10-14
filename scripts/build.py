@@ -103,7 +103,7 @@ def build():
     shutil.copy2(WORK_ROOT / 'open-assets/wilds-digits.ttf', assets / 'wilds-digits.ttf')
     record('build.json', {'status': 'BUILT', 'nro_sha256': digest(plugins / 'damage_numbers_rs.nro'),
                          'font_sha256': digest(assets / 'wilds-digits.ttf'),
-                         'forge_rs_revision': '7f572ed8d0e0a6cfc562571fdbc1ad57441a8438', 'runtime_test': 'NOT RUN'})
+                         'forge_rs_revision': 'd1865b68e9b194eb3eacc8bd71bbf601a5fac63e', 'runtime_test': 'NOT RUN'})
 
 
 def test(host=False):
@@ -112,6 +112,7 @@ def test(host=False):
     for manifest in ['core/Cargo.toml', 'tests/config-harness/Cargo.toml', 'tests/hooks-harness/Cargo.toml']:
         run([rust / 'cargo', 'test', '--locked', '--config', MOD / '.cargo/vendor.toml',
              '--manifest-path', MOD / manifest, '--target', 'x86_64-unknown-linux-gnu'], cwd=MOD.parent, env=env)
+    run([PYTHON, MOD / 'tests/native_pool.py'], env=env)
     run([PYTHON, MOD / 'tests/parity.py'], env=env)
     run([PYTHON, MOD / 'tests/visual.py'], env=env)
     nro = BUILD_ROOT / 'package/romfs/nativeNX/plugins/damage_numbers_rs.nro'
@@ -142,7 +143,7 @@ def package():
         raise ValueError('Unexpected old candidate payload files; preserve them before repackaging')
     shutil.copytree(source, package_dir, dirs_exist_ok=True)
     guide = (MOD / 'DISTRIBUTION_README.md').read_bytes()
-    archive = dest / 'damage-numbers-rs-r1-candidate.zip'
+    archive = dest / 'damage-numbers-rs-r2-candidate.zip'
     with zipfile.ZipFile(archive, 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zipped:
         zipped.writestr('README.md', guide)
         for name in sorted(payloads):
@@ -161,9 +162,9 @@ def package():
     (dest / 'NOTICES.txt').write_text(notices)
     (dest / 'NOTICES.html').write_text('<pre>' + escape(notices) + '</pre>\n')
     evidence = {name: json.loads((BUILD_ROOT / (name + '.json')).read_text())
-                for name in ['tests', 'parity', 'visual', 'gateways', 'verify']}
+                for name in ['tests', 'native-pool', 'parity', 'visual', 'gateways', 'verify']}
     (dest / 'VALIDATION.json').write_text(json.dumps(evidence, indent=2) + '\n')
-    manifest = {'mod': 'damage-numbers-rs', 'version': 'r1', 'status': 'DEVELOPMENT', 'runtime_test': 'NOT RUN',
+    manifest = {'mod': 'damage-numbers-rs', 'version': 'r2', 'status': 'DEVELOPMENT', 'runtime_test': 'NOT RUN',
                 'package_name': 'damage-numbers-rs', 'payloads': payloads, 'archive_sha256': digest(archive)}
     (dest / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
     (dest / 'SHA256SUMS').write_text(''.join(digest(path) + '  ' + str(path.relative_to(dest)) + '\n'

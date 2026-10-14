@@ -1,4 +1,4 @@
-//! Damage Numbers r1: Forge callbacks own lifecycle; native gateways only copy evidence.
+//! Damage Numbers r2: Forge callbacks own lifecycle; native gateways only copy evidence.
 // The Switch plugin has no Rust standard library. alloc provides owned buffers
 // through Forge's allocator; portable logic lives in the separate core crate.
 #![no_std]

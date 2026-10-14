@@ -2,16 +2,16 @@
   "schema_version": 1,
   "mod": "damage-numbers-rs",
   "status": "DEVELOPMENT",
-  "reason": "Rust r1 candidate built and statically verified; gameplay not run. Preserved C++ r25 releases remain separate.",
+  "reason": "Forge 1.5.0 Rust r2 candidate built, packaged and statically verified; gameplay not run. Loader-version gating removed; r1 and C++ r25 deliveries preserved.",
   "publication": {
     "published": false,
     "url": null,
     "date": null
   },
-  "version": "r1",
+  "version": "r2",
   "package_name": "damage-numbers-rs",
-  "archive": "damage-numbers-rs-r1-candidate.zip",
-  "candidate": "build/damage-numbers-rs/candidates/r1/delivery/",
+  "archive": "damage-numbers-rs-r2-candidate.zip",
+  "candidate": "build/damage-numbers-rs/candidates/r2/delivery/",
   "runtime_test": "NOT RUN",
   "gamebanana": {
     "ai_code": {

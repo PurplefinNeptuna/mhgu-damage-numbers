@@ -12,8 +12,7 @@ typedef struct Hook {
     void* detour;
     void* original;
     void* context;
-    Jit jit;
-    Jit ctx_jit;
+    void** ctx_cell;
     bool has_ctx;
 } Hook;
 

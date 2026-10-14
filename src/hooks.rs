@@ -1,4 +1,4 @@
-//! Forge owns trampoline construction. Patch owns reversible target bytes; hooks are installed once at boot.
+//! Forge owns pooled trampolines. Disabled Patch snapshots support checked rollback at the boot boundary.
 use crate::{
     platform::{self, NativeMemory},
     signatures::SIGNATURES,
@@ -9,13 +9,15 @@ use core::{
     sync::atomic::{AtomicBool, AtomicU32, Ordering},
 };
 use damage_numbers_core::capture::Memory;
-use forge::{patch::Patch, sys::hook::Hook};
+use forge::patch::Patch;
+#[cfg(target_pointer_width = "32")]
+use forge::sys::hook::Hook;
 // ACTIVE is published only after all eight continuations are ready. Each
 // ORIGINALS entry holds Forge's trampoline address for the matching gateway.
 pub static ACTIVE: AtomicBool = AtomicBool::new(false);
 pub static ORIGINALS: [AtomicU32; 8] = [const { AtomicU32::new(0) }; 8];
 #[cfg(target_pointer_width = "32")]
-const _: () = assert!(core::mem::size_of::<Hook>() == 76);
+const _: () = assert!(core::mem::size_of::<Hook>() == 24);
 #[cfg(target_pointer_width = "32")]
 const _: () = assert!(core::mem::offset_of!(Hook, context) == 12);
 unsafe extern "C" {
@@ -78,54 +80,134 @@ fn relocatable(op: u32) -> bool {
     }
     false
 }
-// Holding the patches keeps their modified state alive. Holding the native
-// Hook values records the trampolines used for every later game call.
-// The Consumer owns this structure for the plugin's process lifetime.
+// Known game offsets used by Forge, Better Input and maintained plugins. Each
+// redirect occupies eight bytes; signatures also reject unknown modifications.
+const RESERVED: [u32; 14] = [
+    0x3de064, 0x3af5b4, 0x388ee8, 0x5e8130, 0x3850b0, 0x7a3480, 0x3da8fc, 0xb8692c, 0x887810,
+    0x88784c, 0x27e774, 0x27ca28, 0x678894, 0x285e2c,
+];
+fn overlaps(a: u32, bytes: u32, b: u32, other_bytes: u32) -> bool {
+    (a as u64) < b as u64 + other_bytes as u64 && (b as u64) < a as u64 + bytes as u64
+}
+// Validate the complete eight-byte ARM redirects before allocating snapshots or
+// calling Forge. Wider arithmetic prevents a wrapped end from passing a check.
+pub(crate) fn validate_recipe(base: u32, targets: &[u32; 8], detours: &[u32; 8]) -> bool {
+    for (i, (&target, &detour)) in targets.iter().zip(detours).enumerate() {
+        if target == 0
+            || detour == 0
+            || (target | detour) & 3 != 0
+            || target as u64 + 8 >= 0x1_0000_0000
+            || detour as u64 + 4 > 0x1_0000_0000
+            || targets.iter().any(|&other| overlaps(other, 8, detour, 4))
+            || targets[..i]
+                .iter()
+                .any(|&other| overlaps(target, 8, other, 8))
+            || RESERVED.iter().any(|&offset| {
+                base.checked_add(offset)
+                    .is_none_or(|address| overlaps(target, 8, address, 8))
+            })
+        {
+            return false;
+        }
+    }
+    true
+}
+// Patches stay disabled: Forge writes the redirects, and this owner must check
+// the current words before restoring them. Forge's process-lifetime pool owns
+// every trampoline; dropping a Hook value neither releases nor uninstalls it.
 pub struct Installed {
     patches: Vec<Patch>,
-    _hooks: Vec<Hook>,
 }
 impl Installed {
+    // Roll back all sites, including a partially published pair. A word may be
+    // either our branch word or its saved original, but foreign words are never
+    // overwritten. The boot boundary excludes concurrent game execution here.
+    fn rollback(&mut self) -> bool {
+        ACTIVE.store(false, Ordering::Release);
+        let memory = NativeMemory;
+        let mut restored = true;
+        for patch in self.patches.iter_mut().rev() {
+            let mut current = [0; 8];
+            let original: [u8; 8] = patch.original_bytes().try_into().unwrap();
+            let replacement: [u8; 8] = patch.patch_bytes().try_into().unwrap();
+            if !memory.copy(patch.addr(), &mut current) {
+                restored = false;
+                continue;
+            }
+            if current != original {
+                let owned = (0..8).step_by(4).all(|at| {
+                    current[at..at + 4] == original[at..at + 4]
+                        || current[at..at + 4] == replacement[at..at + 4]
+                });
+                if !owned {
+                    restored = false;
+                    continue;
+                }
+                // Patch exposes no adopt/conditional-restore operation. Once
+                // ownership is verified, enable records responsibility and
+                // disable restores the snapshot. Both calls run before play.
+                patch.enable();
+                patch.disable();
+            }
+            let synchronized = platform::sync_code(patch.addr(), 8);
+            restored &=
+                synchronized && memory.copy(patch.addr(), &mut current) && current == original;
+        }
+        // All snapshots are disabled, so their Drop cannot write foreign bytes.
+        self.patches.clear();
+        restored
+    }
     pub fn install() -> Result<Self, &'static str> {
         let base = forge::mem::text_addr();
         platform::BASE.store(base, Ordering::Relaxed);
-        if base == 0 || base > 0xfe000000 || !platform::correct_program() {
+        if base == 0 || base > 0xfe000000 || base & 3 != 0 || !platform::correct_program() {
             return Err("unsupported program");
         }
         let memory = NativeMemory;
-        // Compare all 64-byte windows before patching anything. The final three
-        // windows verify supporting game code as well as the eight hook locations.
+        // Compare all eleven windows before touching any target. The last three
+        // check supporting game code and the expected MHGU executable bytes.
         for &(offset, bytes) in SIGNATURES {
+            let Some(address) = base
+                .checked_add(offset)
+                .filter(|a| a.checked_add(63).is_some())
+            else {
+                return Err("invalid signature address");
+            };
             let mut actual = [0; 64];
-            if !memory.copy(base + offset, &mut actual) || actual != bytes {
+            if !memory.copy(address, &mut actual) || actual != bytes {
                 return Err("MHGU 1.4.0 signature mismatch");
             }
         }
+        let targets = core::array::from_fn(|i| base + SIGNATURES[i].0);
         let detours = detours();
-        let mut patches = Vec::with_capacity(8);
-        let mut hooks = Vec::with_capacity(8);
-        // Prepare every rollback object before Forge writes a branch. A disabled
-        // Patch records the original bytes without changing game code yet.
-        for i in 0..8 {
-            let address = base + SIGNATURES[i].0;
+        if !validate_recipe(base, &targets, &detours) {
+            return Err("invalid or overlapping hook recipe");
+        }
+        for &(_, bytes) in &SIGNATURES[..8] {
             for at in [0, 4] {
-                let op = u32::from_le_bytes(SIGNATURES[i].1[at..at + 4].try_into().unwrap());
-                if !relocatable(op) {
+                if !relocatable(u32::from_le_bytes(bytes[at..at + 4].try_into().unwrap())) {
                     return Err("unsupported displaced instruction");
                 }
             }
+        }
+        let mut installed = Self {
+            patches: Vec::with_capacity(8),
+        };
+        // Capture all originals while the recipe still matches, before Forge
+        // publishes anything. ARM LDR pc,[pc,#-4] plus its literal uses 8 bytes.
+        for i in 0..8 {
             let mut branch = [0; 8];
-            // ARM LDR pc, [pc, #-4] loads the next word as an absolute destination.
-            // At instruction address A, ARM reads PC as A+8, hence the literal at A+4.
-            // Together this instruction and address occupy the displaced eight bytes.
             branch[..4].copy_from_slice(&0xe51ff004u32.to_le_bytes());
             branch[4..].copy_from_slice(&detours[i].to_le_bytes());
-            patches.push(Patch::new(address, &branch, false));
+            installed
+                .patches
+                .push(Patch::new(targets[i], &branch, false));
         }
         for i in 0..8 {
-            let address = base + SIGNATURES[i].0;
+            let address = targets[i];
             let mut original = core::ptr::null();
-            // SAFETY: boot is quiescent, target signatures are verified, and the detour saves the complete register frame.
+            // SAFETY: Forge invokes initialization before original_sApp_run;
+            // exact ARM bytes/relocation and the complete gateway frame were checked.
             let hook = unsafe {
                 forge::sys::hook::forge_hook_create(
                     address as *const c_void,
@@ -133,41 +215,55 @@ impl Installed {
                     &mut original,
                 )
             };
-            hooks.push(hook);
-            // Forge may publish the branch before a later JIT transition fails. Track that attempt for rollback too.
-            if memory.word(address) == 0xe51ff004 && memory.word(address + 4) == detours[i] {
-                // The branch is already present. Enabling marks the Patch as responsible
-                // for restoring its saved bytes if a subsequent installation step fails.
-                patches[i].enable();
+            let continuation = original as u32;
+            let mut trampoline = [0; 16];
+            // The pooled ARM trampoline contains the two displaced words,
+            // LDR pc,[pc,#-4], then target+8. Reject inaccessible or corrupt code.
+            let valid = continuation != 0
+                && continuation & 3 == 0
+                && platform::executable(continuation, 16)
+                && !targets
+                    .iter()
+                    .any(|&target| overlaps(continuation, 16, target, 8))
+                && memory.copy(continuation, &mut trampoline)
+                && trampoline[..8] == SIGNATURES[i].1[..8]
+                && trampoline[8..12] == 0xe51ff004u32.to_le_bytes()
+                && trampoline[12..] == (address + 8).to_le_bytes();
+            if valid {
+                // Retain even if a subsequent check or rollback fails. A leftover
+                // reachable gateway still needs a valid pass-through continuation.
+                ORIGINALS[i].store(continuation, Ordering::Release);
             }
-            if original.is_null() || !patches[i].enabled() || !platform::sync_code(address, 8) {
-                // Dropping only enabled Patch objects restores their pre-install bytes. Trampolines are never freed here.
-                drop(patches);
-                let mut restored = true;
-                for &(offset, bytes) in &SIGNATURES[..8] {
-                    restored &= platform::sync_code(base + offset, 8);
-                    let mut actual = [0; 8];
-                    restored &= memory.copy(base + offset, &mut actual) && actual == bytes[..8];
-                }
-                return Err(if restored {
+            let mut actual = [0; 8];
+            let branch_valid =
+                memory.copy(address, &mut actual) && actual == installed.patches[i].patch_bytes();
+            if !valid
+                || hook.original != original
+                || hook.target as u32 != address
+                || hook.detour as u32 != detours[i]
+                || !branch_valid
+                || !platform::sync_code(address, 8)
+            {
+                return Err(if installed.rollback() {
                     "Forge hook installation failed"
                 } else {
                     "hook rollback failed; restart required"
                 });
             }
-            // Release publishes the initialized continuation to gateway readers using
-            // Acquire. The game must never jump to an uninitialized trampoline.
-            ORIGINALS[i].store(original as u32, Ordering::Release);
         }
-        // Only now can hooks produce capture scopes. Earlier calls pass through
-        // the published continuations without collecting events.
         ACTIVE.store(true, Ordering::Release);
-        Ok(Self {
-            patches,
-            _hooks: hooks,
-        })
+        Ok(installed)
     }
     pub fn count(&self) -> usize {
         self.patches.len()
+    }
+}
+impl Drop for Installed {
+    fn drop(&mut self) {
+        // Production retains this owner until process exit. Tests may drop it
+        // at the same quiescent boundary; shared Forge memory is never released.
+        if !self.patches.is_empty() {
+            self.rollback();
+        }
     }
 }
