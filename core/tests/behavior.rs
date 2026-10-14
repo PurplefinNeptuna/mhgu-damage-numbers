@@ -74,15 +74,6 @@ fn disabling_clears_hits_and_invalid_settings_preserve_previous() {
     assert_eq!(m.pending(), 0);
 }
 #[test]
-fn sprite_bounds_and_overlapping_runs() {
-    let mut pixels = [0; 12];
-    assert!(decode_sprite(&[0, 7, 136, 1, 0], &mut pixels));
-    assert_eq!(pixels, [7; 12]);
-    assert!(!decode_sprite(&[128, 0, 0], &mut pixels));
-    assert!(!decode_sprite(&[255, 0], &mut pixels));
-    assert!(!decode_sprite(&[1, 1], &mut pixels));
-}
-#[test]
 fn mailbox_overflow_retains_newest() {
     let m = Mailbox::new();
     for serial in 1..=300 {

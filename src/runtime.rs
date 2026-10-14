@@ -75,7 +75,7 @@ pub fn start() {
         match Installed::install() {
             Ok(value) => {
                 log::info!(
-                    "[damage-numbers-rs] r2 loaded: {} Forge hooks",
+                    "[damage-numbers-rs] r3 loaded: {} Forge hooks",
                     value.count()
                 );
                 Some(value)
@@ -365,8 +365,8 @@ pub fn panel() {
         ) {
             for (style, name) in [
                 (Style::Wilds, c"Wilds"),
-                (Style::Classic, c"Classic"),
                 (Style::Rise, c"Rise"),
+                (Style::Classic, c"Classic"),
             ] {
                 if forge::imgui::selectable(
                     name,

@@ -40,8 +40,29 @@ struct State(UnsafeCell<Option<render::Resources>>);
 // SAFETY: the C++ fixture invokes this interface on one main thread only.
 unsafe impl Sync for State {}
 static STATE: State = State(UnsafeCell::new(None));
+// The host fixture observes failure deduplication without changing production logging.
+static WARNINGS: core::sync::atomic::AtomicU32 = core::sync::atomic::AtomicU32::new(0);
+struct Logger;
+impl log::Log for Logger {
+    fn enabled(&self, _: &log::Metadata) -> bool {
+        true
+    }
+    fn log(&self, record: &log::Record) {
+        if record.level() == log::Level::Warn {
+            WARNINGS.fetch_add(1, core::sync::atomic::Ordering::Relaxed);
+        }
+    }
+    fn flush(&self) {}
+}
+static LOGGER: Logger = Logger;
+#[unsafe(no_mangle)]
+pub extern "C" fn rs_warning_count() -> u32 {
+    WARNINGS.load(core::sync::atomic::Ordering::Relaxed)
+}
 #[unsafe(no_mangle)]
 pub extern "C" fn rs_initialize() {
+    let _ = log::set_logger(&LOGGER);
+    log::set_max_level(log::LevelFilter::Warn);
     unsafe {
         let resources = (*STATE.0.get()).get_or_insert_with(render::Resources::default);
         resources.initialize();
@@ -49,7 +70,7 @@ pub extern "C" fn rs_initialize() {
     }
 }
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn rs_scene(style: u32, age: f32) {
+pub unsafe extern "C" fn rs_scene(style: u32, age: f32, width: f32, height: f32, scale: f32) {
     unsafe {
         let resources = (*STATE.0.get()).as_mut().unwrap();
         let style = [Style::Wilds, Style::Classic, Style::Rise][style as usize];
@@ -57,6 +78,7 @@ pub unsafe extern "C" fn rs_scene(style: u32, age: f32) {
         model.reset(7);
         model.configure(Settings {
             style,
+            scale,
             ..Settings::default()
         });
         for i in 0..9 {
@@ -86,8 +108,8 @@ pub unsafe extern "C" fn rs_scene(style: u32, age: f32) {
             world_to_clip: [
                 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
             ],
-            width: 1920.0,
-            height: 1080.0,
+            width,
+            height,
             ..View::default()
         };
         let mut placement = Placement::default();

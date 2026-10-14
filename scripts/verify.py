@@ -9,7 +9,7 @@ from pathlib import Path
 from paths import MOD, BUILD_ROOT, WORK_ROOT, CARGO_TARGET, CONFIG, input_path
 from mhgu_binary import Nro, main_image
 from native_support import nso_exports
-from build import doctor, digest
+from build import doctor, digest, asset_hashes
 
 
 def symbols(compiler, elf):
@@ -30,7 +30,7 @@ def native_layouts(compiler):
         'sizeof(damage_numbers::RawFrame)',
         *[f'offsetof(damage_numbers::RawFrame,{field})' for field in ['cpsr', 'fpscr', 'high_d', 'low_d', 'r']],
         *[f'offsetof(ImGuiIO,{field})' for field in ['Fonts', 'BackendFlags']],
-        'offsetof(ImFontConfig,FontDataOwnedByAtlas)', 'offsetof(ImFontBaked,Size)',
+        'offsetof(ImFontConfig,FontDataOwnedByAtlas)', 'offsetof(ImFontConfig,Flags)', 'offsetof(ImFontBaked,Size)',
         'sizeof(ImFontGlyph)', 'offsetof(ImFontGlyph,AdvanceX)', 'offsetof(ImFontGlyph,X0)',
         'sizeof(ImTextureData)',
         *[f'offsetof(ImTextureData,{field})' for field in ['Pixels', 'Status', 'RefCount']],
@@ -104,14 +104,28 @@ def verify():
     address = names['dn_abi']
     actual = data[address:address + len(native)]
     if actual != native:
-        raise ValueError('Rust/native ARM32 layout mismatch: ' + str((struct.unpack('<29I', actual), struct.unpack('<29I', native))))
+        raise ValueError('Rust/native ARM32 layout mismatch: ' + str((struct.unpack('<30I', actual), struct.unpack('<30I', native))))
     build = json.loads((BUILD_ROOT / 'build.json').read_text())
-    if digest(package / 'damage_numbers_rs.nro') != build['nro_sha256'] or digest(package / 'damage-numbers-rs/wilds-digits.ttf') != build['font_sha256']:
+    hashes = asset_hashes()
+    if digest(package / 'damage_numbers_rs.nro') != build['nro_sha256'] or hashes != build['asset_sha256']:
+        raise ValueError('Build receipt differs from prepared assets')
+    if any(digest(package / 'damage-numbers-rs' / name) != expected for name, expected in hashes.items()):
         raise ValueError('Staged bytes differ from build receipt')
+    # Scan the actual NRO and ELF, not just source: neither frozen bitmap stream
+    # nor the old custom decoder may be part of the production plugin.
+    for name in ['wilds-effects.rgba', 'rise-slash.rgba', 'OpenSans.ttf']:
+        if (MOD / 'assets' / name).read_bytes() in data:
+            raise ValueError('Runtime asset embedded in NRO: ' + name)
+    if any('decode_sprite' in name for name in names):
+        raise ValueError('Production decoder remains linked')
+    expected_payloads = {'damage_numbers_rs.nro', *('damage-numbers-rs/' + name for name in hashes)}
+    if {str(p.relative_to(package)) for p in package.rglob('*') if p.is_file()} != expected_payloads:
+        raise ValueError('Unexpected staged runtime files')
     report = {'status': 'PASSED', 'nro_sha256': digest(package / 'damage_numbers_rs.nro'), 'elf_sha256': digest(elf),
               'exports': sorted(exports), 'strong_imports': sorted(imports), 'native_inputs': inputs,
-              'signature_windows': windows, 'layouts': dict(zip(expressions, struct.unpack('<29I', native))),
+              'signature_windows': windows, 'layouts': dict(zip(expressions, struct.unpack('<30I', native))),
               'gateway_sha256': lock['gateway_sha256'], 'nzcvq_restores': 9, 'compiled_status_writes': msr,
+              'asset_sha256': hashes, 'embedded_artwork': False, 'production_decoder': False,
               'nro_bytes': len(data), 'bss_bytes': struct.unpack_from('<I', data, 56)[0],
               'ordinary_hook_slot_bytes': 8 * 16, 'forge_pool_chunk_bytes': 16384,
               'forge_pool_max_chunks': 2, 'allocation_evidence': 'native host fixture; runtime allocation not measured', 'runtime_test': 'NOT RUN'}

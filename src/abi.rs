@@ -9,7 +9,7 @@ use forge::sys::{hook::Hook, imgui::*};
 #[used]
 #[unsafe(no_mangle)]
 #[unsafe(link_section = ".rodata.dn_abi")]
-pub static dn_abi: [u32; 29] = [
+pub static dn_abi: [u32; 30] = [
     size_of::<Hook>() as u32,
     align_of::<Hook>() as u32,
     offset_of!(Hook, target) as u32,
@@ -26,6 +26,7 @@ pub static dn_abi: [u32; 29] = [
     offset_of!(ImGuiIO, Fonts) as u32,
     offset_of!(ImGuiIO, BackendFlags) as u32,
     offset_of!(ImFontConfig, FontDataOwnedByAtlas) as u32,
+    offset_of!(ImFontConfig, Flags) as u32,
     offset_of!(ImFontBaked, Size) as u32,
     size_of::<ImFontGlyph>() as u32,
     offset_of!(ImFontGlyph, AdvanceX) as u32,

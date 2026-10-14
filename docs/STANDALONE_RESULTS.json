@@ -1,6 +1,6 @@
 {
   "status": "PASSED",
-  "version": "r2",
+  "version": "r3",
   "offline": true,
   "initial_cargo_home": "empty",
   "source_only_cargo_configuration": true,
@@ -12,11 +12,11 @@
     "verify",
     "package"
   ],
-  "export_manifest_sha256": "2a10efd1597fb5e789de1ebdc4b77575af10e0cb4caf633d50cbf21c795534cc",
-  "nro_sha256": "92df31e47dc0ce7bb9f5ccb70f286307aef2f3a92587ada6cbd5ddd21faef74a",
-  "workspace_nro_sha256": "b4649573e9865ca1f707dd6bced8341110b2ff11e0035c79288e33685b3b2bb7",
+  "export_manifest_sha256": "5fd884135fd9795c351049417105a3902bfef4beeb595247ae83b0f5a948f8c2",
+  "nro_sha256": "d1566b14202c84b5fc3adae0da1bdec6d548c53f52d8266a48a234f2230280cb",
+  "workspace_nro_sha256": "c2a04bf1970685aa10cbeebc2e984f471c2f1b4998040ead07d78ae89378eed1",
   "byte_identical_nro": false,
-  "reproducibility": "Different NRO bytes across build roots; both exact artifacts passed complete validation. No byte-identical build guarantee.",
-  "archive_sha256": "37a6bd315a8101995f89e043159bfd06179296895a5c6ed5e67a7f970d95ce28",
-  "runtime_test": "NOT RUN"
+  "runtime_test": "NOT RUN",
+  "archive_sha256": "a14e8202f5c92ab4ee600ff101d7bf9f19c7a87b63c4e595f25977cc62f7ecb3",
+  "reproducibility": "NRO hashes differ across build roots; both exact artifacts passed complete validation."
 }

@@ -22,7 +22,7 @@ Rollback checks each current word against the saved original and this plugin's b
 
 Eight ordinary ARM hooks use 16 bytes each, totaling 128 bytes of slots in Forge's shared pool of at most two 16 KiB chunks. The host fixture confirms sharing and failure behavior against the pinned native allocator. Actual emulator pool use remains a runtime check. The load callback is a no-op, leaving the loader's requirement record zero; initialization uses the loader's zero-argument ABI.
 
-Font loading uses `ImFont::load_with` from the namespaced RomFS TTF. The atlas owns the loaded file data. Each decoded texture is registered with ImGui and has a shutdown callback to unregister and destroy it. Context epochs prevent initialization from keeping pointers after shutdown, including when an allocator reuses a context address. Repeated initialization of a live context does not load duplicate assets.
+Font loading uses `ImFont::load_with` from RomFS OpenSans.ttf. Its configuration allows load errors to return a fallback instead of asserting. The atlas owns the loaded file data. Each file-loaded RGBA texture is registered with ImGui and has a shutdown callback to unregister and destroy it. Context epochs prevent initialization from keeping pointers after shutdown, including when an allocator reuses a context address. Repeated initialization of a live context does not load duplicate assets.
 
 ## Settings
 
@@ -33,3 +33,11 @@ The unframed settings tree is closed by default. Its guard balances TreePop on e
 ## Unsafe boundaries
 
 Native address access checks mappings and copies values into owned numeric structures. FFI and assembly requirements are documented beside each unsafe block. Compiler-derived layout data stays in the NRO for verification against the pinned native headers. Raw ImGui operations require an active context, current fonts/draw lists and registered texture lifetime. The mailbox representation contains no padding, references, booleans or Rust enums: every copied word has a valid integer/float representation.
+
+## Prepared assets and pixel parity
+
+Only the numeric font scale and atlas rectangles remain in `src/assets.rs`. Font and bitmap bytes live in the package's external asset files. File sizes are checked before allocation; the exposed ImGui file APIs read directly into the owned texture buffer, and the local file guard closes every successful open. Short reads destroy the incomplete texture. Wilds loads eagerly and Rise once on first use. Missing textures omit their effects without disabling the model or digits.
+
+A separate context-shutdown callback advances the generation even if no texture loaded. Texture callbacks only unregister/free their own allocations. This makes font/resource invalidation independent of successful artwork loading and prevents stale handles if a context address is reused. Warning flags survive reinitialization, while resource pointers and load attempts reset.
+
+Ordinary text, image, line and clip operations use forge-rs DrawList wrappers. Raw access remains for glyph ink bounds, Rise's exact vertex stretch, texture registration and quad drawing. No animation/layout formula changed. Style selection is Wilds, Rise, Classic, with the existing internal numeric IDs retained for compatibility.

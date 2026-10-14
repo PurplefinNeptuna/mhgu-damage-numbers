@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "reference_version": "r2",
+  "font": {
+    "file": "OpenSans.ttf",
+    "sha256": "10b26270e158e51b7f26327aff359a7f7170ccc5904c1c82523bf5e372d5f117",
+    "bytes": 10624,
+    "family": "Open Sans",
+    "style": "Semibold",
+    "source": "https://raw.githubusercontent.com/google/fonts/9710da1eacb3be272583c3224dcb70f9da6eadbb/ofl/opensans/OpenSans%5Bwdth%2Cwght%5D.ttf",
+    "source_sha256": "36643644f318a812aab2d2ed3bb98f8cf0872527f835fe9398d95fe6b9adb878",
+    "license": "SIL OFL 1.1",
+    "weight": 600,
+    "height_scale": 1.1551339977851605,
+    "r2_prepared_sha256": "24b1f1efddfd8107ec1cbb1ca866ab50632618794933989eed9968791d72c4ef",
+    "changed_tables": [
+      "head",
+      "name"
+    ],
+    "outlines_hinting_metrics_cmap_unchanged": true,
+    "r2_unchanged_table_sha256": {
+      "GPOS": "9c0ed2420aa3cee1513a071c8497b54246165c6cf343de417b93a5aefac5d9c5",
+      "GSUB": "a61732fc2207374165fff057db249cb203cdaa3bedfa37d4caa63e2f5532ffc2",
+      "OS/2": "d6f5820d188c79c83e846f0a4de3a0d3241f9d7255d2724bbf526a2bdeb2e055",
+      "STAT": "2f72b0507a0755c1b4e92998e678ef33d29881888fbafe900fbf8d103a4289df",
+      "cmap": "402dad8d85503609b9e0ef5fb485b7b14d5f14e2753f73db53379c744bc7a89a",
+      "cvt ": "27ea3aab975cde526ceabccbac0e0f6838aa6f66b33ed31e029564be3690b62d",
+      "fpgm": "c99e86e03109d4c31f0852e664e8d7844a509c10696980cded1dec490bb04518",
+      "gasp": "986473487a16f97b3a0d57137aa09b2b2b3ca38bf2f5fae59afb9b0ae3475d03",
+      "glyf": "dc4ba3d19a38dea22bf2ae26d188719a2dd9e905606e4eeb78d47a0373f556b4",
+      "head": "b5449ef530c1f68fdae9d43f1cd6b9521b7a79d827c749e22ed6cb500894527d",
+      "hhea": "f47bbb01039a53ff949210cae6ae1458f6aa5e2e7e63d2a736e8be72209bb200",
+      "hmtx": "f864ce337d5f9b753ad8074f2df32d7dcf3d682714b55cf7023d7ba599c0a585",
+      "loca": "d46475a4e165c6fcc1c37adca4958000c5932d9557d4b9f477c3abc2c402a529",
+      "maxp": "40bfcae43c02a175982b34aa089c5081b323a6ba839e5235594a302d0e6de29c",
+      "post": "4fdc83d5e42fe44650fe86f15a645d5cc926d07355ba945e1ede42737607bf83",
+      "prep": "84fe24fdad03e00e8ca0167fb5887dc7b6af39d117e7bbe0b7ca30d410ef3084"
+    }
+  },
+  "artwork": [
+    {
+      "file": "wilds-effects.rgba",
+      "sha256": "fe15190c98259443a01add264777b2b4bee994bbd58f9c8f5f12338abb399f2b",
+      "bytes": 524288,
+      "width": 512,
+      "height": 256,
+      "format": "RGBA8",
+      "provenance": "Independent procedural artwork based on the licensed Open Sans digit font; no sampled game artwork"
+    },
+    {
+      "file": "rise-slash.rgba",
+      "sha256": "d4724a2caff4c13e91a541f0e7d203c74e05c40dedd6f78c55426ccd3396230e",
+      "bytes": 131072,
+      "width": 64,
+      "height": 512,
+      "format": "RGBA8",
+      "provenance": "Independent procedural artwork; no sampled or traced game art"
+    }
+  ]
+}

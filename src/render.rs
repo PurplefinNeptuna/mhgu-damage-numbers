@@ -3,7 +3,7 @@ use core::{
     ptr,
     sync::atomic::{AtomicU32, Ordering},
 };
-// Texture shutdown hooks advance this generation counter. Comparing both
+// Context shutdown advances this generation counter. Comparing both
 // pointer and generation prevents reuse of a dead context's resource pointers
 // if a new context is later allocated at the same address.
 static CONTEXT_EPOCH: AtomicU32 = AtomicU32::new(0);
@@ -12,9 +12,10 @@ use forge::{
     imgui::{DrawList, ImFont as Font},
     sys::imgui::*,
 };
-// build.rs copies generated constants into Cargo's output directory. They
-// contain compressed RGBA atlases, rectangle metadata and font scale metrics.
-include!(concat!(env!("OUT_DIR"), "/assets.rs"));
+// Only numeric metrics live in code; font and artwork bytes come from RomFS.
+#[path = "assets.rs"]
+mod assets;
+use assets::{FONT_SCALE, RECTS};
 // font is an atlas-owned font handle, and texture pointers are registered
 // ImGui resources owned until context shutdown. rise_attempted records the
 // single lazy slash-load attempt; repeated frames do not allocate or retry.
@@ -26,6 +27,9 @@ pub struct Resources {
     wilds: *mut ImTextureData,
     rise: *mut ImTextureData,
     rise_attempted: bool,
+    font_warned: bool,
+    wilds_warned: bool,
+    rise_warned: bool,
 }
 fn point(p: Point) -> ImVec2 {
     ImVec2::new(p.x, p.y)
@@ -46,10 +50,23 @@ impl Resources {
         self.wilds = ptr::null_mut();
         self.rise = ptr::null_mut();
         self.rise_attempted = false;
+        // Context invalidation must also run when every artwork file is missing.
+        // Register it independently of textures so an address reused by a new
+        // context cannot retain a stale atlas-owned font handle.
+        unsafe {
+            let mut hook = ImGuiContextHook {
+                HookId: 0,
+                Type: ImGuiContextHookType::Shutdown,
+                Owner: 0,
+                Callback: Some(invalidate_context),
+                UserData: ptr::null_mut(),
+            };
+            igAddContextHook(context, &mut hook);
+        }
         // Use Forge's actual RomFS mount prefix rather than assuming app:.
         // CString supplies the NUL-terminated path required by the native font loader.
         let path = alloc::ffi::CString::new(alloc::format!(
-            "{}:/nativeNX/plugins/damage-numbers-rs/wilds-digits.ttf",
+            "{}:/nativeNX/plugins/damage-numbers-rs/OpenSans.ttf",
             forge::fs::romfs::mount_point()
         ))
         .unwrap();
@@ -58,6 +75,9 @@ impl Resources {
             let cfg = ImFontConfig_ImFontConfig();
             if !cfg.is_null() {
                 (*cfg).FontDataOwnedByAtlas = true;
+                // Missing optional fonts must return None, not trigger ImGui's
+                // default load-error assertion before our readable-font fallback.
+                (*cfg).Flags |= ImFontFlags::NoLoadError;
                 // Glyph-range pairs cover space, digits 0..9 and fallback '?'; zero ends
                 // this static list. FontDataOwnedByAtlas transfers loaded file data to ImGui,
                 // so only the temporary configuration object is destroyed after loading.
@@ -65,45 +85,71 @@ impl Resources {
                 self.font = Font::load_with(&path, 24.0 * FONT_SCALE, &*cfg, Some(&RANGES));
                 ImFontConfig_destroy(cfg);
             }
-            self.wilds = self.texture(WILDS, 512, 256);
+            self.wilds = self.texture(c"wilds-effects.rgba", 512, 256);
         }
-        if self.font.is_none() {
+        if self.font.is_none() && !self.font_warned {
+            self.font_warned = true;
             log::warn!("[damage-numbers-rs] digit font unavailable; using Forge font");
         }
-        if self.wilds.is_null() {
+        if self.wilds.is_null() && !self.wilds_warned {
+            self.wilds_warned = true;
             log::warn!("[damage-numbers-rs] effect atlas unavailable");
         }
     }
-    /// Register a decoded texture and arrange matching context-shutdown destruction.
-    unsafe fn texture(&self, packed: &[u8], width: i32, height: i32) -> *mut ImTextureData {
-        // SAFETY: only called with an active Forge context. Constructor-allocated texture owns its pixel buffer and shutdown callback.
+    /// Read one fixed-size RGBA asset directly into ImGui's texture buffer.
+    /// Caller supplies the active context and the pinned asset dimensions.
+    unsafe fn texture(
+        &self,
+        filename: &core::ffi::CStr,
+        width: i32,
+        height: i32,
+    ) -> *mut ImTextureData {
+        // The file guard closes on every return, including wrong size, allocation
+        // failure or a short read. Texture ownership transfers only after success.
+        struct File(ImFileHandle);
+        impl Drop for File {
+            fn drop(&mut self) {
+                // SAFETY: File is created only for a non-null open handle, once.
+                unsafe {
+                    igImFileClose(self.0);
+                }
+            }
+        }
+        // SAFETY: Forge provides the current context/allocator; the filenames and
+        // dimensions are internal constants, and the file length is checked first.
         unsafe {
             let io = forge::imgui::get_io();
-            // ImGui's backend must support dynamic texture uploads. Registration below
-            // requests upload; the plugin does not create an emulator-specific GPU texture.
             if (io.BackendFlags.0 & ImGuiBackendFlags::RendererHasTextures.0) == 0 {
+                return ptr::null_mut();
+            }
+            let path = alloc::ffi::CString::new(alloc::format!(
+                "{}:/nativeNX/plugins/damage-numbers-rs/{}",
+                forge::fs::romfs::mount_point(),
+                filename.to_str().unwrap()
+            ))
+            .unwrap();
+            let handle = igImFileOpen(path.as_ptr(), c"rb".as_ptr());
+            if handle.is_null() {
+                return ptr::null_mut();
+            }
+            let file = File(handle);
+            // RGBA8 has four bytes per pixel. These assets have no encoded header
+            // or decoder; reject both truncated files and unexpected trailing data.
+            let bytes = width as u64 * height as u64 * 4;
+            if igImFileGetSize(file.0) != bytes {
                 return ptr::null_mut();
             }
             let texture = ImTextureData_ImTextureData();
             if texture.is_null() {
                 return texture;
             }
-            // Allocate width*height*4 bytes of RGBA pixels, then decode the embedded
-            // stream directly into that owned buffer. Failed decode destroys the allocation.
             ImTextureData_Create(texture, ImTextureFormat::RGBA32, width, height);
-            let pixels = ImTextureData_GetPixels(texture).cast::<u8>();
-            if pixels.is_null()
-                || !decode_sprite(
-                    packed,
-                    core::slice::from_raw_parts_mut(pixels, width as usize * height as usize * 4),
-                )
-            {
+            let pixels = ImTextureData_GetPixels(texture);
+            if pixels.is_null() || igImFileRead(pixels, 1, bytes, file.0) != bytes {
                 ImTextureData_destroy(texture);
                 return ptr::null_mut();
             }
             igRegisterUserTexture(texture);
-            // Store the texture as callback user data. At context shutdown, shutdown
-            // unregisters and destroys it using the same native allocator that created it.
             let mut hook = ImGuiContextHook {
                 HookId: 0,
                 Type: ImGuiContextHookType::Shutdown,
@@ -185,15 +231,14 @@ impl Resources {
     // Requirements: draw is the current context's live draw list, and the atlas
     // is registered with that context. Each RECTS row begins [x,y,width,height];
     // dividing by atlas dimensions converts its pixel rectangle to normalized UVs.
-    unsafe fn sprite(&self, draw: *mut ImDrawList, index: usize, target: Rect, color: u32) {
+    unsafe fn sprite(&self, draw: DrawList, index: usize, target: Rect, color: u32) {
         if self.wilds.is_null() || index >= 22 {
             return;
         }
         let r = RECTS[index];
         // SAFETY: registered atlas and current draw list remain live during the render callback; rectangles index the pinned atlas.
         unsafe {
-            ImDrawList_AddImage(
-                draw,
+            draw.add_image(
                 ImTextureData_GetTexRef(self.wilds),
                 ImVec2::new(target.left, target.top),
                 ImVec2::new(target.right, target.bottom),
@@ -206,7 +251,7 @@ impl Resources {
     // Draw atlas shadows behind the font's real glyphs. Requirements: draw/font
     // belong to the active context and n's text is terminated within its buffer.
     // Metadata stores the shadow rectangle plus its embedded glyph ink rectangle.
-    unsafe fn glyph_effects(&self, draw: *mut ImDrawList, n: &DrawNumber, font: Font, pixels: f32) {
+    unsafe fn glyph_effects(&self, draw: DrawList, n: &DrawNumber, font: Font, pixels: f32) {
         if self.wilds.is_null() {
             return;
         }
@@ -262,7 +307,7 @@ impl Resources {
     // Submit Rise's critical slash only; ordinary hits have no slash texture work.
     // Requirements: draw and resources belong to the active context. The first
     // visible critical lazily creates the shared atlas for all later Rise hits.
-    unsafe fn effect(&mut self, draw: *mut ImDrawList, n: &DrawNumber) {
+    unsafe fn effect(&mut self, draw: DrawList, n: &DrawNumber) {
         if n.style != Style::Rise || n.critical == Critical::None || n.slash.opacity <= 0.0 {
             return;
         }
@@ -270,8 +315,9 @@ impl Resources {
         unsafe {
             if !self.rise_attempted {
                 self.rise_attempted = true;
-                self.rise = self.texture(RISE, 64, 512);
-                if self.rise.is_null() {
+                self.rise = self.texture(c"rise-slash.rgba", 64, 512);
+                if self.rise.is_null() && !self.rise_warned {
+                    self.rise_warned = true;
                     log::warn!("[damage-numbers-rs] Rise slash unavailable");
                 }
             }
@@ -286,14 +332,13 @@ impl Resources {
             } else {
                 0.5
             };
-            ImDrawList_PushClipRect(
-                draw,
+            draw.push_clip_rect(
                 ImVec2::new(n.slash.clip.left, n.slash.clip.top),
                 ImVec2::new(n.slash.clip.right, n.slash.clip.bottom),
                 true,
             );
             ImDrawList_AddImageQuad(
-                draw,
+                draw.raw(),
                 ImTextureData_GetTexRef(self.rise),
                 point(points[0]),
                 point(points[1]),
@@ -305,35 +350,39 @@ impl Resources {
                 ImVec2::new(0.0, v + 0.5),
                 imgui_color(0xffffff, n.slash.opacity),
             );
-            ImDrawList_PopClipRect(draw);
+            draw.pop_clip_rect();
         }
     }
     // Requirements: current draw/font/texture context and valid digit buffer.
     // Draw outlines before fills, then the style's critical marker. All alpha
     // comes from the copied command, so rendering never reads native hit objects.
-    unsafe fn number(&self, draw: *mut ImDrawList, n: &DrawNumber) {
+    unsafe fn number(&self, draw: DrawList, n: &DrawNumber) {
         let font = self.selected_font(n.style);
         let pixels = self.font_pixels(n.pixels, n.style);
+        // Model output is bounded ASCII. Borrow its terminated text once for the
+        // stock text wrapper; malformed internal records produce no draw commands.
+        let Some(value) = core::ffi::CStr::from_bytes_until_nul(&n.text)
+            .ok()
+            .and_then(|text| text.to_str().ok())
+        else {
+            return;
+        };
         // SAFETY: draw list and font belong to this context. Only vertices emitted by this text call are edited, within VtxBuffer.Size.
         unsafe {
             let text = |x: f32, y: f32, color: u32| {
                 // Remember the first new vertex so Rise's width stretch touches only this
                 // text call. Earlier outlines, effects and unrelated UI vertices stay intact.
-                let first = (*draw).VtxBuffer.Size;
-                ImDrawList_AddText_FontPtr(
-                    draw,
-                    font.raw(),
+                let first = (*draw.raw()).VtxBuffer.Size;
+                draw.add_text_with_font(
+                    &font,
                     pixels,
                     ImVec2::new(n.position.x + x, n.position.y + y),
                     color,
-                    n.text.as_ptr().cast(),
-                    ptr::null(),
-                    0.0,
-                    ptr::null(),
+                    value,
                 );
                 if n.style == Style::Rise {
-                    for i in first..(*draw).VtxBuffer.Size {
-                        let vertex = &mut *(*draw).VtxBuffer.Data.add(i as usize);
+                    for i in first..(*draw.raw()).VtxBuffer.Size {
+                        let vertex = &mut *(*draw.raw()).VtxBuffer.Data.add(i as usize);
                         vertex.pos.x =
                             n.position.x + (vertex.pos.x - n.position.x) * RISE_GLYPH_WIDTH;
                     }
@@ -359,15 +408,13 @@ impl Resources {
                     } else {
                         n.position.y + n.pixels + 2.0 * stroke
                     };
-                    ImDrawList_AddLine(
-                        draw,
+                    draw.add_line(
                         ImVec2::new(n.position.x, y),
                         ImVec2::new(n.position.x + n.advance, y),
                         edge,
                         4.0 * stroke,
                     );
-                    ImDrawList_AddLine(
-                        draw,
+                    draw.add_line(
                         ImVec2::new(n.position.x, y),
                         ImVec2::new(n.position.x + n.advance, y),
                         color,
@@ -391,13 +438,13 @@ impl Resources {
             for x in -1..=1 {
                 for y in -1..=1 {
                     if x != 0 || y != 0 {
-                        let first = (*draw).VtxBuffer.Size;
+                        let first = (*draw.raw()).VtxBuffer.Size;
                         // Emit at the normal origin, apply Rise stretch there, then shift these
                         // new vertices by the outline offset. Shifting first would stretch stroke
                         // spacing too and break the intended outline thickness.
                         text(0.0, 0.0, edge);
-                        for i in first..(*draw).VtxBuffer.Size {
-                            let vertex = &mut *(*draw).VtxBuffer.Data.add(i as usize);
+                        for i in first..(*draw.raw()).VtxBuffer.Size {
+                            let vertex = &mut *(*draw.raw()).VtxBuffer.Data.add(i as usize);
                             vertex.pos.x += x as f32 * stroke;
                             vertex.pos.y += y as f32 * stroke;
                         }
@@ -434,14 +481,13 @@ impl Resources {
         }
         // Use the background list so numbers are independent of the settings window.
         // Render all slash effects first, then all digits, retaining r25 layering.
-        let draw = DrawList::background().raw();
-        if draw.is_null() {
+        let draw = DrawList::background();
+        if draw.raw().is_null() {
             return;
         }
         // SAFETY: each push/pop is balanced within this callback; effects are submitted before all digit fills.
         unsafe {
-            ImDrawList_PushClipRect(
-                draw,
+            draw.push_clip_rect(
                 ImVec2::new(view.x, view.y),
                 ImVec2::new(view.x + view.width, view.y + view.height),
                 true,
@@ -452,7 +498,7 @@ impl Resources {
             for number in numbers {
                 self.number(draw, number);
             }
-            ImDrawList_PopClipRect(draw);
+            draw.pop_clip_rect();
         }
     }
 }
@@ -461,10 +507,15 @@ impl Resources {
 // this callback performs the actual unregister/free exactly once per texture.
 unsafe extern "C" fn shutdown(_context: *mut ImGuiContext, hook: *mut ImGuiContextHook) {
     // SAFETY: registration supplies this owned texture exactly once at context shutdown.
-    CONTEXT_EPOCH.fetch_add(1, Ordering::Relaxed);
     unsafe {
         let texture = (*hook).UserData.cast::<ImTextureData>();
         igUnregisterUserTexture(texture);
         ImTextureData_destroy(texture);
     }
+}
+
+// No resources are owned by this callback; it invalidates handles even when
+// failed asset loads registered no texture cleanup callbacks at all.
+unsafe extern "C" fn invalidate_context(_context: *mut ImGuiContext, _hook: *mut ImGuiContextHook) {
+    CONTEXT_EPOCH.fetch_add(1, Ordering::Relaxed);
 }

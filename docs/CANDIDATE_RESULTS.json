@@ -1,8 +1,12 @@
 {
   "build": {
     "status": "BUILT",
-    "nro_sha256": "b4649573e9865ca1f707dd6bced8341110b2ff11e0035c79288e33685b3b2bb7",
-    "font_sha256": "24b1f1efddfd8107ec1cbb1ca866ab50632618794933989eed9968791d72c4ef",
+    "nro_sha256": "c2a04bf1970685aa10cbeebc2e984f471c2f1b4998040ead07d78ae89378eed1",
+    "asset_sha256": {
+      "OpenSans.ttf": "10b26270e158e51b7f26327aff359a7f7170ccc5904c1c82523bf5e372d5f117",
+      "wilds-effects.rgba": "fe15190c98259443a01add264777b2b4bee994bbd58f9c8f5f12338abb399f2b",
+      "rise-slash.rgba": "d4724a2caff4c13e91a541f0e7d203c74e05c40dedd6f78c55426ccd3396230e"
+    },
     "forge_rs_revision": "d1865b68e9b194eb3eacc8bd71bbf601a5fac63e",
     "runtime_test": "NOT RUN"
   },
@@ -10,7 +14,12 @@
     "status": "PASSED",
     "host": true,
     "arm_verified": true,
-    "nro_sha256": "b4649573e9865ca1f707dd6bced8341110b2ff11e0035c79288e33685b3b2bb7",
+    "nro_sha256": "c2a04bf1970685aa10cbeebc2e984f471c2f1b4998040ead07d78ae89378eed1",
+    "asset_sha256": {
+      "OpenSans.ttf": "10b26270e158e51b7f26327aff359a7f7170ccc5904c1c82523bf5e372d5f117",
+      "wilds-effects.rgba": "fe15190c98259443a01add264777b2b4bee994bbd58f9c8f5f12338abb399f2b",
+      "rise-slash.rgba": "d4724a2caff4c13e91a541f0e7d203c74e05c40dedd6f78c55426ccd3396230e"
+    },
     "runtime_test": "NOT RUN"
   },
   "native-pool": {
@@ -45,77 +54,168 @@
   },
   "visual": {
     "status": "PASSED",
-    "renderer": "Production Rust renderer and r25 oracle with pinned real ImGui 1.92.8",
-    "resolution": [
-      1920,
-      1080
-    ],
+    "renderer": "Production Rust and real ImGui 1.92.8",
+    "reference_version": "r2",
     "scenes": [
       {
-        "style": "Wilds",
-        "age": 0.05,
-        "maximum_channel_difference": 0,
-        "rust_preview_sha256": "12ca3ec614b2d7b1350c14e1aad537f10bd0263072a6a5a46bd8e8c5ba170b49",
+        "name": "0-1080-0.500000-0.200000",
+        "maximum_r2_channel_difference": 0,
+        "maximum_oracle_channel_difference": 0,
         "vertices": 864
       },
       {
-        "style": "Wilds",
-        "age": 0.2,
-        "maximum_channel_difference": 0,
-        "rust_preview_sha256": "11cb0536d42bd0fe55107aa29f9ef678722539433429ddb5afc5ed43a80ee360",
+        "name": "0-1080-1.000000-0.050000",
+        "maximum_r2_channel_difference": 0,
+        "maximum_oracle_channel_difference": 0,
         "vertices": 864
       },
       {
-        "style": "Wilds",
-        "age": 0.75,
-        "maximum_channel_difference": 0,
-        "rust_preview_sha256": "d24f887e853ba8f18500a4bf3d8852adfa15a1663ab285834a456faaf8a822d1",
+        "name": "0-1080-1.000000-0.200000",
+        "maximum_r2_channel_difference": 0,
+        "maximum_oracle_channel_difference": 0,
         "vertices": 864
       },
       {
-        "style": "Classic",
-        "age": 0.05,
-        "maximum_channel_difference": 0,
-        "rust_preview_sha256": "acaacd3905255a077386c861263dd686d6fe04ba5180242e081e56804459d928",
+        "name": "0-1080-1.000000-0.750000",
+        "maximum_r2_channel_difference": 0,
+        "maximum_oracle_channel_difference": 0,
+        "vertices": 864
+      },
+      {
+        "name": "0-1080-3.000000-0.200000",
+        "maximum_r2_channel_difference": 0,
+        "maximum_oracle_channel_difference": 0,
+        "vertices": 864
+      },
+      {
+        "name": "0-720-1.000000-0.050000",
+        "maximum_r2_channel_difference": 0,
+        "maximum_oracle_channel_difference": 0,
+        "vertices": 864
+      },
+      {
+        "name": "0-720-1.000000-0.200000",
+        "maximum_r2_channel_difference": 0,
+        "maximum_oracle_channel_difference": 0,
+        "vertices": 864
+      },
+      {
+        "name": "0-720-1.000000-0.750000",
+        "maximum_r2_channel_difference": 0,
+        "maximum_oracle_channel_difference": 0,
+        "vertices": 864
+      },
+      {
+        "name": "1-1080-0.500000-0.200000",
+        "maximum_r2_channel_difference": 0,
+        "maximum_oracle_channel_difference": 0,
         "vertices": 852
       },
       {
-        "style": "Classic",
-        "age": 0.2,
-        "maximum_channel_difference": 0,
-        "rust_preview_sha256": "b39f75f74739f40878434356e4b784c39ab5c9c3195bcc895b26f066e7895db3",
+        "name": "1-1080-1.000000-0.050000",
+        "maximum_r2_channel_difference": 0,
+        "maximum_oracle_channel_difference": 0,
         "vertices": 852
       },
       {
-        "style": "Classic",
-        "age": 0.75,
-        "maximum_channel_difference": 0,
-        "rust_preview_sha256": "e11732c819c482e705371f25215d0c9616464db18351a0c5817241be9c46e9f0",
+        "name": "1-1080-1.000000-0.200000",
+        "maximum_r2_channel_difference": 0,
+        "maximum_oracle_channel_difference": 0,
         "vertices": 852
       },
       {
-        "style": "Rise",
-        "age": 0.05,
-        "maximum_channel_difference": 0,
-        "rust_preview_sha256": "b78a897986b23766e2c56c94609c915490a5cc73921a2d6167d43a99071d8b4c",
-        "vertices": 864
+        "name": "1-1080-1.000000-0.750000",
+        "maximum_r2_channel_difference": 0,
+        "maximum_oracle_channel_difference": 0,
+        "vertices": 852
       },
       {
-        "style": "Rise",
-        "age": 0.2,
-        "maximum_channel_difference": 0,
-        "rust_preview_sha256": "dcfd3abe44205b656d3f54cbfc87ca5103524ea22cea50f33a2ba3591eaac1e7",
+        "name": "1-1080-3.000000-0.200000",
+        "maximum_r2_channel_difference": 0,
+        "maximum_oracle_channel_difference": 0,
+        "vertices": 852
+      },
+      {
+        "name": "1-720-1.000000-0.050000",
+        "maximum_r2_channel_difference": 0,
+        "maximum_oracle_channel_difference": 0,
+        "vertices": 828
+      },
+      {
+        "name": "1-720-1.000000-0.200000",
+        "maximum_r2_channel_difference": 0,
+        "maximum_oracle_channel_difference": 0,
+        "vertices": 828
+      },
+      {
+        "name": "1-720-1.000000-0.750000",
+        "maximum_r2_channel_difference": 0,
+        "maximum_oracle_channel_difference": 0,
+        "vertices": 828
+      },
+      {
+        "name": "2-1080-0.500000-0.200000",
+        "maximum_r2_channel_difference": 0,
+        "maximum_oracle_channel_difference": 0,
         "vertices": 840
       },
       {
-        "style": "Rise",
-        "age": 0.75,
-        "maximum_channel_difference": 0,
-        "rust_preview_sha256": "2e0d09d24d0eb4cad7301ddd5a8a39681936392a4a877dd1271e58bb7cb1be48",
+        "name": "2-1080-1.000000-0.050000",
+        "maximum_r2_channel_difference": 0,
+        "maximum_oracle_channel_difference": 0,
+        "vertices": 864
+      },
+      {
+        "name": "2-1080-1.000000-0.200000",
+        "maximum_r2_channel_difference": 0,
+        "maximum_oracle_channel_difference": 0,
+        "vertices": 840
+      },
+      {
+        "name": "2-1080-1.000000-0.750000",
+        "maximum_r2_channel_difference": 0,
+        "maximum_oracle_channel_difference": 0,
+        "vertices": 840
+      },
+      {
+        "name": "2-1080-3.000000-0.200000",
+        "maximum_r2_channel_difference": 0,
+        "maximum_oracle_channel_difference": 0,
+        "vertices": 840
+      },
+      {
+        "name": "2-720-1.000000-0.050000",
+        "maximum_r2_channel_difference": 0,
+        "maximum_oracle_channel_difference": 0,
+        "vertices": 864
+      },
+      {
+        "name": "2-720-1.000000-0.200000",
+        "maximum_r2_channel_difference": 0,
+        "maximum_oracle_channel_difference": 0,
+        "vertices": 840
+      },
+      {
+        "name": "2-720-1.000000-0.750000",
+        "maximum_r2_channel_difference": 0,
+        "maximum_oracle_channel_difference": 0,
         "vertices": 840
       }
     ],
-    "runtime_test": "NOT RUN"
+    "style_order": [
+      "Wilds",
+      "Rise",
+      "Classic"
+    ],
+    "runtime_test": "NOT RUN",
+    "asset_failure_checks": {
+      "cases": 16,
+      "reused_context_addresses": 15,
+      "warnings": 3,
+      "open_handles": 0,
+      "readable_numbers": true,
+      "shutdown_cleanup": true
+    }
   },
   "gateways": {
     "status": "PASSED",
@@ -136,8 +236,8 @@
   },
   "verify": {
     "status": "PASSED",
-    "nro_sha256": "b4649573e9865ca1f707dd6bced8341110b2ff11e0035c79288e33685b3b2bb7",
-    "elf_sha256": "389c58c1168fe8515f47569648c9c774b0e269a7171e7ea9b8948bed20301751",
+    "nro_sha256": "c2a04bf1970685aa10cbeebc2e984f471c2f1b4998040ead07d78ae89378eed1",
+    "elf_sha256": "c191bbe4dd74f6d5692e2d717a0f0994fbe837021e8e8b0847751d57f19ac5da",
     "exports": [
       "fini",
       "forge_onImGuiFreeRender",
@@ -193,6 +293,10 @@
       "igGetCurrentContext",
       "igGetFont",
       "igGetIO_Nil",
+      "igImFileClose",
+      "igImFileGetSize",
+      "igImFileOpen",
+      "igImFileRead",
       "igRegisterUserTexture",
       "igSelectable_Bool",
       "igSetAllocatorFunctions",
@@ -248,6 +352,7 @@
       "offsetof(ImGuiIO,Fonts)": 44,
       "offsetof(ImGuiIO,BackendFlags)": 4,
       "offsetof(ImFontConfig,FontDataOwnedByAtlas)": 48,
+      "offsetof(ImFontConfig,Flags)": 108,
       "offsetof(ImFontBaked,Size)": 16,
       "sizeof(ImFontGlyph)": 44,
       "offsetof(ImFontGlyph,AdvanceX)": 4,
@@ -275,7 +380,14 @@
       "     368:\te128f002 \tmsr\tCPSR_f, r2",
       "     3b4:\te128f002 \tmsr\tCPSR_f, r2"
     ],
-    "nro_bytes": 262144,
+    "asset_sha256": {
+      "OpenSans.ttf": "10b26270e158e51b7f26327aff359a7f7170ccc5904c1c82523bf5e372d5f117",
+      "wilds-effects.rgba": "fe15190c98259443a01add264777b2b4bee994bbd58f9c8f5f12338abb399f2b",
+      "rise-slash.rgba": "d4724a2caff4c13e91a541f0e7d203c74e05c40dedd6f78c55426ccd3396230e"
+    },
+    "embedded_artwork": false,
+    "production_decoder": false,
+    "nro_bytes": 172032,
     "bss_bytes": 1036288,
     "ordinary_hook_slot_bytes": 128,
     "forge_pool_chunk_bytes": 16384,
@@ -283,18 +395,54 @@
     "allocation_evidence": "native host fixture; runtime allocation not measured",
     "runtime_test": "NOT RUN"
   },
-  "version": "r2",
+  "version": "r3",
   "status": "DEVELOPMENT",
   "runtime_test": "NOT RUN",
   "installation": "NOT REQUESTED",
   "activation": "NOT REQUESTED",
   "publication": "NOT REQUESTED",
   "loader_version_gate": false,
+  "font": {
+    "file": "OpenSans.ttf",
+    "sha256": "10b26270e158e51b7f26327aff359a7f7170ccc5904c1c82523bf5e372d5f117",
+    "bytes": 10624,
+    "family": "Open Sans",
+    "style": "Semibold",
+    "source": "https://raw.githubusercontent.com/google/fonts/9710da1eacb3be272583c3224dcb70f9da6eadbb/ofl/opensans/OpenSans%5Bwdth%2Cwght%5D.ttf",
+    "source_sha256": "36643644f318a812aab2d2ed3bb98f8cf0872527f835fe9398d95fe6b9adb878",
+    "license": "SIL OFL 1.1",
+    "weight": 600,
+    "height_scale": 1.1551339977851605,
+    "r2_prepared_sha256": "24b1f1efddfd8107ec1cbb1ca866ab50632618794933989eed9968791d72c4ef",
+    "changed_tables": [
+      "head",
+      "name"
+    ],
+    "outlines_hinting_metrics_cmap_unchanged": true,
+    "r2_unchanged_table_sha256": {
+      "GPOS": "9c0ed2420aa3cee1513a071c8497b54246165c6cf343de417b93a5aefac5d9c5",
+      "GSUB": "a61732fc2207374165fff057db249cb203cdaa3bedfa37d4caa63e2f5532ffc2",
+      "OS/2": "d6f5820d188c79c83e846f0a4de3a0d3241f9d7255d2724bbf526a2bdeb2e055",
+      "STAT": "2f72b0507a0755c1b4e92998e678ef33d29881888fbafe900fbf8d103a4289df",
+      "cmap": "402dad8d85503609b9e0ef5fb485b7b14d5f14e2753f73db53379c744bc7a89a",
+      "cvt ": "27ea3aab975cde526ceabccbac0e0f6838aa6f66b33ed31e029564be3690b62d",
+      "fpgm": "c99e86e03109d4c31f0852e664e8d7844a509c10696980cded1dec490bb04518",
+      "gasp": "986473487a16f97b3a0d57137aa09b2b2b3ca38bf2f5fae59afb9b0ae3475d03",
+      "glyf": "dc4ba3d19a38dea22bf2ae26d188719a2dd9e905606e4eeb78d47a0373f556b4",
+      "head": "b5449ef530c1f68fdae9d43f1cd6b9521b7a79d827c749e22ed6cb500894527d",
+      "hhea": "f47bbb01039a53ff949210cae6ae1458f6aa5e2e7e63d2a736e8be72209bb200",
+      "hmtx": "f864ce337d5f9b753ad8074f2df32d7dcf3d682714b55cf7023d7ba599c0a585",
+      "loca": "d46475a4e165c6fcc1c37adca4958000c5932d9557d4b9f477c3abc2c402a529",
+      "maxp": "40bfcae43c02a175982b34aa089c5081b323a6ba839e5235594a302d0e6de29c",
+      "post": "4fdc83d5e42fe44650fe86f15a645d5cc926d07355ba945e1ede42737607bf83",
+      "prep": "84fe24fdad03e00e8ca0167fb5887dc7b6af39d117e7bbe0b7ca30d410ef3084"
+    }
+  },
   "cpp_r25_nro_sha256": "292f15916687a2fe86a4e4155d1a5ef246f3981503c62dc5a9a15e4545799b03",
-  "candidate_archive_sha256": "0c8bc06471d74e3f8fbcdfbc985491da88cc318b518093ac4499948cb9362fa4",
+  "candidate_archive_sha256": "94bc0aa15a0101701591872b8734c20e5344e3a42762aa140d940ec6ffb0dfbc",
   "standalone": {
     "status": "PASSED",
-    "version": "r2",
+    "version": "r3",
     "offline": true,
     "initial_cargo_home": "empty",
     "source_only_cargo_configuration": true,
@@ -306,18 +454,22 @@
       "verify",
       "package"
     ],
-    "export_manifest_sha256": "2a10efd1597fb5e789de1ebdc4b77575af10e0cb4caf633d50cbf21c795534cc",
-    "nro_sha256": "92df31e47dc0ce7bb9f5ccb70f286307aef2f3a92587ada6cbd5ddd21faef74a",
-    "workspace_nro_sha256": "b4649573e9865ca1f707dd6bced8341110b2ff11e0035c79288e33685b3b2bb7",
+    "export_manifest_sha256": "5fd884135fd9795c351049417105a3902bfef4beeb595247ae83b0f5a948f8c2",
+    "nro_sha256": "d1566b14202c84b5fc3adae0da1bdec6d548c53f52d8266a48a234f2230280cb",
+    "workspace_nro_sha256": "c2a04bf1970685aa10cbeebc2e984f471c2f1b4998040ead07d78ae89378eed1",
     "byte_identical_nro": false,
-    "reproducibility": "Different NRO bytes across build roots; both exact artifacts passed complete validation. No byte-identical build guarantee.",
-    "archive_sha256": "37a6bd315a8101995f89e043159bfd06179296895a5c6ed5e67a7f970d95ce28",
-    "runtime_test": "NOT RUN"
+    "runtime_test": "NOT RUN",
+    "archive_sha256": "a14e8202f5c92ab4ee600ff101d7bf9f19c7a87b63c4e595f25977cc62f7ecb3",
+    "reproducibility": "NRO hashes differ across build roots; both exact artifacts passed complete validation."
   },
   "preservation": {
-    "accepted_release_and_r1_files": 120,
+    "accepted_and_r1_r2_delivery_files": 142,
     "byte_identical": true,
-    "capture_model_render_config_signatures_and_assembly": "unchanged",
-    "owned_forge_revision": "b8921fa3bbe35bbbafb11ccc489d5f1c6aa24a2d"
+    "capture_model_config_hooks_and_assembly": "unchanged"
+  },
+  "nro_size_change": {
+    "r2": 262144,
+    "r3": 172032,
+    "reduction": 90112
   }
 }

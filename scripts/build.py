@@ -32,7 +32,7 @@ def environment():
         raise ValueError('Set devkitarm in build.local.json or DEVKITARM')
     env.update(CARGO_HOME=str(cargo_home), RUSTUP_HOME=str(runtime / 'rustup'),
                RUSTUP_TOOLCHAIN='nightly', CARGO_NET_OFFLINE='true', DEVKITARM=str(compiler),
-               DN_ASSETS=str(WORK_ROOT / 'open-assets'), CARGO_TARGET_DIR=str(CARGO_TARGET))
+               CARGO_TARGET_DIR=str(CARGO_TARGET))
     env['PATH'] = os.pathsep.join([str(rust), str(Path(compiler) / 'bin'), env.get('PATH', '')])
     return env, rust
 
@@ -61,6 +61,19 @@ def doctor():
     print('Pinned compiler, forge-rs, registry sources, fonts and native declarations checked')
 
 
+def asset_hashes():
+    """Prepared runtime files are copied verbatim; no image/font tools run at build time."""
+    manifest = json.loads((MOD / 'assets/manifest.json').read_text())
+    records = [manifest['font'], *manifest['artwork']]
+    result = {}
+    for item in records:
+        path = MOD / 'assets' / item['file']
+        if path.stat().st_size != item['bytes'] or digest(path) != item['sha256']:
+            raise ValueError('Prepared asset differs: ' + item['file'])
+        result[item['file']] = item['sha256']
+    return result
+
+
 def prepare(fetch=False):
     env, rust = environment()
     if fetch:
@@ -68,7 +81,8 @@ def prepare(fetch=False):
         fetch_sysroot(rust)
         env['CARGO_NET_OFFLINE'] = 'false'
         run([rust / 'cargo', 'fetch', '--locked', '--manifest-path', MOD / 'Cargo.toml'], cwd=MOD, env=env)
-    run([PYTHON, MOD / 'scripts/prepare_assets.py'], cwd=MOD)
+    asset_hashes()
+    print('Prepared asset files checked; no generation required')
 
 
 def build():
@@ -100,9 +114,11 @@ def build():
     shutil.copy2(generated_nro, plugins / 'damage_numbers_rs.nro')
     assets = plugins / 'damage-numbers-rs'
     assets.mkdir(exist_ok=True)
-    shutil.copy2(WORK_ROOT / 'open-assets/wilds-digits.ttf', assets / 'wilds-digits.ttf')
+    hashes = asset_hashes()
+    for name in hashes:
+        shutil.copy2(MOD / 'assets' / name, assets / name)
     record('build.json', {'status': 'BUILT', 'nro_sha256': digest(plugins / 'damage_numbers_rs.nro'),
-                         'font_sha256': digest(assets / 'wilds-digits.ttf'),
+                         'asset_sha256': hashes,
                          'forge_rs_revision': 'd1865b68e9b194eb3eacc8bd71bbf601a5fac63e', 'runtime_test': 'NOT RUN'})
 
 
@@ -120,7 +136,7 @@ def test(host=False):
         run([CONFIG.get('arm_python', ROOT / 'tools/mwc-analysis-venv/bin/python'), MOD / 'tests/gateways.py'])
         verify()
     record('tests.json', {'status': 'PASSED', 'host': True, 'arm_verified': not host,
-                          'nro_sha256': digest(nro) if not host else None, 'runtime_test': 'NOT RUN'})
+                          'nro_sha256': digest(nro) if not host else None, 'asset_sha256': asset_hashes(), 'runtime_test': 'NOT RUN'})
 
 
 def verify():
@@ -132,7 +148,7 @@ def package():
     source = BUILD_ROOT / 'package'
     nro = source / 'romfs/nativeNX/plugins/damage_numbers_rs.nro'
     tests = json.loads((BUILD_ROOT / 'tests.json').read_text())
-    if not tests['arm_verified'] or tests['nro_sha256'] != digest(nro):
+    if not tests['arm_verified'] or tests['nro_sha256'] != digest(nro) or tests['asset_sha256'] != asset_hashes():
         raise ValueError('Run the complete test command for this exact NRO before packaging')
     dest = BUILD_ROOT / 'delivery'
     dest.mkdir(parents=True, exist_ok=True)
@@ -143,7 +159,7 @@ def package():
         raise ValueError('Unexpected old candidate payload files; preserve them before repackaging')
     shutil.copytree(source, package_dir, dirs_exist_ok=True)
     guide = (MOD / 'DISTRIBUTION_README.md').read_bytes()
-    archive = dest / 'damage-numbers-rs-r2-candidate.zip'
+    archive = dest / 'damage-numbers-rs-r3-candidate.zip'
     with zipfile.ZipFile(archive, 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zipped:
         zipped.writestr('README.md', guide)
         for name in sorted(payloads):
@@ -164,7 +180,7 @@ def package():
     evidence = {name: json.loads((BUILD_ROOT / (name + '.json')).read_text())
                 for name in ['tests', 'native-pool', 'parity', 'visual', 'gateways', 'verify']}
     (dest / 'VALIDATION.json').write_text(json.dumps(evidence, indent=2) + '\n')
-    manifest = {'mod': 'damage-numbers-rs', 'version': 'r2', 'status': 'DEVELOPMENT', 'runtime_test': 'NOT RUN',
+    manifest = {'mod': 'damage-numbers-rs', 'version': 'r3', 'status': 'DEVELOPMENT', 'runtime_test': 'NOT RUN',
                 'package_name': 'damage-numbers-rs', 'payloads': payloads, 'archive_sha256': digest(archive)}
     (dest / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
     (dest / 'SHA256SUMS').write_text(''.join(digest(path) + '  ' + str(path.relative_to(dest)) + '\n'

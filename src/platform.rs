@@ -1,5 +1,7 @@
 //! Narrow native boundary: checked copies, process identity, clock and executable cache synchronization.
-//! Forge provides addresses/singletons but has no checked mapping-query or process-cache-flush wrapper; these SVCs fill that gap.
+//! Forge provides addresses/singletons. Its memory-query and program-ID helpers
+//! are internal, not exported by the pinned loader; cache flushing has no wrapper.
+//! These narrow SVC bindings cover those unavailable plugin operations.
 use core::ffi::c_void;
 use core::sync::atomic::{AtomicU32, Ordering};
 use damage_numbers_core::capture::Memory;

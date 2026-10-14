@@ -1,21 +1,21 @@
 # Damage Numbers (Rust)
 
-Displays separate numbers at each impact, including total physical and elemental damage, hunter/Prowler and Palico attacks, bombs and monster-to-monster hits. Choose Wilds, Classic or Rise presentation.
+Displays separate numbers at each impact, including total physical and elemental damage, hunter/Prowler and Palico attacks, bombs and monster-to-monster hits. Choose Wilds, Rise or Classic presentation.
 
 ## Requirements
 
-MHGU 1.4.0 for Nintendo Switch, and Forge 1.5.0 with the MHGU SDK mutex import correction. This r2 DEVELOPMENT candidate has passed static tests; gameplay has not been tested.
+MHGU 1.4.0 for Nintendo Switch, and Forge 1.5.0 with the MHGU SDK mutex import correction. This r3 DEVELOPMENT candidate has passed static tests; gameplay has not been tested.
 
 ## Installation
 
 1. Close the emulator and disable the C++ Damage Numbers package.
-2. Extract `damage-numbers-rs-r2-candidate.zip`.
+2. Extract `damage-numbers-rs-r3-candidate.zip`.
 3. Copy `damage-numbers-rs` into the MHGU mod directory:
    - Eden: `~/.local/share/eden/load/0100770008DD8000/`
    - Ryujinx: `mods/contents/0100770008dd8000/` inside its data directory.
 4. Enable `damage-numbers-rs` and launch MHGU.
 
-Keep both `romfs/nativeNX/plugins/damage_numbers_rs.nro` and the accompanying `damage-numbers-rs/wilds-digits.ttf` asset. To remove the mod, disable or remove its package in the emulator.
+Keep `romfs/nativeNX/plugins/damage_numbers_rs.nro` and all three accompanying files in `romfs/nativeNX/plugins/damage-numbers-rs/`: `OpenSans.ttf`, `wilds-effects.rgba` and `rise-slash.rgba`. To remove the mod, disable or remove its package in the emulator.
 
 ## Settings
 
@@ -24,13 +24,13 @@ Open **Plugin UI > Damage numbers (Rust)** in Forge's overlay. Closing the setti
 | Control | Default and range |
 | --- | --- |
 | Show damage numbers | Enabled. |
-| Style | Wilds; also Classic and Rise. |
+| Style | Wilds; also Rise and Classic. |
 | Number size | 1.0, adjustable from 0.5 to 3.0. |
 | Duration | 0.9 seconds, adjustable from 0.4 to 2.0 seconds. |
 | Restore defaults | Reset the current settings. |
 | Save settings | Save the current settings to MHGU's save folder. |
 
-Wilds uses outlined digits and glowing critical stars; Classic uses straight critical markers; Rise uses slanted critical slashes. At size 1.0 and 1080p, Wilds/Classic use a 36 px base, and Rise uses a 30 px base enlarged to 42 px for weak-point numbers. Sizes follow screen height.
+Wilds uses outlined digits and glowing critical stars; Rise uses slanted critical slashes; Classic uses straight critical markers. At size 1.0 and 1080p, Wilds/Classic use a 36 px base, and Rise uses a 30 px base enlarged to 42 px for weak-point numbers. Sizes follow screen height.
 
 White digits indicate physical hitzone values below 45 or unknown values; gold indicates 45 or higher; bounced attacks appear gray.
 
@@ -53,3 +53,5 @@ lifetime = 0.9
 ## Known issues
 
 Rise slashes are screen-space effects and may extend across foreground scenery.
+
+If an artwork file is missing or unreadable, numbers continue without that file's effects. If OpenSans.ttf is unavailable, numbers use Forge's font. Restore the packaged files and restart the game to restore the full styling.

@@ -2,7 +2,7 @@
   "schema_version": 1,
   "mod": "damage-numbers-rs",
   "kind": "plugin",
-  "version": "r2",
+  "version": "r3",
   "candidate": true,
   "package_name": "damage-numbers-rs"
 }
