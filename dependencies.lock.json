@@ -4,7 +4,8 @@
   "files": {
     "Cargo.lock": "bdbac3f1e1e8c614aeb4b4b194099500dc87a65d782c1dad0669eb897b262134",
     "licenses/COMPILER_BUILTINS.txt": "ab6eec6caf0fa5775e411c7a8bc6a45c4ef2956b0980b157ab74fc5cd62a928b",
-    "licenses/RUST-MIT.txt": "b85dcd3e453d05982552c52b5fc9e0bdd6d23c6f8e844b984a88af32570b0cc0",
+    "licenses/RUST-MIT.txt": "b71bd43a069ca0641a9ecfe585ca7b3c53b5cc1608f8b68321168698e28b5ea1",
+    "licenses/UNICODE-3.0.txt": "f5062c9a188d81dfe66b56db4182dcf9e4b17c0d9b0d311a8e20b3a1b075c443",
     "research/native-hook.h": "032abe55c5dee9d2fc3090ac355004b5f329a8361c2276cff2668a3487acfd9a",
     "research/sysroot-Cargo.lock": "45e36114b9fbeb1a778c470ea4e3a6e31b9ac2029de0d9a7077abac757ec0b29",
     "tests/oracle/bounce.h": "7a3c5fbfeaeb927c7dea511c72e270f683f2389a853b08d7eaa8841aeb98c228",

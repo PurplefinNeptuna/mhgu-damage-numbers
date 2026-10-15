@@ -37,6 +37,7 @@
     "fonts/roboto-OFL.txt",
     "licenses/COMPILER_BUILTINS.txt",
     "licenses/RUST-MIT.txt",
+    "licenses/UNICODE-3.0.txt",
     "link/exported.txt",
     "link/switch32.ld",
     "mod.json",

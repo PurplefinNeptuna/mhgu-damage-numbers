@@ -179,7 +179,7 @@ def package():
     licenses = ['DISTRIBUTION_NOTICES.md', 'LICENSE', 'vendor/forge-rs/LICENSE', 'fonts/OFL.txt',
                 'vendor/libnx/LICENSE-MIT', 'vendor/crates/cfg-if-1.0.5/LICENSE-MIT',
                 'vendor/crates/log-0.4.34/LICENSE-MIT', 'vendor/crates/ini_core-0.2.0/license.txt',
-                'licenses/RUST-MIT.txt', 'licenses/COMPILER_BUILTINS.txt',
+                'licenses/RUST-MIT.txt', 'licenses/UNICODE-3.0.txt', 'licenses/COMPILER_BUILTINS.txt',
                 'vendor/cimgui/LICENSE', 'vendor/cimgui/imgui/LICENSE.txt']
     notices = '\n\n'.join((MOD / name).read_text() for name in licenses)
     (dest / 'NOTICES.txt').write_text(notices)
