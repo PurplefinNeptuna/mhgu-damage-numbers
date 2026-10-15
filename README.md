@@ -1,6 +1,8 @@
 # Damage Numbers
 
-Displays separate numbers at each impact, including total physical and elemental damage, hunter/Prowler and Palico attacks, bombs and monster-to-monster hits. Choose Wilds, Rise or Classic presentation.
+Shows damage numbers at each impact, combining physical and elemental damage.
+Works with hunter, Prowler and Palico attacks, bombs and monster-to-monster hits.
+Choose Wilds, Rise or Classic style.
 
 ## Requirements
 
@@ -24,17 +26,23 @@ Open **Plugin UI > Damage Numbers** in Forge's overlay. Closing the settings row
 | Control | Default and range |
 | --- | --- |
 | Show damage numbers | Enabled. |
-| Style | Wilds; also Rise and Classic. |
+| Style | Wilds by default. Rise and Classic are also available. |
 | Number size | 1.0, adjustable from 0.5 to 3.0. |
 | Duration | 0.9 seconds, adjustable from 0.4 to 2.0 seconds. |
 | Restore defaults | Reset the current settings. |
 | Save settings | Save the current settings to MHGU's save folder. |
 
-Wilds uses outlined digits and glowing critical stars; Rise uses slanted critical slashes; Classic uses straight critical markers. At size 1.0 and 1080p, Wilds/Classic use a 36 px base, and Rise uses a 30 px base enlarged to 42 px for weak-point numbers. Sizes follow screen height.
+Wilds uses outlined digits and glowing stars for critical hits. Rise has slanted
+critical slashes, while Classic has straight critical markers. Rise makes
+weak-point numbers larger. All sizes scale with screen height.
 
-White digits indicate physical hitzone values below 45 or unknown values; gold indicates 45 or higher; bounced attacks appear gray.
+Numbers are gold when the physical hitzone value is 45 or higher, and white
+when it is below 45 or unknown. Bounced attacks appear gray.
 
-Forge creates `damage_numbers.ini` with defaults once the save-data filesystem is available. **Save settings** persists changes. **Restore defaults** changes the session; use Save to persist those defaults. If saving fails, load a player save and retry.
+Forge creates `damage_numbers.ini` with defaults once it can access MHGU's save
+folder. Use **Save settings** to keep your changes for the next session.
+**Restore defaults** resets the current session's settings. Press Save settings
+afterward to keep those defaults. If saving fails, load a player save and retry.
 
 ## INI settings
 
@@ -48,10 +56,12 @@ scale = 1
 lifetime = 0.9
 ```
 
-`enabled` accepts `true` or `false`; `style` accepts lowercase `wilds`, `classic` or `rise`. Size and duration use the ranges above. Missing or invalid individual settings use their defaults. Restart the game to reload edits.
+Set `enabled` to `true` or `false` and `style` to lowercase `wilds`, `classic`
+or `rise`. Size and duration use the ranges above. Missing or invalid settings
+use their individual defaults. Restart the game to load your edits.
 
 ## Known issues
 
-Rise slashes are screen-space effects and may extend across foreground scenery.
+Rise slashes are drawn over the screen and may appear over foreground scenery.
 
 If an artwork file is missing or unreadable, numbers continue without that file's effects. If OpenSans.ttf is unavailable, numbers use Forge's font. Restore the packaged files and restart the game to restore the full styling.
