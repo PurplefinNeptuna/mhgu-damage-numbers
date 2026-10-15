@@ -1,0 +1,49 @@
+{
+  "version": "r3",
+  "release_status": "READY_TO_DISTRIBUTE",
+  "date": "2026-10-15",
+  "user_report": "working well, ready to distribute",
+  "acceptance": "User confirms successful use and authorizes distribution of the unchanged r3 candidate. Individual styles, damage sources, transitions and settings persistence were not enumerated.",
+  "runtime_rebuilt": false,
+  "installed_by_promotion": false,
+  "published": false,
+  "payload_sha256": {
+    "romfs/nativeNX/plugins/damage_numbers_rs.nro": "c2a04bf1970685aa10cbeebc2e984f471c2f1b4998040ead07d78ae89378eed1",
+    "romfs/nativeNX/plugins/damage-numbers-rs/OpenSans.ttf": "10b26270e158e51b7f26327aff359a7f7170ccc5904c1c82523bf5e372d5f117",
+    "romfs/nativeNX/plugins/damage-numbers-rs/rise-slash.rgba": "d4724a2caff4c13e91a541f0e7d203c74e05c40dedd6f78c55426ccd3396230e",
+    "romfs/nativeNX/plugins/damage-numbers-rs/wilds-effects.rgba": "fe15190c98259443a01add264777b2b4bee994bbd58f9c8f5f12338abb399f2b"
+  },
+  "installed_payloads_match_candidate": true,
+  "installed_root": "~/.local/share/eden/load/0100770008DD8000/damage-numbers-rs",
+  "candidate_archive_sha256": "94bc0aa15a0101701591872b8734c20e5344e3a42762aa140d940ec6ffb0dfbc",
+  "log": {
+    "source": "~/.local/share/eden/log/eden_log.txt",
+    "snapshot": "backups/damage-numbers-rs/promotion-r3-20261015/eden_log.txt",
+    "sha256": "381eac76d1d8638c5d18c5e136965dbda24cb8487f35d74cfd6ff4dd551fec00",
+    "emulator": "Eden Development Build master-a594c8d60e-master",
+    "host": "Linux/CachyOS",
+    "title_id": "0100770008DD8000",
+    "game_version": "1.4.0",
+    "main_build_id": "FB08F1D20FD1204FE7070672777F869B",
+    "forge_version": "1.5.0",
+    "installed_forge_sha256": "9935e8d139b73ae700b58db1ebad0efff3498342770145b3f01865a795dc19e4",
+    "plugin_startup_line_present": false,
+    "scope": "The log corroborates the game and loader environment, not Damage Numbers activation or its individual hook results. Current installed NRO and asset hashes match the accepted candidate; gameplay acceptance comes from the user report.",
+    "end_of_log": "Force stopping EmuThread at 213.453171 seconds precedes a host Dynarmic SIGSEGV at 213.918818 seconds. Cause is not established; no clean-shutdown claim.",
+    "selected_lines": [
+      "[   0.000405] Frontend <Info> qt_common/qt_common.cpp:242:Init: Eden Version: Eden Development Build | master-a594c8d60e-master",
+      "[  32.283937] Frontend <Info> yuzu/main_window.cpp:2042:BootGame: Booting game: 0100770008DD8000 | MONSTER HUNTER GENERATIONS ULTIMATE (32-bit) | 1.4.0",
+      "[  34.020536] Debug.Emulated <Info> core/hle/kernel/svc/svc_debug_string.cpp:25:OutputDebugString: [DEBUG] [forge] Version 1.5.0",
+      "[ 213.453171] Frontend <Warning> ./qt_common/render/emu_thread.h:65:ForceStop: Force stopping EmuThread",
+      "[ 213.918818] Core <Error> dynarmic/backend/exception_handler_posix.cpp:146:SigAction: Unhandled SIGSEGV at 0x00007fe38449b8d4"
+    ]
+  },
+  "limits": [
+    "Ryujinx and native Switch gameplay are not confirmed by this report.",
+    "The user did not separately enumerate styles, combat sources, quests, save/restart persistence, context replacement or asset failures in gameplay.",
+    "Clean shutdown is unconfirmed. The latest Eden log contains a host SIGSEGV after a forced stop; no cause is assigned to this plugin.",
+    "Loader-version gating remains disabled; an incompatible native Hook ABI can be reached."
+  ],
+  "static_evidence": "docs/CANDIDATE_RESULTS.json",
+  "standalone_evidence": "docs/STANDALONE_RESULTS.json"
+}

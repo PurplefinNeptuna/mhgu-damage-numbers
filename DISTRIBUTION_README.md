@@ -4,12 +4,12 @@ Displays separate numbers at each impact, including total physical and elemental
 
 ## Requirements
 
-MHGU 1.4.0 for Nintendo Switch, and Forge 1.5.0 with the MHGU SDK mutex import correction. This r3 DEVELOPMENT candidate has passed static tests; gameplay has not been tested.
+MHGU 1.4.0 for Nintendo Switch and a compatible Forge 1.5.0 loader.
 
 ## Installation
 
 1. Close the emulator and disable the C++ Damage Numbers package.
-2. Extract `damage-numbers-rs-r3-candidate.zip`.
+2. Extract `damage-numbers-rs-r3.zip`.
 3. Copy `damage-numbers-rs` into the MHGU mod directory:
    - Eden: `~/.local/share/eden/load/0100770008DD8000/`
    - Ryujinx: `mods/contents/0100770008dd8000/` inside its data directory.
