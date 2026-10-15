@@ -11,7 +11,7 @@ Choose Wilds, Rise or Classic style.
 ## Installation
 
 1. Close the emulator.
-2. Extract `damage-numbers-r27-candidate.zip`.
+2. Extract `damage-numbers-r27.zip`.
 3. Copy the whole `damage-numbers` folder into your emulator's MHGU mod directory:
    - Eden: `~/.local/share/eden/load/0100770008DD8000/`
    - Ryujinx: `mods/contents/0100770008dd8000/` inside its data directory.

@@ -3,6 +3,6 @@
   "mod": "damage-numbers",
   "kind": "plugin",
   "version": "r27",
-  "candidate": true,
+  "candidate": false,
   "package_name": "damage-numbers"
 }

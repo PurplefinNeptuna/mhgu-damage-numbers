@@ -1739,10 +1739,10 @@
   "current": {
     "version": "r27",
     "date": "2026-10-15",
-    "status": "DEVELOPMENT",
+    "status": "READY_TO_DISTRIBUTE",
     "scope": "Fix failed impact-copy handling and add user-requested screen-centre fallback for unavailable/clipped world projection.",
     "regression_before_fix": "The failed-position regression published default world origin with the original production core.",
-    "manual_test": "NOT RUN",
+    "manual_test": "USER_CONFIRMED",
     "runtime_issue": "The r3 third-party placement report remains unreproduced; r27 is not claimed to resolve that report.",
     "preserved_r26": "backups/accepted/damage-numbers/r26-before-centre-fallback/PRESERVATION.json",
     "nro_sha256": "c8cd8be03e7a85bb8f5e96bb69d3bc2121b7b97cd9472abc9a966286ded2e031",
@@ -1803,6 +1803,17 @@
       "mod_records": 11,
       "command": "python3 scripts/mod_distribution.py check"
     },
-    "preserved_r26_verified_files": 14
+    "preserved_r26_verified_files": 14,
+    "acceptance": {
+      "date": "2026-10-15",
+      "user_report": "working well, promote to ready to distribute",
+      "scope": "User-reported working r27 run and approval to distribute. Individual styles/sources, fallback cases, persistence and other platforms were not separately enumerated.",
+      "installed_hashes_match_candidate": true,
+      "evidence_path": "work/damage-numbers/r27-promotion/runtime-evidence.json",
+      "eden_log_scope": "Eden master-a594c8d60e-master and Forge 1.5.1. No Damage Numbers startup line. Unmapped-memory error at 652.634299s and forced stop at 657.266997s; no cause assigned to this plugin.",
+      "activation_scope": "Current installed hash match plus user gameplay report. Log alone does not confirm activation."
+    },
+    "tested_candidate_backup": "backups/accepted/damage-numbers/r27-tested-candidate/PRESERVATION.json",
+    "runtime_rebuilt_for_promotion": false
   }
 }

@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "mod": "damage-numbers",
-  "status": "DEVELOPMENT",
-  "reason": "Projection/capture regression fix with user-requested screen-centre fallback; build/package validation does not establish the reporter issue is resolved.",
+  "status": "READY_TO_DISTRIBUTE",
+  "reason": "User reports r27 working well and explicitly requests promotion. The tested NRO and assets are promoted unchanged.",
   "publication": {
     "published": false,
     "url": null,
@@ -10,8 +10,8 @@
   },
   "version": "r27",
   "package_name": "damage-numbers",
-  "archive": "damage-numbers-r27-candidate.zip",
-  "runtime_test": "NOT_RUN",
+  "archive": "damage-numbers-r27.zip",
+  "runtime_test": "USER_CONFIRMED",
   "gamebanana": {
     "ai_code": {
       "used": true,
@@ -58,15 +58,16 @@
     ]
   },
   "approval": {
-    "date": null,
-    "basis": "Development candidate only; no release approval or gameplay acceptance for these bytes."
+    "date": "2026-10-15",
+    "basis": "User: working well, promote to ready to distribute. Promote unchanged r27 candidate runtime bytes after existing full validation."
   },
   "target": "MHGU Nintendo Switch 1.4.0; upstream Forge 1.5.1; Eden/Ryujinx.",
   "limitations": [
-    "No gameplay run of r27. The r3 third-party placement report remains unreproduced.",
+    "User acceptance is scoped to the reported working r27 run. Styles, sources, settings persistence and fallback branches were not separately enumerated in gameplay.",
+    "The original third-party r3 placement case at 900p/1.25x has not been reproduced or retested by that reporter.",
     "A finite same-aspect offscreen camera cannot be distinguished by the current viewport guard.",
-    "Unprojectable hits, including offscreen/behind-camera hits, use screen centre and normal animation/overlap spacing.",
-    "Windows/PC runtime code is outside this Switch candidate."
+    "Ryujinx and native Switch gameplay remain unconfirmed.",
+    "Current Eden log has no Damage Numbers startup line and includes an unmapped-memory error before forced stop. It does not establish plugin activation or clean shutdown; no cause is assigned to this plugin."
   ],
   "dependencies": [
     {
@@ -117,12 +118,10 @@
       "mods/damage-numbers/EVIDENCE.json"
     ],
     "static_summary": "r27 regression, full host/native/build/package results recorded in EVIDENCE.json.",
-    "manual_summary": "NOT RUN. Earlier acceptance is retained with original hashes in historical records."
+    "manual_summary": "User reports r27 working well and approves distribution. Current installed Eden NRO and all three assets match the candidate. The copied Eden log records Forge 1.5.1 but no Damage Numbers startup line; gameplay acceptance comes from the user report."
   },
   "support": {
     "DEVELOPMENT.md": "mods/damage-numbers/DEVELOPMENT.md",
     "EVIDENCE.json": "mods/damage-numbers/EVIDENCE.json"
-  },
-  "candidate_builder": "scripts/build.py",
-  "candidate": "build/damage-numbers/candidates/r27/delivery"
+  }
 }
