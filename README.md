@@ -6,7 +6,7 @@ Choose Wilds, Rise or Classic style.
 
 ## Requirements
 
-MHGU 1.4.0 for Nintendo Switch and a compatible Forge 1.5.1 loader.
+MHGU 1.4.0 for Nintendo Switch and [Fexty's Forge 1.5.1](https://github.com/Fexty12573/forge/releases/tag/v1.5.1).
 
 ## Installation
 

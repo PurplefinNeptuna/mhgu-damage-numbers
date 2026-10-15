@@ -1,6 +1,6 @@
 # Component credits
 
-Forge by Jeffi (https://github.com/jeffi6375/forge) provides plugin loading and rendering. forge-rs by Fexty (https://github.com/Fexty12573/forge-rs) provides this plugin's Rust runtime, callbacks and helper APIs under MIT.
+Fexty's MHGU Forge fork (https://github.com/Fexty12573/forge), based on Jeffi's original Forge (https://github.com/jeffi6375/forge), provides plugin loading and rendering. forge-rs by Fexty (https://github.com/Fexty12573/forge-rs) provides this plugin's Rust runtime, callbacks and helper APIs under MIT.
 
 Dear ImGui by Omar Cornut (https://github.com/ocornut/imgui) and cimgui by Stephan Dilly and contributors (https://github.com/cimgui/cimgui) supply the rendering APIs used by the bindings, under MIT.
 
