@@ -36,11 +36,11 @@ fn main() {
                                 target: 2,
                                 application: 0,
                             },
-                            position: Vec3 {
+                            position: Some(Vec3 {
                                 x: (i as i32 % 3 - 1) as f32 * 0.03,
                                 y: (i as i32 / 3 - 1) as f32 * 0.02,
                                 z: 0.5,
-                            },
+                            }),
                             total_damage: (i * 17 + 1) as i32,
                             physical_hzv: if hz == 0 {
                                 -1

@@ -74,6 +74,16 @@ pub struct View {
     pub width: f32,
     pub height: f32,
 }
+impl View {
+    /// A valid display without a camera. The zero matrix makes projection use screen centre.
+    pub fn screen(width: f32, height: f32) -> Option<Self> {
+        (width.is_finite() && height.is_finite() && width > 0.0 && height > 0.0).then_some(Self {
+            width,
+            height,
+            ..Self::default()
+        })
+    }
+}
 // advance is where the next character would start, including glyph spacing.
 // ink is the actual visible glyph rectangle relative to the text origin;
 // centering uses advance while clipping/collision checks use visible ink.
@@ -135,26 +145,19 @@ pub fn native_camera(
     width: f32,
     height: f32,
 ) -> Option<View> {
-    // Admit only the full native viewport with a matching display aspect ratio
-    // (within 2%). A subview or stale rectangle would misplace every projected hit.
+    let mut result = View::screen(width, height)?;
+    // Accept an origin-aligned viewport with a matching aspect ratio (within 2%).
+    // Dimensions may differ from the display under resolution scaling; this does
+    // not prove that a same-aspect offscreen view belongs to the presented frame.
     if rect[0] != 0
         || rect[1] != 0
         || rect[2] <= 0
         || rect[3] <= 0
-        || !width.is_finite()
-        || !height.is_finite()
-        || width <= 0.0
-        || height <= 0.0
         || ((rect[2] as f32 / rect[3] as f32) / (width / height) - 1.0).abs() > 0.02
         || view.iter().chain(projection).any(|x| !x.is_finite())
     {
         return None;
     }
-    let mut result = View {
-        width,
-        height,
-        ..View::default()
-    };
     // For each output element, sum four products from view and projection.
     // The swapped row/column indices also transpose the native row-vector result,
     // so project can multiply column vectors with ordinary row-major indexing.
@@ -516,9 +519,11 @@ pub fn layout(
         if age < 0.0 || age >= s.lifetime || !visible(e, s) {
             continue;
         }
-        let Some(anchor) = project(e.position, view) else {
-            continue;
-        };
+        // Keep damage visible when impact capture, clipping or camera projection fails.
+        let anchor = e.position.and_then(|p| project(p, view)).unwrap_or(Point {
+            x: view.x + view.width * 0.5,
+            y: view.y + view.height * 0.5,
+        });
         let m = motion(age, s.lifetime, s.style);
         // Rise weak-hitzone digits are 1.4 times the ordinary settled size. Other
         // styles indicate weak hitzones with tint while keeping their base size.

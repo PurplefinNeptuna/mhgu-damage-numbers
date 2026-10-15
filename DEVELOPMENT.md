@@ -1,6 +1,36 @@
 # Development and research
 
-Current Switch build: r26 with upstream Forge 1.5.1. Earlier version claims below retain their recorded scope.
+Current Switch build: r27 DEVELOPMENT candidate with upstream Forge 1.5.1.
+Earlier version claims below retain their recorded scope.
+
+## r27 projection and centre fallback
+
+A failed impact-position copy previously left `(0,0,0)`, which could be projected
+as a real world position. Capture now marks the position unavailable while keeping
+the collision scope and native return chain intact. The consumer represents a
+missing position with `None`. A genuine captured world origin remains valid.
+
+Missing positions, missing/stale/invalid cameras and clipped projections now use
+the display centre, with normal animation and overlap spacing. This includes hits
+behind or outside the camera. Invalid display dimensions still prevent drawing.
+Normal projected positions retain the existing matrix, scaling and placement rules.
+
+The viewport guard checks origin and aspect ratio, not presentation-target
+ownership. A same-aspect offscreen view can still pass. Requiring equal native
+and display dimensions would reject legitimate resolution scaling, so r27 retains
+the guard. Read-only native exports and original-byte comparisons are retained in
+`work/damage-numbers/projection-r27/native/`. They do not identify the reporter's camera.
+
+Regression tests cover failed/non-finite position reads inside nested collision
+scopes, valid world origin, matrix order and 720p/900p/1080p/1440p mapping. Fallback
+tests cover all three styles, absent/invalid cameras and clipped points.
+The r3 third-party report remains unreproduced. No r27 gameplay acceptance is claimed.
+
+After an authorized manual installation, compare the same stationary hit with a
+stationary camera at 1.0× and 1.25×, then rotate the camera and repeat with each style.
+Use the matched plugin/loader hashes, an actual launch log and video showing both
+the impact and number to establish whether the reporter's displacement persists.
+Host tests prove the fallback branches, not the live camera selection.
 
 ## Damage Numbers in Rust
 
@@ -18,7 +48,10 @@ The load callback leaves the loader requirement record untouched, so Forge versi
 
 The prepared font retains Open Sans Semibold naming. Its glyph outlines, hinting, metrics and weight match r2; only naming metadata/checksums changed. Artwork pixels and atlas geometry are unchanged. The selected styles appear as Wilds, Rise, Classic; stored style IDs remain stable. Missing artwork omits its effects while readable damage numbers continue. Failure messages are deduplicated across context replacements.
 
-The canonical local release is `build/damage-numbers/releases/r26/damage-numbers-r3.zip`. Use the coordinating workspace’s `python3 scripts/mod_distribution.py package damage-numbers` and full `check` for approved delivery. The mod-local packaging command retains the development-candidate workflow.
+The current candidate ZIP is `build/damage-numbers/candidates/r27/delivery/damage-numbers-r27-candidate.zip`.
+Package with `python3 scripts/mod_distribution.py package damage-numbers` and run
+the full `check`. The approved r26 delivery is preserved under
+`backups/accepted/damage-numbers/r26-before-centre-fallback/`.
 
 
 ## Build and validate
@@ -39,11 +72,16 @@ Copy `build.local.example.json` to ignored `build.local.json` and supply the too
 | `./build.sh package` | Require complete tests for the exact NRO, then verify the candidate ZIP and adjacent guides/notices/checksums. |
 | `./build.sh export --output DEST` | Export the explicit source allowlist to an unused directory. |
 
-Workspace outputs are under `build/damage-numbers/candidates/r26/` and `work/damage-numbers/candidates/r26/`. Cargo caches, the unstripped ELF and converter output stay under `work/damage-numbers/candidates/r26/cargo-target/`. The pinned converter requires a temporary `target` symlink and loose NRO in the source root while building; the wrapper removes both when the converter exits, including on failure. An independent source export uses its own ignored build/work folders. Registry sources are vendored, including metadata needed by this nightly's build-std resolver. Host tests explicitly load the source-only Cargo configuration so they do not inherit the ARM target or build-std settings. Default builds and tests are offline.
+Workspace outputs are under `build/damage-numbers/candidates/r27/` and `work/damage-numbers/candidates/r27/`. Cargo caches, the unstripped ELF and converter output stay under `work/damage-numbers/candidates/r27/cargo-target/`. The pinned converter requires a temporary `target` symlink and loose NRO in the source root while building; the wrapper removes both when the converter exits, including on failure. An independent source export uses its own ignored build/work folders. Registry sources are vendored, including metadata needed by this nightly's build-std resolver. Host tests explicitly load the source-only Cargo configuration so they do not inherit the ARM target or build-std settings. Default builds and tests are offline.
 
 After adding source files, refresh the allowlist with `python3 scripts/export_source.py --refresh`. Exports omit native game inputs, outputs, private configurations, caches and Git metadata. They retain dependency bytes exactly so Cargo checksum validation remains meaningful. Supply your toolchain/input paths in the exported repo's own configuration. No sibling mod import is needed.
 
-The root distribution packager reserves releases for approved READY_TO_DISTRIBUTE records. The mod-local `package` command retains the candidate workflow under `candidates/r3/delivery/`. For the approved unchanged r3 release, use `python3 scripts/mod_distribution.py package damage-numbers`; the canonical ZIP is under `build/damage-numbers/releases/r26/`. Run `python3 scripts/mod_distribution.py check` from the coordinating workspace to validate every registered mod and preserve the existing releases. User gameplay acceptance and current log limits are recorded in `docs/RUNTIME_RESULTS.json`. Packaging does not install, activate, publish or push.
+The root distribution packager validates the registered r27 DEVELOPMENT delivery
+through the mod-local candidate builder. Run
+`python3 scripts/mod_distribution.py package damage-numbers` and the full
+`python3 scripts/mod_distribution.py check`. Candidate packaging grants no release
+approval. The accepted r26 delivery and its exact hashes remain in the backup
+listed above. Packaging does not install, activate, publish or push.
 
 forge-rs source is pinned at `d1865b68e9b194eb3eacc8bd71bbf601a5fac63e`; the native hook fixture is pinned to Forge `1671ad1526f6df5ee8d6e61a03518e0a427e202e`. The copied loader input has SHA-256 `1e452243cc85108a2271dda99167f9728d051887075766b38e36a1ce94a29b42`. The native fixture compiles the actual allocator with host JIT/TLS/cache doubles, omits ARM barriers, and uses ASan/UBSan. LeakSanitizer is disabled under sandbox tracing; the fixture counts creation and closure of every mock JIT chunk. These checks do not measure emulator allocation or establish gameplay acceptance.
 

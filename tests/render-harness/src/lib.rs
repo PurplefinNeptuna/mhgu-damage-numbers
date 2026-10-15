@@ -89,11 +89,11 @@ pub unsafe extern "C" fn rs_scene(style: u32, age: f32, width: f32, height: f32,
                     target: 42,
                     application: 0,
                 },
-                position: Vec3 {
+                position: Some(Vec3 {
                     x: (i as i32 % 3 - 1) as f32 * 0.3,
                     y: (i as i32 / 3 - 1) as f32 * 0.3,
                     z: 0.5,
-                },
+                }),
                 total_damage: [40, 47, 12, 6, 155, 111, 888, 1, 9999][i as usize],
                 physical_hzv: if i % 3 == 0 { 44 } else { 45 },
                 source: Source::Attack,

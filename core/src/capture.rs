@@ -266,7 +266,10 @@ impl CaptureState {
                 scope.subject = frame.r[1];
                 scope.monster = frame.r[2];
                 scope.owner = attack_owner(memory, scope.subject);
-                copy_value(memory, frame.r[3], &mut scope.position);
+                // Keep the scope for nested returns, but never project a failed copy as world origin.
+                if !copy_value(memory, frame.r[3], &mut scope.position) {
+                    scope.position.x = f32::NAN;
+                }
                 if memory.readable(sp.wrapping_add(8), 4) {
                     scope.auxiliary = memory.word(sp.wrapping_add(8));
                 }

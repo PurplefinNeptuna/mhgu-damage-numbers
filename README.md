@@ -11,7 +11,7 @@ Choose Wilds, Rise or Classic style.
 ## Installation
 
 1. Close the emulator.
-2. Extract `damage-numbers-r26.zip`.
+2. Extract `damage-numbers-r27-candidate.zip`.
 3. Copy the whole `damage-numbers` folder into your emulator's MHGU mod directory:
    - Eden: `~/.local/share/eden/load/0100770008DD8000/`
    - Ryujinx: `mods/contents/0100770008dd8000/` inside its data directory.
@@ -27,6 +27,10 @@ Numbers appear for hunter, Prowler and Palico attacks, bombs and
 monster-to-monster hits. Wilds uses outlined digits and glowing stars for
 critical hits. Rise has slanted critical slashes and larger weak-point numbers.
 Classic has straight critical markers. All sizes scale with screen height.
+
+If the impact position or camera projection is unavailable, numbers appear at
+screen centre with the usual animation and spacing. Hits outside the camera
+view also use this fallback.
 
 Numbers are gold when the physical hitzone value is 45 or higher, and white
 when it is below 45 or unknown. Bounced attacks appear grey.

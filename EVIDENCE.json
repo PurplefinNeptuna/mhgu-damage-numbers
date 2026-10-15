@@ -1324,7 +1324,7 @@
       ]
     }
   },
-  "current": {
+  "r26_before_centre_fallback": {
     "version": "r26",
     "date": "2026-10-15",
     "scope": "Approved workspace rename/upstream-loader maintenance; no gameplay run.",
@@ -1735,5 +1735,74 @@
       }
     },
     "manual_test": "NOT RUN"
+  },
+  "current": {
+    "version": "r27",
+    "date": "2026-10-15",
+    "status": "DEVELOPMENT",
+    "scope": "Fix failed impact-copy handling and add user-requested screen-centre fallback for unavailable/clipped world projection.",
+    "regression_before_fix": "The failed-position regression published default world origin with the original production core.",
+    "manual_test": "NOT RUN",
+    "runtime_issue": "The r3 third-party placement report remains unreproduced; r27 is not claimed to resolve that report.",
+    "preserved_r26": "backups/accepted/damage-numbers/r26-before-centre-fallback/PRESERVATION.json",
+    "nro_sha256": "c8cd8be03e7a85bb8f5e96bb69d3bc2121b7b97cd9472abc9a966286ded2e031",
+    "validation": {
+      "tests": {
+        "path": "build/damage-numbers/candidates/r27/tests.json",
+        "sha256": "3d1dcb7dfff3a425ef531f462aac9a787a525cba0bbbad22200047641c792a42",
+        "status": "PASSED"
+      },
+      "native-pool": {
+        "path": "build/damage-numbers/candidates/r27/native-pool.json",
+        "sha256": "8aeab880238af15c5df98505965f4e0afa7119393521e62526d04de9357fb48f",
+        "status": "PASSED"
+      },
+      "parity": {
+        "path": "build/damage-numbers/candidates/r27/parity.json",
+        "sha256": "39a603b15100232cb4fb57518de0e212a5450c24f0dd1c60d36eb20bf0e74400",
+        "status": "PASSED"
+      },
+      "visual": {
+        "path": "build/damage-numbers/candidates/r27/visual.json",
+        "sha256": "ac3ebb4e3429b93e4cf9a244ff8061fefe5fc1ed82a4d15fb51ce17190ac2a8a",
+        "status": "PASSED"
+      },
+      "gateways": {
+        "path": "build/damage-numbers/candidates/r27/gateways.json",
+        "sha256": "4aa545ac986965c8673ea09eeb05ff4bd4016d2ba9dcb4c5e3e08c5f68b6b141",
+        "status": "PASSED"
+      },
+      "verify": {
+        "path": "build/damage-numbers/candidates/r27/verify.json",
+        "sha256": "698c10cd28c488aecafabeeed2e2bc3845aa4bd97b75cc56103058f41aaaeef3",
+        "status": "PASSED"
+      }
+    },
+    "regressions": {
+      "core_behavior_tests": 12,
+      "position_capture": "Unreadable and non-finite impact inputs become missing positions; nested returns and valid world origin are preserved.",
+      "screen_centre": "Missing impacts, absent/invalid/behind cameras and clipped points use the same centred layout in all three styles at 720p/900p/1080p.",
+      "projection": "Noncommuting rotation/translation/perspective preserves expected normalized coordinates through 1440p, including 1.25x."
+    },
+    "native_research": {
+      "path": "work/damage-numbers/projection-r27/native/research.json",
+      "main_sha256": "b3935415499549adaf4c0e89822831daa175cfd456a7990791c79be3997645ef",
+      "function_offsets": [
+        "0xb8909c",
+        "0x885844"
+      ],
+      "instruction_byte_mismatches": 0,
+      "scope": "Read-only native evidence; presentation-target identity and reporter environment remain unverified."
+    },
+    "candidate_archive": {
+      "path": "build/damage-numbers/candidates/r27/delivery/damage-numbers-r27-candidate.zip",
+      "sha256": "57b296f29415bbe3e465276d1d83e6535cada7c48f8a2a34698d732edb494efb"
+    },
+    "distribution_check": {
+      "status": "PASSED",
+      "mod_records": 11,
+      "command": "python3 scripts/mod_distribution.py check"
+    },
+    "preserved_r26_verified_files": 14
   }
 }

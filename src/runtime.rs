@@ -74,10 +74,7 @@ pub fn start() {
     let installed = if clock.is_some() {
         match Installed::install() {
             Ok(value) => {
-                log::info!(
-                    "[damage-numbers] r26 loaded: {} Forge hooks",
-                    value.count()
-                );
+                log::info!("[damage-numbers] r27 loaded: {} Forge hooks", value.count());
                 Some(value)
             }
             Err(reason) => {
@@ -221,7 +218,7 @@ impl Consumer {
                                     target: record.monster,
                                     application: slot as u32,
                                 },
-                                position: record.position,
+                                position: record.position.valid().then_some(record.position),
                                 total_damage: record.damage,
                                 physical_hzv: record.hzv as i16,
                                 source,
@@ -292,7 +289,7 @@ pub fn render() {
         let now = platform::tick();
         let size = forge::imgui::get_io().DisplaySize;
         // Only a camera sample for this player, younger than 0.2 seconds, may drive
-        // projection. Missing/stale cameras cause model.update to clear old numbers.
+        // world projection. Missing/stale cameras keep numbers at screen centre.
         let view = if state.player != 0
             && state.camera.player == state.player
             && fresh(state.camera.tick, now, frequency, 0.2)
@@ -306,7 +303,8 @@ pub fn render() {
             )
         } else {
             None
-        };
+        }
+        .or_else(|| presentation::View::screen(size.x, size.y));
         let time = seconds(now, origin, frequency).unwrap_or(f32::NAN);
         state.model.update(time, view.is_some());
         let Some(view) = view else {

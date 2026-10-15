@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "mod": "damage-numbers",
-  "status": "READY_TO_DISTRIBUTE",
-  "reason": "User explicitly approved the workspace compaction and distribution of the renamed/upstream-maintenance builds after static validation.",
+  "status": "DEVELOPMENT",
+  "reason": "Projection/capture regression fix with user-requested screen-centre fallback; build/package validation does not establish the reporter issue is resolved.",
   "publication": {
     "published": false,
     "url": null,
     "date": null
   },
-  "version": "r26",
+  "version": "r27",
   "package_name": "damage-numbers",
-  "archive": "damage-numbers-r26.zip",
+  "archive": "damage-numbers-r27-candidate.zip",
   "runtime_test": "NOT_RUN",
   "gamebanana": {
     "ai_code": {
@@ -58,15 +58,15 @@
     ]
   },
   "approval": {
-    "date": "2026-10-15",
-    "basis": "User approved implementation of the full compaction plan, including renamed ready releases and stock Forge maintenance. Earlier gameplay acceptance remains attached to the original hashes."
+    "date": null,
+    "basis": "Development candidate only; no release approval or gameplay acceptance for these bytes."
   },
   "target": "MHGU Nintendo Switch 1.4.0; upstream Forge 1.5.1; Eden/Ryujinx.",
   "limitations": [
-    "This maintenance build has no new gameplay run. Earlier user acceptance applies only to the preserved original binaries; Ryujinx/native Switch coverage remains unconfirmed.",
-    "Ryujinx and native Switch gameplay are not confirmed by this report.",
-    "The user did not separately enumerate styles, combat sources, quests, save/restart persistence, context replacement or asset failures in gameplay.",
-    "Clean shutdown is unconfirmed. The latest Eden log contains a host SIGSEGV after a forced stop; no cause is assigned to this plugin."
+    "No gameplay run of r27. The r3 third-party placement report remains unreproduced.",
+    "A finite same-aspect offscreen camera cannot be distinguished by the current viewport guard.",
+    "Unprojectable hits, including offscreen/behind-camera hits, use screen centre and normal animation/overlap spacing.",
+    "Windows/PC runtime code is outside this Switch candidate."
   ],
   "dependencies": [
     {
@@ -93,20 +93,20 @@
   ],
   "payloads": {
     "romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf": {
-      "source": "build/damage-numbers/candidates/r26/package/romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf",
+      "source": "build/damage-numbers/candidates/r27/package/romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf",
       "sha256": "10b26270e158e51b7f26327aff359a7f7170ccc5904c1c82523bf5e372d5f117"
     },
     "romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba": {
-      "source": "build/damage-numbers/candidates/r26/package/romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba",
+      "source": "build/damage-numbers/candidates/r27/package/romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba",
       "sha256": "d4724a2caff4c13e91a541f0e7d203c74e05c40dedd6f78c55426ccd3396230e"
     },
     "romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba": {
-      "source": "build/damage-numbers/candidates/r26/package/romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba",
+      "source": "build/damage-numbers/candidates/r27/package/romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba",
       "sha256": "fe15190c98259443a01add264777b2b4bee994bbd58f9c8f5f12338abb399f2b"
     },
     "romfs/nativeNX/plugins/damage_numbers.nro": {
-      "source": "build/damage-numbers/candidates/r26/package/romfs/nativeNX/plugins/damage_numbers.nro",
-      "sha256": "12163118f91c38be604564a76a4e06eb62b3195ec96ec195a13125a283c83bf4"
+      "source": "build/damage-numbers/candidates/r27/package/romfs/nativeNX/plugins/damage_numbers.nro",
+      "sha256": "c8cd8be03e7a85bb8f5e96bb69d3bc2121b7b97cd9472abc9a966286ded2e031"
     }
   },
   "evidence": {
@@ -116,11 +116,13 @@
     "manual": [
       "mods/damage-numbers/EVIDENCE.json"
     ],
-    "static_summary": "Current host/native/build evidence and original dated results are recorded in EVIDENCE.json.",
-    "manual_summary": "No new gameplay run. The user approved distribution of this maintenance build; historical gameplay reports and exact hashes remain under EVIDENCE.json historical records."
+    "static_summary": "r27 regression, full host/native/build/package results recorded in EVIDENCE.json.",
+    "manual_summary": "NOT RUN. Earlier acceptance is retained with original hashes in historical records."
   },
   "support": {
     "DEVELOPMENT.md": "mods/damage-numbers/DEVELOPMENT.md",
     "EVIDENCE.json": "mods/damage-numbers/EVIDENCE.json"
-  }
+  },
+  "candidate_builder": "scripts/build.py",
+  "candidate": "build/damage-numbers/candidates/r27/delivery"
 }

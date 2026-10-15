@@ -105,7 +105,8 @@ pub struct HitKey {
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Event {
     pub key: HitKey,
-    pub position: Vec3,
+    /// None keeps valid damage visible at screen centre when impact capture failed.
+    pub position: Option<Vec3>,
     pub total_damage: i32,
     /// Physical HZV before damage weighting; -1 means unavailable.
     pub physical_hzv: i16,
@@ -141,13 +142,13 @@ impl Settings {
     }
 }
 // Apply the same admission rules to pending events and already shown numbers.
-// Unknown hitzones (-1) are allowed; invalid positions/times and zero damage
-// are rejected. Tick damage is outside the displayed r25 damage families.
+// Unknown hitzones (-1) and missing positions are allowed. Non-finite supplied
+// positions/times and zero damage are rejected; missing positions use screen centre.
 pub fn visible(e: Event, s: Settings) -> bool {
     s.enabled
         && s.valid()
         && e.total_damage > 0
-        && e.position.valid()
+        && e.position.is_none_or(Vec3::valid)
         && e.captured_at.is_finite()
         && e.key.serial != 0
         && e.key.target != 0

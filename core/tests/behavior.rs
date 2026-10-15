@@ -1,5 +1,5 @@
 //! Behavior tests use copied records and fake game memory; no emulator or installed package is involved.
-use damage_numbers_core::{capture::*, mailbox::*, *};
+use damage_numbers_core::{capture::*, mailbox::*, presentation::*, *};
 use std::{collections::BTreeMap, sync::Arc};
 fn hit(serial: u32) -> Event {
     Event {
@@ -9,11 +9,11 @@ fn hit(serial: u32) -> Event {
             target: 2,
             application: 0,
         },
-        position: Vec3 {
+        position: Some(Vec3 {
             x: 0.0,
             y: 0.0,
             z: 0.5,
-        },
+        }),
         total_damage: 123,
         physical_hzv: 45,
         owner: Owner::LocalPlayer,
@@ -180,12 +180,14 @@ impl Memory for Fake {
 }
 #[test]
 fn nested_collision_and_damage_keep_native_return_identity() {
-    let memory = Fake::scene();
+    let mut memory = Fake::scene();
+    memory.region(0xb000, 12);
     let mut state = CaptureState::new(Some(0));
     let m = Mailbox::new();
     let mut frame = RawFrame::default();
     frame.r[1] = 0x7000;
     frame.r[2] = 0x8000;
+    frame.r[3] = 0xb000;
     frame.r[13] = 0xaaaa;
     assert!(state.enter(0, &frame, 0x9000, &memory));
     frame.r[0] = 0x8000;
@@ -198,6 +200,243 @@ fn nested_collision_and_damage_keep_native_return_identity() {
     assert_eq!((r.damage, r.monster, r.part, r.actor), (123, 0x8000, 3, 0));
     assert_eq!(state.leave(&frame, 0x9000, true, &memory, &m), Some(0xaaaa));
     assert!(state.leave(&frame, 0x9000, true, &memory, &m).is_none());
+}
+#[test]
+fn collision_position_failures_request_centre_without_losing_native_scope() {
+    // Keep a valid outer collision live: rejecting an inner position must not
+    // lose its return scope or fall back to the outer collision's coordinates.
+    for position in [
+        None,
+        Some([f32::NAN, 0.0, 0.0]),
+        Some([0.0, f32::INFINITY, 0.0]),
+        Some([0.0, 0.0, f32::NEG_INFINITY]),
+        Some([0.0, 0.0, 0.0]),
+        Some([1.0, 2.0, 3.0]),
+    ] {
+        let mut memory = Fake::scene();
+        memory.region(0xb000, 12);
+        for (i, value) in [10.0f32, 20.0, 30.0].into_iter().enumerate() {
+            memory.put(0xb000 + 4 * i as u32, value.to_bits());
+        }
+        if let Some(values) = position {
+            memory.region(0xc000, 12);
+            for (i, value) in values.into_iter().enumerate() {
+                memory.put(0xc000 + 4 * i as u32, value.to_bits());
+            }
+        }
+        let mut state = CaptureState::new(Some(0));
+        let mailbox = Mailbox::new();
+        let mut frame = RawFrame::default();
+        frame.r[1] = 0x7000;
+        frame.r[2] = 0x8000;
+        frame.r[3] = 0xb000;
+        frame.r[13] = 0xaaaa;
+        assert!(state.enter(0, &frame, 0xa000, &memory));
+        frame.r[3] = 0xc000;
+        frame.r[13] = 0xbbbb;
+        assert!(state.enter(0, &frame, 0x9000, &memory));
+        frame.r[0] = 0x8000;
+        frame.r[1] = 3;
+        frame.r[13] = 0xcccc;
+        assert!(state.enter(1, &frame, 0x8f00, &memory));
+        frame.r[0] = 123;
+        assert_eq!(
+            state.leave(&frame, 0x8f00, true, &memory, &mailbox),
+            Some(0xcccc)
+        );
+        let mut cursor = Cursor::default();
+        let record = mailbox.read(&mut cursor).unwrap();
+        if let Some(values) = position.filter(|v| v.iter().all(|n| n.is_finite())) {
+            assert_eq!(
+                record.position,
+                Vec3 {
+                    x: values[0],
+                    y: values[1],
+                    z: values[2]
+                }
+            );
+        } else {
+            assert!(
+                !record.position.valid(),
+                "failed capture became world origin"
+            );
+        }
+        let event = Event {
+            position: record.position.valid().then_some(record.position),
+            ..hit(1)
+        };
+        assert_eq!(
+            event.position.is_some(),
+            position.is_some_and(|v| v.iter().all(|n| n.is_finite()))
+        );
+        let mut model = Model::default();
+        model.reset(1);
+        assert!(model.capture(event));
+        assert_eq!(
+            state.leave(&frame, 0x9000, true, &memory, &mailbox),
+            Some(0xbbbb)
+        );
+        frame.r[0] = 0x8000;
+        frame.r[13] = 0xdddd;
+        assert!(state.enter(1, &frame, 0x9f00, &memory));
+        frame.r[0] = 456;
+        assert_eq!(
+            state.leave(&frame, 0x9f00, true, &memory, &mailbox),
+            Some(0xdddd)
+        );
+        assert_eq!(
+            mailbox.read(&mut cursor).unwrap().position,
+            Vec3 {
+                x: 10.0,
+                y: 20.0,
+                z: 30.0
+            }
+        );
+        assert_eq!(
+            state.leave(&frame, 0xa000, true, &memory, &mailbox),
+            Some(0xaaaa)
+        );
+        assert_eq!(state.depth, 0);
+    }
+}
+#[test]
+fn native_projection_preserves_positions_across_display_scales() {
+    // Row-vector rotation/translation gives (-0.1, 0.1, 0.6, 1), then
+    // perspective gives (-0.2, 0.3, 0.6, 1.6). Reversing matrix order differs.
+    let view = [
+        0., 1., 0., 0., -1., 0., 0., 0., 0., 0., 1., 0., 0.2, -0.1, 0.2, 1.,
+    ];
+    let projection = [
+        2., 0., 0., 0., 0., 3., 0., 0., 0., 0., 1., 1., 0., 0., 0., 1.,
+    ];
+    for rect in [[0, 0, 1280, 720], [0, 0, 1920, 1080]] {
+        for (width, height) in [(1280., 720.), (1600., 900.), (1920., 1080.), (2560., 1440.)] {
+            let camera = native_camera(&view, &projection, rect, width, height).unwrap();
+            let point = project(
+                Vec3 {
+                    x: 0.2,
+                    y: 0.3,
+                    z: 0.4,
+                },
+                &camera,
+            )
+            .unwrap();
+            assert!((point.x / width - 0.4375).abs() < 0.00001);
+            assert!((point.y / height - 0.40625).abs() < 0.00001);
+        }
+    }
+}
+#[test]
+fn unavailable_or_clipped_projection_uses_screen_centre_in_every_style() {
+    fn draw(position: Option<Vec3>, view: &View, style: Style) -> DrawNumber {
+        let mut model = Model::default();
+        model.reset(1);
+        model.configure(Settings {
+            style,
+            ..Settings::default()
+        });
+        assert!(model.capture(Event {
+            position,
+            critical: Critical::Positive,
+            ..hit(1)
+        }));
+        model.update(0.2, true);
+        let mut output = [DrawNumber::default(); 128];
+        assert_eq!(
+            layout(
+                &model,
+                view,
+                0.2,
+                &mut output,
+                &mut Placement::default(),
+                |text, pixels, _| {
+                    let width = text.iter().take_while(|&&n| n != 0).count() as f32 * pixels * 0.55;
+                    Some(TextMetrics {
+                        advance: width,
+                        ink: Rect {
+                            left: 0.0,
+                            top: 0.0,
+                            right: width,
+                            bottom: pixels,
+                        },
+                    })
+                }
+            ),
+            1
+        );
+        output[0]
+    }
+    let id = [
+        1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1.,
+    ];
+    for (width, height) in [(1280., 720.), (1600., 900.), (1920., 1080.)] {
+        let camera = native_camera(&id, &id, [0, 0, 1280, 720], width, height).unwrap();
+        let no_camera = View::screen(width, height).unwrap();
+        for style in [Style::Wilds, Style::Rise, Style::Classic] {
+            let centre = draw(None, &camera, style);
+            assert!((centre.position.x + centre.advance * 0.5 - width * 0.5).abs() < 1.0);
+            assert!((centre.position.y - height * 0.5).abs() < height * 0.1);
+            for position in [
+                Vec3 {
+                    x: 2.0,
+                    y: 0.0,
+                    z: 0.5,
+                },
+                Vec3 {
+                    x: 0.0,
+                    y: -2.0,
+                    z: 0.5,
+                },
+                Vec3 {
+                    x: 0.0,
+                    y: 0.0,
+                    z: -1.0,
+                },
+                Vec3 {
+                    x: 0.0,
+                    y: 0.0,
+                    z: 2.0,
+                },
+            ] {
+                let fallback = draw(Some(position), &camera, style);
+                assert_eq!(fallback.position, centre.position);
+                assert_eq!(fallback.slash.origin, centre.slash.origin);
+            }
+            let fallback = draw(hit(1).position, &no_camera, style);
+            assert_eq!(fallback.position, centre.position);
+            let mut invalid = camera;
+            invalid.world_to_clip[0] = f32::NAN;
+            assert_eq!(
+                draw(hit(1).position, &invalid, style).position,
+                centre.position
+            );
+            let mut behind = camera;
+            behind.world_to_clip[15] = -1.0;
+            assert_eq!(
+                draw(hit(1).position, &behind, style).position,
+                centre.position
+            );
+        }
+    }
+    for (width, height) in [
+        (0.0, 720.0),
+        (1280.0, -1.0),
+        (f32::NAN, 900.0),
+        (1600.0, f32::INFINITY),
+    ] {
+        assert!(View::screen(width, height).is_none());
+    }
+    assert!(!visible(
+        Event {
+            position: Some(Vec3 {
+                x: f32::NAN,
+                y: 0.0,
+                z: 0.0
+            }),
+            ..hit(1)
+        },
+        Settings::default()
+    ));
 }
 #[test]
 fn overflow_quarantines_until_unwind() {
