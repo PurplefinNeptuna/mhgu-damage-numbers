@@ -34,3 +34,10 @@ record. Do not restore retired custom loader shims or patches.
 
 Damage Numbers retains the explicit upstream forge-rs config load/default
 creation/ScopedMount/Writer exception. Preserve per-field defaults and Save/Reset.
+
+Release READMEs address mod users. Use Requirements, Installation, Usage,
+Update and removal, then Compatibility and known issues when relevant.
+Put Settings/INI subsections under Usage. Settings tables use Setting/Default/Effect,
+controls use Action/Input, and installation includes exact platform paths.
+Apply the full Humanizer process, use plain colour names, and omit maintainer
+history/testing/approval material and unrelated-mod advice.
