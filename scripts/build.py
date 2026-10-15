@@ -94,12 +94,12 @@ def build():
     # Bridge that lookup only while it runs; keep Cargo's cache and converter
     # output in work/ even when conversion fails. Do not replace unknown files.
     target_link = MOD / 'target'
-    converter_output = MOD / 'damage_numbers_rs.nro'
+    converter_output = MOD / 'damage_numbers.nro'
     if target_link.exists() or target_link.is_symlink() or converter_output.exists():
         raise ValueError('Move existing target/ or loose NRO out of the source folder before building')
     cargo_target = Path(env['CARGO_TARGET_DIR'])
     cargo_target.mkdir(parents=True, exist_ok=True)
-    generated_nro = cargo_target / 'damage_numbers_rs.nro'
+    generated_nro = cargo_target / 'damage_numbers.nro'
     target_link.symlink_to(cargo_target, target_is_directory=True)
     try:
         run([converter(), 'forge', 'build', '--release'], cwd=MOD, env=env)
@@ -111,13 +111,13 @@ def build():
         raise ValueError('Cargo.lock changed during build; pin dependencies before retrying')
     plugins = BUILD_ROOT / 'package/romfs/nativeNX/plugins'
     plugins.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(generated_nro, plugins / 'damage_numbers_rs.nro')
-    assets = plugins / 'damage-numbers-rs'
+    shutil.copy2(generated_nro, plugins / 'damage_numbers.nro')
+    assets = plugins / 'damage-numbers'
     assets.mkdir(exist_ok=True)
     hashes = asset_hashes()
     for name in hashes:
         shutil.copy2(MOD / 'assets' / name, assets / name)
-    record('build.json', {'status': 'BUILT', 'nro_sha256': digest(plugins / 'damage_numbers_rs.nro'),
+    record('build.json', {'status': 'BUILT', 'nro_sha256': digest(plugins / 'damage_numbers.nro'),
                          'asset_sha256': hashes,
                          'forge_rs_revision': 'd1865b68e9b194eb3eacc8bd71bbf601a5fac63e', 'runtime_test': 'NOT RUN'})
 
@@ -131,7 +131,7 @@ def test(host=False):
     run([PYTHON, MOD / 'tests/native_pool.py'], env=env)
     run([PYTHON, MOD / 'tests/parity.py'], env=env)
     run([PYTHON, MOD / 'tests/visual.py'], env=env)
-    nro = BUILD_ROOT / 'package/romfs/nativeNX/plugins/damage_numbers_rs.nro'
+    nro = BUILD_ROOT / 'package/romfs/nativeNX/plugins/damage_numbers.nro'
     if not host:
         run([CONFIG.get('arm_python', ROOT / 'tools/mwc-analysis-venv/bin/python'), MOD / 'tests/gateways.py'])
         verify()
@@ -146,24 +146,31 @@ def verify():
 def package():
     verify()
     source = BUILD_ROOT / 'package'
-    nro = source / 'romfs/nativeNX/plugins/damage_numbers_rs.nro'
+    nro = source / 'romfs/nativeNX/plugins/damage_numbers.nro'
     tests = json.loads((BUILD_ROOT / 'tests.json').read_text())
     if not tests['arm_verified'] or tests['nro_sha256'] != digest(nro) or tests['asset_sha256'] != asset_hashes():
         raise ValueError('Run the complete test command for this exact NRO before packaging')
+    spec = json.loads((MOD / 'DISTRIBUTION.json').read_text())
+    if spec['status'] in ('READY_TO_DISTRIBUTE', 'PUBLISHED'):
+        # The same distribution engine owns workspace and standalone releases.
+        # Its payload pins keep approval tied to these exact tested bytes.
+        import mod_distribution as distribution
+        print('Verified release:', distribution.package(spec['mod'], ROOT))
+        return
     dest = BUILD_ROOT / 'delivery'
     dest.mkdir(parents=True, exist_ok=True)
     payloads = {str(path.relative_to(source)): digest(path) for path in source.rglob('*') if path.is_file()}
-    package_dir = dest / 'damage-numbers-rs'
+    package_dir = dest / 'damage-numbers'
     existing = {str(path.relative_to(package_dir)) for path in package_dir.rglob('*') if path.is_file()}
     if existing - payloads.keys():
         raise ValueError('Unexpected old candidate payload files; preserve them before repackaging')
     shutil.copytree(source, package_dir, dirs_exist_ok=True)
-    guide = (MOD / 'DISTRIBUTION_README.md').read_bytes()
-    archive = dest / 'damage-numbers-rs-r3-candidate.zip'
+    guide = (MOD / 'README.md').read_bytes()
+    archive = dest / 'damage-numbers-r26-candidate.zip'
     with zipfile.ZipFile(archive, 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zipped:
         zipped.writestr('README.md', guide)
         for name in sorted(payloads):
-            zipped.write(source / name, 'damage-numbers-rs/' + name)
+            zipped.write(source / name, 'damage-numbers/' + name)
     (dest / 'README.md').write_bytes(guide)
     import mod_distribution as distribution
     spec = json.loads((MOD / 'DISTRIBUTION.json').read_text())
@@ -180,16 +187,16 @@ def package():
     evidence = {name: json.loads((BUILD_ROOT / (name + '.json')).read_text())
                 for name in ['tests', 'native-pool', 'parity', 'visual', 'gateways', 'verify']}
     (dest / 'VALIDATION.json').write_text(json.dumps(evidence, indent=2) + '\n')
-    manifest = {'mod': 'damage-numbers-rs', 'version': 'r3', 'status': 'DEVELOPMENT', 'runtime_test': 'NOT RUN',
-                'package_name': 'damage-numbers-rs', 'payloads': payloads, 'archive_sha256': digest(archive)}
+    manifest = {'mod': 'damage-numbers', 'version': 'r26', 'status': 'DEVELOPMENT', 'runtime_test': 'NOT RUN',
+                'package_name': 'damage-numbers', 'payloads': payloads, 'archive_sha256': digest(archive)}
     (dest / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
     (dest / 'SHA256SUMS').write_text(''.join(digest(path) + '  ' + str(path.relative_to(dest)) + '\n'
                                           for path in sorted(dest.rglob('*')) if path.is_file() and path.name != 'SHA256SUMS'))
     with zipfile.ZipFile(archive) as zipped:
         assert zipped.testzip() is None and zipped.read('README.md') == guide
-        assert set(zipped.namelist()) == {'README.md', *('damage-numbers-rs/' + name for name in payloads)}
+        assert set(zipped.namelist()) == {'README.md', *('damage-numbers/' + name for name in payloads)}
         for name, expected in payloads.items():
-            assert hashlib.sha256(zipped.read('damage-numbers-rs/' + name)).hexdigest() == expected
+            assert hashlib.sha256(zipped.read('damage-numbers/' + name)).hexdigest() == expected
             assert digest(package_dir / name) == expected
     for line in (dest / 'SHA256SUMS').read_text().splitlines():
         expected, name = line.split('  ', 1)

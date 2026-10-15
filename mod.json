@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "mod": "damage-numbers-rs",
+  "mod": "damage-numbers",
   "kind": "plugin",
-  "version": "r3",
+  "version": "r26",
   "candidate": false,
-  "package_name": "damage-numbers-rs"
+  "package_name": "damage-numbers"
 }

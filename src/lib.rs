@@ -1,4 +1,4 @@
-//! Damage Numbers r3: Forge callbacks own lifecycle; native gateways only copy evidence.
+//! Damage Numbers r26: Forge callbacks own lifecycle; native gateways only copy evidence.
 // The Switch plugin has no Rust standard library. alloc provides owned buffers
 // through Forge's allocator; portable logic lives in the separate core crate.
 #![no_std]
@@ -14,10 +14,28 @@ mod signatures;
 // register layout is shared with capture::RawFrame and checked by verify.
 core::arch::global_asm!(include_str!("gateway.S"), options(raw));
 
-// The entry macro supplies the loader export and Forge runtime setup. Startup
-// installs capture once; later update/render callbacks process copied events.
-#[forge::entry]
-fn start() {
+// Forge supplies a 70-byte output record; its Rust binding names only the
+// six-byte version prefix. Keep the native name and required loader explicit.
+#[repr(C)]
+struct PluginMetadata {
+    version: forge::ForgeVersion,
+    name: [u8; 64],
+}
+const _: () = assert!(core::mem::size_of::<PluginMetadata>() == 70);
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn forge_onLoad(params: *mut forge::PluginInitParams) {
+    if params.is_null() { return; }
+    let mut name = [0; 64];
+    let label = b"Damage Numbers r26";
+    name[..label.len()].copy_from_slice(label);
+    // SAFETY: Forge owns the writable native metadata record for this call.
+    unsafe { params.cast::<PluginMetadata>().write(PluginMetadata {
+        version: forge::ForgeVersion { major: 1, minor: 5, patch: 1 }, name,
+    }); }
+}
+#[unsafe(no_mangle)]
+pub extern "C" fn forge_onInit() {
+    forge::log::init().expect("Failed to initialize logger");
     runtime::start();
 }
 // no_mangle keeps the name Forge looks up, and extern "C" selects the native

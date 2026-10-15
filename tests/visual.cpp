@@ -125,7 +125,7 @@ void cpp_scene(const Scene& s, ImDrawList* draw) {
 // Missing and malformed artwork must preserve numbers and leave no user
 // textures or open handles after shutdown. Each new context retries once.
 void faults(const char* font_path, const std::string& output) {
-    const auto assets = std::filesystem::path("app:/nativeNX/plugins/damage-numbers-rs");
+    const auto assets = std::filesystem::path("app:/nativeNX/plugins/damage-numbers");
     tracking_rust = true;
     unsigned cases = 0, reused = 0;
     ImGuiContext* previous = nullptr;

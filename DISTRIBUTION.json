@@ -1,17 +1,17 @@
 {
   "schema_version": 1,
-  "mod": "damage-numbers-rs",
+  "mod": "damage-numbers",
   "status": "READY_TO_DISTRIBUTE",
-  "reason": "User confirms r3 working well and approves distribution. Promote the exact tested NRO and external assets without rebuilding; preserve r1/r2/r3 candidates and accepted C++ releases.",
+  "reason": "User explicitly approved the workspace compaction and distribution of the renamed/upstream-maintenance builds after static validation.",
   "publication": {
     "published": false,
     "url": null,
     "date": null
   },
-  "version": "r3",
-  "package_name": "damage-numbers-rs",
-  "archive": "damage-numbers-rs-r3.zip",
-  "runtime_test": "USER_CONFIRMED",
+  "version": "r26",
+  "package_name": "damage-numbers",
+  "archive": "damage-numbers-r26.zip",
+  "runtime_test": "NOT_RUN",
   "gamebanana": {
     "ai_code": {
       "used": true,
@@ -53,63 +53,67 @@
   },
   "approval": {
     "date": "2026-10-15",
-    "basis": "User: working well, ready to distribute. Preserve the unchanged r3 NRO and all three accepted external assets."
+    "basis": "User approved implementation of the full compaction plan, including renamed ready releases and stock Forge maintenance. Earlier gameplay acceptance remains attached to the original hashes."
   },
-  "target": "MHGU Nintendo Switch 1.4.0; compatible Forge 1.5.0 loader and forge-rs 1.5.0 24-byte Hook ABI; Eden/Ryujinx.",
+  "target": "MHGU Nintendo Switch 1.4.0; upstream Forge 1.5.1; Eden/Ryujinx.",
   "limitations": [
+    "This maintenance build has no new gameplay run. Earlier user acceptance applies only to the preserved original binaries; Ryujinx/native Switch coverage remains unconfirmed.",
     "Ryujinx and native Switch gameplay are not confirmed by this report.",
     "The user did not separately enumerate styles, combat sources, quests, save/restart persistence, context replacement or asset failures in gameplay.",
-    "Clean shutdown is unconfirmed. The latest Eden log contains a host SIGSEGV after a forced stop; no cause is assigned to this plugin.",
-    "Loader-version gating remains disabled; an incompatible native Hook ABI can be reached."
+    "Clean shutdown is unconfirmed. The latest Eden log contains a host SIGSEGV after a forced stop; no cause is assigned to this plugin."
   ],
   "dependencies": [
     {
-      "name": "Forge 1.5.0",
-      "scope": "External Switch loader with compatible MHGU SDK bindings and the matching 24-byte Hook ABI. The tested corrected-loader SHA256 is recorded in runtime evidence."
+      "name": "Forge",
+      "version": "1.5.1",
+      "scope": "External unmodified upstream Switch loader; not bundled."
     }
   ],
-  "readme": "mods/damage-numbers-rs/DISTRIBUTION_README.md",
+  "readme": "mods/damage-numbers/README.md",
   "notices": [
-    "mods/damage-numbers-rs/DISTRIBUTION_NOTICES.md",
-    "mods/damage-numbers-rs/LICENSE",
-    "mods/damage-numbers-rs/vendor/forge-rs/LICENSE",
-    "mods/damage-numbers-rs/fonts/OFL.txt",
-    "mods/damage-numbers-rs/vendor/libnx/LICENSE-MIT",
-    "mods/damage-numbers-rs/vendor/crates/cfg-if-1.0.5/LICENSE-MIT",
-    "mods/damage-numbers-rs/vendor/crates/log-0.4.34/LICENSE-MIT",
-    "mods/damage-numbers-rs/vendor/crates/ini_core-0.2.0/license.txt",
-    "mods/damage-numbers-rs/licenses/RUST-MIT.txt",
-    "mods/damage-numbers-rs/licenses/COMPILER_BUILTINS.txt",
-    "mods/damage-numbers-rs/vendor/cimgui/LICENSE",
-    "mods/damage-numbers-rs/vendor/cimgui/imgui/LICENSE.txt"
+    "mods/damage-numbers/DISTRIBUTION_NOTICES.md",
+    "mods/damage-numbers/LICENSE",
+    "mods/damage-numbers/vendor/forge-rs/LICENSE",
+    "mods/damage-numbers/fonts/OFL.txt",
+    "mods/damage-numbers/vendor/libnx/LICENSE-MIT",
+    "mods/damage-numbers/vendor/crates/cfg-if-1.0.5/LICENSE-MIT",
+    "mods/damage-numbers/vendor/crates/log-0.4.34/LICENSE-MIT",
+    "mods/damage-numbers/vendor/crates/ini_core-0.2.0/license.txt",
+    "mods/damage-numbers/licenses/RUST-MIT.txt",
+    "mods/damage-numbers/licenses/COMPILER_BUILTINS.txt",
+    "mods/damage-numbers/vendor/cimgui/LICENSE",
+    "mods/damage-numbers/vendor/cimgui/imgui/LICENSE.txt"
   ],
   "payloads": {
-    "romfs/nativeNX/plugins/damage_numbers_rs.nro": {
-      "source": "build/damage-numbers-rs/candidates/r3/package/romfs/nativeNX/plugins/damage_numbers_rs.nro",
-      "sha256": "c2a04bf1970685aa10cbeebc2e984f471c2f1b4998040ead07d78ae89378eed1"
-    },
-    "romfs/nativeNX/plugins/damage-numbers-rs/OpenSans.ttf": {
-      "source": "build/damage-numbers-rs/candidates/r3/package/romfs/nativeNX/plugins/damage-numbers-rs/OpenSans.ttf",
+    "romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf": {
+      "source": "build/damage-numbers/candidates/r26/package/romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf",
       "sha256": "10b26270e158e51b7f26327aff359a7f7170ccc5904c1c82523bf5e372d5f117"
     },
-    "romfs/nativeNX/plugins/damage-numbers-rs/rise-slash.rgba": {
-      "source": "build/damage-numbers-rs/candidates/r3/package/romfs/nativeNX/plugins/damage-numbers-rs/rise-slash.rgba",
+    "romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba": {
+      "source": "build/damage-numbers/candidates/r26/package/romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba",
       "sha256": "d4724a2caff4c13e91a541f0e7d203c74e05c40dedd6f78c55426ccd3396230e"
     },
-    "romfs/nativeNX/plugins/damage-numbers-rs/wilds-effects.rgba": {
-      "source": "build/damage-numbers-rs/candidates/r3/package/romfs/nativeNX/plugins/damage-numbers-rs/wilds-effects.rgba",
+    "romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba": {
+      "source": "build/damage-numbers/candidates/r26/package/romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba",
       "sha256": "fe15190c98259443a01add264777b2b4bee994bbd58f9c8f5f12338abb399f2b"
+    },
+    "romfs/nativeNX/plugins/damage_numbers.nro": {
+      "source": "build/damage-numbers/candidates/r26/package/romfs/nativeNX/plugins/damage_numbers.nro",
+      "sha256": "12163118f91c38be604564a76a4e06eb62b3195ec96ec195a13125a283c83bf4"
     }
   },
   "evidence": {
     "static": [
-      "mods/damage-numbers-rs/docs/CANDIDATE_RESULTS.json",
-      "mods/damage-numbers-rs/docs/STANDALONE_RESULTS.json"
+      "mods/damage-numbers/EVIDENCE.json"
     ],
     "manual": [
-      "mods/damage-numbers-rs/docs/RUNTIME_RESULTS.json"
+      "mods/damage-numbers/EVIDENCE.json"
     ],
-    "static_summary": "Exact candidate passed host/config/installer/pooled-allocation/parity checks, 24 zero-difference r2 pixel scenes, 16 asset/lifecycle cases, ARM gateways, ABI/import/signature checks and offline standalone validation before promotion.",
-    "manual_summary": "User reports r3 working well and approves distribution. Current installed Eden NRO and all three assets match the tested candidate. Fresh Eden log confirms MHGU 1.4.0 and Forge 1.5.0, but has no plugin startup line and ends with a host SIGSEGV after a forced stop; activation/hook results and clean shutdown are not established by that log."
+    "static_summary": "Current host/native/build evidence and original dated results are recorded in EVIDENCE.json.",
+    "manual_summary": "No new gameplay run. The user approved distribution of this maintenance build; historical gameplay reports and exact hashes remain under EVIDENCE.json historical records."
+  },
+  "support": {
+    "DEVELOPMENT.md": "mods/damage-numbers/DEVELOPMENT.md",
+    "EVIDENCE.json": "mods/damage-numbers/EVIDENCE.json"
   }
 }

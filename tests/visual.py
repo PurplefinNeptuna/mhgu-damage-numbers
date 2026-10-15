@@ -12,7 +12,7 @@ import numpy as np
 env, rust = environment()
 out = WORK_ROOT / 'visual'
 out.mkdir(parents=True, exist_ok=True)
-runtime_assets = out / 'app:/nativeNX/plugins/damage-numbers-rs'
+runtime_assets = out / 'app:/nativeNX/plugins/damage-numbers'
 runtime_assets.mkdir(parents=True, exist_ok=True)
 for name in ['OpenSans.ttf', 'wilds-effects.rgba', 'rise-slash.rgba']:
     shutil.copy2(MOD / 'assets' / name, runtime_assets / name)

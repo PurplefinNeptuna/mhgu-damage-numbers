@@ -75,18 +75,18 @@ pub fn start() {
         match Installed::install() {
             Ok(value) => {
                 log::info!(
-                    "[damage-numbers-rs] r3 loaded: {} Forge hooks",
+                    "[damage-numbers] r26 loaded: {} Forge hooks",
                     value.count()
                 );
                 Some(value)
             }
             Err(reason) => {
-                log::warn!("[damage-numbers-rs] {}", reason);
+                log::warn!("[damage-numbers] {}", reason);
                 None
             }
         }
     } else {
-        log::warn!("[damage-numbers-rs] invalid native clock");
+        log::warn!("[damage-numbers] invalid native clock");
         None
     };
     STATE.get_or_init(|| Shared {
@@ -143,7 +143,7 @@ impl Consumer {
                 self.model.configure(settings);
             }
             Err(reason) => {
-                log::warn!("[damage-numbers-rs] config: {}", reason);
+                log::warn!("[damage-numbers] config: {}", reason);
             }
         }
     }
@@ -332,7 +332,7 @@ pub fn panel() {
     if !render_thread() {
         return;
     }
-    if !forge::imgui::tree_node(c"Damage numbers (Rust)##damage-numbers-rs") {
+    if !forge::imgui::tree_node(c"Damage Numbers##damage-numbers") {
         return;
     }
     // This small Drop guard pairs TreePop with the successful TreeNode even if
@@ -350,7 +350,7 @@ pub fn panel() {
         // The ## suffixes give each setting a stable plugin-specific ImGui identity.
         let mut settings = state.model.settings;
         let mut changed = forge::imgui::checkbox(
-            c"Show damage numbers##damage-numbers-rs",
+            c"Show damage numbers##damage-numbers",
             &mut settings.enabled,
         );
         let preview = match settings.style {
@@ -359,7 +359,7 @@ pub fn panel() {
             Style::Rise => c"Rise",
         };
         if forge::imgui::begin_combo(
-            c"Style##damage-numbers-rs",
+            c"Style##damage-numbers",
             preview,
             forge::sys::imgui::ImGuiComboFlags::None,
         ) {
@@ -381,21 +381,21 @@ pub fn panel() {
             forge::imgui::end_combo();
         }
         changed |= forge::imgui::slider_float(
-            c"Number size##damage-numbers-rs",
+            c"Number size##damage-numbers",
             &mut settings.scale,
             0.5,
             3.0,
             forge::sys::imgui::ImGuiSliderFlags::AlwaysClamp,
         );
         changed |= forge::imgui::slider_float(
-            c"Duration##damage-numbers-rs",
+            c"Duration##damage-numbers",
             &mut settings.lifetime,
             0.4,
             2.0,
             forge::sys::imgui::ImGuiSliderFlags::AlwaysClamp,
         );
         if forge::imgui::button(
-            c"Restore defaults##damage-numbers-rs",
+            c"Restore defaults##damage-numbers",
             forge::sys::imgui::ImVec2::new(0.0, 0.0),
         ) {
             settings = Settings::default();
@@ -408,20 +408,20 @@ pub fn panel() {
             state.feedback = alloc::string::String::from("Settings changed");
         }
         if forge::imgui::button(
-            c"Save settings##damage-numbers-rs",
+            c"Save settings##damage-numbers",
             forge::sys::imgui::ImVec2::new(0.0, 0.0),
         ) {
             state.loaded = true;
             match config::save(state.model.settings) {
                 Ok(()) => {
                     state.feedback = alloc::string::String::from(
-                        "Saved damage_numbers_rs.ini in MHGU's save folder",
+                        "Saved damage_numbers.ini in MHGU's save folder",
                     );
-                    log::info!("[damage-numbers-rs] settings saved");
+                    log::info!("[damage-numbers] settings saved");
                 }
                 Err(reason) => {
                     state.feedback = alloc::format!("Save failed: {}", reason);
-                    log::warn!("[damage-numbers-rs] {}", state.feedback);
+                    log::warn!("[damage-numbers] {}", state.feedback);
                 }
             }
         }
@@ -485,7 +485,7 @@ pub unsafe extern "C" fn dn_gateway_leave(frame: *mut RawFrame) -> u32 {
         })
     });
     let Some(caller) = continuation else {
-        panic!("damage-numbers-rs gateway return scope mismatch");
+        panic!("damage-numbers gateway return scope mismatch");
     };
     // If native LR still contains our substituted address, restore the real
     // caller in the saved register image as well as returning it to assembly.

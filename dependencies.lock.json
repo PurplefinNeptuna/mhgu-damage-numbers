@@ -2,7 +2,7 @@
   "schema_version": 1,
   "forge_rs_revision": "d1865b68e9b194eb3eacc8bd71bbf601a5fac63e",
   "files": {
-    "Cargo.lock": "dcd89a199e1724fb314d9400ed9c42c66180f5da0e2a820b888463ce662b5c07",
+    "Cargo.lock": "bdbac3f1e1e8c614aeb4b4b194099500dc87a65d782c1dad0669eb897b262134",
     "licenses/COMPILER_BUILTINS.txt": "ab6eec6caf0fa5775e411c7a8bc6a45c4ef2956b0980b157ab74fc5cd62a928b",
     "licenses/RUST-MIT.txt": "b85dcd3e453d05982552c52b5fc9e0bdd6d23c6f8e844b984a88af32570b0cc0",
     "research/native-hook.h": "032abe55c5dee9d2fc3090ac355004b5f329a8361c2276cff2668a3487acfd9a",
@@ -2054,7 +2054,7 @@
     "vendor/forge-rs/forge-macros/README.md": "900c0843b9a53487146973d920b8f47a2f50e1b6ea35648020bea1a1cea12ec2",
     "vendor/forge-rs/forge-macros/src/hook.rs": "de6dfa3d78d137bca9b1688a3c7563004a5ae52de5e6b1623b9b16a22b42610d",
     "vendor/forge-rs/forge-macros/src/ini.rs": "3cc4aec2203ba62a0acc3d014f104d7511dffbc1c74acf3e074e86828357d967",
-    "vendor/forge-rs/forge-macros/src/lib.rs": "650763ac91092eedbbe9525b52a07e733845e278a29c0e763ec28c1f23260b41",
+    "vendor/forge-rs/forge-macros/src/lib.rs": "8a3f2d3cf83ec53c6738da8dc55e9cf1e1e5615f2c511b84b1ca9aaeaa633b9c",
     "vendor/forge-rs/forge-macros/src/pure_virtual.rs": "ab546cd190fa08ed8e0b4998c5c7904bc7c4f2fe044b6bc3271912d189950f5c",
     "vendor/forge-rs/forge-rt/Cargo.toml": "ad0cac71a80b41a0992e3b0ff80491929f4f4c191513f81febecd8869885abe4",
     "vendor/forge-rs/forge-rt/README.md": "c351aa01b4340e32dcaa30a4be75301f6d4ef920bd673cbdd753aed804dd67f7",
@@ -2103,7 +2103,7 @@
   "inputs": {
     "main": "b3935415499549adaf4c0e89822831daa175cfd456a7990791c79be3997645ef",
     "sdk": "9a9b7035266637ee693a32da6b0fde54bda00e897bef05b1c8d8cda30f8ac8b0",
-    "forge": "1e452243cc85108a2271dda99167f9728d051887075766b38e36a1ce94a29b42"
+    "forge": "469f425dd02a37b7a5d84ddde5f769922bc5e0d5fbc8adb0ca270e2c0773cd7d"
   },
   "gateway_sha256": "91438457912a25107948045f43c05e9003299259ad5851853a929cbcf3405a0d",
   "tool_sha256": {

@@ -1,4 +1,27 @@
-# Build and validate
+# Development and research
+
+Current Switch build: r26 with upstream Forge 1.5.1. Earlier version claims below retain their recorded scope.
+
+## Damage Numbers in Rust
+
+`r3` uses Forge 1.5.0 and forge-rs 1.5.0 for the Rust port of Damage Numbers r25. It retains the eight capture sites, ownership and damage rules, duplicate suppression, projection and placement, and Wilds, Rise and Classic presentation. Defaults are enabled, Wilds, size 1.0 and lifetime 0.9 seconds. The unchanged r3 payload is READY_TO_DISTRIBUTE after user acceptance on 2026-10-15. Coverage and log limits are recorded in [runtime evidence](EVIDENCE.json).
+
+[Player guide](README.md), [build instructions](DEVELOPMENT.md), [code walkthrough](DEVELOPMENT.md), [validation scope](DEVELOPMENT.md) and [r3 results](EVIDENCE.json) and [dependency provenance](THIRD_PARTY.md).
+
+The standalone workflow is `./build.sh doctor`, `prepare`, `build`, `test`, `verify`, `package`, and `export --output DEST`. `test --host` omits ARM checks. Preparation, builds and packaging do not install or activate the plugin. The runtime package contains `damage_numbers.nro`, `OpenSans.ttf`, and two external RGBA artwork files. Ordinary builds copy prepared assets; the runtime contains no artwork payloads or compression decoder. Existing C++ source and r25 packages remain preserved.
+
+Forge owns entry, callbacks, logging, memory lookup, thread-local storage, singleton lookup, configuration, Patch objects, native trampoline construction and ImGui wrappers. Specialized font/texture operations use its raw ImGui bindings. TLS borrows end before assembly invokes native continuations. Queued records live in independent process-lifetime mailboxes, so thread teardown cannot invalidate them.
+
+The vendored Hook binding matches Forge 1.5.0's native ARM32 declaration: 24 bytes, with context and its update cell. Forge shares trampoline storage across hooks. `verify` compares compiler-derived Rust and C++ layouts in the actual target artifact. Assembly preserves NZCVQ and all GPR/VFP/FPSCR state under the recorded eight-site GE audit.
+
+The load callback leaves the loader requirement record untouched, so Forge version checks do not gate startup. The build targets the 1.5.0 native ABI; other loader layouts can be incompatible. Initialization takes no arguments, matching the loader callback. Game-code signatures and instruction checks remain in place. The preserved [r1 results](EVIDENCE.json) describe the older candidate.
+
+The prepared font retains Open Sans Semibold naming. Its glyph outlines, hinting, metrics and weight match r2; only naming metadata/checksums changed. Artwork pixels and atlas geometry are unchanged. The selected styles appear as Wilds, Rise, Classic; stored style IDs remain stable. Missing artwork omits its effects while readable damage numbers continue. Failure messages are deduplicated across context replacements.
+
+The canonical local release is `build/damage-numbers/releases/r26/damage-numbers-r3.zip`. Use the coordinating workspace’s `python3 scripts/mod_distribution.py package damage-numbers` and full `check` for approved delivery. The mod-local packaging command retains the development-candidate workflow.
+
+
+## Build and validate
 
 Copy `build.local.example.json` to ignored `build.local.json` and supply the tool paths and copied native inputs. Use Rust nightly-2026-10-02 with rust-src, the pinned cargo-forge 1.4.1 converter built from revision `7f572ed8d0e0a6cfc562571fdbc1ad57441a8438` (retained independently of the 1.5.0 runtime crates), devkitARM GCC 15.2.0, and the Python dependencies recorded in requirements files. The Rust compiler and cargo-forge binary fingerprints are in `dependencies.lock.json`. No installed emulator package is an input.
 
@@ -16,11 +39,11 @@ Copy `build.local.example.json` to ignored `build.local.json` and supply the too
 | `./build.sh package` | Require complete tests for the exact NRO, then verify the candidate ZIP and adjacent guides/notices/checksums. |
 | `./build.sh export --output DEST` | Export the explicit source allowlist to an unused directory. |
 
-Workspace outputs are under `build/damage-numbers-rs/candidates/r3/` and `work/damage-numbers-rs/candidates/r3/`. Cargo caches, the unstripped ELF and converter output stay under `work/damage-numbers-rs/candidates/r3/cargo-target/`. The pinned converter requires a temporary `target` symlink and loose NRO in the source root while building; the wrapper removes both when the converter exits, including on failure. An independent source export uses its own ignored build/work folders. Registry sources are vendored, including metadata needed by this nightly's build-std resolver. Host tests explicitly load the source-only Cargo configuration so they do not inherit the ARM target or build-std settings. Default builds and tests are offline.
+Workspace outputs are under `build/damage-numbers/candidates/r26/` and `work/damage-numbers/candidates/r26/`. Cargo caches, the unstripped ELF and converter output stay under `work/damage-numbers/candidates/r26/cargo-target/`. The pinned converter requires a temporary `target` symlink and loose NRO in the source root while building; the wrapper removes both when the converter exits, including on failure. An independent source export uses its own ignored build/work folders. Registry sources are vendored, including metadata needed by this nightly's build-std resolver. Host tests explicitly load the source-only Cargo configuration so they do not inherit the ARM target or build-std settings. Default builds and tests are offline.
 
 After adding source files, refresh the allowlist with `python3 scripts/export_source.py --refresh`. Exports omit native game inputs, outputs, private configurations, caches and Git metadata. They retain dependency bytes exactly so Cargo checksum validation remains meaningful. Supply your toolchain/input paths in the exported repo's own configuration. No sibling mod import is needed.
 
-The root distribution packager reserves releases for approved READY_TO_DISTRIBUTE records. The mod-local `package` command retains the candidate workflow under `candidates/r3/delivery/`. For the approved unchanged r3 release, use `python3 scripts/mod_distribution.py package damage-numbers-rs`; the canonical ZIP is under `build/damage-numbers-rs/releases/r3/`. Run `python3 scripts/mod_distribution.py check` from the coordinating workspace to validate every registered mod and preserve the existing releases. User gameplay acceptance and current log limits are recorded in `docs/RUNTIME_RESULTS.json`. Packaging does not install, activate, publish or push.
+The root distribution packager reserves releases for approved READY_TO_DISTRIBUTE records. The mod-local `package` command retains the candidate workflow under `candidates/r3/delivery/`. For the approved unchanged r3 release, use `python3 scripts/mod_distribution.py package damage-numbers`; the canonical ZIP is under `build/damage-numbers/releases/r26/`. Run `python3 scripts/mod_distribution.py check` from the coordinating workspace to validate every registered mod and preserve the existing releases. User gameplay acceptance and current log limits are recorded in `docs/RUNTIME_RESULTS.json`. Packaging does not install, activate, publish or push.
 
 forge-rs source is pinned at `d1865b68e9b194eb3eacc8bd71bbf601a5fac63e`; the native hook fixture is pinned to Forge `1671ad1526f6df5ee8d6e61a03518e0a427e202e`. The copied loader input has SHA-256 `1e452243cc85108a2271dda99167f9728d051887075766b38e36a1ce94a29b42`. The native fixture compiles the actual allocator with host JIT/TLS/cache doubles, omits ARM barriers, and uses ASan/UBSan. LeakSanitizer is disabled under sandbox tracing; the fixture counts creation and closure of every mock JIT chunk. These checks do not measure emulator allocation or establish gameplay acceptance.
 
@@ -31,3 +54,222 @@ The owned `assets/` folder contains the exact prepared runtime files and their h
 External RGBA files are opened through Forge's exposed ImGui APIs, length-checked before texture allocation, read directly into the pixel buffer, and closed on every return. Wilds loads during initialization; Rise loads on its first critical effect. Failed assets are not retried in the same context. Each new context retries loading, while failure logs remain deduplicated for the resource owner's process lifetime. Independent context invalidation prevents stale font handles even when no artwork texture could be registered.
 
 The r3 standalone build, full tests and packaging passed offline with an empty Cargo home. NRO hashes differ across build roots; both exact artifacts passed complete validation. See `docs/STANDALONE_RESULTS.json` for exact fingerprints.
+
+
+## Code walkthrough
+
+### From a native call to a visible number
+
+`src/lib.rs` declares Forge's entry and rendering callbacks. Startup creates the stock `ThreadLocal<CaptureState>`, then validates the exact game windows and installs all eight ordinary hooks. Capture becomes active only after the last hook succeeds.
+
+`src/gateway.S` saves a 328-byte stack image before Rust runs: continuation scratch at 0, CPSR/FPSCR at 8/12, d16–d31 at 16, d0–d15 at 144, and r0–r12/LR at 272. Native stack arguments remain above the original SP. Around hooks replace the saved LR only after `CaptureState::enter` records the caller; the shared after gateway pops that scope and resumes its exact caller. Camera and melee HZV taps observe registers before the displaced instructions execute. `core/src/capture.rs` explains each copied payload and nested scope.
+
+`src/runtime.rs` obtains a short mutable TLS borrow for each helper and releases it before assembly branches to the original trampoline. Nested original calls can therefore access the same thread-local state again without an overlapping Rust borrow. First access may allocate through the stock ThreadLocal helper. Capture then uses fixed storage: 64 scopes, 16 producer mailboxes with 256 records each, and copied numeric payloads.
+
+Mailboxes belong to static plugin storage and are never recycled during the process. Each producer owns one slot; the consumer owns each Cursor. Thread exit drops its CaptureState while queued records remain valid. Atomic payload words and publication tickets reject torn snapshots, and overflow advances to the newest available records. Pool exhaustion passes through without capturing. This matches the r25 limit of 16 producer contexts.
+
+The consumer copies records into `core/src/lib.rs`'s bounded Model: 256 pending events, 128 visible numbers and 512 recent identities. It applies player/time ownership, environmental-source rules, bounce feedback and duplicate suppression. Player or camera changes reset the display epoch. Game identities are used for comparisons only; the rendering code never follows captured object pointers.
+
+`core/src/presentation.rs` projects copied matrices, reserves peak animation bounds, chooses stable placement, and produces DrawNumber values. It contains the three animation styles and r25 size constants. `src/render.rs` measures actual baked glyphs and submits those draw values to ImGui. Effects precede digit fills, preserving r25 ordering, colors, outlines, stars and Rise slash geometry.
+
+### Hook and asset lifetimes
+
+`src/hooks.rs` checks the complete signature windows, instruction relocation whitelist, alignment, bounds and reserved/overlapping redirects before calling Forge. Disabled upstream Patch objects snapshot all originals. Forge creates the eight ordinary hooks in its shared pool; the installer checks each returned ARM trampoline's displaced words, return jump and executable mapping before publishing its continuation. Capture activates only after every branch and synchronization passes.
+
+Rollback checks each current word against the saved original and this plugin's branch. A pair containing foreign bytes is left untouched. For owned or partially published pairs, the Patch enable/disable operations restore the snapshot, followed by cache synchronization and readback. Snapshots remain disabled outside that restoration, so their destruction cannot overwrite foreign modifications. Valid continuations are retained even after a later failure, and incomplete rollback requires restart. There is no live installation, uninstall or trampoline release. The Forge pool owns all trampoline memory until process exit; retaining returned Hook structs is unnecessary.
+
+Eight ordinary ARM hooks use 16 bytes each, totaling 128 bytes of slots in Forge's shared pool of at most two 16 KiB chunks. The host fixture confirms sharing and failure behavior against the pinned native allocator. Actual emulator pool use remains a runtime check. The load callback is a no-op, leaving the loader's requirement record zero; initialization uses the loader's zero-argument ABI.
+
+Font loading uses `ImFont::load_with` from RomFS OpenSans.ttf. Its configuration allows load errors to return a fallback instead of asserting. The atlas owns the loaded file data. Each file-loaded RGBA texture is registered with ImGui and has a shutdown callback to unregister and destroy it. Context epochs prevent initialization from keeping pointers after shutdown, including when an allocator reuses a context address. Repeated initialization of a live context does not load duplicate assets.
+
+### Settings
+
+`src/config.rs` derives upstream IniSerialize/IniDeserialize. Individual field wrappers define true, 1.0 and 0.9 defaults, and reject invalid or nonfinite values; Style defaults to Wilds. Once save data and MtFile are available, stock `config::load` reads the file or creates it with defaults. Save uses stock ScopedMount and Writer. Reset updates session settings; Save persists them. These are the explicitly requested forge-rs saving semantics, superseding the older custom persistence rules for this mod.
+
+The unframed settings tree is closed by default. Its guard balances TreePop on every opened path. Free-render processing runs independently of whether that tree is open.
+
+### Unsafe boundaries
+
+Native address access checks mappings and copies values into owned numeric structures. FFI and assembly requirements are documented beside each unsafe block. Compiler-derived layout data stays in the NRO for verification against the pinned native headers. Raw ImGui operations require an active context, current fonts/draw lists and registered texture lifetime. The mailbox representation contains no padding, references, booleans or Rust enums: every copied word has a valid integer/float representation.
+
+### Prepared assets and pixel parity
+
+Only the numeric font scale and atlas rectangles remain in `src/assets.rs`. Font and bitmap bytes live in the package's external asset files. File sizes are checked before allocation; the exposed ImGui file APIs read directly into the owned texture buffer, and the local file guard closes every successful open. Short reads destroy the incomplete texture. Wilds loads eagerly and Rise once on first use. Missing textures omit their effects without disabling the model or digits.
+
+A separate context-shutdown callback advances the generation even if no texture loaded. Texture callbacks only unregister/free their own allocations. This makes font/resource invalidation independent of successful artwork loading and prevents stale handles if a context address is reused. Warning flags survive reinitialization, while resource pointers and load attempts reset.
+
+Ordinary text, image, line and clip operations use forge-rs DrawList wrappers. Raw access remains for glyph ink bounds, Rise's exact vertex stretch, texture registration and quad drawing. No animation/layout formula changed. Style selection is Wilds, Rise, Classic, with the existing internal numeric IDs retained for compatibility.
+
+
+## Validation scope
+
+Host tests exercise copied-value capture nesting, scope overflow/quarantine, ownership/source policy, bounce association, bounded model/mailbox overflow, duplicate suppression, disabled settings, concurrent publication and queued records surviving thread exit.
+
+The config harness compiles the pinned upstream config/INI modules and derives, plus production src/config.rs, against test MtFile and counted-mount I/O. It checks automatic default-file creation, individual defaults and invalid parsing, all style round trips, Save and Reset.
+
+The hook harness compiles production src/hooks.rs and the stock Patch wrapper against a native API double. It rejects invalid recipes, reserved/overlapping spans and changed game signatures; injects failures before, during and after branch publication at all eight sites; checks invalid/non-executable trampoline and returned-record evidence; and exercises cache, restoration and foreign-change failures. Owned changes must roll back and capture must remain disabled on failure. Foreign changes remain untouched, valid continuations remain published and incomplete restoration requires restart. Success activates all eight.
+
+The native pool fixture compiles pinned Forge hook.c with JIT/TLS/cache doubles and omitted ARM barriers. Eight ordinary hooks share one chunk and use 128 bytes of slots. Allocation failure, rejected fallback and full two-chunk capacity preserve target bytes. ASan/UBSan run; mocked JIT allocations are counted and closed because LeakSanitizer cannot run under sandbox tracing. This is host evidence, not measured emulator allocation.
+
+The C++ r25 oracle comparison covers 243 combinations of style, critical outcome, HZV and age, producing 1,944 draw records. Exact identities/colors/text and bounded float differences are checked. Another 2,800 cases compare source/owner policy, finalized damage/critical outcomes and native matrix projection against r25, including invalid matrices, perspective, translation and clipped points. The real renderer harness compiles production src/render.rs with pinned Forge font/draw wrappers and actual ImGui 1.92.8. All three styles are compared against 24 frozen r2 scenes at 720p/1080p and minimum/maximum scales, including textures, glyph atlas bytes, draw commands, indices, vertices and exact composited pixels. The unchanged C++ oracle comparison retains its historical tolerance. Repeated initialization is checked against duplicate resource creation. File-operation doubles inject short reads and count handles; missing/wrong-size assets, font fallback, context replacement and shutdown cleanup are exercised.
+
+The ARM fixture executes all nine gateways from the production NRO in Unicorn 2.1.4. Its helper doubles deliberately clobber registers, floating-point state and flags; it checks all GPRs, d0–d31, FPSCR, NZCVQ, LR/SP, native stack arguments, around-return paths, and all 16 GE patterns with preserved and changed GE. Helpers are doubles; this is not a native gameplay run. The eight-site GE liveness audit applies to the pinned game and unchanged gateway sites.
+
+`verify` additionally compares compiler-derived Rust/C++ ARM32 Hook size/alignment/pointer offsets, saved frame, ImGui/font/texture/draw layouts; checks callback exports, all strong imports against actual main/SDK/Forge exports, exact game signatures, asset receipt hashes and nine NZCVQ-only restoration instructions.
+
+Gameplay, config persistence across a real restart, loader allocation limits and emulator lifecycle remain manual checks. No installation, activation or game launch is performed by these commands.
+
+
+## GE preservation audit
+
+Checked 2026-10-06 for the eight current MHGU 1.4.0 capture hooks and the
+released r16 plugin. GE restoration is unnecessary for these hook locations.
+The gateway's general transparent-state contract originally included GE, but
+the captured game computations do not consume it.
+
+The bounded compatibility change is `msr APSR_nzcvqg, r2` to
+`msr APSR_nzcvq, r2` in the shared RESTORE macro. This preserves NZCVQ and
+leaves GE untouched by that instruction. It does not zero GE. This audit did
+not change the production source, release package or installed plugin.
+
+### Binary identity
+
+- Copied original main NSO: `work/damage-numbers/inputs/main`, SHA-256
+  `b3935415499549adaf4c0e89822831daa175cfd456a7990791c79be3997645ef`.
+- Main build ID: `FB08F1D20FD1204FE7070672777F869B`.
+- Verified decompressed main image: SHA-256
+  `24c208c395c65727b21b5fa91af8381396e70cf421b0fcfee0345d8743298110`.
+- Released NRO and current Ryujinx-installed NRO both have SHA-256
+  `5f59506f88d5156ed8db7cffd5747651717b3bab7ecdfd398800a0402fe4f33e`.
+  Installed path:
+  `<recorded Ryujinx r16 package>/romfs/nativeNX/plugins/damage_numbers_capture.nro`.
+- `work/damage-numbers/open-assets/plugin.elf` SHA-256
+  `589f0b39e9e80f5321cbd1e2725a62ba6bc11b9f50a7d780707065de8ed245c0`.
+  Converting this ELF with the existing `elf_to_nro` reproduces the released
+  NRO hash, tying the callback disassembly to the installed binary.
+
+Installation presence does not establish activation or a gameplay result.
+
+### Original game instructions
+
+Function boundaries came from the saved Ghidra functions index, with image
+base `0x009c9000` subtracted. Instruction bytes came from the verified original
+NSO, avoiding the known byte discrepancy in the Ghidra database.
+
+| Hook | Main-relative offset | Location | Enclosing function bytes |
+| --- | --- | --- | --- |
+| 0 | `0x170968` | Collision function entry, around hook | 15,868 |
+| 1 | `0x9d6f8` | Damage function entry, around hook | 432 |
+| 2 | `0x2a87a8` | Feedback function entry, around hook | 680 |
+| 3 | `0xb8909c` | Viewport function entry, around hook | 2,128 |
+| 4 | `0x885844` | Camera function entry, before-only hook | 4,424 |
+| 5 | `0x16dd7c` | Melee hitzone function tail, before-only hook | 284 |
+| 6 | `0x16dc6c` | Melee hitzone function entry, around hook | 284 |
+| 7 | `0x178660` | Shot hitzone function entry, around hook | 500 |
+
+None of these complete function bodies contains a `SEL`, `MRS`, `MSR`, or
+GE-setting parallel integer add/subtract instruction. Ordinary comparisons,
+conditional branches and floating-point calculations do not consume GE[3:0].
+
+The sole interior tap is particularly narrow. Immediately before it, the game
+compares floating-point values and selects the result:
+
+```asm
+0x16dd6c: vcmpe.f32 s0, s2
+0x16dd70: vmrs APSR_nzcv, fpscr
+0x16dd74: movwlt r0, #1
+0x16dd78: vselge.f32 s0, s0, s2
+0x16dd7c: strb r0, [r4]                 // hook begins here
+0x16dd80: vpop {d8-d12}
+0x16dd84: pop {r4, r5, r11, pc}
+```
+
+`vselge` uses the signed condition `N == V`, not the four GE bits. That selection
+has already completed when the tap runs. The continuation stores the integer
+result and returns; it does not read GE or perform another flag-dependent
+selection. Preserving the captured registers and floating-point state still
+matters. Instruction semantics:
+[Arm instruction guide, VSEL](https://documentation-service.arm.com/static/6245c734b059dc5ff9a8bdab),
+[Arm VFP condition codes](https://developer.arm.com/community/arm-community-blogs/b/architectures-and-processors-blog/posts/condition-codes-4-floating-point-comparisons-using-vfp).
+
+At public function interfaces, the Arm calling convention defines NZCVQ and
+GE as unspecified on entry and return. See
+[AAPCS32, section 6.1.1](https://github.com/ARM-software/abi-aa/blob/main/aapcs32/aapcs32.rst#611core-registers).
+This ABI rule alone would not justify removing preservation at an arbitrary
+interior tap; the exact continuation above supplies the additional evidence.
+
+A broader raw-encoding scan of the 20,913,644-byte main text found no ARM or
+Thumb `SEL` candidate and no GE-access candidate inside the 47,986 indexed
+functions. Eight ARM MRS/MSR-shaped words outside those indexed ranges were
+retained as candidates, not asserted to be executable instructions. This
+scan is supporting evidence, not a proof that every module or unindexed byte
+is GE-free.
+
+### Capture helper instructions
+
+Disassembly of the matching r16 ELF found no GE arithmetic or GE consumers in
+the compiled C++ code. Its nine `MRS`/`MSR` pairs belong to the eight assembly
+entries and the shared return gateway. No C++ callback reads `RawFrame::cpsr`.
+
+Capture helpers also call imported `memcpy`, SDK TLS/clock functions and a
+private query-memory SVC wrapper. The imported implementations were not
+proved GE-preserving in this audit. They may clobber GE under the calling
+convention; GE is dead at the audited game continuations, so correctness does
+not depend on those callees preserving it.
+
+The comment marking gateways 6 and 7 as fixture-only is stale:
+`capture_install()` currently installs all eight signature/detour entries.
+Both were included in this audit.
+
+### Scratch execution checks
+
+The existing compiled gateway fixture was verified against its manifest and
+source hashes. Its original binary SHA-256 is
+`ffe6fb1e27c8e8483c622667fc96e12a9f6eef38c3ba70e860bccfccbddb8928`.
+
+A scratch copy changed only nine instruction words: `e12cf002` (NZCVQ+GE)
+to `e128f002` (NZCVQ). Scratch SHA-256:
+`03a310467d9f72f897caf0d28052f22d506b35ce6193d1fe1bebce694557b36f`.
+
+- The unchanged gateway passed 9,031 existing checks across 1,769 fixture calls.
+- The scratch gateway passed the same 9,031 checks and 1,769 calls with GE
+  excluded from the deliberately stronger full-state comparison. Integer
+  registers, all d0-d31, NZCVQ, FPSCR, LR, SP, stack arguments, nesting/capacity
+  behavior and copied native damage/hitzone results remained checked.
+- All 16 GE patterns across all eight entries passed 128 additional full-state
+  comparisons when the helper stub preserved GE.
+- Another 128 comparisons deliberately changed GE in the helper. The scratch
+  gateway correctly left that changed GE in place while all other checked
+  state matched. This confirms the reduced contract explicitly.
+
+Evidence is retained under `work/damage-numbers/ge-audit/`, including original
+hook-function disassembly, encoding candidates, scratch gateway binary and
+`gateway-probe.json`. Tests used pinned Unicorn 2.1.4. Capture callbacks and
+native service dependencies are fixture stubs; these are not live Ryujinx or
+Eden gameplay tests.
+
+### R17 implementation — 2026-10-06
+
+The audited change is now applied in the production `gateway.S` restore macro.
+The original r16/scratch evidence above remains a historical record.
+[R17 compatibility notes](DEVELOPMENT.md) document the reduced
+contract, production binary comparison, fresh fixtures and user-confirmed
+Eden/Ryujinx gameplay. The stale entries-6/7 comment is corrected; all eight entries
+remain production hooks. No hook location or captured frame layout changes.
+
+The original Ryujinx-Nextendo translator at reference commit
+`05577ab543f4322cb7534c1f5caca0e0079791bf` handles MSR mask 8 (NZCVQ) and throws
+`APSR_g` for mask 4 (GE). The proposed instruction therefore avoids this
+specific unsupported translation path. Its MRS also omits GE, but the capture
+helpers do not consume the saved GE bits.
+
+### Limits
+
+This result applies to the recorded game build, r16 helper binary and current
+eight hook sites. Recheck new hooks, especially a tap between GE-setting
+parallel arithmetic and a `SEL`, or code that reads GE through `MRS`.
+A generic transparent gateway should retain GE preservation when such
+liveness has not been ruled out. Gameplay compatibility of a changed NRO
+still requires a user-run emulator test.
+
+R18 revalidation (2026-10-07): gateway source is byte-identical to the audited r17 assembly. All nine emitted NZCVQ restores and all original/compiled gateway state fixtures passed. No hook site or continuation changed; r18 carries this liveness conclusion. This is static/compiled evidence without a fresh gameplay run.

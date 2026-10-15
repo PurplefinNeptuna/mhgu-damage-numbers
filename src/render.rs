@@ -66,7 +66,7 @@ impl Resources {
         // Use Forge's actual RomFS mount prefix rather than assuming app:.
         // CString supplies the NUL-terminated path required by the native font loader.
         let path = alloc::ffi::CString::new(alloc::format!(
-            "{}:/nativeNX/plugins/damage-numbers-rs/OpenSans.ttf",
+            "{}:/nativeNX/plugins/damage-numbers/OpenSans.ttf",
             forge::fs::romfs::mount_point()
         ))
         .unwrap();
@@ -89,11 +89,11 @@ impl Resources {
         }
         if self.font.is_none() && !self.font_warned {
             self.font_warned = true;
-            log::warn!("[damage-numbers-rs] digit font unavailable; using Forge font");
+            log::warn!("[damage-numbers] digit font unavailable; using Forge font");
         }
         if self.wilds.is_null() && !self.wilds_warned {
             self.wilds_warned = true;
-            log::warn!("[damage-numbers-rs] effect atlas unavailable");
+            log::warn!("[damage-numbers] effect atlas unavailable");
         }
     }
     /// Read one fixed-size RGBA asset directly into ImGui's texture buffer.
@@ -123,7 +123,7 @@ impl Resources {
                 return ptr::null_mut();
             }
             let path = alloc::ffi::CString::new(alloc::format!(
-                "{}:/nativeNX/plugins/damage-numbers-rs/{}",
+                "{}:/nativeNX/plugins/damage-numbers/{}",
                 forge::fs::romfs::mount_point(),
                 filename.to_str().unwrap()
             ))
@@ -318,7 +318,7 @@ impl Resources {
                 self.rise = self.texture(c"rise-slash.rgba", 64, 512);
                 if self.rise.is_null() && !self.rise_warned {
                     self.rise_warned = true;
-                    log::warn!("[damage-numbers-rs] Rise slash unavailable");
+                    log::warn!("[damage-numbers] Rise slash unavailable");
                 }
             }
             if self.rise.is_null() {

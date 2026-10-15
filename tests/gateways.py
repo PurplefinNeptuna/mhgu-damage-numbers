@@ -11,13 +11,13 @@ from paths import MOD,BUILD_ROOT,CARGO_TARGET,CONFIG
 import unicorn
 from unicorn import arm_const as arm
 MODULE,ENGINE,RETURN,STACK=0x31000000,0x32000000,0x32000100,0x41010000
-elf=CARGO_TARGET/'armv7a-none-eabi/release/libdamage_numbers_rs.so'
+elf=CARGO_TARGET/'armv7a-none-eabi/release/libdamage_numbers.so'
 nm=Path(CONFIG['devkitarm'])/'bin/arm-none-eabi-nm'
 names={}
 for line in subprocess.check_output([nm,'-n',elf],text=True).splitlines():
  parts=line.split()
- if len(parts)==3 and parts[2].startswith('dn_gateway_'):names[parts[2]]=MODULE+int(parts[0],16)
-data=(BUILD_ROOT/'package/romfs/nativeNX/plugins/damage_numbers_rs.nro').read_bytes()
+ if len(parts)==3 and (parts[2].startswith('dn_gateway_') or parts[2]=='forge_onLoad'):names[parts[2]]=MODULE+int(parts[0],16)
+data=(BUILD_ROOT/'package/romfs/nativeNX/plugins/damage_numbers.nro').read_bytes()
 regs=[getattr(arm,'UC_ARM_REG_R'+str(i))for i in range(13)]
 ds=[getattr(arm,'UC_ARM_REG_D'+str(i))for i in range(32)]
 checks=0
@@ -65,5 +65,20 @@ for site in range(8):
    assert bytes(u.mem_read(STACK,64))==stack
    assert callbacks==(['entry']if site in [4,5]else['entry','return'])
    checks+=1
+# Execute the loader callback against its actual native buffer, including
+# canaries so a metadata rename cannot overrun Forge's adjacent storage.
+u=unicorn.Uc(unicorn.UC_ARCH_ARM,unicorn.UC_MODE_ARM);u.ctl_set_cpu_model(arm.UC_CPU_ARM_MAX)
+u.reg_write(arm.UC_ARM_REG_C1_C0_2,0xf00000);u.reg_write(arm.UC_ARM_REG_FPEXC,0x40000000)
+u.mem_map(MODULE,((len(data)+4095)//4096+64)*4096);u.mem_write(MODULE,data)
+u.mem_map(ENGINE,4096);u.mem_map(0x41000000,0x20000)
+params=ENGINE+0x200;u.mem_write(params-8,b'\xa5'*86)
+u.reg_write(arm.UC_ARM_REG_SP,STACK);u.reg_write(arm.UC_ARM_REG_LR,RETURN)
+u.reg_write(arm.UC_ARM_REG_R0,params)
+u.emu_start(names['forge_onLoad'],RETURN,count=1000)
+assert struct.unpack('<3H',u.mem_read(params,6))==(1,5,1)
+assert bytes(u.mem_read(params+6,64)).rstrip(b'\0')==b'Damage Numbers r26'
+assert bytes(u.mem_read(params-8,8))==bytes(u.mem_read(params+70,8))==b'\xa5'*8
+u.reg_write(arm.UC_ARM_REG_R0,0);u.reg_write(arm.UC_ARM_REG_LR,RETURN)
+u.emu_start(names['forge_onLoad'],RETURN,count=1000)
 report={'status':'PASSED','compiled_nro':True,'calls':checks,'gateways':9,'preserved':['r0-r12','lr','sp','d0-d31','FPSCR','NZCVQ','native stack arguments'],'GE':'all 16 preserved and deliberately changed callback patterns checked; not restored','runtime_test':'NOT RUN'}
 (BUILD_ROOT/'gateways.json').write_text(json.dumps(report,indent=2)+'\n');print(report)

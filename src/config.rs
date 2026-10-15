@@ -90,7 +90,7 @@ impl From<Settings> for Config {
         }
     }
 }
-pub const FILENAME: &str = "damage_numbers_rs.ini";
+pub const FILENAME: &str = "damage_numbers.ini";
 // Stock load reads the plugin-specific file or automatically writes defaults
 // when needed. Consumer::load_config calls it once storage becomes available.
 pub fn load() -> Result<Settings, alloc::string::String> {

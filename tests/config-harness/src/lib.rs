@@ -102,7 +102,7 @@ mod tests {
         clear();
         let loaded = settings::load().unwrap();
         assert_eq!(loaded, Settings::default());
-        let data = FILES.with(|files| files.borrow()["savedata:/damage_numbers_rs.ini"].clone());
+        let data = FILES.with(|files| files.borrow()["savedata:/damage_numbers.ini"].clone());
         let text = String::from_utf8(data).unwrap();
         assert!(text.contains("enabled = true") && text.contains("lifetime = 0.9"));
         assert_eq!(MOUNTS.with(|v| v.get()), 0);
@@ -127,7 +127,7 @@ mod tests {
         clear();
         FILES.with(|files| {
             files.borrow_mut().insert(
-                "savedata:/damage_numbers_rs.ini".into(),
+                "savedata:/damage_numbers.ini".into(),
                 b"[DamageNumbers]\nscale=NaN\nlifetime=99\nstyle=invalid\n".to_vec(),
             )
         });

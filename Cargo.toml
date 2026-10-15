@@ -1,5 +1,5 @@
 [package]
-name = "damage-numbers-rs"
+name = "damage-numbers"
 version = "0.1.0"
 edition = "2024"
 

@@ -57,7 +57,7 @@ def native_layouts(compiler):
 def verify():
     doctor()
     package = BUILD_ROOT / 'package/romfs/nativeNX/plugins'
-    data = (package / 'damage_numbers_rs.nro').read_bytes()
+    data = (package / 'damage_numbers.nro').read_bytes()
     nro = Nro(data)
     exports = {name.decode() for name, entry, *_ in nro.symbols if name and entry[5] and entry[3] >> 4 == 1}
     contract = (MOD / 'link/exported.txt').read_text().split('global:')[1].split('local:')[0]
@@ -89,7 +89,7 @@ def verify():
     if digest(MOD / 'src/gateway.S') != lock['gateway_sha256']:
         raise ValueError('Audited gateway source changed')
     compiler = Path(CONFIG['devkitarm']) / 'bin'
-    elf = CARGO_TARGET / 'armv7a-none-eabi/release/libdamage_numbers_rs.so'
+    elf = CARGO_TARGET / 'armv7a-none-eabi/release/libdamage_numbers.so'
     names = symbols(compiler, elf)
     for name in [*[f'dn_gateway_{site}' for site in range(8)], 'dn_gateway_after']:
         address = names[name]
@@ -107,9 +107,9 @@ def verify():
         raise ValueError('Rust/native ARM32 layout mismatch: ' + str((struct.unpack('<30I', actual), struct.unpack('<30I', native))))
     build = json.loads((BUILD_ROOT / 'build.json').read_text())
     hashes = asset_hashes()
-    if digest(package / 'damage_numbers_rs.nro') != build['nro_sha256'] or hashes != build['asset_sha256']:
+    if digest(package / 'damage_numbers.nro') != build['nro_sha256'] or hashes != build['asset_sha256']:
         raise ValueError('Build receipt differs from prepared assets')
-    if any(digest(package / 'damage-numbers-rs' / name) != expected for name, expected in hashes.items()):
+    if any(digest(package / 'damage-numbers' / name) != expected for name, expected in hashes.items()):
         raise ValueError('Staged bytes differ from build receipt')
     # Scan the actual NRO and ELF, not just source: neither frozen bitmap stream
     # nor the old custom decoder may be part of the production plugin.
@@ -118,10 +118,10 @@ def verify():
             raise ValueError('Runtime asset embedded in NRO: ' + name)
     if any('decode_sprite' in name for name in names):
         raise ValueError('Production decoder remains linked')
-    expected_payloads = {'damage_numbers_rs.nro', *('damage-numbers-rs/' + name for name in hashes)}
+    expected_payloads = {'damage_numbers.nro', *('damage-numbers/' + name for name in hashes)}
     if {str(p.relative_to(package)) for p in package.rglob('*') if p.is_file()} != expected_payloads:
         raise ValueError('Unexpected staged runtime files')
-    report = {'status': 'PASSED', 'nro_sha256': digest(package / 'damage_numbers_rs.nro'), 'elf_sha256': digest(elf),
+    report = {'status': 'PASSED', 'nro_sha256': digest(package / 'damage_numbers.nro'), 'elf_sha256': digest(elf),
               'exports': sorted(exports), 'strong_imports': sorted(imports), 'native_inputs': inputs,
               'signature_windows': windows, 'layouts': dict(zip(expressions, struct.unpack('<30I', native))),
               'gateway_sha256': lock['gateway_sha256'], 'nzcvq_restores': 9, 'compiled_status_writes': msr,
