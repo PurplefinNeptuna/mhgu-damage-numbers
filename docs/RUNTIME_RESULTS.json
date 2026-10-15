@@ -45,5 +45,24 @@
     "Loader-version gating remains disabled; an incompatible native Hook ABI can be reached."
   ],
   "static_evidence": "docs/CANDIDATE_RESULTS.json",
-  "standalone_evidence": "docs/STANDALONE_RESULTS.json"
+  "standalone_evidence": "docs/STANDALONE_RESULTS.json",
+  "reported_issues": [
+    {
+      "date": "2026-10-15",
+      "status": "DEFERRED",
+      "confirmed": false,
+      "source": "Third-party report relayed by the user",
+      "version": "r3 Rust",
+      "symptom": "Damage number locations reported as really off.",
+      "reported_setup": {
+        "resolution_scale": "1.25x",
+        "resolution": "900p",
+        "aspect_ratio": "16:9",
+        "emulator": "not specified"
+      },
+      "local_comparison": "User reports that the issue does not happen on their own system with a similar setup.",
+      "cause": "Unknown; no reproduction or reporter-specific logs/video available.",
+      "disposition": "User requested: so just note it and ignore. Investigation deferred; no code, runtime package or distribution-status change."
+    }
+  ]
 }
