@@ -1,6 +1,19 @@
+# r28 hardware-test rebuild: DEVELOPMENT
+
+PIC remains enabled. The target adds `-nostartfiles` and `-Wl,-z,text` to
+exclude GCC startup objects and reject dynamic relocations in read-only sections.
+Gameplay, hooks, settings and assets are unchanged apart from build identification.
+The final NRO verifier also rejects DT_TEXTREL/DF_TEXTREL.
+
+The accepted r27 release and its records are preserved at
+`backups/accepted/damage-numbers/r27-before-hardware-link/`.
+New output uses separate r28 candidate and work directories. No installation,
+launch or hardware acceptance is implied. The updated loader is not bundled.
+See EVIDENCE.json for the exact build and validation results.
+
 # Development and research
 
-Current Switch build: r27 READY_TO_DISTRIBUTE with upstream Forge 1.5.1.
+Previous accepted Switch build: r27 READY_TO_DISTRIBUTE with upstream Forge 1.5.1.
 Earlier version claims below retain their recorded scope.
 
 ## r27 projection and centre fallback

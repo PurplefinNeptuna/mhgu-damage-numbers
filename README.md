@@ -5,13 +5,16 @@ Choose Wilds, Rise or Classic style.
 
 ## Requirements
 
+This is a hardware-test candidate. Real Switch compatibility is unconfirmed.
+The tester must supply the updated Forge loader separately.
+
 - MHGU 1.4.0 for Nintendo Switch.
 - [Fexty's Forge 1.5.1](https://github.com/Fexty12573/forge/releases/tag/v1.5.1).
 
 ## Installation
 
 1. Close the emulator.
-2. Extract `damage-numbers-r27.zip`.
+2. Extract `damage-numbers-r28-candidate.zip`.
 3. Copy the whole `damage-numbers` folder into your emulator's MHGU mod directory:
    - Eden: `~/.local/share/eden/load/0100770008DD8000/`
    - Ryujinx: `mods/contents/0100770008dd8000/` inside its data directory.

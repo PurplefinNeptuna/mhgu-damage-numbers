@@ -1736,7 +1736,7 @@
     },
     "manual_test": "NOT RUN"
   },
-  "current": {
+  "r27_before_hardware_link": {
     "version": "r27",
     "date": "2026-10-15",
     "status": "READY_TO_DISTRIBUTE",
@@ -1815,5 +1815,129 @@
     },
     "tested_candidate_backup": "backups/accepted/damage-numbers/r27-tested-candidate/PRESERVATION.json",
     "runtime_rebuilt_for_promotion": false
+  },
+  "current": {
+    "version": "r28",
+    "date": "2026-10-18",
+    "status": "DEVELOPMENT",
+    "scope": "Linker-only hardware-test rebuild; gameplay unchanged.",
+    "runtime_test": "NOT RUN",
+    "previous_accepted": "r27",
+    "preserved_release": "backups/accepted/damage-numbers/r27-before-hardware-link",
+    "build_validation": "PASSED",
+    "nro_sha256": "3c733aa5e816ab0acf71bd5593ffa0adb4ac53077bcf18726e16ff5a41a974fc",
+    "elf_sha256": "4af07dfeeaa64e41d6a0f47c3b8aa4b87a35a1f403d1d9e0ec617fd0106f0c59",
+    "relocations": {
+      "before": {
+        "sha256": "c8cd8be03e7a85bb8f5e96bb69d3bc2121b7b97cd9472abc9a966286ded2e031",
+        "bytes": 176128,
+        "DT_TEXTREL": true,
+        "DF_TEXTREL": false,
+        "relocation_targets": {
+          "text": 6,
+          "data": 282
+        },
+        "nonwritable_targets": [
+          {
+            "offset": "0xc8",
+            "type": 23
+          },
+          {
+            "offset": "0xd0",
+            "type": 23
+          },
+          {
+            "offset": "0xfc",
+            "type": 23
+          },
+          {
+            "offset": "0x100",
+            "type": 23
+          },
+          {
+            "offset": "0xcc",
+            "type": 2
+          },
+          {
+            "offset": "0xf8",
+            "type": 2
+          }
+        ]
+      },
+      "after": {
+        "sha256": "3c733aa5e816ab0acf71bd5593ffa0adb4ac53077bcf18726e16ff5a41a974fc",
+        "bytes": 176128,
+        "DT_TEXTREL": false,
+        "DF_TEXTREL": false,
+        "relocation_targets": {
+          "data": 278
+        },
+        "nonwritable_targets": []
+      }
+    },
+    "relocation_audit": "research/hardware-link.json",
+    "validation": {
+      "build": {
+        "path": "build/damage-numbers/candidates/r28/build.json",
+        "sha256": "4e6dfc7592598cfc8c6867d5f155ba3d404fcd725fd0830321c0a4255db22dd8",
+        "status": "BUILT"
+      },
+      "tests": {
+        "path": "build/damage-numbers/candidates/r28/tests.json",
+        "sha256": "48d1909ffe2bb6d4787b73c41c22bba83361f139b357d6b01ca45fbe8c9e832d",
+        "status": "PASSED"
+      },
+      "native-pool": {
+        "path": "build/damage-numbers/candidates/r28/native-pool.json",
+        "sha256": "8aeab880238af15c5df98505965f4e0afa7119393521e62526d04de9357fb48f",
+        "status": "PASSED"
+      },
+      "parity": {
+        "path": "build/damage-numbers/candidates/r28/parity.json",
+        "sha256": "39a603b15100232cb4fb57518de0e212a5450c24f0dd1c60d36eb20bf0e74400",
+        "status": "PASSED"
+      },
+      "visual": {
+        "path": "build/damage-numbers/candidates/r28/visual.json",
+        "sha256": "ac3ebb4e3429b93e4cf9a244ff8061fefe5fc1ed82a4d15fb51ce17190ac2a8a",
+        "status": "PASSED"
+      },
+      "gateways": {
+        "path": "build/damage-numbers/candidates/r28/gateways.json",
+        "sha256": "4aa545ac986965c8673ea09eeb05ff4bd4016d2ba9dcb4c5e3e08c5f68b6b141",
+        "status": "PASSED"
+      },
+      "verify": {
+        "path": "build/damage-numbers/candidates/r28/verify.json",
+        "sha256": "6cfdc025fdac02bbcb4111dcc57fe592dc5477f130c10e0fe72e7e80682b5c4a",
+        "status": "PASSED"
+      }
+    },
+    "logs": {
+      "build": {
+        "path": "build/damage-numbers/candidates/r28/build.log",
+        "sha256": "ee944ac6f8245485aaed1849b5c009e819cd8974ff7dd5e76b4027d7cdfed9fe"
+      },
+      "test": {
+        "path": "build/damage-numbers/candidates/r28/test.log",
+        "sha256": "4c02dc8597728c18d627f94f8643e27f0d52c3db18b06c531b5de8f5c7ed1237"
+      }
+    },
+    "gameplay_source_changes": "None. Damage Numbers metadata/startup log and Key Quest Markers build identity use the new version.",
+    "linker_errors": "None. Both builds report only the existing -z norelro ignored warning.",
+    "updated_loader_revision": "Not supplied or inspected.",
+    "parity_scenarios": 243,
+    "policy_projection_cases": 2800,
+    "rendering_scenes": 24,
+    "arm_gateway_calls": 256,
+    "package": {
+      "path": "build/damage-numbers/candidates/r28/delivery/damage-numbers-r28-candidate.zip",
+      "sha256": "b23067beaaf173f11e1e3cf7134e13773d2814dd16671ae1014bdfbea179bb29",
+      "status": "VERIFIED_DEVELOPMENT_CANDIDATE"
+    },
+    "distribution_check": {
+      "status": "PASSED",
+      "mod_records": 11
+    }
   }
 }

@@ -1,0 +1,94 @@
+{
+  "version": "r28",
+  "date": "2026-10-18",
+  "status": "PASSED",
+  "scope": "Static ELF/NRO loading requirements; no runtime test.",
+  "before": {
+    "sha256": "c8cd8be03e7a85bb8f5e96bb69d3bc2121b7b97cd9472abc9a966286ded2e031",
+    "bytes": 176128,
+    "DT_TEXTREL": true,
+    "DF_TEXTREL": false,
+    "relocation_targets": {
+      "text": 6,
+      "data": 282
+    },
+    "nonwritable_targets": [
+      {
+        "offset": "0xc8",
+        "type": 23
+      },
+      {
+        "offset": "0xd0",
+        "type": 23
+      },
+      {
+        "offset": "0xfc",
+        "type": 23
+      },
+      {
+        "offset": "0x100",
+        "type": 23
+      },
+      {
+        "offset": "0xcc",
+        "type": 2
+      },
+      {
+        "offset": "0xf8",
+        "type": 2
+      }
+    ]
+  },
+  "after": {
+    "sha256": "3c733aa5e816ab0acf71bd5593ffa0adb4ac53077bcf18726e16ff5a41a974fc",
+    "bytes": 176128,
+    "DT_TEXTREL": false,
+    "DF_TEXTREL": false,
+    "relocation_targets": {
+      "data": 278
+    },
+    "nonwritable_targets": []
+  },
+  "elf_sha256": "4af07dfeeaa64e41d6a0f47c3b8aa4b87a35a1f403d1d9e0ec617fd0106f0c59",
+  "gcc_startup_symbols_present": false,
+  "target": {
+    "arch": "arm",
+    "data-layout": "e-m:e-p:32:32-Fi8-i64:64-v128:64:128-a:0:32-n32-S64",
+    "llvm-target": "armv7a-none-eabi",
+    "os": "switch",
+    "env": "",
+    "vendor": "none",
+    "target-endian": "little",
+    "target-pointer-width": 32,
+    "target-c-int-width": 32,
+    "linker": "arm-none-eabi-gcc",
+    "linker-flavor": "gcc",
+    "pre-link-args": {
+      "gcc": [
+        "-nostartfiles",
+        "-Wl,-z,text"
+      ]
+    },
+    "abi": "eabi",
+    "features": "+v8,+crc,+crypto",
+    "max-atomic-width": 64,
+    "panic-strategy": "abort",
+    "relocation-model": "pic",
+    "dynamic-linking": true,
+    "executables": true,
+    "relro-level": "off",
+    "disable-redzone": false,
+    "frame-pointer": "always",
+    "no-default-libraries": true,
+    "emit-debug-gdb-scripts": false,
+    "llvm-floatabi": "soft",
+    "has-thread-local": false,
+    "has-rpath": false,
+    "crt-static-default": false,
+    "crt-static-respected": false,
+    "position-independent-executables": true
+  },
+  "build_log_sha256": "ee944ac6f8245485aaed1849b5c009e819cd8974ff7dd5e76b4027d7cdfed9fe",
+  "read_only_relocation_link_errors": false,
+  "old_nro_verifier_regression": "PASS: damage-numbers verifier rejects actual r27 NRO with read-only relocations"
+}

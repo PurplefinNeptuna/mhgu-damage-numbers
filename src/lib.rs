@@ -1,4 +1,4 @@
-//! Damage Numbers r27: Forge callbacks own lifecycle; native gateways only copy evidence.
+//! Damage Numbers r28: Forge callbacks own lifecycle; native gateways only copy evidence.
 // The Switch plugin has no Rust standard library. alloc provides owned buffers
 // through Forge's allocator; portable logic lives in the separate core crate.
 #![no_std]
@@ -26,7 +26,7 @@ const _: () = assert!(core::mem::size_of::<PluginMetadata>() == 70);
 pub unsafe extern "C" fn forge_onLoad(params: *mut forge::PluginInitParams) {
     if params.is_null() { return; }
     let mut name = [0; 64];
-    let label = b"Damage Numbers r27";
+    let label = b"Damage Numbers r28";
     name[..label.len()].copy_from_slice(label);
     // SAFETY: Forge owns the writable native metadata record for this call.
     unsafe { params.cast::<PluginMetadata>().write(PluginMetadata {

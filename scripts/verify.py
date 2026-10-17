@@ -59,6 +59,9 @@ def verify():
     package = BUILD_ROOT / 'package/romfs/nativeNX/plugins'
     data = (package / 'damage_numbers.nro').read_bytes()
     nro = Nro(data)
+    # DT_TEXTREL / DF_TEXTREL require writes to memory the Switch maps read-only.
+    if 22 in nro.tags or nro.tags.get(30, 0) & 4:
+        raise ValueError('NRO requires dynamic relocations in read-only memory')
     exports = {name.decode() for name, entry, *_ in nro.symbols if name and entry[5] and entry[3] >> 4 == 1}
     contract = (MOD / 'link/exported.txt').read_text().split('global:')[1].split('local:')[0]
     expected = set(re.findall(r'\b(\w+)\s*;', contract))
@@ -126,7 +129,7 @@ def verify():
               'signature_windows': windows, 'layouts': dict(zip(expressions, struct.unpack('<30I', native))),
               'gateway_sha256': lock['gateway_sha256'], 'nzcvq_restores': 9, 'compiled_status_writes': msr,
               'asset_sha256': hashes, 'embedded_artwork': False, 'production_decoder': False,
-              'nro_bytes': len(data), 'bss_bytes': struct.unpack_from('<I', data, 56)[0],
+              'nro_bytes': len(data), 'bss_bytes': struct.unpack_from('<I', data, 56)[0], 'text_relocations': False,
               'ordinary_hook_slot_bytes': 8 * 16, 'forge_pool_chunk_bytes': 16384,
               'forge_pool_max_chunks': 2, 'allocation_evidence': 'native host fixture; runtime allocation not measured', 'runtime_test': 'NOT RUN'}
     (BUILD_ROOT / 'verify.json').write_text(json.dumps(report, indent=2) + '\n')

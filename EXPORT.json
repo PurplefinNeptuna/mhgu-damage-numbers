@@ -44,6 +44,7 @@
     "requirements-arm.txt",
     "requirements.txt",
     "research/gateway-baseline.json",
+    "research/hardware-link.json",
     "research/native-hook.c",
     "research/native-hook.h",
     "research/sysroot-Cargo.lock",
