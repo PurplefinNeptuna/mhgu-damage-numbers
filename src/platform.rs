@@ -130,6 +130,13 @@ impl Memory for NativeMemory {
 pub fn singleton(name: &str) -> Option<u32> {
     SingletonManager::get_by_name(name).map(|object| object as *mut _ as *mut c_void as u32)
 }
+// Forge exposes singleton lookup but no presented-window/crop query. The saved
+// object-kind DTI identifies the actual game singleton as sFestaRender (ID 0x300a6cd8),
+// not its sRender base class; Forge's registry resolves exact types only.
+pub fn visible_size(width: f32, height: f32) -> Option<[f32; 2]> {
+    let renderer = SingletonManager::get_by_id(0x300a6cd8)? as *mut _ as u32;
+    damage_numbers_core::capture::visible_size(&NativeMemory, renderer, width, height)
+}
 // The save-data singleton and MtFile runtime type must both exist before the
 // stock INI loader can mount storage and open files.
 pub fn storage_ready() -> bool {

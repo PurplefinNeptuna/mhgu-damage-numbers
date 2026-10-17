@@ -4,6 +4,3 @@ version = "0.1.0"
 edition = "2024"
 [lib]
 path = "src/lib.rs"
-
-[dev-dependencies]
-log = { version = "0.4", default-features = false }

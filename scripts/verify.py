@@ -87,7 +87,7 @@ def verify():
         if image[address:address + 64] != expected:
             raise ValueError('Game signature mismatch: ' + offset)
         windows.append(hex(address))
-    if len(windows) != 11:
+    if len(windows) != 12:
         raise ValueError('Signature count changed')
     if digest(MOD / 'src/gateway.S') != lock['gateway_sha256']:
         raise ValueError('Audited gateway source changed')
@@ -133,7 +133,7 @@ def verify():
               'ordinary_hook_slot_bytes': 8 * 16, 'forge_pool_chunk_bytes': 16384,
               'forge_pool_max_chunks': 2, 'allocation_evidence': 'native host fixture; runtime allocation not measured', 'runtime_test': 'NOT RUN'}
     (BUILD_ROOT / 'verify.json').write_text(json.dumps(report, indent=2) + '\n')
-    print(f'PASS: ARM32 layouts, {len(imports)} resolved imports, callbacks, 11 game windows and nine NZCVQ restores')
+    print(f'PASS: ARM32 layouts, {len(imports)} resolved imports, callbacks, 12 game windows and nine NZCVQ restores')
 
 
 if __name__ == '__main__':

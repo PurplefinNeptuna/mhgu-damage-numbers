@@ -1,4 +1,47 @@
-# r29-diagnostics: DEVELOPMENT
+# r30 visible-crop correction: DEVELOPMENT
+
+MHGU can display a smaller crop of an unchanged swapchain allocation. Forge's
+ImGui DisplaySize describes that allocation, so the previous mapping could use
+1920×1080 bounds for a visible 1280×720 region. The user reports correct docked
+placement and displaced handheld placement on Switch and Android. Exact live
+dimensions and the r30 correction remain unconfirmed on those devices.
+
+The render callback now obtains the actual sFestaRender singleton through
+Forge's exact-type ID lookup (0x300a6cd8). The sRender base ID is not registered
+for that object. Checked copies of inherited mDisplaySize at +0xb8/+0xbc provide
+the applied crop width/height in backing-texture pixels. Native main+0xbc0874
+calls main+0x86a24c to SetCrop(0,0,mScreenSize), updates that pair, then presents.
+The fields at +0xb0/+0xb4 are requested dimensions and may still be pending.
+Saved object-kind DTI and original-byte research agree on these offsets.
+See research/visible-crop.json for the native contract and provenance.
+
+The size is re-read each render callback. It must be positive and fit inside
+Forge's finite backing dimensions. The same size reaches camera projection,
+number/effect scaling, placement bounds, clipping and screen-centre fallback.
+Layout's existing viewport comparison discards cached offsets after a size change.
+The native matrix multiplication and camera-admission policy are unchanged;
+same-aspect rendering at another internal resolution remains supported. No
+hardcoded 720p/1080p multiplier or additional hook is used. Stock Forge is unchanged.
+
+An unavailable/invalid crop retains the previous Forge bounds to keep damage
+visible and emits one lifetime-deduplicated warning once a player exists. That
+fallback can retain the original displacement. No native pointer is cached or
+dereferenced by deferred rendering. A twelfth signature window checks the crop
+call and applied-field stores before any of the original eight hooks are installed.
+The gateway assembly and its NZCVQ/GE contract are unchanged.
+
+r29's diagnostic module, screen crosses and per-hit logs are retired in Git;
+its exact candidate remains available. r28/r29 delivery hashes and copied records
+are preserved under backups/accepted/damage-numbers/r29-before-visible-crop/.
+New outputs use build/damage-numbers/candidates/r30/ and the matching work path.
+
+New tests cover crop reads, invalid dimensions/mappings and pointer overflow,
+applied versus requested size, repeated mode changes, all-style geometry and
+centre fallback. tests/viewport.py executes the original ARM SetCrop wrapper
+and applied-size stores with an NVN double. Existing host/renderer/gateway tests
+remain required. These checks do not establish GPU or affected-device acceptance.
+
+# r29-diagnostics (preserved)
 
 Temporary diagnostic candidate for the user-reported misplaced numbers on
 real Switch and Android. r28 starts and shows damage according to the user;
@@ -124,7 +167,7 @@ Copy `build.local.example.json` to ignored `build.local.json` and supply the too
 | `./build.sh package` | Require complete tests for the exact NRO, then verify the candidate ZIP and adjacent guides/notices/checksums. |
 | `./build.sh export --output DEST` | Export the explicit source allowlist to an unused directory. |
 
-Workspace outputs are under `build/damage-numbers/candidates/r29-diagnostics/` and `work/damage-numbers/candidates/r29-diagnostics/`. Cargo caches, the unstripped ELF and converter output stay under `work/damage-numbers/candidates/r29-diagnostics/cargo-target/`. The pinned converter requires a temporary `target` symlink and loose NRO in the source root while building; the wrapper removes both when the converter exits, including on failure. An independent source export uses its own ignored build/work folders. Registry sources are vendored, including metadata needed by this nightly's build-std resolver. Host tests explicitly load the source-only Cargo configuration so they do not inherit the ARM target or build-std settings. Default builds and tests are offline.
+Workspace outputs are under `build/damage-numbers/candidates/r30/` and `work/damage-numbers/candidates/r30/`. Cargo caches, the unstripped ELF and converter output stay under `work/damage-numbers/candidates/r30/cargo-target/`. The pinned converter requires a temporary `target` symlink and loose NRO in the source root while building; the wrapper removes both when the converter exits, including on failure. An independent source export uses its own ignored build/work folders. Registry sources are vendored, including metadata needed by this nightly's build-std resolver. Host tests explicitly load the source-only Cargo configuration so they do not inherit the ARM target or build-std settings. Default builds and tests are offline.
 
 After adding source files, refresh the allowlist with `python3 scripts/export_source.py --refresh`. Exports omit native game inputs, outputs, private configurations, caches and Git metadata. They retain dependency bytes exactly so Cargo checksum validation remains meaningful. Supply your toolchain/input paths in the exported repo's own configuration. No sibling mod import is needed.
 

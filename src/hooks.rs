@@ -164,8 +164,8 @@ impl Installed {
             return Err("unsupported program");
         }
         let memory = NativeMemory;
-        // Compare all eleven windows before touching any target. The last three
-        // check supporting game code and the expected MHGU executable bytes.
+        // Compare every window before touching any target. Supporting windows
+        // check the expected MHGU build, ownership code and applied crop layout.
         for &(offset, bytes) in SIGNATURES {
             let Some(address) = base
                 .checked_add(offset)

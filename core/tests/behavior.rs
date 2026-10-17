@@ -179,49 +179,6 @@ impl Memory for Fake {
     }
 }
 #[test]
-fn camera_diagnostics_copy_metadata_without_changing_admission() {
-    for metadata in [false, true] {
-        let mut memory = Fake::scene();
-        memory.region(0xc000, if metadata { 0x35 } else { 0x28 });
-        memory.put(0xc024, 0xd000);
-        memory.region(0xd000, 4);
-        memory.put(0xd000, 0x1730d0c);
-        memory.region(0xe000, 144);
-        memory.put(0xe000, 1.0_f32.to_bits());
-        memory.put(0xe088, 1280);
-        memory.put(0xe08c, 720);
-        if metadata {
-            memory.put(0xc028, 0x12340000);
-            memory.put(0xc02c, 0x56780000);
-            for (offset, value) in [(4, 1), (0x30, 1), (0x31, 3), (0x33, 10), (0x34, 2)] {
-                memory.bytes.insert(0xc000 + offset, value);
-            }
-        }
-        let mut state = CaptureState::new(Some(0));
-        let mailbox = Mailbox::new();
-        let mut frame = RawFrame::default();
-        frame.r[0] = 0xc000;
-        frame.r[13] = 0xaaaa;
-        assert!(state.enter(3, &frame, 0x9000, &memory));
-        frame.r[1] = 0xe000;
-        frame.r[2] = 0xe040;
-        frame.r[3] = 0xe080;
-        state.tap(4, &frame, &memory, &mailbox);
-        let record = mailbox.read(&mut Cursor::default()).unwrap();
-        assert_eq!((record.kind, record.actor, record.monster), (3, 0xd000, 0xc000));
-        assert_eq!(record.view[0], 1.0);
-        assert_eq!(record.rect, [0, 0, 1280, 720]);
-        assert_eq!(record.damage_type, u32::from(metadata));
-        if metadata {
-            assert_eq!((record.attack, record.attack_counter, record.flags), (0x56780000, 0x12340000, 1));
-            assert_eq!(record.source_tags.to_le_bytes(), [1, 3, 10, 2]);
-            memory.put(0xc02c, 0);
-            assert_eq!(record.attack, 0x56780000);
-        }
-        assert_eq!(state.leave(&frame, 0x9000, true, &memory, &mailbox), Some(0xaaaa));
-    }
-}
-#[test]
 fn nested_collision_and_damage_keep_native_return_identity() {
     let mut memory = Fake::scene();
     memory.region(0xb000, 12);
@@ -370,45 +327,105 @@ fn native_projection_preserves_positions_across_display_scales() {
     }
 }
 #[test]
-fn unavailable_or_clipped_projection_uses_screen_centre_in_every_style() {
-    fn draw(position: Option<Vec3>, view: &View, style: Style) -> DrawNumber {
-        let mut model = Model::default();
-        model.reset(1);
-        model.configure(Settings {
-            style,
-            ..Settings::default()
-        });
-        assert!(model.capture(Event {
-            position,
-            critical: Critical::Positive,
-            ..hit(1)
-        }));
-        model.update(0.2, true);
-        let mut output = [DrawNumber::default(); 128];
-        assert_eq!(
-            layout(
-                &model,
-                view,
-                0.2,
-                &mut output,
-                &mut Placement::default(),
-                |text, pixels, _| {
-                    let width = text.iter().take_while(|&&n| n != 0).count() as f32 * pixels * 0.55;
-                    Some(TextMetrics {
-                        advance: width,
-                        ink: Rect {
-                            left: 0.0,
-                            top: 0.0,
-                            right: width,
-                            bottom: pixels,
-                        },
-                    })
-                }
-            ),
-            1
-        );
-        output[0]
+fn applied_crop_is_checked_and_recopied_across_mode_changes() {
+    let renderer = 0x1000;
+    let mut memory = Fake::new();
+    memory.region(renderer + 0xb0, 16);
+    // Requested dimensions can differ from the crop that has actually been applied.
+    memory.put(renderer + 0xb0, 9999);
+    memory.put(renderer + 0xb4, 9999);
+    for size in [[1280, 720], [1920, 1080], [1280, 720], [1600, 900]] {
+        memory.put(renderer + 0xb8, size[0]);
+        memory.put(renderer + 0xbc, size[1]);
+        assert_eq!(visible_size(&memory, renderer, 1920., 1080.), Some(size.map(|n| n as f32)));
     }
+    for size in [[0, 720], [1280, 0], [u32::MAX, 720], [1280, u32::MAX], [1921, 1080], [1920, 1081]] {
+        memory.put(renderer + 0xb8, size[0]);
+        memory.put(renderer + 0xbc, size[1]);
+        assert!(visible_size(&memory, renderer, 1920., 1080.).is_none());
+    }
+    memory.put(renderer + 0xb8, 1280);
+    memory.put(renderer + 0xbc, 720);
+    for backing in [[0., 1080.], [-1., 1080.], [1920., f32::NAN], [f32::INFINITY, 1080.]] {
+        assert!(visible_size(&memory, renderer, backing[0], backing[1]).is_none());
+    }
+    assert!(visible_size(&memory, 0, 1920., 1080.).is_none());
+    assert!(visible_size(&memory, u32::MAX - 0xb8, 1920., 1080.).is_none());
+    memory.bytes.remove(&(renderer + 0xbf));
+    assert!(visible_size(&memory, renderer, 1920., 1080.).is_none());
+}
+#[test]
+fn crop_drives_projection_fallback_and_all_style_geometry() {
+    let renderer = 0x1000;
+    let mut memory = Fake::new();
+    memory.region(renderer + 0xb8, 8);
+    let identity = [1.,0.,0.,0.,0.,1.,0.,0.,0.,0.,1.,0.,0.,0.,0.,1.];
+    let point = Vec3 { x: 0., y: 0., z: 0.5 };
+    // Reproduce the old lower-right centre when the backing size is used in handheld.
+    let wrong = native_camera(&identity, &identity, [0,0,1280,720], 1920., 1080.).unwrap();
+    assert_eq!(project(point, &wrong), Some(Point { x: 960., y: 540. }));
+    for (width, height) in [(1280,720), (1920,1080), (1600,900), (1280,720)] {
+        memory.put(renderer + 0xb8, width);
+        memory.put(renderer + 0xbc, height);
+        let [w,h] = visible_size(&memory, renderer, 1920., 1080.).unwrap();
+        let screen = View::screen(w,h).unwrap();
+        for rect in [[0,0,1280,720], [0,0,1920,1080]] {
+            let view = native_camera(&identity, &identity, rect, w,h).unwrap();
+            assert_eq!(project(point, &view), Some(Point { x: w/2., y: h/2. }));
+            for style in [Style::Wilds, Style::Rise, Style::Classic] {
+                let projected = draw(Some(point), &view, style);
+                let fallback = draw(None, &screen, style);
+                let reference = draw(Some(point), &View { world_to_clip: identity, ..screen }, style);
+                assert_eq!(projected.position, fallback.position);
+                assert_eq!(projected.position, reference.position);
+                assert_eq!(projected.pixels, reference.pixels);
+                assert_eq!(projected.reserve, reference.reserve);
+                assert_eq!(projected.slash.origin, reference.slash.origin);
+                assert_eq!(projected.slash.clip, reference.slash.clip);
+            }
+        }
+    }
+}
+fn draw(position: Option<Vec3>, view: &View, style: Style) -> DrawNumber {
+    let mut model = Model::default();
+    model.reset(1);
+    model.configure(Settings {
+        style,
+        ..Settings::default()
+    });
+    assert!(model.capture(Event {
+        position,
+        critical: Critical::Positive,
+        ..hit(1)
+    }));
+    model.update(0.2, true);
+    let mut output = [DrawNumber::default(); 128];
+    assert_eq!(
+        layout(
+            &model,
+            view,
+            0.2,
+            &mut output,
+            &mut Placement::default(),
+            |text, pixels, _| {
+                let width = text.iter().take_while(|&&n| n != 0).count() as f32 * pixels * 0.55;
+                Some(TextMetrics {
+                    advance: width,
+                    ink: Rect {
+                        left: 0.0,
+                        top: 0.0,
+                        right: width,
+                        bottom: pixels,
+                    },
+                })
+            }
+        ),
+        1
+    );
+    output[0]
+}
+#[test]
+fn unavailable_or_clipped_projection_uses_screen_centre_in_every_style() {
     let id = [
         1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1.,
     ];

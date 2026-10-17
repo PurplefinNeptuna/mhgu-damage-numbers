@@ -1,0 +1,38 @@
+{
+  "game": "MHGU Switch 1.4.0",
+  "main_nso_sha256": "b3935415499549adaf4c0e89822831daa175cfd456a7990791c79be3997645ef",
+  "singleton": {
+    "actual_class": "sFestaRender",
+    "id": "0x300a6cd8",
+    "base_class": "sRender",
+    "object_kind_vtable": "main+0x1754a58"
+  },
+  "fields": {
+    "requested_mScreenSize": [
+      "0xb0",
+      "0xb4"
+    ],
+    "applied_mDisplaySize": [
+      "0xb8",
+      "0xbc"
+    ],
+    "backing_allocation_size": [
+      "0x44bac0",
+      "0x44bac4"
+    ]
+  },
+  "native_contract": {
+    "crop_wrapper": "main+0x86a24c",
+    "presentation_update": "main+0xbc0874",
+    "signature_offset": "0xbc0b74",
+    "signature_bytes": "980094e5287003e3901094e5d02bc4e1070090e700008de50500a0e1ada5f2ebb00094e5b80084e5b40094e5bc0084e50000a0e30000c6e5f90a0be31e20d4e5",
+    "origin": [
+      0,
+      0
+    ],
+    "flow": "Window initialization supplies backing allocation dimensions separately. Presentation calls SetCrop(0,0,mScreenSize), copies width/height to mDisplaySize, then presents. The plugin reads that applied pair each render callback."
+  },
+  "evidence": "Saved object-kind sFestaRender DTI and original-byte-verified read-only Ghidra exports under work/damage-numbers/handheld-viewport/. All exported instruction bytes match the copied original NSO.",
+  "forge_api_gap": "Stock Forge 1.5.1 reports backing texture dimensions to ImGui and exposes no window-crop query. Use its exact-type singleton lookup and the existing checked Memory adapter, without adding hooks or patching the loader.",
+  "runtime_limit": "No affected-device measurement or correction acceptance yet. Invalid/unavailable native crop retains the old Forge bounds with a lifetime-deduplicated warning."
+}

@@ -134,6 +134,7 @@ def test(host=False):
     nro = BUILD_ROOT / 'package/romfs/nativeNX/plugins/damage_numbers.nro'
     if not host:
         run([CONFIG.get('arm_python', ROOT / 'tools/mwc-analysis-venv/bin/python'), MOD / 'tests/gateways.py'])
+        run([CONFIG.get('arm_python', ROOT / 'tools/mwc-analysis-venv/bin/python'), MOD / 'tests/viewport.py'])
         verify()
     record('tests.json', {'status': 'PASSED', 'host': True, 'arm_verified': not host,
                           'nro_sha256': digest(nro) if not host else None, 'asset_sha256': asset_hashes(), 'runtime_test': 'NOT RUN'})
@@ -166,7 +167,7 @@ def package():
         raise ValueError('Unexpected old candidate payload files; preserve them before repackaging')
     shutil.copytree(source, package_dir, dirs_exist_ok=True)
     guide = (MOD / 'README.md').read_bytes()
-    archive = dest / 'damage-numbers-r29-diagnostics-candidate.zip'
+    archive = dest / 'damage-numbers-r30-candidate.zip'
     with zipfile.ZipFile(archive, 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zipped:
         zipped.writestr('README.md', guide)
         for name in sorted(payloads):
@@ -185,9 +186,9 @@ def package():
     (dest / 'NOTICES.txt').write_text(notices)
     (dest / 'NOTICES.html').write_text('<pre>' + escape(notices) + '</pre>\n')
     evidence = {name: json.loads((BUILD_ROOT / (name + '.json')).read_text())
-                for name in ['tests', 'native-pool', 'parity', 'visual', 'gateways', 'verify']}
+                for name in ['tests', 'native-pool', 'parity', 'visual', 'gateways', 'viewport', 'verify']}
     (dest / 'VALIDATION.json').write_text(json.dumps(evidence, indent=2) + '\n')
-    manifest = {'mod': 'damage-numbers', 'version': 'r29-diagnostics', 'status': 'DEVELOPMENT', 'runtime_test': 'NOT RUN',
+    manifest = {'mod': 'damage-numbers', 'version': 'r30', 'status': 'DEVELOPMENT', 'runtime_test': 'NOT RUN',
                 'package_name': 'damage-numbers', 'payloads': payloads, 'archive_sha256': digest(archive)}
     (dest / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
     (dest / 'SHA256SUMS').write_text(''.join(digest(path) + '  ' + str(path.relative_to(dest)) + '\n'

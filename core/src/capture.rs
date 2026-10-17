@@ -182,6 +182,25 @@ fn copy_value<T: Copy>(memory: &impl Memory, address: u32, out: &mut T) -> bool 
     };
     memory.copy(address, bytes)
 }
+/// Read MHGU 1.4.0's applied window-crop size, in backing-texture pixels.
+pub fn visible_size(memory: &impl Memory, renderer: u32, width: f32, height: f32) -> Option<[f32; 2]> {
+    // sFestaRender inherits sRender.mDisplaySize at +0xb8/+0xbc. The native
+    // main+0xbc0b74 window updates these after SetCrop(0,0,mScreenSize).
+    // Reading the applied size avoids using a pending mode change at +0xb0/+0xb4.
+    // No renderer reference survives this copy; no fixed handheld/docked ratio is assumed.
+    if renderer == 0 || renderer.checked_add(0xc0).is_none() {
+        return None;
+    }
+    let mut size = [0_i32; 2];
+    if !copy_value(memory, renderer + 0xb8, &mut size)
+        || !width.is_finite() || !height.is_finite()
+        || size[0] <= 0 || size[1] <= 0
+        || size[0] as f32 > width || size[1] as f32 > height
+    {
+        return None;
+    }
+    Some([size[0] as f32, size[1] as f32])
+}
 // Entry-time facts retained until the corresponding native function returns.
 // subject/auxiliary vary by kind; caller is the original LR and sp proves that
 // the shared after gateway is unwinding the same native call.
@@ -491,22 +510,6 @@ impl CaptureState {
                             monster: viewport.subject,
                             ..Record::default()
                         };
-                        // Camera-only diagnostic fields keep the 248-byte mailbox ABI unchanged.
-                        // sCamera::Viewport: +4 subscene, +0x24 camera, +0x28 test camera,
-                        // +0x2c scene texture, +0x30 visible, +0x31 number, +0x33 mode, +0x34 display.
-                        // Missing metadata must not change the original camera admission rule.
-                        if memory.readable(viewport.subject, 0x35) {
-                            record.damage_type = 1;
-                            record.attack = memory.word(viewport.subject + 0x2c);
-                            record.attack_counter = memory.word(viewport.subject + 0x28);
-                            record.flags = memory.byte(viewport.subject + 0x30) as u32;
-                            record.source_tags = u32::from_le_bytes([
-                                memory.byte(viewport.subject + 4),
-                                memory.byte(viewport.subject + 0x31),
-                                memory.byte(viewport.subject + 0x33),
-                                memory.byte(viewport.subject + 0x34),
-                            ]);
-                        }
                         if copy_value(memory, frame.r[1], &mut record.view)
                             && copy_value(memory, frame.r[2], &mut record.projection)
                             && copy_value(memory, frame.r[3], &mut record.rect)

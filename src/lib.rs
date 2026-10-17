@@ -1,11 +1,10 @@
-//! Damage Numbers r29-diagnostics: bounded projection evidence for emulator trials.
+//! Damage Numbers r30: use the game's applied visible crop for screen coordinates.
 // The Switch plugin has no Rust standard library. alloc provides owned buffers
 // through Forge's allocator; portable logic lives in the separate core crate.
 #![no_std]
 extern crate alloc;
 mod abi;
 mod config;
-mod diagnostics;
 mod hooks;
 mod platform;
 mod render;
@@ -27,7 +26,7 @@ const _: () = assert!(core::mem::size_of::<PluginMetadata>() == 70);
 pub unsafe extern "C" fn forge_onLoad(params: *mut forge::PluginInitParams) {
     if params.is_null() { return; }
     let mut name = [0; 64];
-    let label = b"Damage Numbers r29-diagnostics";
+    let label = b"Damage Numbers r30";
     name[..label.len()].copy_from_slice(label);
     // SAFETY: Forge owns the writable native metadata record for this call.
     unsafe { params.cast::<PluginMetadata>().write(PluginMetadata {

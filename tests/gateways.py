@@ -76,7 +76,7 @@ u.reg_write(arm.UC_ARM_REG_SP,STACK);u.reg_write(arm.UC_ARM_REG_LR,RETURN)
 u.reg_write(arm.UC_ARM_REG_R0,params)
 u.emu_start(names['forge_onLoad'],RETURN,count=1000)
 assert struct.unpack('<3H',u.mem_read(params,6))==(1,5,1)
-assert bytes(u.mem_read(params+6,64)).rstrip(b'\0')==b'Damage Numbers r29-diagnostics'
+assert bytes(u.mem_read(params+6,64)).rstrip(b'\0')==b'Damage Numbers r30'
 assert bytes(u.mem_read(params-8,8))==bytes(u.mem_read(params+70,8))==b'\xa5'*8
 u.reg_write(arm.UC_ARM_REG_R0,0);u.reg_write(arm.UC_ARM_REG_LR,RETURN)
 u.emu_start(names['forge_onLoad'],RETURN,count=1000)

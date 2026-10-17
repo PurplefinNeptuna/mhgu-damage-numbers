@@ -1817,118 +1817,146 @@
     "runtime_rebuilt_for_promotion": false
   },
   "current": {
-    "version": "r29-diagnostics",
+    "version": "r30",
     "date": "2026-10-18",
     "status": "DEVELOPMENT",
-    "scope": "Temporary bounded projection diagnostics. Preserve the existing camera admission, damage and placement behavior.",
+    "scope": "Use the actual applied visible crop for projection, layout, effect/number size, clipping and screen-centre fallback. Remove temporary r29 diagnostics.",
     "runtime_test": "NOT RUN",
     "previous_accepted": "r27",
-    "preserved_candidate": "backups/accepted/damage-numbers/r28-before-projection-diagnostics/preservation.json",
+    "preserved_candidates": "backups/accepted/damage-numbers/r29-before-visible-crop/preservation.json",
     "prior_user_report": {
-      "version_reported": "r28 rebuild",
-      "real_switch": "User reports damage numbers work but appear in the wrong place.",
-      "android_emulator": "User reports the same placement issue on a phone; authorizes a diagnostic build for their Eden/suyu tablet.",
+      "r29_diagnostics_run": false,
+      "docked": "Prior rebuilt payload works on Switch and Android.",
+      "handheld": "Prior rebuilt payload shows displaced numbers on Switch and Android.",
       "damage_values": "User says values look correct.",
-      "camera_movement": "User says numbers are mostly in that area.",
-      "exact_payload_and_loader_hashes": "Not supplied; this is a user report, not a matched-log runtime verification."
+      "exact_tested_payload_and_loader_hashes": "Not supplied.",
+      "exact_live_crop_and_backing_dimensions": "Not measured."
     },
-    "diagnostics": {
-      "prefix": "[DN-DIAG]",
-      "severity": "ERROR intentionally bypasses the stock Forge ERROR filter",
-      "destination": "svcOutputDebugString captured by emulator log; no private file writer",
-      "limits_per_process": {
-        "distinct_camera_snapshots": 16,
-        "first_visible_hit_keys": 32,
-        "display_changes": 4
-      },
-      "copied_fields": [
-        "camera and viewport identities",
-        "scene texture and test camera identities",
-        "viewport flags and mode/number/display",
-        "view/projection matrices",
-        "native rect",
-        "capture ticks/player identity",
-        "impact XYZ",
-        "projection/fallback",
-        "text position and placement offset",
-        "ImGui DisplaySize/DisplayFramebufferScale/main viewport bounds"
+    "native_contract": {
+      "singleton": "sFestaRender",
+      "id": "0x300a6cd8",
+      "applied_mDisplaySize": [
+        "+0xb8",
+        "+0xbc"
       ],
-      "markers": {
-        "Cyan": "screen centre",
-        "Magenta": "projected hit anchor",
-        "Yellow": "centre fallback"
-      },
-      "native_pointer_dereferences_in_logging": false,
-      "camera_selection_changed": false,
-      "save_behavior_changed": false,
-      "test": "core/tests/diagnostics.rs executes the production formatter, verifies quotas/deduplication, both projection outcomes, missing-number output, ERROR severity and message size below 500 bytes."
+      "requested_mScreenSize": [
+        "+0xb0",
+        "+0xb4"
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "new_preflight_window": "main+0xbc0b74, 64 exact original bytes",
+      "native_original_execution": "Original main+0xbc0b74 crop call/stores and main+0x86a24c wrapper executed against an NVN SetCrop double for 1280x720 -> 1920x1080 -> 1280x720 -> 1600x900.",
+      "provenance": "mods/damage-numbers/research/visible-crop.json"
+    },
+    "implementation": {
+      "additional_hooks": 0,
+      "forge_modified": false,
+      "matrix_multiplication_changed": false,
+      "camera_admission_changed": false,
+      "damage_arithmetic_changed": false,
+      "settings_changed": false,
+      "fixed_handheld_scale": false,
+      "reads_crop_every_frame": true,
+      "invalid_crop": "Preserve previous Forge bounds and emit one lifetime-deduplicated warning once a player exists. Original displacement may remain on this fallback.",
+      "diagnostic_markers": false,
+      "per_hit_logging": false
     },
     "build_validation": "PASSED",
-    "nro_sha256": "375dac4a08b84591b18df921e934204e6e86fb38a7a4f9456c0cd6bca90f8974",
-    "elf_sha256": "09d9c13332f7d273b3f3e239975a8ee0af33370190e9cb1e2c4fcc3705902171",
+    "nro_sha256": "415682347ba61fbb10ad4c03cdd73b2141f59bdbb9ffd191f36559c9ea858550",
+    "elf_sha256": "09628dc511db935e7ebe1ec5b298f20793a0b824e5b94c5566d83f99da8de3b5",
+    "strong_imports": 68,
     "text_relocations": false,
-    "strong_imports": 69,
+    "signature_windows": [
+      "0x170968",
+      "0x9d6f8",
+      "0x2a87a8",
+      "0xb8909c",
+      "0x885844",
+      "0x16dd7c",
+      "0x16dc6c",
+      "0x178660",
+      "0x172e52c",
+      "0x276278",
+      "0x285c6c",
+      "0xbc0b74"
+    ],
     "validation": {
       "build": {
-        "path": "build/damage-numbers/candidates/r29-diagnostics/build.json",
-        "sha256": "98d4caeb9bc6ac3a4ee1e10cae746ce07811a41f5d3a776f21437f4cbc079995",
+        "path": "build/damage-numbers/candidates/r30/build.json",
+        "sha256": "6ced5aa601d39f4b97d51be5bfa77fe5e7aa619aef0cd76241835cb635e4db40",
         "status": "BUILT"
       },
       "tests": {
-        "path": "build/damage-numbers/candidates/r29-diagnostics/tests.json",
-        "sha256": "ccc0d06bb4e0f59134ef35866b73757a18448010f72184d9e6b9d04aa64e8a78",
+        "path": "build/damage-numbers/candidates/r30/tests.json",
+        "sha256": "df2aca1aa90d91483a17b7e9d9b6c6abbf218ca7a20ede6677cf726de0996794",
         "status": "PASSED"
       },
       "native-pool": {
-        "path": "build/damage-numbers/candidates/r29-diagnostics/native-pool.json",
+        "path": "build/damage-numbers/candidates/r30/native-pool.json",
         "sha256": "8aeab880238af15c5df98505965f4e0afa7119393521e62526d04de9357fb48f",
         "status": "PASSED"
       },
       "parity": {
-        "path": "build/damage-numbers/candidates/r29-diagnostics/parity.json",
+        "path": "build/damage-numbers/candidates/r30/parity.json",
         "sha256": "39a603b15100232cb4fb57518de0e212a5450c24f0dd1c60d36eb20bf0e74400",
         "status": "PASSED"
       },
       "visual": {
-        "path": "build/damage-numbers/candidates/r29-diagnostics/visual.json",
+        "path": "build/damage-numbers/candidates/r30/visual.json",
         "sha256": "ac3ebb4e3429b93e4cf9a244ff8061fefe5fc1ed82a4d15fb51ce17190ac2a8a",
         "status": "PASSED"
       },
       "gateways": {
-        "path": "build/damage-numbers/candidates/r29-diagnostics/gateways.json",
+        "path": "build/damage-numbers/candidates/r30/gateways.json",
         "sha256": "4aa545ac986965c8673ea09eeb05ff4bd4016d2ba9dcb4c5e3e08c5f68b6b141",
         "status": "PASSED"
       },
+      "viewport": {
+        "path": "build/damage-numbers/candidates/r30/viewport.json",
+        "sha256": "e8ad0ef7e557a2a72d50a2b0d7a44ad081d0bf183f9861551aae75a108030915",
+        "status": "PASSED"
+      },
       "verify": {
-        "path": "build/damage-numbers/candidates/r29-diagnostics/verify.json",
-        "sha256": "fc20868a82f9df9a639ed5fd78e1698c8766bf92b7d133e28be3d274ccd8b5e1",
+        "path": "build/damage-numbers/candidates/r30/verify.json",
+        "sha256": "95099e36fab3ad16d9279b4f3789198a9fc5439eff498929fc3854afdf6c04bc",
         "status": "PASSED"
       }
     },
     "host_tests": {
-      "core_behavior": 13,
-      "production_diagnostic_formatter": 1,
+      "core_behavior": 14,
       "config": 5,
       "hook_installer": 8
     },
+    "regressions": [
+      "Old backing-size centre reproduced as (960,540); visible 1280x720 crop maps to (640,360).",
+      "Applied dimensions are re-read across repeated mode changes and requested dimensions are ignored.",
+      "Reject missing/partial memory, null/overflow pointers, nonfinite backing sizes, nonpositive crop sizes and crops larger than the backing.",
+      "Projection, centre fallback and all three styles retain expected geometry at cropped/full/intermediate dimensions."
+    ],
     "parity_scenarios": 243,
     "policy_projection_cases": 2800,
     "base_renderer_scenes": 24,
     "base_renderer_pixel_differences": 0,
     "arm_gateway_calls": 256,
-    "marker_gpu_output": "Not tested in game; device video is required.",
-    "source_provenance": "Native scene-texture/viewport reader and caller exports have zero original-byte mismatches in work/damage-numbers/placement-r28/. Saved object-kind DTI agrees with these offsets.",
+    "original_arm_crop_cases": 4,
+    "test_log": {
+      "path": "build/damage-numbers/candidates/r30/test.log",
+      "sha256": "f91dc957d602217fcfab69928bf839ca11470a81e37891bcda0c7150dbb6797e"
+    },
     "linker_warning": "Existing -z norelro ignored warning only.",
     "package": {
-      "path": "build/damage-numbers/candidates/r29-diagnostics/delivery/damage-numbers-r29-diagnostics-candidate.zip",
-      "sha256": "19062a577ddeac81d4e95b57061bdb76f27f0c62d3aca9bed230e56f9a4f8abc",
+      "path": "build/damage-numbers/candidates/r30/delivery/damage-numbers-r30-candidate.zip",
+      "sha256": "70efaec301f57d88dd7e8820bca40f2d081e69a5ceba2bb62e12f250950ca11f",
       "status": "VERIFIED_DEVELOPMENT_CANDIDATE"
     },
     "distribution_check": {
       "status": "PASSED",
-      "mod_records": 11,
-      "generated_baseline_repair": "Existing Key Quest Markers r18 ZIP bytes already matched its candidate manifest/checksums, but were stored under the old archive name. Restored the expected filename without changing ZIP/runtime bytes; preserved old-named ZIP and checksums at backups/key-quest-markers/r18-candidate-archive-name-20261018/. No Key Quest Markers source changes."
-    }
+      "mod_records": 11
+    },
+    "runtime_limits": "No installation, launch, mode-switch gameplay, GPU output or affected-device acceptance for this exact NRO. Source/original ARM/host results are separate from live validation."
   },
   "r28_before_projection_diagnostics": {
     "version": "r28",
@@ -2052,6 +2080,120 @@
     "distribution_check": {
       "status": "PASSED",
       "mod_records": 11
+    }
+  },
+  "r29_before_visible_crop": {
+    "version": "r29-diagnostics",
+    "date": "2026-10-18",
+    "status": "DEVELOPMENT",
+    "scope": "Temporary bounded projection diagnostics. Preserve the existing camera admission, damage and placement behavior.",
+    "runtime_test": "NOT RUN",
+    "previous_accepted": "r27",
+    "preserved_candidate": "backups/accepted/damage-numbers/r28-before-projection-diagnostics/preservation.json",
+    "prior_user_report": {
+      "version_reported": "r28 rebuild",
+      "real_switch": "User reports damage numbers work but appear in the wrong place.",
+      "android_emulator": "User reports the same placement issue on a phone; authorizes a diagnostic build for their Eden/suyu tablet.",
+      "damage_values": "User says values look correct.",
+      "camera_movement": "User says numbers are mostly in that area.",
+      "exact_payload_and_loader_hashes": "Not supplied; this is a user report, not a matched-log runtime verification."
+    },
+    "diagnostics": {
+      "prefix": "[DN-DIAG]",
+      "severity": "ERROR intentionally bypasses the stock Forge ERROR filter",
+      "destination": "svcOutputDebugString captured by emulator log; no private file writer",
+      "limits_per_process": {
+        "distinct_camera_snapshots": 16,
+        "first_visible_hit_keys": 32,
+        "display_changes": 4
+      },
+      "copied_fields": [
+        "camera and viewport identities",
+        "scene texture and test camera identities",
+        "viewport flags and mode/number/display",
+        "view/projection matrices",
+        "native rect",
+        "capture ticks/player identity",
+        "impact XYZ",
+        "projection/fallback",
+        "text position and placement offset",
+        "ImGui DisplaySize/DisplayFramebufferScale/main viewport bounds"
+      ],
+      "markers": {
+        "Cyan": "screen centre",
+        "Magenta": "projected hit anchor",
+        "Yellow": "centre fallback"
+      },
+      "native_pointer_dereferences_in_logging": false,
+      "camera_selection_changed": false,
+      "save_behavior_changed": false,
+      "test": "core/tests/diagnostics.rs executes the production formatter, verifies quotas/deduplication, both projection outcomes, missing-number output, ERROR severity and message size below 500 bytes."
+    },
+    "build_validation": "PASSED",
+    "nro_sha256": "375dac4a08b84591b18df921e934204e6e86fb38a7a4f9456c0cd6bca90f8974",
+    "elf_sha256": "09d9c13332f7d273b3f3e239975a8ee0af33370190e9cb1e2c4fcc3705902171",
+    "text_relocations": false,
+    "strong_imports": 69,
+    "validation": {
+      "build": {
+        "path": "build/damage-numbers/candidates/r29-diagnostics/build.json",
+        "sha256": "98d4caeb9bc6ac3a4ee1e10cae746ce07811a41f5d3a776f21437f4cbc079995",
+        "status": "BUILT"
+      },
+      "tests": {
+        "path": "build/damage-numbers/candidates/r29-diagnostics/tests.json",
+        "sha256": "ccc0d06bb4e0f59134ef35866b73757a18448010f72184d9e6b9d04aa64e8a78",
+        "status": "PASSED"
+      },
+      "native-pool": {
+        "path": "build/damage-numbers/candidates/r29-diagnostics/native-pool.json",
+        "sha256": "8aeab880238af15c5df98505965f4e0afa7119393521e62526d04de9357fb48f",
+        "status": "PASSED"
+      },
+      "parity": {
+        "path": "build/damage-numbers/candidates/r29-diagnostics/parity.json",
+        "sha256": "39a603b15100232cb4fb57518de0e212a5450c24f0dd1c60d36eb20bf0e74400",
+        "status": "PASSED"
+      },
+      "visual": {
+        "path": "build/damage-numbers/candidates/r29-diagnostics/visual.json",
+        "sha256": "ac3ebb4e3429b93e4cf9a244ff8061fefe5fc1ed82a4d15fb51ce17190ac2a8a",
+        "status": "PASSED"
+      },
+      "gateways": {
+        "path": "build/damage-numbers/candidates/r29-diagnostics/gateways.json",
+        "sha256": "4aa545ac986965c8673ea09eeb05ff4bd4016d2ba9dcb4c5e3e08c5f68b6b141",
+        "status": "PASSED"
+      },
+      "verify": {
+        "path": "build/damage-numbers/candidates/r29-diagnostics/verify.json",
+        "sha256": "fc20868a82f9df9a639ed5fd78e1698c8766bf92b7d133e28be3d274ccd8b5e1",
+        "status": "PASSED"
+      }
+    },
+    "host_tests": {
+      "core_behavior": 13,
+      "production_diagnostic_formatter": 1,
+      "config": 5,
+      "hook_installer": 8
+    },
+    "parity_scenarios": 243,
+    "policy_projection_cases": 2800,
+    "base_renderer_scenes": 24,
+    "base_renderer_pixel_differences": 0,
+    "arm_gateway_calls": 256,
+    "marker_gpu_output": "Not tested in game; device video is required.",
+    "source_provenance": "Native scene-texture/viewport reader and caller exports have zero original-byte mismatches in work/damage-numbers/placement-r28/. Saved object-kind DTI agrees with these offsets.",
+    "linker_warning": "Existing -z norelro ignored warning only.",
+    "package": {
+      "path": "build/damage-numbers/candidates/r29-diagnostics/delivery/damage-numbers-r29-diagnostics-candidate.zip",
+      "sha256": "19062a577ddeac81d4e95b57061bdb76f27f0c62d3aca9bed230e56f9a4f8abc",
+      "status": "VERIFIED_DEVELOPMENT_CANDIDATE"
+    },
+    "distribution_check": {
+      "status": "PASSED",
+      "mod_records": 11,
+      "generated_baseline_repair": "Existing Key Quest Markers r18 ZIP bytes already matched its candidate manifest/checksums, but were stored under the old archive name. Restored the expected filename without changing ZIP/runtime bytes; preserved old-named ZIP and checksums at backups/key-quest-markers/r18-candidate-archive-name-20261018/. No Key Quest Markers source changes."
     }
   }
 }
