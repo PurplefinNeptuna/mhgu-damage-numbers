@@ -491,6 +491,22 @@ impl CaptureState {
                             monster: viewport.subject,
                             ..Record::default()
                         };
+                        // Camera-only diagnostic fields keep the 248-byte mailbox ABI unchanged.
+                        // sCamera::Viewport: +4 subscene, +0x24 camera, +0x28 test camera,
+                        // +0x2c scene texture, +0x30 visible, +0x31 number, +0x33 mode, +0x34 display.
+                        // Missing metadata must not change the original camera admission rule.
+                        if memory.readable(viewport.subject, 0x35) {
+                            record.damage_type = 1;
+                            record.attack = memory.word(viewport.subject + 0x2c);
+                            record.attack_counter = memory.word(viewport.subject + 0x28);
+                            record.flags = memory.byte(viewport.subject + 0x30) as u32;
+                            record.source_tags = u32::from_le_bytes([
+                                memory.byte(viewport.subject + 4),
+                                memory.byte(viewport.subject + 0x31),
+                                memory.byte(viewport.subject + 0x33),
+                                memory.byte(viewport.subject + 0x34),
+                            ]);
+                        }
                         if copy_value(memory, frame.r[1], &mut record.view)
                             && copy_value(memory, frame.r[2], &mut record.projection)
                             && copy_value(memory, frame.r[3], &mut record.rect)

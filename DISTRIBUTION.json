@@ -2,15 +2,15 @@
   "schema_version": 1,
   "mod": "damage-numbers",
   "status": "DEVELOPMENT",
-  "reason": "Hardware-test rebuild with PIC retained, GCC startup objects excluded and read-only dynamic relocations rejected. No gameplay changes; hardware acceptance pending.",
+  "reason": "Temporary bounded camera/projection diagnostics for the reported Switch/Android placement issue; gameplay and camera-selection rules retained. Not a release or a placement fix.",
   "publication": {
     "published": false,
     "url": null,
     "date": null
   },
-  "version": "r28",
+  "version": "r29-diagnostics",
   "package_name": "damage-numbers",
-  "archive": "damage-numbers-r28-candidate.zip",
+  "archive": "damage-numbers-r29-diagnostics-candidate.zip",
   "runtime_test": "NOT RUN",
   "gamebanana": {
     "ai_code": {
@@ -59,10 +59,9 @@
   },
   "target": "MHGU Nintendo Switch 1.4.0; upstream Forge 1.5.1; Eden/Ryujinx.",
   "limitations": [
-    "No runtime test of this rebuild on Switch, Eden or Ryujinx.",
-    "The tester's updated Forge loader revision and physical Switch compatibility have not been verified.",
-    "The original third-party r3 placement case at 900p/1.25x has not been reproduced or retested by that reporter.",
-    "A finite same-aspect offscreen camera cannot be distinguished by the current viewport guard."
+    "Diagnostic build: reference markers and up to 16 distinct camera snapshots, 32 hit snapshots and 4 display changes per process. Diagnostic ERROR messages are expected.",
+    "Not yet tested in the affected Android/Switch run; the exact tester loader revision is unknown.",
+    "Camera selection is unchanged. This candidate collects evidence and does not claim to fix the misplaced numbers."
   ],
   "dependencies": [
     {
@@ -89,19 +88,19 @@
   ],
   "payloads": {
     "romfs/nativeNX/plugins/damage_numbers.nro": {
-      "source": "build/damage-numbers/candidates/r28/package/romfs/nativeNX/plugins/damage_numbers.nro",
-      "sha256": "3c733aa5e816ab0acf71bd5593ffa0adb4ac53077bcf18726e16ff5a41a974fc"
+      "source": "build/damage-numbers/candidates/r29-diagnostics/package/romfs/nativeNX/plugins/damage_numbers.nro",
+      "sha256": "375dac4a08b84591b18df921e934204e6e86fb38a7a4f9456c0cd6bca90f8974"
     },
     "romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf": {
-      "source": "build/damage-numbers/candidates/r28/package/romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf",
+      "source": "build/damage-numbers/candidates/r29-diagnostics/package/romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf",
       "sha256": "10b26270e158e51b7f26327aff359a7f7170ccc5904c1c82523bf5e372d5f117"
     },
     "romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba": {
-      "source": "build/damage-numbers/candidates/r28/package/romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba",
+      "source": "build/damage-numbers/candidates/r29-diagnostics/package/romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba",
       "sha256": "d4724a2caff4c13e91a541f0e7d203c74e05c40dedd6f78c55426ccd3396230e"
     },
     "romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba": {
-      "source": "build/damage-numbers/candidates/r28/package/romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba",
+      "source": "build/damage-numbers/candidates/r29-diagnostics/package/romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba",
       "sha256": "fe15190c98259443a01add264777b2b4bee994bbd58f9c8f5f12338abb399f2b"
     }
   },
@@ -112,13 +111,13 @@
     "manual": [
       "mods/damage-numbers/EVIDENCE.json"
     ],
-    "static_summary": "r28: target build and complete host/native fixtures passed; DT_TEXTREL absent and every dynamic relocation target is writable. See EVIDENCE.json and research/hardware-link.json.",
-    "manual_summary": "NOT RUN for r28. Prior accepted r27 evidence is preserved in EVIDENCE.json and backups/accepted/."
+    "static_summary": "r29-diagnostics: 14 core/diagnostic tests, 5 config tests, 8 hook tests, native pool checks, 243 parity scenarios, 2800 policy/projection cases, 24 unchanged base-renderer scenes, 256 ARM gateway calls and ARM32/import/relocation verification passed. Marker GPU output and affected-device runtime are untested.",
+    "manual_summary": "User reports r28 starts and displays damage on Switch and Android, with misplaced positions. Exact tested loader/plugin hashes not supplied. This diagnostic NRO has not been run."
   },
   "support": {
     "DEVELOPMENT.md": "mods/damage-numbers/DEVELOPMENT.md",
     "EVIDENCE.json": "mods/damage-numbers/EVIDENCE.json"
   },
-  "candidate": "build/damage-numbers/candidates/r28/delivery",
+  "candidate": "build/damage-numbers/candidates/r29-diagnostics/delivery",
   "candidate_builder": "scripts/build.py"
 }

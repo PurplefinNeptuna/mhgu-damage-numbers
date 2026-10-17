@@ -1,4 +1,40 @@
-# r28 hardware-test rebuild: DEVELOPMENT
+# r29-diagnostics: DEVELOPMENT
+
+Temporary diagnostic candidate for the user-reported misplaced numbers on
+real Switch and Android. r28 starts and shows damage according to the user;
+the precise loader/plugin hashes have not been supplied. The current candidate
+adds evidence collection, not a placement fix. No installation or launch is implied.
+
+The camera record retains its 248-byte ABI. Camera-only unused words carry
+checked copies of sCamera::Viewport metadata: scene texture +0x2c, test camera
++0x28, visible +0x30, and packed subscene/number/mode/display at +4/+0x31/+0x33/+0x34.
+The original class/matrix admission rule remains intact when metadata is unreadable.
+These fields are ignored by the damage-record decoder. Native pointers are logged
+as numeric identities and are never dereferenced by diagnostics after capture.
+
+Only the render consumer formats logs. Limits are 16 distinct camera/viewport
+metadata snapshots, 32 first-visible hit keys and 4 display changes per process.
+Budgets do not reset when the player, camera or ImGui context changes. Each hit
+includes its raw impact, camera matrices, rectangle, camera freshness/admission
+result, projected point or fallback, and optional laid-out text coordinates.
+ERROR severity is deliberate because stock Forge filters at ERROR by default.
+Lines stay below its fixed 512-byte message buffer and go to svcOutputDebugString,
+which the emulator captures. No save-data/SD log writer or settings change is added.
+
+Cyan marks the calculated screen centre. Magenta marks projected impacts and
+Yellow marks fallback. Crosses use the existing background draw list and bypass
+digit placement. The original eight hooks and pinned assembly remain unchanged.
+Read-only original-byte research is under `work/damage-numbers/placement-r28/`.
+The scene-texture field is verified by native main+0xb89900 and saved DTI;
+an affected runtime sample is still needed to establish the cause.
+
+r28 build/work/delivery directories remain intact. Prior distribution/support
+records and hashes are copied to
+`backups/accepted/damage-numbers/r28-before-projection-diagnostics/`.
+New output uses `build/damage-numbers/candidates/r29-diagnostics/` and the
+matching work directory. EVIDENCE.json records exact validation and hashes.
+
+## r28 hardware-test rebuild (preserved)
 
 PIC remains enabled. The target adds `-nostartfiles` and `-Wl,-z,text` to
 exclude GCC startup objects and reject dynamic relocations in read-only sections.
@@ -88,7 +124,7 @@ Copy `build.local.example.json` to ignored `build.local.json` and supply the too
 | `./build.sh package` | Require complete tests for the exact NRO, then verify the candidate ZIP and adjacent guides/notices/checksums. |
 | `./build.sh export --output DEST` | Export the explicit source allowlist to an unused directory. |
 
-Workspace outputs are under `build/damage-numbers/candidates/r27/` and `work/damage-numbers/candidates/r27/`. Cargo caches, the unstripped ELF and converter output stay under `work/damage-numbers/candidates/r27/cargo-target/`. The pinned converter requires a temporary `target` symlink and loose NRO in the source root while building; the wrapper removes both when the converter exits, including on failure. An independent source export uses its own ignored build/work folders. Registry sources are vendored, including metadata needed by this nightly's build-std resolver. Host tests explicitly load the source-only Cargo configuration so they do not inherit the ARM target or build-std settings. Default builds and tests are offline.
+Workspace outputs are under `build/damage-numbers/candidates/r29-diagnostics/` and `work/damage-numbers/candidates/r29-diagnostics/`. Cargo caches, the unstripped ELF and converter output stay under `work/damage-numbers/candidates/r29-diagnostics/cargo-target/`. The pinned converter requires a temporary `target` symlink and loose NRO in the source root while building; the wrapper removes both when the converter exits, including on failure. An independent source export uses its own ignored build/work folders. Registry sources are vendored, including metadata needed by this nightly's build-std resolver. Host tests explicitly load the source-only Cargo configuration so they do not inherit the ARM target or build-std settings. Default builds and tests are offline.
 
 After adding source files, refresh the allowlist with `python3 scripts/export_source.py --refresh`. Exports omit native game inputs, outputs, private configurations, caches and Git metadata. They retain dependency bytes exactly so Cargo checksum validation remains meaningful. Supply your toolchain/input paths in the exported repo's own configuration. No sibling mod import is needed.
 

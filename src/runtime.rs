@@ -1,6 +1,7 @@
 //! Callback-owned display state and independent producer mailboxes. Native hooks never lock the display mutex.
 use crate::{
     config,
+    diagnostics::Diagnostics,
     hooks::{self, Installed},
     platform::{self, NativeMemory},
     render::Resources,
@@ -50,6 +51,7 @@ struct Consumer {
     loaded: bool,
     retry: u64,
     feedback: alloc::string::String,
+    diagnostics: Diagnostics,
 }
 // Call the closure while holding Forge's scoped mutex guard. Both the mutable
 // Consumer borrow and lock end when the closure returns, including early exits.
@@ -74,7 +76,7 @@ pub fn start() {
     let installed = if clock.is_some() {
         match Installed::install() {
             Ok(value) => {
-                log::info!("[damage-numbers] r28 loaded: {} Forge hooks", value.count());
+                log::error!("[DN-DIAG] r29-diagnostics loaded: {} hooks; camera limit=16, hit limit=32; Cyan=screen centre, Magenta=projected hit, Yellow=fallback; diagnostic ERROR lines are expected", value.count());
                 Some(value)
             }
             Err(reason) => {
@@ -101,6 +103,7 @@ pub fn start() {
             loaded: false,
             retry: 0,
             feedback: alloc::string::String::new(),
+            diagnostics: Diagnostics::default(),
         }),
     });
 }
@@ -249,6 +252,7 @@ impl Consumer {
                 // Camera: actor is camera identity and monster is viewport identity in
                 // this record variant. Identity/rectangle changes start a new display epoch.
                 3 => {
+                    self.diagnostics.camera(&record);
                     if player != 0 && record.player == player {
                         if self.camera.actor != 0
                             && (self.camera.actor != record.actor
@@ -287,10 +291,16 @@ pub fn render() {
             return;
         };
         let now = platform::tick();
-        let size = forge::imgui::get_io().DisplaySize;
+        let io = forge::imgui::get_io();
+        let size = io.DisplaySize;
+        let scale = io.DisplayFramebufferScale;
+        // ImGui owns this viewport for the current callback. Copy its values only.
+        let viewport = unsafe { forge::sys::imgui::igGetMainViewport().as_ref() };
+        let bounds = viewport.map_or([f32::NAN; 4], |v| [v.Pos.x, v.Pos.y, v.Size.x, v.Size.y]);
+        state.diagnostics.display([size.x, size.y, scale.x, scale.y, bounds[0], bounds[1], bounds[2], bounds[3]]);
         // Only a camera sample for this player, younger than 0.2 seconds, may drive
         // world projection. Missing/stale cameras keep numbers at screen centre.
-        let view = if state.player != 0
+        let native_view = if state.player != 0
             && state.camera.player == state.player
             && fresh(state.camera.tick, now, frequency, 0.2)
         {
@@ -303,8 +313,9 @@ pub fn render() {
             )
         } else {
             None
-        }
-        .or_else(|| presentation::View::screen(size.x, size.y));
+        };
+        let native_camera_used = native_view.is_some();
+        let view = native_view.or_else(|| presentation::View::screen(size.x, size.y));
         let time = seconds(now, origin, frequency).unwrap_or(f32::NAN);
         state.model.update(time, view.is_some());
         let Some(view) = view else {
@@ -323,7 +334,26 @@ pub fn render() {
             |text, pixels, style| state.resources.measure(text, pixels, style),
         );
         state.resources.draw(&view, &numbers[..count]);
+        let draw = forge::imgui::DrawList::background();
+        let centre = presentation::Point { x: view.x + view.width * 0.5, y: view.y + view.height * 0.5 };
+        diagnostic_cross(draw, centre, 0xffffff00);
+        draw.add_text(forge::sys::imgui::ImVec2::new(centre.x + 10.0, centre.y + 10.0), 0xffffff00, "DN diag centre");
+        for &event in &state.model.numbers[..state.model.count] {
+            let number = numbers[..count].iter().find(|number| number.key == event.key);
+            state.diagnostics.hit(event, &state.camera, &view, native_camera_used, now, number);
+            if number.is_some() {
+                let projected = event.position.and_then(|p| presentation::project(p, &view));
+                diagnostic_cross(draw, projected.unwrap_or(centre), if projected.is_some() { 0xffff00ff } else { 0xff00ffff });
+            }
+        }
     });
+}
+// These fixed-size reference marks bypass number animation, glyph metrics and
+// overlap placement. Cyan checks Forge coordinates; Magenta/Yellow check the anchor.
+fn diagnostic_cross(draw: forge::imgui::DrawList, point: presentation::Point, color: u32) {
+    use forge::sys::imgui::ImVec2;
+    draw.add_line(ImVec2::new(point.x - 8.0, point.y), ImVec2::new(point.x + 8.0, point.y), color, 2.0);
+    draw.add_line(ImVec2::new(point.x, point.y - 8.0), ImVec2::new(point.x, point.y + 8.0), color, 2.0);
 }
 /// Closing the settings tree affects only this callback. The overlay keeps processing through free_render.
 pub fn panel() {

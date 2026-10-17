@@ -20,6 +20,9 @@ dependencies = [
 [[package]]
 name = "damage-numbers-core"
 version = "0.1.0"
+dependencies = [
+ "log",
+]
 
 [[package]]
 name = "equivalent"
