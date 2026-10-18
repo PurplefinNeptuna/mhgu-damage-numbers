@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "mod": "damage-numbers",
-  "status": "DEVELOPMENT",
-  "reason": "Visible-crop correction candidate for the user-reported handheld displacement. Use the game's applied display size for projection and layout; diagnostic markers/per-hit logging removed. Affected-device acceptance pending.",
+  "status": "READY_TO_DISTRIBUTE",
+  "reason": "User approved distribution of the existing r30 visible-crop correction. Promote the validated NRO and assets unchanged, with no rebuild. Affected-device gameplay remains unconfirmed.",
   "publication": {
     "published": false,
     "url": null,
@@ -10,7 +10,7 @@
   },
   "version": "r30",
   "package_name": "damage-numbers",
-  "archive": "damage-numbers-r30-candidate.zip",
+  "archive": "damage-numbers-r30.zip",
   "runtime_test": "NOT RUN",
   "gamebanana": {
     "ai_code": {
@@ -119,6 +119,8 @@
     "DEVELOPMENT.md": "mods/damage-numbers/DEVELOPMENT.md",
     "EVIDENCE.json": "mods/damage-numbers/EVIDENCE.json"
   },
-  "candidate": "build/damage-numbers/candidates/r30/delivery",
-  "candidate_builder": "scripts/build.py"
+  "approval": {
+    "date": "2026-10-18",
+    "basis": "User request: promote this to ready to distribute. Approval applies to the unchanged r30 candidate; it does not supply a new gameplay acceptance report."
+  }
 }

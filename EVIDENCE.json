@@ -1819,7 +1819,7 @@
   "current": {
     "version": "r30",
     "date": "2026-10-18",
-    "status": "DEVELOPMENT",
+    "status": "READY_TO_DISTRIBUTE",
     "scope": "Use the actual applied visible crop for projection, layout, effect/number size, clipping and screen-centre fallback. Remove temporary r29 diagnostics.",
     "runtime_test": "NOT RUN",
     "previous_accepted": "r27",
@@ -1948,15 +1948,39 @@
     },
     "linker_warning": "Existing -z norelro ignored warning only.",
     "package": {
-      "path": "build/damage-numbers/candidates/r30/delivery/damage-numbers-r30-candidate.zip",
-      "sha256": "70efaec301f57d88dd7e8820bca40f2d081e69a5ceba2bb62e12f250950ca11f",
-      "status": "VERIFIED_DEVELOPMENT_CANDIDATE"
+      "path": "build/damage-numbers/releases/r30/damage-numbers-r30.zip",
+      "sha256": "3c8ef85480efc258b75d0d436a2f9daa28ae883372d8c546e4f99ee881d74df7",
+      "bytes": 141146,
+      "status": "VERIFIED_LOCAL_RELEASE"
     },
     "distribution_check": {
       "status": "PASSED",
       "mod_records": 11
     },
-    "runtime_limits": "No installation, launch, mode-switch gameplay, GPU output or affected-device acceptance for this exact NRO. Source/original ARM/host results are separate from live validation."
+    "runtime_limits": "No installation, launch, mode-switch gameplay, GPU output or affected-device acceptance for this exact NRO. Source/original ARM/host results are separate from live validation.",
+    "approval": {
+      "date": "2026-10-18",
+      "basis": "User request: promote this to ready to distribute. Approval applies to the unchanged r30 candidate; it does not supply a new gameplay acceptance report."
+    },
+    "runtime_rebuilt_for_promotion": false,
+    "candidate_archive": {
+      "path": "build/damage-numbers/candidates/r30/delivery/damage-numbers-r30-candidate.zip",
+      "sha256": "70efaec301f57d88dd7e8820bca40f2d081e69a5ceba2bb62e12f250950ca11f",
+      "status": "VERIFIED_DEVELOPMENT_CANDIDATE"
+    },
+    "preserved_candidate": "backups/accepted/damage-numbers/r30-distribution-approved/PRESERVATION.json",
+    "promotion": {
+      "date": "2026-10-18",
+      "source_commit": "1f22556",
+      "runtime_rebuilt": false,
+      "payload_hashes_unchanged": true,
+      "candidate_receipt_hashes_verified": true,
+      "preservation": "backups/accepted/damage-numbers/r30-distribution-approved/PRESERVATION.json",
+      "installed": false,
+      "published": false,
+      "pushed": false,
+      "gameplay_acceptance": "No new r30 result supplied with the distribution request."
+    }
   },
   "r28_before_projection_diagnostics": {
     "version": "r28",

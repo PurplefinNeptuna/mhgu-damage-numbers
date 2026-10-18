@@ -1,4 +1,13 @@
-# r30 visible-crop correction: DEVELOPMENT
+# r30 visible-crop correction: READY_TO_DISTRIBUTE
+
+The user approved distribution on 2026-10-18. The validated candidate NRO and
+three assets were promoted unchanged, without rebuilding. This approval does
+not add an affected-device gameplay result. The local, unpublished release is
+`build/damage-numbers/releases/r30/damage-numbers-r30.zip`.
+The candidate and pre-promotion records are preserved under
+`backups/accepted/damage-numbers/r30-distribution-approved/`.
+Keep r30 build outputs and receipts immutable. Further runtime edits require a
+new version and output directories.
 
 MHGU can display a smaller crop of an unchanged swapchain allocation. Forge's
 ImGui DisplaySize describes that allocation, so the previous mapping could use
@@ -143,7 +152,7 @@ The load callback leaves the loader requirement record untouched, so Forge versi
 
 The prepared font retains Open Sans Semibold naming. Its glyph outlines, hinting, metrics and weight match r2; only naming metadata/checksums changed. Artwork pixels and atlas geometry are unchanged. The selected styles appear as Wilds, Rise, Classic; stored style IDs remain stable. Missing artwork omits its effects while readable damage numbers continue. Failure messages are deduplicated across context replacements.
 
-The release ZIP is `build/damage-numbers/releases/r27/damage-numbers-r27.zip`.
+The release ZIP is `build/damage-numbers/releases/r30/damage-numbers-r30.zip`.
 Package with `python3 scripts/mod_distribution.py package damage-numbers` and run
 the full `check`. The approved r26 delivery is preserved under
 `backups/accepted/damage-numbers/r26-before-centre-fallback/`.
@@ -171,7 +180,7 @@ Workspace outputs are under `build/damage-numbers/candidates/r30/` and `work/dam
 
 After adding source files, refresh the allowlist with `python3 scripts/export_source.py --refresh`. Exports omit native game inputs, outputs, private configurations, caches and Git metadata. They retain dependency bytes exactly so Cargo checksum validation remains meaningful. Supply your toolchain/input paths in the exported repo's own configuration. No sibling mod import is needed.
 
-The root distribution packager validates the approved r27 release. Run
+The root distribution packager validates the approved r30 release. Run
 `python3 scripts/mod_distribution.py package damage-numbers` and the full
 `python3 scripts/mod_distribution.py check`. The accepted r26 delivery and tested
 r27 candidate remain in `backups/accepted/damage-numbers/` with exact hashes.

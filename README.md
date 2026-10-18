@@ -5,8 +5,7 @@ Choose Wilds, Rise or Classic style.
 
 ## Requirements
 
-This is a handheld/docked viewport correction candidate. Keep the Forge loader
-from your working setup. The loader is supplied separately.
+The Forge loader is supplied separately.
 
 - MHGU 1.4.0 for Nintendo Switch.
 - [Fexty's Forge 1.5.1](https://github.com/Fexty12573/forge/releases/tag/v1.5.1).
@@ -14,7 +13,7 @@ from your working setup. The loader is supplied separately.
 ## Installation
 
 1. Close MHGU.
-2. Extract `damage-numbers-r30-candidate.zip`.
+2. Extract `damage-numbers-r30.zip`.
 3. Copy the whole `damage-numbers` folder into your emulator's MHGU mod directory:
    - Eden: `~/.local/share/eden/load/0100770008DD8000/`
    - Ryujinx: `mods/contents/0100770008dd8000/` inside its data directory.
@@ -88,17 +87,31 @@ use their individual defaults. Restart the game to load your edits.
 Close MHGU before updating or removing the mod. To update, replace
 its `damage-numbers` folder with the one from the new ZIP. To remove it,
 disable the package or delete its folder from the emulator's mod directory.
-This candidate uses the same settings file as earlier versions.
+This version uses the same settings file as earlier versions. If updating from
+r28 or r29 with all accompanying files already present, you can replace only
+`romfs/nativeNX/plugins/damage_numbers.nro`.
+
+On Switch, update the files under
+`sd:/atmosphere/contents/0100770008DD8000/romfs/nativeNX/plugins/`.
+To remove the mod, delete `damage_numbers.nro` and its `damage-numbers/` asset
+folder from that directory.
 
 ## Compatibility and known issues
 
 This correction has not yet been confirmed on the affected tablet or Switch.
 If numbers remain displaced, report whether the game is in handheld or docked
-mode and retain the emulator log. The diagnostic crosses and per-hit logs from
-r29 are absent.
+mode and retain the emulator log.
 
 Rise slashes are drawn over the screen and may appear over foreground scenery.
 
 If an artwork file is missing or unreadable, numbers continue without that
 file's effects. If OpenSans.ttf is unavailable, numbers use Forge's font.
 Restore the packaged files and restart the game to restore the full styling.
+
+## Credits
+
+- [MHGU Forge](https://github.com/Fexty12573/forge) by Fexty.
+- [Original Forge](https://github.com/jeffi6375/forge) by Jeffi and the Skyline Project.
+- [forge-rs](https://github.com/Fexty12573/forge-rs) by Fexty.
+- [libnx](https://github.com/switchbrew/libnx) by Hydrosphere Developers.
+- [Open Sans](https://github.com/googlefonts/opensans) by The Open Sans Project Authors.
