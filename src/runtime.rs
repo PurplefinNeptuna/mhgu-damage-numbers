@@ -77,7 +77,7 @@ pub fn start() {
     let installed = if clock.is_some() {
         match Installed::install() {
             Ok(value) => {
-                log::info!("[damage-numbers] r33 loaded: {} Forge hooks", value.count());
+                log::info!("[damage-numbers] r34 loaded: {} Forge hooks", value.count());
                 Some(value)
             }
             Err(reason) => {
@@ -417,7 +417,7 @@ pub fn panel() {
             &mut settings.other,
         );
         forge::imgui::set_item_tooltip(
-            c"Also shows monster HP loss that Damage Numbers could not match to a hit it saw.\nThis can be other hunters online, traps, cannons or the environment,\nso these numbers may be unknown damage.",
+            c"Shows monster HP loss that no detected hit, poison, blast or mount accounts for.\nDamage Numbers can't tell where it came from; online, it may include other hunters' attacks.\nDamage landing at the same moment can show as one number.",
         );
         let preview = match settings.style {
             Style::Wilds => c"Wilds",

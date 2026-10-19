@@ -13,7 +13,7 @@ The Forge loader is supplied separately.
 ## Installation
 
 1. Close MHGU.
-2. Extract `damage-numbers-r33.zip`.
+2. Extract `damage-numbers-r34.zip`.
 3. Copy the whole `damage-numbers` folder into your emulator's MHGU mod directory:
    - Eden: `~/.local/share/eden/load/0100770008DD8000/`
    - Ryujinx: `mods/contents/0100770008dd8000/` inside its data directory.
@@ -36,8 +36,8 @@ There is no handheld/docked setting to change in the mod.
 
 Numbers appear for hunter, Prowler and Palico attacks, Insect Glaive kinsect
 hits, bombs and monster-to-monster hits. Poison ticks, blast explosions and the
-mount knockdown also show their damage. These appear at the monster's position
-and show for everyone's poison, blast and mounts in multiplayer. Wilds uses outlined digits and glowing stars for
+mount knockdown also show their damage. These numbers appear at the monster's
+position, including in multiplayer when another hunter caused them. Wilds uses outlined digits and glowing stars for
 critical hits. Rise has slanted critical slashes and larger weak-point numbers.
 Classic has straight critical markers. All sizes scale with screen height.
 
@@ -57,7 +57,7 @@ row leaves numbers running.
 | Setting | Default | Effect |
 | --- | --- | --- |
 | Show damage numbers | On | Turns the display on or off. |
-| Show other damage | Off | Also shows monster HP loss the mod could not match to a hit it saw, at the monster's position. Hover the option for details. |
+| Show other damage | Off | Shows monster HP loss that no detected damage accounts for, at the monster's position. |
 | Style | Wilds | Choose Wilds, Rise or Classic. |
 | Number size | 1.0x | Adjust from 0.5x to 3.0x. |
 | Duration | 0.9 seconds | Adjust from 0.4 to 2.0 seconds. |
@@ -110,9 +110,9 @@ mode and retain the emulator log.
 
 Rise slashes are drawn over the screen and may appear over foreground scenery.
 
-Show other damage can't tell where the damage came from. In online play it
-shows other hunters' hits. It also shows traps, cannons and environmental
-damage, and several sources that land together can appear as one number.
+Show other damage can't tell where its damage came from. Online, it may
+include other hunters' attacks. Damage from several sources landing at once can
+appear as one number.
 
 If an artwork file is missing or unreadable, numbers continue without that
 file's effects. If OpenSans.ttf is unavailable, numbers use Forge's font.
