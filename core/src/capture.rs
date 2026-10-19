@@ -170,9 +170,26 @@ pub fn attack_owner(memory: &impl Memory, hit: u32) -> Owner {
     let primary = memory.byte(hit + 0x10);
     if primary == 0 || primary == 3 {
         resolve(memory, primary, memory.word(hit + 0xc))
+    } else if primary == 2 && memory.byte(hit + 0x6e) == 2 {
+        stage_shell(memory, memory.word(hit + 0x70))
     } else {
         resolve(memory, memory.byte(hit + 0x6e), memory.word(hit + 0x70))
     }
+}
+// A shell hit left at secondary kind 2 still names the shell at +0x70. Its owner
+// character is *(*(shell+0x136c)+0xc), accepted with the same (+0xc & 7) in 1..=2
+// check as main+0x4a1b6c. The map's uStageShellOwner is built by main+0x53985c
+// with character type 9 at +0x1052 (main+0x51c440).
+fn stage_shell(memory: &impl Memory, shell: u32) -> Owner {
+    if !memory.readable(shell, 0x1370) {
+        return Owner::Unknown;
+    }
+    let info = memory.word(shell + 0x136c);
+    let owner = if memory.readable(info, 0x10) { memory.word(info + 0xc) } else { 0 };
+    if !memory.readable(owner, 0x1053) || !(1..=2).contains(&(memory.word(owner + 0xc) & 7)) {
+        return Owner::Unknown;
+    }
+    if memory.byte(owner + 0x1052) == 9 { Owner::Stage } else { Owner::Unknown }
 }
 // This private helper is used only with numeric arrays, Vec3 and floats.
 // Copy alone does not guarantee that arbitrary byte patterns are valid for T;

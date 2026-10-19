@@ -13,7 +13,7 @@ The Forge loader is supplied separately.
 ## Installation
 
 1. Close MHGU.
-2. Extract `damage-numbers-r34.zip`.
+2. Extract `damage-numbers-r35.zip`.
 3. Copy the whole `damage-numbers` folder into your emulator's MHGU mod directory:
    - Eden: `~/.local/share/eden/load/0100770008DD8000/`
    - Ryujinx: `mods/contents/0100770008dd8000/` inside its data directory.
@@ -37,7 +37,9 @@ There is no handheld/docked setting to change in the mod.
 Numbers appear for hunter, Prowler and Palico attacks, Insect Glaive kinsect
 hits, bombs and monster-to-monster hits. Poison ticks, blast explosions and the
 mount knockdown also show their damage. These numbers appear at the monster's
-position, including in multiplayer when another hunter caused them. Wilds uses outlined digits and glowing stars for
+position, including in multiplayer when another hunter caused them. Ballista
+shots and shots fired by the map itself, such as the rail cannon, show for
+every player. Wilds uses outlined digits and glowing stars for
 critical hits. Rise has slanted critical slashes and larger weak-point numbers.
 Classic has straight critical markers. All sizes scale with screen height.
 
@@ -109,6 +111,9 @@ If numbers remain displaced, report whether the game is in handheld or docked
 mode and retain the emulator log.
 
 Rise slashes are drawn over the screen and may appear over foreground scenery.
+
+Map-fired shots have no owner in the game's data, so their numbers show even
+when another hunter triggered the weapon.
 
 Show other damage can't tell where its damage came from. Online, it may
 include other hunters' attacks. Damage from several sources landing at once can

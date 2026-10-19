@@ -724,3 +724,27 @@ fn poison_is_gray_and_blast_uses_the_weak_point_colour() {
         assert!(visible(e, Settings::default()));
     }
 }
+#[test]
+fn map_fired_shells_show_as_object_damage() {
+    // Shell 0x8000 keeps secondary kind 2; its owner info at 0xa400 names
+    // character 0xb000, the map's uStageShellOwner (type 9 at +0x1052).
+    let mut memory = Fake::scene();
+    memory.bytes.insert(0x7010, 2);
+    memory.bytes.insert(0x706d, 8);
+    memory.bytes.insert(0x706e, 2);
+    memory.region(0x7070, 4);
+    memory.put(0x7070, 0x8000);
+    memory.region(0x8000, 0x1370);
+    memory.put(0x8000 + 0x136c, 0xa400);
+    memory.region(0xa400, 0x10);
+    memory.put(0xa40c, 0xb000);
+    memory.region(0xb000, 0x1053);
+    memory.put(0xb00c, 1);
+    assert_eq!(attack_owner(&memory, 0x7000), Owner::Unknown, "type 0 is not the map");
+    memory.bytes.insert(0xb000 + 0x1052, 9);
+    assert_eq!(attack_owner(&memory, 0x7000), Owner::Stage);
+    assert_eq!(source_outcome(0x020802, Owner::Stage), Some(Source::Object));
+    assert_eq!(source_outcome(0x020802, Owner::Unknown), None);
+    memory.put(0xb00c, 0);
+    assert_eq!(attack_owner(&memory, 0x7000), Owner::Unknown, "inactive owner");
+}

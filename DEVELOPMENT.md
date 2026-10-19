@@ -1,4 +1,19 @@
-# r34 other-damage wording: DEVELOPMENT
+# r35 map-fired shells: DEVELOPMENT
+
+User request (2026-10-20): show damage whose source can be traced but was
+hidden. Static research (`work/damage-numbers/siege-weapons-research.md`) shows
+the shell hit setup main+0x4a2790 rewrites hit owner fields only for hunters,
+Palicoes and monsters. Shells fired by the map's uStageShellOwner (character
+type 9, main+0x51c440 -> main+0x53985c) keep secondary kind 2 with the shell at
++0x70; the rail cannon (uShellSt006, main+0x497040) is one. `attack_owner` now
+follows that shell's owner `*(*(shell+0x136c)+0xc)` (same activity check as
+main+0x4a1b6c) and returns `Owner::Stage` (wire 5) for type 9. Tags (2, any,
+2) with a Stage owner become Object damage, shown for every player. Ballista
+shots were already Object (tags 2, 8, 0 with the hunter at +0x70). Cannon, huge
+cannon and Dragonator projectiles are not traced; they show only if they use
+map-owned shells. Hits with other unrecognised tags stay hidden. Gameplay NOT RUN.
+
+# r34 other-damage wording (superseded candidate)
 
 User request (2026-10-20): run the Show other damage tooltip through the
 humanizer skill. The tooltip and README no longer name traps or cannons, which
@@ -309,11 +324,11 @@ Copy `build.local.example.json` to ignored `build.local.json` and supply the too
 | `./build.sh package` | Require complete tests for the exact NRO, then verify the candidate ZIP and adjacent guides/notices/checksums. |
 | `./build.sh export --output DEST` | Export the explicit source allowlist to an unused directory. |
 
-Workspace outputs are under `build/damage-numbers/candidates/r34/` and `work/damage-numbers/candidates/r34/`. Cargo caches, the unstripped ELF and converter output stay under `work/damage-numbers/candidates/r34/cargo-target/`. The pinned converter requires a temporary `target` symlink and loose NRO in the source root while building; the wrapper removes both when the converter exits, including on failure. An independent source export uses its own ignored build/work folders. Registry sources are vendored, including metadata needed by this nightly's build-std resolver. Host tests explicitly load the source-only Cargo configuration so they do not inherit the ARM target or build-std settings. Default builds and tests are offline.
+Workspace outputs are under `build/damage-numbers/candidates/r35/` and `work/damage-numbers/candidates/r35/`. Cargo caches, the unstripped ELF and converter output stay under `work/damage-numbers/candidates/r35/cargo-target/`. The pinned converter requires a temporary `target` symlink and loose NRO in the source root while building; the wrapper removes both when the converter exits, including on failure. An independent source export uses its own ignored build/work folders. Registry sources are vendored, including metadata needed by this nightly's build-std resolver. Host tests explicitly load the source-only Cargo configuration so they do not inherit the ARM target or build-std settings. Default builds and tests are offline.
 
 After adding source files, refresh the allowlist with `python3 scripts/export_source.py --refresh`. Exports omit native game inputs, outputs, private configurations, caches and Git metadata. They retain dependency bytes exactly so Cargo checksum validation remains meaningful. Supply your toolchain/input paths in the exported repo's own configuration. No sibling mod import is needed.
 
-The root distribution packager validates the r34 candidate. Run
+The root distribution packager validates the r35 candidate. Run
 `python3 scripts/mod_distribution.py package damage-numbers` and the full
 `python3 scripts/mod_distribution.py check`. The accepted r26 delivery and tested
 r27 candidate remain in `backups/accepted/damage-numbers/` with exact hashes.

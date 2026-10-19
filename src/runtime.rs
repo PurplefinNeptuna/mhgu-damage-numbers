@@ -77,7 +77,7 @@ pub fn start() {
     let installed = if clock.is_some() {
         match Installed::install() {
             Ok(value) => {
-                log::info!("[damage-numbers] r34 loaded: {} Forge hooks", value.count());
+                log::info!("[damage-numbers] r35 loaded: {} Forge hooks", value.count());
                 Some(value)
             }
             Err(reason) => {
@@ -218,6 +218,7 @@ impl Consumer {
                         1 => Owner::LocalPalico,
                         2 => Owner::RemotePlayer,
                         3 => Owner::RemotePalico,
+                        5 => Owner::Stage,
                         _ => Owner::Unknown,
                     };
                     if player != 0

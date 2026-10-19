@@ -35,6 +35,8 @@ pub enum Owner {
     RemotePalico,
     #[default]
     Unknown,
+    /// The map's uStageShellOwner (character type 9) fired this shell, e.g. the rail cannon.
+    Stage,
 }
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -232,6 +234,11 @@ pub fn source_outcome(tags: u32, owner: Owner) -> Option<Source> {
         return Some(Source::Monster);
     }
     if primary == 2 && subtype == 8 && secondary == 0 && owner != Owner::Unknown {
+        return Some(Source::Object);
+    }
+    // Map-fired shells keep secondary kind 2 because main+0x4a2790 rewrites the
+    // owner only for hunters, Palicoes and monsters; attack_owner identifies them.
+    if primary == 2 && secondary == 2 && owner == Owner::Stage {
         return Some(Source::Object);
     }
     None
