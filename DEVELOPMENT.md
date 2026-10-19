@@ -1,4 +1,16 @@
-# r31 kinsect, status damage and opt-in other damage: DEVELOPMENT
+# r32 poison and blast colours: DEVELOPMENT
+
+User request (2026-10-20): poison ticks use the bounce gray and blast uses the
+weak-point colour, provided both come from their own native source rather than
+HP watching. They do: poison comes from hook 8 (main+0xa2664) and blast from
+hook 9 (main+0xaac54). r31's single Status family is split into `Poison` (wire
+6), `Blast` (wire 7) and `Status` (mount finisher, wire 4); `tint()` maps them
+to Gray and Weak, so Rise's weak-point enlargement also applies to blast. Kinsect
+was already an ordinary Attack since r31, independent of Show other damage.
+Hooks, signatures and gateways are unchanged from r31. The unrun r31 candidate
+stays in its own build folder. Gameplay NOT RUN.
+
+# r31 kinsect, status damage and opt-in other damage (superseded candidate)
 
 The user reported that r30 shows no numbers for mount, Insect Glaive kinsect,
 blast or poison damage. They asked for the native functions to be located
@@ -281,11 +293,11 @@ Copy `build.local.example.json` to ignored `build.local.json` and supply the too
 | `./build.sh package` | Require complete tests for the exact NRO, then verify the candidate ZIP and adjacent guides/notices/checksums. |
 | `./build.sh export --output DEST` | Export the explicit source allowlist to an unused directory. |
 
-Workspace outputs are under `build/damage-numbers/candidates/r31/` and `work/damage-numbers/candidates/r31/`. Cargo caches, the unstripped ELF and converter output stay under `work/damage-numbers/candidates/r31/cargo-target/`. The pinned converter requires a temporary `target` symlink and loose NRO in the source root while building; the wrapper removes both when the converter exits, including on failure. An independent source export uses its own ignored build/work folders. Registry sources are vendored, including metadata needed by this nightly's build-std resolver. Host tests explicitly load the source-only Cargo configuration so they do not inherit the ARM target or build-std settings. Default builds and tests are offline.
+Workspace outputs are under `build/damage-numbers/candidates/r32/` and `work/damage-numbers/candidates/r32/`. Cargo caches, the unstripped ELF and converter output stay under `work/damage-numbers/candidates/r32/cargo-target/`. The pinned converter requires a temporary `target` symlink and loose NRO in the source root while building; the wrapper removes both when the converter exits, including on failure. An independent source export uses its own ignored build/work folders. Registry sources are vendored, including metadata needed by this nightly's build-std resolver. Host tests explicitly load the source-only Cargo configuration so they do not inherit the ARM target or build-std settings. Default builds and tests are offline.
 
 After adding source files, refresh the allowlist with `python3 scripts/export_source.py --refresh`. Exports omit native game inputs, outputs, private configurations, caches and Git metadata. They retain dependency bytes exactly so Cargo checksum validation remains meaningful. Supply your toolchain/input paths in the exported repo's own configuration. No sibling mod import is needed.
 
-The root distribution packager validates the r31 candidate. Run
+The root distribution packager validates the r32 candidate. Run
 `python3 scripts/mod_distribution.py package damage-numbers` and the full
 `python3 scripts/mod_distribution.py check`. The accepted r26 delivery and tested
 r27 candidate remain in `backups/accepted/damage-numbers/` with exact hashes.

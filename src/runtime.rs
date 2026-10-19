@@ -77,7 +77,7 @@ pub fn start() {
     let installed = if clock.is_some() {
         match Installed::install() {
             Ok(value) => {
-                log::info!("[damage-numbers] r31 loaded: {} Forge hooks", value.count());
+                log::info!("[damage-numbers] r32 loaded: {} Forge hooks", value.count());
                 Some(value)
             }
             Err(reason) => {
@@ -209,6 +209,8 @@ impl Consumer {
                         1 => Some(Source::Monster),
                         2 => Some(Source::Object),
                         4 => Some(Source::Status),
+                        6 => Some(Source::Poison),
+                        7 => Some(Source::Blast),
                         _ => None,
                     };
                     let owner = match record.actor {

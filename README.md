@@ -13,7 +13,7 @@ The Forge loader is supplied separately.
 ## Installation
 
 1. Close MHGU.
-2. Extract `damage-numbers-r31.zip`.
+2. Extract `damage-numbers-r32.zip`.
 3. Copy the whole `damage-numbers` folder into your emulator's MHGU mod directory:
    - Eden: `~/.local/share/eden/load/0100770008DD8000/`
    - Ryujinx: `mods/contents/0100770008dd8000/` inside its data directory.
@@ -46,7 +46,8 @@ screen centre with the usual animation and spacing. Hits outside the camera
 view also use this fallback.
 
 Numbers are gold when the physical hitzone value is 45 or higher, and white
-when it is below 45 or unknown. Bounced attacks appear grey.
+when it is below 45 or unknown. Bounced attacks appear grey. Poison damage is
+always grey and blast damage is always gold.
 
 ### Settings
 

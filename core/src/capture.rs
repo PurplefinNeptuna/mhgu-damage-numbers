@@ -496,7 +496,8 @@ impl CaptureState {
                 let work = memory.word(scope.subject.wrapping_add(0x1428));
                 let mut amount = [0; 2];
                 if memory.copy(work.wrapping_add(0x5d66), &mut amount) {
-                    self.status(scope.subject, i16::from_le_bytes(amount) as i32, memory, mailbox);
+                    let amount = i16::from_le_bytes(amount) as i32;
+                    self.status(scope.subject, amount, Source::Poison, memory, mailbox);
                 }
             }
             _ => {}
@@ -504,8 +505,8 @@ impl CaptureState {
         Some(scope.caller)
     }
     // Status damage has no hit entry: the position is the monster root at work+0x40,
-    // the owner is unknown and feedback[0].reserved carries the Status family.
-    fn status(&mut self, monster: u32, amount: i32, memory: &impl Memory, mailbox: &Mailbox) {
+    // the owner is unknown and feedback[0].reserved carries the poison/blast/mount family.
+    fn status(&mut self, monster: u32, amount: i32, source: Source, memory: &impl Memory, mailbox: &Mailbox) {
         let work = memory.word(monster.wrapping_add(0x1428));
         if amount <= 0 || !memory.readable(work, 0x378) {
             return;
@@ -520,7 +521,7 @@ impl CaptureState {
         if !copy_value(memory, work + 0x40, &mut record.position) {
             record.position.x = f32::NAN;
         }
-        record.feedback[0].reserved = Source::Status as u8;
+        record.feedback[0].reserved = source as u8;
         self.publish(record, memory, mailbox);
     }
     /// sp is the native stack pointer at the tapped instruction (frame address + 328).
@@ -537,7 +538,7 @@ impl CaptureState {
             let blast = if data == 0 { 0 } else { memory.word(data.wrapping_add(100 + 0x54)) };
             let mut amount = [0; 2];
             if blast != 0 && memory.copy(blast.wrapping_add(0xc), &mut amount) {
-                self.status(monster, i16::from_le_bytes(amount) as i32, memory, mailbox);
+                self.status(monster, i16::from_le_bytes(amount) as i32, Source::Blast, memory, mailbox);
             }
             return;
         }
@@ -546,7 +547,7 @@ impl CaptureState {
         if kind == 10 {
             let cell = memory.word(sp.wrapping_add(60));
             if cell > 0x1428 {
-                self.status(cell - 0x1428, frame.r[4] as i32, memory, mailbox);
+                self.status(cell - 0x1428, frame.r[4] as i32, Source::Status, memory, mailbox);
             }
             return;
         }

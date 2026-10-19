@@ -2,15 +2,15 @@
   "schema_version": 1,
   "mod": "damage-numbers",
   "status": "DEVELOPMENT",
-  "reason": "Candidate for the user-reported missing kinsect, poison, blast and mount numbers: accept kinsect hit tags, add poison-tick, blast and mount-finisher hooks, and add an opt-in Show other damage setting (default off) for unattributed monster HP loss. Gameplay NOT RUN.",
+  "reason": "r32 candidate for the user-reported missing kinsect, poison, blast and mount numbers: accept kinsect hit tags, add poison-tick, blast and mount-finisher hooks, and add an opt-in Show other damage setting (default off) for unattributed monster HP loss. Poison numbers are gray and blast numbers use the weak-point colour. Gameplay NOT RUN.",
   "publication": {
     "published": false,
     "url": null,
     "date": null
   },
-  "version": "r31",
+  "version": "r32",
   "package_name": "damage-numbers",
-  "archive": "damage-numbers-r31-candidate.zip",
+  "archive": "damage-numbers-r32-candidate.zip",
   "runtime_test": "NOT RUN",
   "gamebanana": {
     "ai_code": {
@@ -63,7 +63,7 @@
   },
   "target": "MHGU Nintendo Switch 1.4.0; upstream Forge 1.5.1; Eden/Ryujinx.",
   "limitations": [
-    "r31 has not been run. Kinsect, poison, blast and mount detection come from static research of MHGU 1.4.0 code without a gameplay trace.",
+    "r32 has not been run. Kinsect, poison, blast and mount detection come from static research of MHGU 1.4.0 code without a gameplay trace.",
     "The mount number is taken from the fixed HP subtraction in ride state 0xd; identifying it as the mount finisher is an inference from the surrounding ride code.",
     "Poison, blast and mount numbers have no owner and appear for every player at the monster root position.",
     "Show other damage cannot attribute its numbers: online it includes other hunters, and it includes traps, cannons and environmental damage.",
@@ -95,19 +95,19 @@
   ],
   "payloads": {
     "romfs/nativeNX/plugins/damage_numbers.nro": {
-      "source": "build/damage-numbers/candidates/r31/package/romfs/nativeNX/plugins/damage_numbers.nro",
-      "sha256": "023fd55c06182bd89d5ab1c466b94ddba8a7576ee666619bddf8b020af5ea866"
+      "source": "build/damage-numbers/candidates/r32/package/romfs/nativeNX/plugins/damage_numbers.nro",
+      "sha256": "bdd5fcf2b0d6948a54a06e2d929019db1cce22e4b0a2f5b0fcbdffdc89b7c925"
     },
     "romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf": {
-      "source": "build/damage-numbers/candidates/r31/package/romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf",
+      "source": "build/damage-numbers/candidates/r32/package/romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf",
       "sha256": "10b26270e158e51b7f26327aff359a7f7170ccc5904c1c82523bf5e372d5f117"
     },
     "romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba": {
-      "source": "build/damage-numbers/candidates/r31/package/romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba",
+      "source": "build/damage-numbers/candidates/r32/package/romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba",
       "sha256": "d4724a2caff4c13e91a541f0e7d203c74e05c40dedd6f78c55426ccd3396230e"
     },
     "romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba": {
-      "source": "build/damage-numbers/candidates/r31/package/romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba",
+      "source": "build/damage-numbers/candidates/r32/package/romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba",
       "sha256": "fe15190c98259443a01add264777b2b4bee994bbd58f9c8f5f12338abb399f2b"
     }
   },
@@ -118,13 +118,13 @@
     "manual": [
       "mods/damage-numbers/EVIDENCE.json"
     ],
-    "static_summary": "r31: 21 core tests (including kinsect, poison, blast, mount, remote-hit accounting, visibility, monster list and HP bookkeeping), 5 config tests, 8 hook tests over eleven sites, native pool with eleven hooks, 243 parity scenarios, 2800 policy/projection cases, 24 base-renderer scenes with zero pixel differences, 352 gateway calls across twelve gateways, four original ARM crop-update cases, and 15-window/ABI/import/relocation checks passed. Gameplay NOT RUN.",
-    "manual_summary": "NOT RUN for r31."
+    "static_summary": "r32: 22 core tests (including kinsect, poison, blast, mount, remote-hit accounting, visibility, poison/blast colours, monster list and HP bookkeeping), 5 config tests, 8 hook tests over eleven sites, native pool with eleven hooks, 243 parity scenarios, 2800 policy/projection cases, 24 base-renderer scenes with zero pixel differences, 352 gateway calls across twelve gateways, four original ARM crop-update cases, and 15-window/ABI/import/relocation checks passed. Gameplay NOT RUN.",
+    "manual_summary": "NOT RUN for r32."
   },
   "support": {
     "DEVELOPMENT.md": "mods/damage-numbers/DEVELOPMENT.md",
     "EVIDENCE.json": "mods/damage-numbers/EVIDENCE.json"
   },
-  "candidate": "build/damage-numbers/candidates/r31/delivery",
+  "candidate": "build/damage-numbers/candidates/r32/delivery",
   "candidate_builder": "scripts/build.py"
 }

@@ -593,7 +593,7 @@ fn poison_tick_publishes_the_stored_amount_on_return() {
     assert_eq!(state.leave(&frame, 0x8000, true, &memory, &mailbox), Some(0xcccc));
     let record = only(&mailbox);
     assert_eq!((record.kind, record.monster, record.damage), (1, 0x9000, 37));
-    assert_eq!(record.feedback[0].reserved, Source::Status as u8);
+    assert_eq!(record.feedback[0].reserved, Source::Poison as u8);
     assert_eq!(record.position, Vec3 { x: 1.0, y: 2.0, z: 3.0 });
     assert_eq!(record.player, 0x3000);
 }
@@ -613,7 +613,9 @@ fn blast_and_mount_taps_read_their_native_amounts() {
     memory.put(0xc000 + 100 + 0x54, 0xd000);
     memory.put(0xd00c, 120);
     state.tap(9, &frame, 0, &memory, &mailbox);
-    assert_eq!(only(&mailbox).damage, 120);
+    let record = only(&mailbox);
+    assert_eq!(record.damage, 120);
+    assert_eq!(record.feedback[0].reserved, Source::Blast as u8);
     // Mount finisher: r4 is the amount and [sp+60] is monster+0x1428.
     let mailbox = Mailbox::new();
     memory.region(0xe000, 0x40);
@@ -705,4 +707,20 @@ fn vitals_report_only_settled_unexplained_hp_loss() {
     assert_eq!(v.observe(0, 0x9100, 10, 2000, 6.0), None);
     assert_eq!(v.observe(0, 0, 0, 0, 6.1), None);
     assert_eq!(v.observe(MONSTERS, 0x9000, 1, 1, 6.2), None);
+}
+#[test]
+fn poison_is_gray_and_blast_uses_the_weak_point_colour() {
+    let mut e = hit(1);
+    e.physical_hzv = 10;
+    e.source = Source::Poison;
+    assert_eq!(tint(e), Tint::Gray);
+    e.source = Source::Blast;
+    assert_eq!(tint(e), Tint::Weak);
+    e.source = Source::Status;
+    assert_eq!(tint(e), Tint::White);
+    e.owner = Owner::Unknown;
+    for source in [Source::Poison, Source::Blast, Source::Status] {
+        e.source = source;
+        assert!(visible(e, Settings::default()));
+    }
 }
