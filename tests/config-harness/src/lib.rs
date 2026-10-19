@@ -105,17 +105,19 @@ mod tests {
         let data = FILES.with(|files| files.borrow()["savedata:/damage_numbers.ini"].clone());
         let text = String::from_utf8(data).unwrap();
         assert!(text.contains("enabled = true") && text.contains("lifetime = 0.9"));
+        assert!(text.contains("other = false"));
         assert_eq!(MOUNTS.with(|v| v.get()), 0);
     }
     #[test]
     fn save_round_trips_all_settings_and_styles() {
         clear();
-        for style in [Style::Wilds, Style::Classic, Style::Rise] {
+        for (style, other) in [(Style::Wilds, true), (Style::Classic, false), (Style::Rise, true)] {
             let value = Settings {
                 enabled: false,
                 style,
                 scale: 2.75,
                 lifetime: 1.8,
+                other,
             };
             settings::save(value).unwrap();
             assert_eq!(settings::load().unwrap(), value);
@@ -141,6 +143,7 @@ mod tests {
             style: Style::Rise,
             scale: 3.0,
             lifetime: 2.0,
+            other: true,
         })
         .unwrap();
         settings::save(Settings::default()).unwrap();

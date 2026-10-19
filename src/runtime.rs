@@ -10,7 +10,7 @@ use core::{
     sync::atomic::{AtomicU32, Ordering},
 };
 use damage_numbers_core::{
-    capture::{CaptureState, Memory, RawFrame, Record},
+    capture::{self, CaptureState, Memory, RawFrame, Record},
     mailbox::{Cursor, Mailbox},
     presentation::{self, DrawNumber, Placement},
     *,
@@ -51,6 +51,8 @@ struct Consumer {
     retry: u64,
     feedback: alloc::string::String,
     viewport_warning: bool,
+    vitals: Vitals,
+    other_serial: u32,
 }
 // Call the closure while holding Forge's scoped mutex guard. Both the mutable
 // Consumer borrow and lock end when the closure returns, including early exits.
@@ -75,7 +77,7 @@ pub fn start() {
     let installed = if clock.is_some() {
         match Installed::install() {
             Ok(value) => {
-                log::info!("[damage-numbers] r30 loaded: {} Forge hooks", value.count());
+                log::info!("[damage-numbers] r31 loaded: {} Forge hooks", value.count());
                 Some(value)
             }
             Err(reason) => {
@@ -103,6 +105,8 @@ pub fn start() {
             retry: 0,
             feedback: alloc::string::String::new(),
             viewport_warning: false,
+            vitals: Vitals::default(),
+            other_serial: 0,
         }),
     });
 }
@@ -155,6 +159,7 @@ impl Consumer {
         }
         self.model.reset(epoch);
         self.placement.reset();
+        self.vitals.clear();
     }
     fn consume(&mut self) {
         if self.installed.is_none() {
@@ -167,6 +172,7 @@ impl Consumer {
         let Some((origin, frequency)) = self.clock else {
             return;
         };
+        let time = seconds(now, origin, frequency);
         // A changed local-player identity ends the display session: camera and queued
         // hits from the previous player must not appear for this one.
         if player != self.player {
@@ -193,10 +199,16 @@ impl Consumer {
                 // The mailbox slot becomes application in HitKey to disambiguate serials.
                 1 => {
                     hits += 1;
+                    // Every published amount, shown or not, repays HP loss before
+                    // "other" numbers consider it unexplained.
+                    if let Some(time) = time {
+                        self.vitals.expect(record.monster, record.damage, time);
+                    }
                     let source = match record.feedback[0].reserved {
                         0 => Some(Source::Attack),
                         1 => Some(Source::Monster),
                         2 => Some(Source::Object),
+                        4 => Some(Source::Status),
                         _ => None,
                     };
                     let owner = match record.actor {
@@ -266,6 +278,39 @@ impl Consumer {
             }
         }
     }
+    // Opt-in HP accounting: HP loss nothing published within the settle window
+    // becomes one ownerless "other" number at the monster root. Mailbox slot 16
+    // does not exist, so its application value cannot collide with a producer's.
+    fn other(&mut self, now: f32) {
+        if !self.model.settings.enabled || !self.model.settings.other || self.player == 0 {
+            self.vitals.clear();
+            return;
+        }
+        for slot in 0..MONSTERS {
+            let (monster, hp, max, position) =
+                capture::monster_vital(&NativeMemory, slot).unwrap_or_default();
+            let Some(amount) = self.vitals.observe(slot, monster, hp, max, now) else {
+                continue;
+            };
+            self.other_serial = self.other_serial.wrapping_add(1).max(1);
+            self.model.capture(Event {
+                key: HitKey {
+                    epoch: self.model.epoch,
+                    serial: self.other_serial,
+                    target: monster,
+                    application: 16,
+                },
+                position: position.valid().then_some(position),
+                total_damage: amount,
+                physical_hzv: -1,
+                source: Source::Other,
+                owner: Owner::Unknown,
+                critical: Critical::None,
+                bounced: false,
+                captured_at: now,
+            });
+        }
+    }
 }
 pub fn update() {
     with_state(|state| state.load_config());
@@ -289,6 +334,10 @@ pub fn render() {
             return;
         };
         let now = platform::tick();
+        let time = seconds(now, origin, frequency).unwrap_or(f32::NAN);
+        if time.is_finite() {
+            state.other(time);
+        }
         let backing = forge::imgui::get_io().DisplaySize;
         // Forge reports the allocation size. MHGU can present a smaller crop in
         // handheld mode, so projection, layout and fallback share its applied size.
@@ -316,7 +365,6 @@ pub fn render() {
             None
         };
         let view = native_view.or_else(|| presentation::View::screen(size[0], size[1]));
-        let time = seconds(now, origin, frequency).unwrap_or(f32::NAN);
         state.model.update(time, view.is_some());
         let Some(view) = view else {
             state.placement.reset();
@@ -361,6 +409,13 @@ pub fn panel() {
         let mut changed = forge::imgui::checkbox(
             c"Show damage numbers##damage-numbers",
             &mut settings.enabled,
+        );
+        changed |= forge::imgui::checkbox(
+            c"Show other damage##damage-numbers",
+            &mut settings.other,
+        );
+        forge::imgui::set_item_tooltip(
+            c"Also shows monster HP loss that Damage Numbers could not match to a hit it saw.\nThis can be other hunters online, traps, cannons or the environment,\nso these numbers may be unknown damage.",
         );
         let preview = match settings.style {
             Style::Wilds => c"Wilds",
@@ -515,7 +570,7 @@ pub unsafe extern "C" fn dn_gateway_tap(kind: u32, frame: *mut RawFrame) -> u32 
             let saved = unsafe { &*frame };
             tls.with_mut(|state| {
                 if let Some(slot) = state.slot {
-                    state.tap(kind, saved, &NativeMemory, &MAILBOXES[slot]);
+                    state.tap(kind, saved, frame as u32 + 328, &NativeMemory, &MAILBOXES[slot]);
                 }
             });
         }

@@ -1,9 +1,11 @@
-//! Eight gateway adapters. Scope borrows end before assembly resumes native execution.
+//! Eleven gateway adapters. Scope borrows end before assembly resumes native execution.
 // Typical melee flow: collision enters scope 0, melee calculation enters 6,
 // tap 5 supplies the hitzone, and finalized damage enters/returns through 1.
 // Scope 1 combines its return amount with scope 0's position/owner/hitzone.
 // Each return pops only its own scope; publication copies a Record to a mailbox.
 // Camera uses a separate path: viewport scope 3 encloses the camera tap 4.
+// Status damage never passes the hit path: poison scope 8, blast tap 9 and
+// mount-finisher tap 10 each publish one ownerless record per HP payment.
 use crate::mailbox::Mailbox;
 use crate::*;
 
@@ -201,6 +203,24 @@ pub fn visible_size(memory: &impl Memory, renderer: u32, width: f32, height: f32
     }
     Some([size[0] as f32, size[1] as f32])
 }
+/// Copy one listed monster's identity, HP, maximum HP and root position.
+// sEnemy::Instance (main+0x1851fe0) lists up to ten monsters at +0x1c, as
+// getMonsterInMap (main+0x5ceb4) reads them. The work block at monster+0x1428
+// holds HP at +0x370 and maximum HP at +0x374 (the s32 pair the monster update
+// and the regeneration helpers write) and the root position at +0x40.
+pub fn monster_vital(memory: &impl Memory, slot: usize) -> Option<(u32, i32, i32, Vec3)> {
+    let list = memory.cell(0x1851fe0);
+    if slot >= MONSTERS || !memory.readable(list, 0x1c + 4 * MONSTERS) {
+        return None;
+    }
+    let monster = memory.word(list + 0x1c + 4 * slot as u32);
+    let work = if memory.readable(monster, 0x142c) { memory.word(monster + 0x1428) } else { 0 };
+    let (mut hp, mut position) = ([0_i32; 2], Vec3::default());
+    if work == 0 || !copy_value(memory, work + 0x370, &mut hp) || !copy_value(memory, work + 0x40, &mut position) {
+        return None;
+    }
+    Some((monster, hp[0], hp[1], position))
+}
 // Entry-time facts retained until the corresponding native function returns.
 // subject/auxiliary vary by kind; caller is the original LR and sp proves that
 // the shared after gateway is unwinding the same native call.
@@ -276,7 +296,8 @@ impl CaptureState {
             ..Scope::default()
         };
         // Gateway wire IDs: 0 collision, 1 finalized damage, 2 feedback, 3 viewport;
-        // 6 melee HZV and 7 shot HZV. Taps 4/5 do not substitute a return address.
+        // 6 melee HZV, 7 shot HZV and 8 poison tick (r0=monster). Taps 4/5/9/10 do
+        // not substitute a return address.
         match kind {
             // Collision entry: r1=hit, r2=monster, r3=position; native stack +8
             // holds auxiliary input. This outer scope supplies finalized damage context.
@@ -299,7 +320,7 @@ impl CaptureState {
                 scope.subject = frame.r[0];
                 scope.auxiliary = frame.r[1];
             }
-            2 | 3 => scope.subject = frame.r[0],
+            2 | 3 | 8 => scope.subject = frame.r[0],
             6 => scope.monster = frame.r[1],
             // Shot hitzone entry: retain hit/monster and the factor output pointer
             // at native stack +4; that output becomes valid after the original returns.
@@ -363,34 +384,38 @@ impl CaptureState {
                                 | ((memory.byte(hit.subject + 0x6d) as u32) << 8)
                                 | ((memory.byte(hit.subject + 0x6e) as u32) << 16);
                             let source = source_outcome(tags, hit.owner);
+                            let mut record = Record {
+                                kind: 1,
+                                actor: hit.owner as u32,
+                                attack: hit.subject,
+                                monster: hit.monster,
+                                part: scope.auxiliary,
+                                hzv: hit.hzv as i32,
+                                damage: amount,
+                                damage_type: damage_type as u32,
+                                flags: memory.word(hit.subject + 0x30),
+                                critical: memory.byte(hit.subject + 0x54) as u32,
+                                effect: memory.byte(hit.subject + 6) as u32,
+                                source_tags: tags,
+                                position: hit.position,
+                                ..Record::default()
+                            };
+                            // For damage records, this byte carries the resolved source family.
+                            // 255 means unclassified and will be rejected by the consumer.
+                            record.feedback[0].reserved = source.map_or(255, |s| s as u8);
+                            let player = memory.local_player();
+                            let mut counter = [0; 2];
+                            if memory.copy(player.wrapping_add(0x2522), &mut counter) {
+                                record.attack_counter = u16::from_le_bytes(counter) as u32;
+                            }
+                            // Every amount is published so "other" HP accounting can repay it; the
+                            // consumer still shows only local attacks and ownerless families.
+                            let published = self.publish(record, memory, mailbox);
+                            // Bounce matching keeps its audited subset; remote hits must not replace it.
                             if matches!(hit.owner, Owner::LocalPlayer | Owner::LocalPalico)
                                 || source.is_some_and(|s| s != Source::Attack)
                             {
-                                let mut record = Record {
-                                    kind: 1,
-                                    actor: hit.owner as u32,
-                                    attack: hit.subject,
-                                    monster: hit.monster,
-                                    part: scope.auxiliary,
-                                    hzv: hit.hzv as i32,
-                                    damage: amount,
-                                    damage_type: damage_type as u32,
-                                    flags: memory.word(hit.subject + 0x30),
-                                    critical: memory.byte(hit.subject + 0x54) as u32,
-                                    effect: memory.byte(hit.subject + 6) as u32,
-                                    source_tags: tags,
-                                    position: hit.position,
-                                    ..Record::default()
-                                };
-                                // For damage records, this byte carries the resolved source family.
-                                // 255 means unclassified and will be rejected by the consumer.
-                                record.feedback[0].reserved = source.map_or(255, |s| s as u8);
-                                let player = memory.local_player();
-                                let mut counter = [0; 2];
-                                if memory.copy(player.wrapping_add(0x2522), &mut counter) {
-                                    record.attack_counter = u16::from_le_bytes(counter) as u32;
-                                }
-                                self.last_damage = self.publish(record, memory, mailbox);
+                                self.last_damage = published;
                             }
                         }
                     }
@@ -464,12 +489,65 @@ impl CaptureState {
                     }
                 }
             }
+            // Poison tick (main+0xa2664) clears work+0x5d66, then stores the tick's HP
+            // damage there when the poison interval elapses. The monster update
+            // (main+0x97ddc) subtracts and clears it afterwards.
+            8 => {
+                let work = memory.word(scope.subject.wrapping_add(0x1428));
+                let mut amount = [0; 2];
+                if memory.copy(work.wrapping_add(0x5d66), &mut amount) {
+                    self.status(scope.subject, i16::from_le_bytes(amount) as i32, memory, mailbox);
+                }
+            }
             _ => {}
         }
         Some(scope.caller)
     }
-    pub fn tap(&mut self, kind: u32, frame: &RawFrame, memory: &impl Memory, mailbox: &Mailbox) {
+    // Status damage has no hit entry: the position is the monster root at work+0x40,
+    // the owner is unknown and feedback[0].reserved carries the Status family.
+    fn status(&mut self, monster: u32, amount: i32, memory: &impl Memory, mailbox: &Mailbox) {
+        let work = memory.word(monster.wrapping_add(0x1428));
+        if amount <= 0 || !memory.readable(work, 0x378) {
+            return;
+        }
+        let mut record = Record {
+            kind: 1,
+            actor: Owner::Unknown as u32,
+            monster,
+            damage: amount,
+            ..Record::default()
+        };
+        if !copy_value(memory, work + 0x40, &mut record.position) {
+            record.position.x = f32::NAN;
+        }
+        record.feedback[0].reserved = Source::Status as u8;
+        self.publish(record, memory, mailbox);
+    }
+    /// sp is the native stack pointer at the tapped instruction (frame address + 328).
+    pub fn tap(&mut self, kind: u32, frame: &RawFrame, sp: u32, memory: &impl Memory, mailbox: &Mailbox) {
         if self.quarantine || self.slot.is_none() {
+            return;
+        }
+        // Blast entry (main+0xaac54, r0=monster). Its data getter is
+        // *(monster+0x75ec)+100; a null blast table at +0x54 makes the function
+        // return early. Otherwise it adds the table's s16 at +0xc to a part counter.
+        if kind == 9 {
+            let monster = frame.r[0];
+            let data = memory.word(monster.wrapping_add(0x75ec));
+            let blast = if data == 0 { 0 } else { memory.word(data.wrapping_add(100 + 0x54)) };
+            let mut amount = [0; 2];
+            if blast != 0 && memory.copy(blast.wrapping_add(0xc), &mut amount) {
+                self.status(monster, i16::from_le_bytes(amount) as i32, memory, mailbox);
+            }
+            return;
+        }
+        // Mount finisher (main+0x9978c), reached only in ride state 0xd: r4 holds the
+        // fixed HP damage about to be subtracted and [sp+60] holds monster+0x1428.
+        if kind == 10 {
+            let cell = memory.word(sp.wrapping_add(60));
+            if cell > 0x1428 {
+                self.status(cell - 0x1428, frame.r[4] as i32, memory, mailbox);
+            }
             return;
         }
         // The melee interior tap observes live calculation registers before the

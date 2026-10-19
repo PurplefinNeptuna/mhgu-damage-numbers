@@ -67,6 +67,8 @@ pub struct Config {
     pub style: Style,
     pub scale: Scale,
     pub lifetime: Lifetime,
+    // Plain bool defaults to false, matching the opt-in "other damage" default.
+    pub other: bool,
 }
 // Unwrap the INI-specific field types into the portable gameplay settings.
 // The reverse conversion below wraps a settings snapshot for serialization.
@@ -77,6 +79,7 @@ impl From<Config> for Settings {
             style: c.style,
             scale: c.scale.0,
             lifetime: c.lifetime.0,
+            other: c.other,
         }
     }
 }
@@ -87,6 +90,7 @@ impl From<Settings> for Config {
             style: s.style,
             scale: Scale(s.scale),
             lifetime: Lifetime(s.lifetime),
+            other: s.other,
         }
     }
 }

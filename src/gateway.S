@@ -22,7 +22,7 @@
     str r0, [sp]
     ldr r2, [sp, #8]
     ldr r3, [sp, #12]
-    /* GE is dead at these eight audited hook sites; NZCVQ-only restoration
+    /* GE is dead at these eleven audited hook sites; NZCVQ-only restoration
      * avoids Ryujinx's unsupported APSR_g translation. See GE_PRESERVATION_AUDIT.md.
      * This leaves callback GE untouched; it neither restores nor clears it. */
     msr APSR_nzcvq, r2
@@ -56,6 +56,10 @@ ENTRY 5, dn_gateway_tap
 /* Production melee and shot HZV entries, also exercised by the ABI fixture. */
 ENTRY 6, dn_gateway_enter
 ENTRY 7, dn_gateway_enter
+/* Status damage: poison tick entry, blast entry tap and mount-finisher tap. */
+ENTRY 8, dn_gateway_enter
+ENTRY 9, dn_gateway_tap
+ENTRY 10, dn_gateway_tap
 
 .section .text.dn_gateway_after,"ax",%progbits
 .balign 4

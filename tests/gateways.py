@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Execute the production NRO's nine ARM gateways with deliberately clobbering callback doubles.
+"""Execute the production NRO's twelve ARM gateways with deliberately clobbering callback doubles.
 
 This exercises compiled registers/stack/return paths; it does not emulate Forge or gameplay.
-GE is deliberately excluded from equality because it is dead at these eight audited continuations.
+GE is deliberately excluded from equality because it is dead at these eleven audited continuations.
 """
 import json,struct,subprocess,sys
 from pathlib import Path
@@ -20,8 +20,9 @@ for line in subprocess.check_output([nm,'-n',elf],text=True).splitlines():
 data=(BUILD_ROOT/'package/romfs/nativeNX/plugins/damage_numbers.nro').read_bytes()
 regs=[getattr(arm,'UC_ARM_REG_R'+str(i))for i in range(13)]
 ds=[getattr(arm,'UC_ARM_REG_D'+str(i))for i in range(32)]
+TAPS=[4,5,9,10]
 checks=0
-for site in range(8):
+for site in range(11):
  for ge in range(16):
   for change_ge in [False,True]:
    u=unicorn.Uc(unicorn.UC_ARCH_ARM,unicorn.UC_MODE_ARM);u.ctl_set_cpu_model(arm.UC_CPU_ARM_MAX)
@@ -46,7 +47,7 @@ for site in range(8):
     assert struct.unpack_from('<I',raw,12)[0]==fpscr
     assert struct.unpack_from('<I',raw,8)[0]&0xf8000000==flags
     callbacks.append('entry'if entering else 'return')
-    around=site not in [4,5]
+    around=site not in TAPS
     if entering:assert cpu.reg_read(arm.UC_ARM_REG_R0)==site
     if around:cpu.mem_write(ptr+324,struct.pack('<I',names['dn_gateway_after']if entering else RETURN))
     ret=cpu.reg_read(arm.UC_ARM_REG_LR)
@@ -63,7 +64,7 @@ for site in range(8):
    assert u.reg_read(arm.UC_ARM_REG_CPSR)&0xf0000==(15-ge if change_ge else ge)<<16
    assert u.reg_read(arm.UC_ARM_REG_SP)==STACK and u.reg_read(arm.UC_ARM_REG_LR)==RETURN
    assert bytes(u.mem_read(STACK,64))==stack
-   assert callbacks==(['entry']if site in [4,5]else['entry','return'])
+   assert callbacks==(['entry']if site in TAPS else['entry','return'])
    checks+=1
 # Execute the loader callback against its actual native buffer, including
 # canaries so a metadata rename cannot overrun Forge's adjacent storage.
@@ -76,9 +77,9 @@ u.reg_write(arm.UC_ARM_REG_SP,STACK);u.reg_write(arm.UC_ARM_REG_LR,RETURN)
 u.reg_write(arm.UC_ARM_REG_R0,params)
 u.emu_start(names['forge_onLoad'],RETURN,count=1000)
 assert struct.unpack('<3H',u.mem_read(params,6))==(1,5,1)
-assert bytes(u.mem_read(params+6,64)).rstrip(b'\0')==b'Damage Numbers r30'
+assert bytes(u.mem_read(params+6,64)).rstrip(b'\0')==b'Damage Numbers r31'
 assert bytes(u.mem_read(params-8,8))==bytes(u.mem_read(params+70,8))==b'\xa5'*8
 u.reg_write(arm.UC_ARM_REG_R0,0);u.reg_write(arm.UC_ARM_REG_LR,RETURN)
 u.emu_start(names['forge_onLoad'],RETURN,count=1000)
-report={'status':'PASSED','compiled_nro':True,'calls':checks,'gateways':9,'preserved':['r0-r12','lr','sp','d0-d31','FPSCR','NZCVQ','native stack arguments'],'GE':'all 16 preserved and deliberately changed callback patterns checked; not restored','runtime_test':'NOT RUN'}
+report={'status':'PASSED','compiled_nro':True,'calls':checks,'gateways':12,'preserved':['r0-r12','lr','sp','d0-d31','FPSCR','NZCVQ','native stack arguments'],'GE':'all 16 preserved and deliberately changed callback patterns checked; not restored','runtime_test':'NOT RUN'}
 (BUILD_ROOT/'gateways.json').write_text(json.dumps(report,indent=2)+'\n');print(report)

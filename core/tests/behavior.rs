@@ -546,3 +546,163 @@ fn source_policy_keeps_palico_bombs_owned() {
     );
     assert_eq!(source_outcome(0x000102, Owner::Unknown), None);
 }
+#[test]
+fn kinsect_hits_resolve_to_their_hunter() {
+    // main+0x4816c0 rewrites the shell hit to primary 6, keeps subtype 1 and
+    // stores the owning hunter at +0x70 with secondary kind 0.
+    let mut memory = Fake::scene();
+    memory.bytes.insert(0x7010, 6);
+    memory.region(0x7070, 4);
+    memory.put(0x7070, 0x3000);
+    assert_eq!(attack_owner(&memory, 0x7000), Owner::LocalPlayer);
+    assert_eq!(source_outcome(0x000106, Owner::LocalPlayer), Some(Source::Attack));
+    assert_eq!(source_outcome(0x000106, Owner::Unknown), None);
+    assert_eq!(source_outcome(0x000206, Owner::LocalPlayer), None);
+}
+// A monster at 0x9000 whose work block (+0x1428) is 0x20000, rooted at (1, 2, 3).
+fn monster_scene() -> Fake {
+    let mut m = Fake::scene();
+    m.region(0x9000, 0x7600);
+    m.put(0x9000 + 0x1428, 0x20000);
+    m.region(0x20000, 0x5e10);
+    for (i, v) in [1.0f32, 2.0, 3.0].into_iter().enumerate() {
+        m.put(0x20040 + 4 * i as u32, v.to_bits());
+    }
+    m
+}
+fn only(mailbox: &Mailbox) -> Record {
+    let mut cursor = Cursor::default();
+    let record = mailbox.read(&mut cursor).expect("one record");
+    assert!(mailbox.read(&mut cursor).is_none());
+    record
+}
+#[test]
+fn poison_tick_publishes_the_stored_amount_on_return() {
+    let mut memory = monster_scene();
+    let mut state = CaptureState::new(Some(0));
+    let mailbox = Mailbox::new();
+    let mut frame = RawFrame::default();
+    frame.r[0] = 0x9000;
+    frame.r[13] = 0xcccc;
+    // No tick this frame: the native function leaves work+0x5d66 at zero.
+    assert!(state.enter(8, &frame, 0x8000, &memory));
+    assert_eq!(state.leave(&frame, 0x8000, true, &memory, &mailbox), Some(0xcccc));
+    assert!(mailbox.read(&mut Cursor::default()).is_none());
+    memory.put(0x20000 + 0x5d64, 37 << 16);
+    assert!(state.enter(8, &frame, 0x8000, &memory));
+    assert_eq!(state.leave(&frame, 0x8000, true, &memory, &mailbox), Some(0xcccc));
+    let record = only(&mailbox);
+    assert_eq!((record.kind, record.monster, record.damage), (1, 0x9000, 37));
+    assert_eq!(record.feedback[0].reserved, Source::Status as u8);
+    assert_eq!(record.position, Vec3 { x: 1.0, y: 2.0, z: 3.0 });
+    assert_eq!(record.player, 0x3000);
+}
+#[test]
+fn blast_and_mount_taps_read_their_native_amounts() {
+    let mut memory = monster_scene();
+    // FUN_00a3a078: *(monster+0x75ec)+100; blast table at +0x54, amount at +0xc.
+    memory.put(0x9000 + 0x75ec, 0xc000);
+    memory.region(0xc000, 0x100);
+    memory.region(0xd000, 0x10);
+    let mut state = CaptureState::new(Some(0));
+    let mut frame = RawFrame::default();
+    frame.r[0] = 0x9000;
+    let mailbox = Mailbox::new();
+    state.tap(9, &frame, 0, &memory, &mailbox);
+    assert!(mailbox.read(&mut Cursor::default()).is_none(), "null blast table");
+    memory.put(0xc000 + 100 + 0x54, 0xd000);
+    memory.put(0xd00c, 120);
+    state.tap(9, &frame, 0, &memory, &mailbox);
+    assert_eq!(only(&mailbox).damage, 120);
+    // Mount finisher: r4 is the amount and [sp+60] is monster+0x1428.
+    let mailbox = Mailbox::new();
+    memory.region(0xe000, 0x40);
+    memory.put(0xe03c, 0x9000 + 0x1428);
+    frame.r[4] = 350;
+    state.tap(10, &frame, 0xe000, &memory, &mailbox);
+    let record = only(&mailbox);
+    assert_eq!((record.monster, record.damage), (0x9000, 350));
+    assert_eq!(record.feedback[0].reserved, Source::Status as u8);
+}
+#[test]
+fn remote_hits_are_published_for_accounting_but_not_for_bounces() {
+    let mut memory = Fake::scene();
+    // A second hunter in table slot 1 owns this direct hit.
+    memory.region(0x2020, 4);
+    memory.put(0x2020, 0x4000);
+    memory.region(0x4000, 4);
+    memory.put(0x700c, 0x4000);
+    memory.region(0x5000, 12);
+    let mut state = CaptureState::new(Some(0));
+    let mailbox = Mailbox::new();
+    let mut frame = RawFrame::default();
+    frame.r[1] = 0x7000;
+    frame.r[2] = 0x6000;
+    frame.r[3] = 0x5000;
+    assert!(state.enter(0, &frame, 0x9000, &memory));
+    frame.r[0] = 0x6000;
+    assert!(state.enter(1, &frame, 0x8f00, &memory));
+    frame.r[0] = 55;
+    state.leave(&frame, 0x8f00, true, &memory, &mailbox);
+    state.leave(&frame, 0x9000, true, &memory, &mailbox);
+    let record = only(&mailbox);
+    assert_eq!((record.actor, record.damage), (Owner::RemotePlayer as u32, 55));
+    assert_eq!(state.last_damage.serial, 0);
+}
+#[test]
+fn status_is_always_visible_and_other_needs_opt_in() {
+    let mut e = hit(1);
+    e.owner = Owner::Unknown;
+    e.source = Source::Status;
+    let mut s = Settings::default();
+    assert!(visible(e, s));
+    e.source = Source::Other;
+    assert!(!visible(e, s));
+    s.other = true;
+    assert!(visible(e, s));
+}
+#[test]
+fn monster_list_copies_hp_and_root() {
+    let mut memory = monster_scene();
+    memory.region(0x1851fe0, 4);
+    memory.put(0x1851fe0, 0xb000);
+    memory.region(0xb000, 0x1c + 40);
+    memory.put(0xb000 + 0x1c + 4, 0x9000);
+    memory.put(0x20370, 900);
+    memory.put(0x20374, 1000);
+    assert_eq!(capture::monster_vital(&memory, 0), None);
+    assert_eq!(
+        capture::monster_vital(&memory, 1),
+        Some((0x9000, 900, 1000, Vec3 { x: 1.0, y: 2.0, z: 3.0 }))
+    );
+    assert_eq!(capture::monster_vital(&memory, MONSTERS), None);
+}
+#[test]
+fn vitals_report_only_settled_unexplained_hp_loss() {
+    let mut v = Vitals::default();
+    assert_eq!(v.observe(0, 0x9000, 1000, 1000, 0.0), None, "baseline");
+    // A captured hit before the HP drop explains it completely.
+    v.expect(0x9000, 100, 0.1);
+    assert_eq!(v.observe(0, 0x9000, 900, 1000, 0.1), None);
+    assert_eq!(v.observe(0, 0x9000, 900, 1000, 0.5), None);
+    // A late record repays a drop inside the settle window.
+    assert_eq!(v.observe(0, 0x9000, 850, 1000, 1.0), None);
+    v.expect(0x9000, 50, 1.05);
+    assert_eq!(v.observe(0, 0x9000, 850, 1000, 1.2), None);
+    // Partly explained loss reports only the remainder after settling.
+    v.expect(0x9000, 30, 2.0);
+    assert_eq!(v.observe(0, 0x9000, 780, 1000, 2.0), None);
+    assert_eq!(v.observe(0, 0x9000, 780, 1000, 2.1), None);
+    assert_eq!(v.observe(0, 0x9000, 780, 1000, 2.2), Some(40));
+    // Damage the game never subtracts (an HP floor) expires instead of hiding later loss.
+    v.expect(0x9000, 500, 3.0);
+    assert_eq!(v.observe(0, 0x9000, 780, 1000, 4.1), None);
+    assert_eq!(v.observe(0, 0x9000, 700, 1000, 4.2), None);
+    assert_eq!(v.observe(0, 0x9000, 700, 1000, 4.4), Some(80));
+    // Healing, a different monster or a new maximum only move the baseline.
+    assert_eq!(v.observe(0, 0x9000, 750, 1000, 5.0), None);
+    assert_eq!(v.observe(0, 0x9100, 10, 2000, 5.1), None);
+    assert_eq!(v.observe(0, 0x9100, 10, 2000, 6.0), None);
+    assert_eq!(v.observe(0, 0, 0, 0, 6.1), None);
+    assert_eq!(v.observe(MONSTERS, 0x9000, 1, 1, 6.2), None);
+}

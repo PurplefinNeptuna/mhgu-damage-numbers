@@ -250,6 +250,18 @@ ret
 .global dn_gateway_7
 dn_gateway_7:
 ret
+.balign 4
+.global dn_gateway_8
+dn_gateway_8:
+ret
+.balign 4
+.global dn_gateway_9
+dn_gateway_9:
+ret
+.balign 4
+.global dn_gateway_10
+dn_gateway_10:
+ret
 "#
 );
 fn reset(fail: Option<(usize, bool)>, sync_fail: Option<usize>) {
@@ -278,7 +290,7 @@ fn originals_restored() {
 #[test]
 fn failures_before_and_after_branch_at_every_site_restore_all_bytes() {
     let _guard = SERIAL.lock().unwrap();
-    for i in 0..8 {
+    for i in 0..hooks::COUNT {
         for published in [false, true] {
             reset(Some((i, published)), None);
             assert!(hooks::Installed::install().is_err());
@@ -289,21 +301,21 @@ fn failures_before_and_after_branch_at_every_site_restore_all_bytes() {
 #[test]
 fn instruction_cache_failure_rolls_back_all_patches() {
     let _guard = SERIAL.lock().unwrap();
-    for i in 0..8 {
+    for i in 0..hooks::COUNT {
         reset(None, Some(i));
         assert!(hooks::Installed::install().is_err());
         originals_restored();
     }
 }
 #[test]
-fn successful_install_enables_only_after_all_eight_hooks() {
+fn successful_install_enables_only_after_all_hooks() {
     let _guard = SERIAL.lock().unwrap();
     reset(None, None);
     let installed = hooks::Installed::install().unwrap();
-    assert_eq!(installed.count(), 8);
+    assert_eq!(installed.count(), hooks::COUNT);
     assert!(hooks::ACTIVE.load(core::sync::atomic::Ordering::Acquire));
     let n = NATIVE.lock().unwrap();
-    assert_eq!((n.calls, n.patches), (8, 8));
+    assert_eq!((n.calls, n.patches), (hooks::COUNT, hooks::COUNT));
     drop(n);
     drop(installed);
     hooks::ACTIVE.store(false, core::sync::atomic::Ordering::Relaxed);
@@ -354,7 +366,7 @@ fn signature_and_program_rejection_never_call_forge() {
 #[test]
 fn partial_publication_and_invalid_continuations_restore_all_sites() {
     let _guard = SERIAL.lock().unwrap();
-    for i in 0..8 {
+    for i in 0..hooks::COUNT {
         for mode in 0..4 {
             reset(None, None);
             {
@@ -374,7 +386,7 @@ fn partial_publication_and_invalid_continuations_restore_all_sites() {
 #[test]
 fn foreign_changes_survive_rollback_with_continuations_retained() {
     let _guard = SERIAL.lock().unwrap();
-    for i in 0..8 {
+    for i in 0..hooks::COUNT {
         reset(None, None);
         let address = mem::text_addr() + signatures::SIGNATURES[i].0;
         NATIVE.lock().unwrap().foreign = Some((i, address));
@@ -396,7 +408,7 @@ fn foreign_changes_survive_rollback_with_continuations_retained() {
 #[test]
 fn failed_restore_or_rollback_cache_sync_requires_restart() {
     let _guard = SERIAL.lock().unwrap();
-    for i in 0..8 {
+    for i in 0..hooks::COUNT {
         reset(None, Some(i));
         let address = mem::text_addr() + signatures::SIGNATURES[i].0;
         NATIVE.lock().unwrap().restore_fail = Some(address);

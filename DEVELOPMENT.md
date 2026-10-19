@@ -1,9 +1,114 @@
-# r30 visible-crop correction: READY_TO_DISTRIBUTE
+# r31 kinsect, status damage and opt-in other damage: DEVELOPMENT
+
+The user reported that r30 shows no numbers for mount, Insect Glaive kinsect,
+blast or poison damage. They asked for the native functions to be located
+statically, because they cannot reliably produce Insect Glaive or mount runtime
+evidence. They also allowed an opt-in "Show other damage" setting, off by default,
+that shows monster HP loss the hooks did not explain, with a tooltip warning that
+these numbers can be unknown damage. r31 is an unapproved candidate. Gameplay is
+NOT RUN. The approved r30 release, candidate and receipts are untouched; r31
+uses `build/damage-numbers/candidates/r31/` and the matching work path.
+
+## How monster HP falls (static research)
+
+Offsets are main-relative and were read from the verified original NSO; the
+Ghidra database (image base `0x009c9000`) supplied decompilation and references.
+
+- The monster work block is `*(monster+0x1428)`. The network sync record
+  `nFestaNetwork::netEmMasterChange` (DTI `mParam.hp_vital`, s32) is filled by
+  main+0xcba54 from `work+0x370`. The regeneration helpers main+0x9ce9c/0x9cf7c
+  clamp `work+0x370` against the maximum at `work+0x374`. The same record maps
+  the root position to `work+0x40/44/48`.
+- HP is not reduced at hit time. main+0x9d6f8 (hook 1) adds each hit's
+  contribution to the part counter `work+0x488+part*2`. The per-frame monster
+  update main+0x97ddc sums the raw part counters (`local_4c += counter`) and
+  subtracts the sum from HP. It then subtracts the s16 pending amount at
+  `work+0x5d66` and clears it.
+- All five hit handlers are reached from the collision function (hook 0):
+  main+0x171350 by call and 0x172bf0/0x173a24/0x174c0c/0x176ad0 by tail branch
+  from 0x170a20..0x170ab0. The collision scope therefore encloses every hit.
+
+## Why each reported type was missed, and the r31 source
+
+| Damage | Native path | r30 behaviour | r31 |
+| --- | --- | --- | --- |
+| Kinsect | Collision path. The w13 shell hit setup main+0x4816c0 calls the shared shell hit initialiser (vtable +0x140, main+0x4a2790) with subtype 1, then rewrites the entry: +0x10 = 6, +0xc = kinsect, +0x6e = 0, +0x70 = owner hunter (main+0x4a1b6c). | Owner resolved to the hunter, but `source_outcome` had no rule for primary kind 6. | Accept tags (6, 1, 0) with a known owner as Attack. Ownership rules are unchanged. |
+| Poison | Poison tick main+0xa2664 clears `work+0x5d66`. While `work+0x5e08 & 2` is set it advances the timer at `work+0x5ca8`, and at each interval stores the poison table's s16 +0xc in `work+0x5d66`. | Never a hit; no hook saw it. | Around hook 8 at the function entry reads `work+0x5d66` after the native function returns. |
+| Blast | Detonation main+0xaac54 obtains the blast table at `(*(monster+0x75ec)+100)+0x54` (the getter main+0x71078 is that expression) and returns early when it is null. Otherwise it resets the blast point and adds the table's s16 +0xc to the part counter directly. | Bypasses main+0x9d6f8. | Before-only tap 9 at the function entry reads the same table. |
+| Mount | Hits on a ridden monster (`main+0x812a8`: ride action states or category 0xd) go to main+0x170adc, which adds the hit to the rider's mount gauge (main+0x2f6778), not to HP. In category 0xd the monster update reaches main+0x99764, loads a fixed amount from monster data +0x8c (×1.5 when the unidentified singleton query main+0x49938 returns ≥ 2), subtracts it from HP at 0x9979c and sets action 0x2b. | Not a hit and not `+0x5d66`. | Before-only tap 10 at 0x9978c reads r4 (the amount) and `[sp+60]` (monster+0x1428). |
+
+Identifying the 0x2b branch as the mount finisher is an inference. It depends on
+the ride-state gate, the rider-gauge path and the mount point `work+0x5d9a`
+(DTI `mParam.nori_dmg_point`, updated by main+0xa3528 from the same update).
+No string names the branch. If gameplay shows a different event, only the
+label changes; the amount is still real HP damage.
+
+Status records carry no owner and are shown for every player, like monster and
+object damage. Their position is the monster root, not an impact point.
+
+## Opt-in other damage
+
+`Settings::other` (INI key `other`, default false) enables the per-frame HP
+check. `sEnemy::Instance` (main+0x1851fe0) lists up to ten monsters at +0x1c;
+main+0x5ceb4 (`getMonsterInMap`) reads the same slots. Every published damage
+record, including remote and unclassified hits that stay hidden, repays HP loss
+in `Vitals`. Loss nothing explains waits 0.15 s for late mailbox records, then
+becomes one ownerless number at the monster root. Captured damage the game never
+subtracts (HP floors, capture limits) expires after 1 s. A new monster pointer
+or maximum resets the baseline; healing is ignored. Remote hunters' damage in
+online play, traps, cannons and the environment appear here as unknown damage.
+
+Capture now publishes all finalized hit amounts, not only shown families. The
+consumer's visibility rules are unchanged, and bounce association still uses
+only the previously published local/ownerless subset.
+
+## Hook sites added
+
+| Hook | Main offset | Kind | Displaced words |
+| --- | --- | --- | --- |
+| 8 | `0xa2664` | Poison tick entry, around | `push {r4-r7,r11,lr}`, `vpush {d8}` |
+| 9 | `0xaac54` | Blast detonation entry, before-only | `push {r4-r8,lr}`, `sub sp,sp,#8` |
+| 10 | `0x9978c` | Mount finisher, interior before-only | `ldr r7,[sp,#60]`, `ldr r0,[r7]` |
+
+The relocation whitelist adds only the two loads at hook 10. Neither reads PC.
+A scan of all ARM branches found no branch to 0x99790, the second displaced
+word. 0x9978c is reached by fall-through and from the `blt` at 0x99770, where r4
+already holds the unscaled amount. The poison function's tail branch at 0xa2740
+returns through the substituted LR, like the collision function. No workspace
+mod patches these offsets, and none is in the reserved list.
+
+The functions containing hooks 8–10 (0xa2664, 240 bytes; 0xaac54, 332 bytes;
+0x97ddc, 13,472 bytes), and the poison tick's caller 0xc8ddc (2,056 bytes),
+contain no SEL, MRS, MSR or GE-setting parallel add/subtract encoding. The
+reduced NZCVQ-only restore therefore covers the new sites too. The gateway
+source hash in `dependencies.lock.json` was updated for the three new ENTRY lines.
+
+## r31 validation (static/host/build only)
+
+Host: 21 core tests, including kinsect ownership/policy, poison/blast/mount
+records, remote-hit publication without bounce association, visibility, the
+monster list and HP bookkeeping; 5 config tests with the new key; 8 installer
+tests over all eleven sites; the native pool with eleven hooks (176 bytes); 243
+parity scenarios and 2,800 policy/projection cases (the r25 oracle covers
+primary kinds 0–4 only, so the kinsect rule does not alter it); 24 renderer
+scenes with zero pixel differences. ARM: 352 gateway calls across twelve
+gateways and `verify` with 15 game windows matched against the original NSO,
+twelve NZCVQ restores and 69 resolved imports, including `igSetItemTooltip`.
+None of this establishes gameplay behaviour.
+
+Runtime checks still needed after an authorized install: kinsect hits (local
+and online), a poison tick, a blast detonation and a mount finisher each show
+one number of the expected size. With "Show other damage" off nothing extra
+appears; with it on, solo hits and status damage add no extra numbers, while trap or
+cannon damage does.
+
+# r30 visible-crop correction: READY_TO_DISTRIBUTE (preserved)
 
 The user approved distribution on 2026-10-18. The validated candidate NRO and
 three assets were promoted unchanged, without rebuilding. This approval does
-not add an affected-device gameplay result. The local, unpublished release is
-`build/damage-numbers/releases/r30/damage-numbers-r30.zip`.
+not add an affected-device gameplay result. The local, unpublished release was
+archived unchanged for r31 development to
+`backups/accepted/damage-numbers/r30-before-status-damage/release/damage-numbers-r30.zip`.
 The candidate and pre-promotion records are preserved under
 `backups/accepted/damage-numbers/r30-distribution-approved/`.
 Keep r30 build outputs and receipts immutable. Further runtime edits require a
@@ -146,13 +251,13 @@ The standalone workflow is `./build.sh doctor`, `prepare`, `build`, `test`, `ver
 
 Forge owns entry, callbacks, logging, memory lookup, thread-local storage, singleton lookup, configuration, Patch objects, native trampoline construction and ImGui wrappers. Specialized font/texture operations use its raw ImGui bindings. TLS borrows end before assembly invokes native continuations. Queued records live in independent process-lifetime mailboxes, so thread teardown cannot invalidate them.
 
-The vendored Hook binding matches Forge 1.5.0's native ARM32 declaration: 24 bytes, with context and its update cell. Forge shares trampoline storage across hooks. `verify` compares compiler-derived Rust and C++ layouts in the actual target artifact. Assembly preserves NZCVQ and all GPR/VFP/FPSCR state under the recorded eight-site GE audit.
+The vendored Hook binding matches Forge 1.5.0's native ARM32 declaration: 24 bytes, with context and its update cell. Forge shares trampoline storage across hooks. `verify` compares compiler-derived Rust and C++ layouts in the actual target artifact. Assembly preserves NZCVQ and all GPR/VFP/FPSCR state under the recorded GE audit of all eleven sites.
 
 The load callback leaves the loader requirement record untouched, so Forge version checks do not gate startup. The build targets the 1.5.0 native ABI; other loader layouts can be incompatible. Initialization takes no arguments, matching the loader callback. Game-code signatures and instruction checks remain in place. The preserved [r1 results](EVIDENCE.json) describe the older candidate.
 
 The prepared font retains Open Sans Semibold naming. Its glyph outlines, hinting, metrics and weight match r2; only naming metadata/checksums changed. Artwork pixels and atlas geometry are unchanged. The selected styles appear as Wilds, Rise, Classic; stored style IDs remain stable. Missing artwork omits its effects while readable damage numbers continue. Failure messages are deduplicated across context replacements.
 
-The release ZIP is `build/damage-numbers/releases/r30/damage-numbers-r30.zip`.
+The approved r30 release ZIP is archived at `backups/accepted/damage-numbers/r30-before-status-damage/release/damage-numbers-r30.zip`; r31 is a candidate.
 Package with `python3 scripts/mod_distribution.py package damage-numbers` and run
 the full `check`. The approved r26 delivery is preserved under
 `backups/accepted/damage-numbers/r26-before-centre-fallback/`.
@@ -176,11 +281,11 @@ Copy `build.local.example.json` to ignored `build.local.json` and supply the too
 | `./build.sh package` | Require complete tests for the exact NRO, then verify the candidate ZIP and adjacent guides/notices/checksums. |
 | `./build.sh export --output DEST` | Export the explicit source allowlist to an unused directory. |
 
-Workspace outputs are under `build/damage-numbers/candidates/r30/` and `work/damage-numbers/candidates/r30/`. Cargo caches, the unstripped ELF and converter output stay under `work/damage-numbers/candidates/r30/cargo-target/`. The pinned converter requires a temporary `target` symlink and loose NRO in the source root while building; the wrapper removes both when the converter exits, including on failure. An independent source export uses its own ignored build/work folders. Registry sources are vendored, including metadata needed by this nightly's build-std resolver. Host tests explicitly load the source-only Cargo configuration so they do not inherit the ARM target or build-std settings. Default builds and tests are offline.
+Workspace outputs are under `build/damage-numbers/candidates/r31/` and `work/damage-numbers/candidates/r31/`. Cargo caches, the unstripped ELF and converter output stay under `work/damage-numbers/candidates/r31/cargo-target/`. The pinned converter requires a temporary `target` symlink and loose NRO in the source root while building; the wrapper removes both when the converter exits, including on failure. An independent source export uses its own ignored build/work folders. Registry sources are vendored, including metadata needed by this nightly's build-std resolver. Host tests explicitly load the source-only Cargo configuration so they do not inherit the ARM target or build-std settings. Default builds and tests are offline.
 
 After adding source files, refresh the allowlist with `python3 scripts/export_source.py --refresh`. Exports omit native game inputs, outputs, private configurations, caches and Git metadata. They retain dependency bytes exactly so Cargo checksum validation remains meaningful. Supply your toolchain/input paths in the exported repo's own configuration. No sibling mod import is needed.
 
-The root distribution packager validates the approved r30 release. Run
+The root distribution packager validates the r31 candidate. Run
 `python3 scripts/mod_distribution.py package damage-numbers` and the full
 `python3 scripts/mod_distribution.py check`. The accepted r26 delivery and tested
 r27 candidate remain in `backups/accepted/damage-numbers/` with exact hashes.
@@ -201,9 +306,9 @@ The r3 standalone build, full tests and packaging passed offline with an empty C
 
 ### From a native call to a visible number
 
-`src/lib.rs` declares Forge's entry and rendering callbacks. Startup creates the stock `ThreadLocal<CaptureState>`, then validates the exact game windows and installs all eight ordinary hooks. Capture becomes active only after the last hook succeeds.
+`src/lib.rs` declares Forge's entry and rendering callbacks. Startup creates the stock `ThreadLocal<CaptureState>`, then validates the exact game windows and installs all eleven ordinary hooks. Capture becomes active only after the last hook succeeds.
 
-`src/gateway.S` saves a 328-byte stack image before Rust runs: continuation scratch at 0, CPSR/FPSCR at 8/12, d16–d31 at 16, d0–d15 at 144, and r0–r12/LR at 272. Native stack arguments remain above the original SP. Around hooks replace the saved LR only after `CaptureState::enter` records the caller; the shared after gateway pops that scope and resumes its exact caller. Camera and melee HZV taps observe registers before the displaced instructions execute. `core/src/capture.rs` explains each copied payload and nested scope.
+`src/gateway.S` saves a 328-byte stack image before Rust runs: continuation scratch at 0, CPSR/FPSCR at 8/12, d16–d31 at 16, d0–d15 at 144, and r0–r12/LR at 272. Native stack arguments remain above the original SP. Around hooks replace the saved LR only after `CaptureState::enter` records the caller; the shared after gateway pops that scope and resumes its exact caller. Camera, melee HZV, blast and mount-finisher taps observe registers before the displaced instructions execute. `core/src/capture.rs` explains each copied payload and nested scope.
 
 `src/runtime.rs` obtains a short mutable TLS borrow for each helper and releases it before assembly branches to the original trampoline. Nested original calls can therefore access the same thread-local state again without an overlapping Rust borrow. First access may allocate through the stock ThreadLocal helper. Capture then uses fixed storage: 64 scopes, 16 producer mailboxes with 256 records each, and copied numeric payloads.
 
@@ -215,17 +320,17 @@ The consumer copies records into `core/src/lib.rs`'s bounded Model: 256 pending 
 
 ### Hook and asset lifetimes
 
-`src/hooks.rs` checks the complete signature windows, instruction relocation whitelist, alignment, bounds and reserved/overlapping redirects before calling Forge. Disabled upstream Patch objects snapshot all originals. Forge creates the eight ordinary hooks in its shared pool; the installer checks each returned ARM trampoline's displaced words, return jump and executable mapping before publishing its continuation. Capture activates only after every branch and synchronization passes.
+`src/hooks.rs` checks the complete signature windows, instruction relocation whitelist, alignment, bounds and reserved/overlapping redirects before calling Forge. Disabled upstream Patch objects snapshot all originals. Forge creates the eleven ordinary hooks in its shared pool; the installer checks each returned ARM trampoline's displaced words, return jump and executable mapping before publishing its continuation. Capture activates only after every branch and synchronization passes.
 
 Rollback checks each current word against the saved original and this plugin's branch. A pair containing foreign bytes is left untouched. For owned or partially published pairs, the Patch enable/disable operations restore the snapshot, followed by cache synchronization and readback. Snapshots remain disabled outside that restoration, so their destruction cannot overwrite foreign modifications. Valid continuations are retained even after a later failure, and incomplete rollback requires restart. There is no live installation, uninstall or trampoline release. The Forge pool owns all trampoline memory until process exit; retaining returned Hook structs is unnecessary.
 
-Eight ordinary ARM hooks use 16 bytes each, totaling 128 bytes of slots in Forge's shared pool of at most two 16 KiB chunks. The host fixture confirms sharing and failure behavior against the pinned native allocator. Actual emulator pool use remains a runtime check. The load callback is a no-op, leaving the loader's requirement record zero; initialization uses the loader's zero-argument ABI.
+Eleven ordinary ARM hooks use 16 bytes each, totaling 176 bytes of slots in Forge's shared pool of at most two 16 KiB chunks. The host fixture confirms sharing and failure behavior against the pinned native allocator. Actual emulator pool use remains a runtime check. The load callback is a no-op, leaving the loader's requirement record zero; initialization uses the loader's zero-argument ABI.
 
 Font loading uses `ImFont::load_with` from RomFS OpenSans.ttf. Its configuration allows load errors to return a fallback instead of asserting. The atlas owns the loaded file data. Each file-loaded RGBA texture is registered with ImGui and has a shutdown callback to unregister and destroy it. Context epochs prevent initialization from keeping pointers after shutdown, including when an allocator reuses a context address. Repeated initialization of a live context does not load duplicate assets.
 
 ### Settings
 
-`src/config.rs` derives upstream IniSerialize/IniDeserialize. Individual field wrappers define true, 1.0 and 0.9 defaults, and reject invalid or nonfinite values; Style defaults to Wilds. Once save data and MtFile are available, stock `config::load` reads the file or creates it with defaults. Save uses stock ScopedMount and Writer. Reset updates session settings; Save persists them. These are the explicitly requested forge-rs saving semantics, superseding the older custom persistence rules for this mod.
+`src/config.rs` derives upstream IniSerialize/IniDeserialize. Individual field wrappers define true, 1.0 and 0.9 defaults, and reject invalid or nonfinite values; Style defaults to Wilds. The r31 `other` key is a plain bool, so a missing or invalid value means off. Once save data and MtFile are available, stock `config::load` reads the file or creates it with defaults. Save uses stock ScopedMount and Writer. Reset updates session settings; Save persists them. These are the explicitly requested forge-rs saving semantics, superseding the older custom persistence rules for this mod.
 
 The unframed settings tree is closed by default. Its guard balances TreePop on every opened path. Free-render processing runs independently of whether that tree is open.
 
@@ -248,15 +353,15 @@ Host tests exercise copied-value capture nesting, scope overflow/quarantine, own
 
 The config harness compiles the pinned upstream config/INI modules and derives, plus production src/config.rs, against test MtFile and counted-mount I/O. It checks automatic default-file creation, individual defaults and invalid parsing, all style round trips, Save and Reset.
 
-The hook harness compiles production src/hooks.rs and the stock Patch wrapper against a native API double. It rejects invalid recipes, reserved/overlapping spans and changed game signatures; injects failures before, during and after branch publication at all eight sites; checks invalid/non-executable trampoline and returned-record evidence; and exercises cache, restoration and foreign-change failures. Owned changes must roll back and capture must remain disabled on failure. Foreign changes remain untouched, valid continuations remain published and incomplete restoration requires restart. Success activates all eight.
+The hook harness compiles production src/hooks.rs and the stock Patch wrapper against a native API double. It rejects invalid recipes, reserved/overlapping spans and changed game signatures; injects failures before, during and after branch publication at all eleven sites; checks invalid/non-executable trampoline and returned-record evidence; and exercises cache, restoration and foreign-change failures. Owned changes must roll back and capture must remain disabled on failure. Foreign changes remain untouched, valid continuations remain published and incomplete restoration requires restart. Success activates all eleven.
 
-The native pool fixture compiles pinned Forge hook.c with JIT/TLS/cache doubles and omitted ARM barriers. Eight ordinary hooks share one chunk and use 128 bytes of slots. Allocation failure, rejected fallback and full two-chunk capacity preserve target bytes. ASan/UBSan run; mocked JIT allocations are counted and closed because LeakSanitizer cannot run under sandbox tracing. This is host evidence, not measured emulator allocation.
+The native pool fixture compiles pinned Forge hook.c with JIT/TLS/cache doubles and omitted ARM barriers. Eleven ordinary hooks share one chunk and use 176 bytes of slots. Allocation failure, rejected fallback and full two-chunk capacity preserve target bytes. ASan/UBSan run; mocked JIT allocations are counted and closed because LeakSanitizer cannot run under sandbox tracing. This is host evidence, not measured emulator allocation.
 
 The C++ r25 oracle comparison covers 243 combinations of style, critical outcome, HZV and age, producing 1,944 draw records. Exact identities/colors/text and bounded float differences are checked. Another 2,800 cases compare source/owner policy, finalized damage/critical outcomes and native matrix projection against r25, including invalid matrices, perspective, translation and clipped points. The real renderer harness compiles production src/render.rs with pinned Forge font/draw wrappers and actual ImGui 1.92.8. All three styles are compared against 24 frozen r2 scenes at 720p/1080p and minimum/maximum scales, including textures, glyph atlas bytes, draw commands, indices, vertices and exact composited pixels. The unchanged C++ oracle comparison retains its historical tolerance. Repeated initialization is checked against duplicate resource creation. File-operation doubles inject short reads and count handles; missing/wrong-size assets, font fallback, context replacement and shutdown cleanup are exercised.
 
-The ARM fixture executes all nine gateways from the production NRO in Unicorn 2.1.4. Its helper doubles deliberately clobber registers, floating-point state and flags; it checks all GPRs, d0–d31, FPSCR, NZCVQ, LR/SP, native stack arguments, around-return paths, and all 16 GE patterns with preserved and changed GE. Helpers are doubles; this is not a native gameplay run. The eight-site GE liveness audit applies to the pinned game and unchanged gateway sites.
+The ARM fixture executes all twelve gateways from the production NRO in Unicorn 2.1.4. Its helper doubles deliberately clobber registers, floating-point state and flags; it checks all GPRs, d0–d31, FPSCR, NZCVQ, LR/SP, native stack arguments, around-return paths, and all 16 GE patterns with preserved and changed GE. Helpers are doubles; this is not a native gameplay run. The GE liveness audit (eight original sites, plus the r31 sites above) applies to the pinned game.
 
-`verify` additionally compares compiler-derived Rust/C++ ARM32 Hook size/alignment/pointer offsets, saved frame, ImGui/font/texture/draw layouts; checks callback exports, all strong imports against actual main/SDK/Forge exports, exact game signatures, asset receipt hashes and nine NZCVQ-only restoration instructions.
+`verify` additionally compares compiler-derived Rust/C++ ARM32 Hook size/alignment/pointer offsets, saved frame, ImGui/font/texture/draw layouts; checks callback exports, all strong imports against actual main/SDK/Forge exports, exact game signatures, asset receipt hashes and twelve NZCVQ-only restoration instructions.
 
 Gameplay, config persistence across a real restart, loader allocation limits and emulator lifecycle remain manual checks. No installation, activation or game launch is performed by these commands.
 

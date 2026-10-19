@@ -17,6 +17,10 @@ pub enum Source {
     Monster,
     Object,
     Tick,
+    /// Poison ticks, blast detonations and mount finishers; native status code, not a hit.
+    Status,
+    /// Monster HP loss that no captured record explains; shown only when opted in.
+    Other,
 }
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -122,6 +126,8 @@ pub struct Settings {
     pub style: Style,
     pub scale: f32,
     pub lifetime: f32,
+    /// Opt-in unattributed HP loss; it can include other hunters, traps and the environment.
+    pub other: bool,
 }
 impl Default for Settings {
     fn default() -> Self {
@@ -130,6 +136,7 @@ impl Default for Settings {
             style: Style::Wilds,
             scale: 1.0,
             lifetime: 0.9,
+            other: false,
         }
     }
 }
@@ -155,8 +162,9 @@ pub fn visible(e: Event, s: Settings) -> bool {
         && e.physical_hzv >= -1
         && match e.source {
             Source::Attack => matches!(e.owner, Owner::LocalPlayer | Owner::LocalPalico),
-            Source::Monster | Source::Object => true,
+            Source::Monster | Source::Object | Source::Status => true,
             Source::Tick => false,
+            Source::Other => s.other,
         }
 }
 // Bounce feedback takes precedence over the weak-hitzone threshold of 45.
@@ -205,7 +213,10 @@ pub fn source_outcome(tags: u32, owner: Owner) -> Option<Source> {
         || (primary == 2
             && ((subtype == 1 && secondary == 0)
                 || (subtype == 4 && secondary == 3)
-                || (subtype == 8 && secondary == 3))))
+                || (subtype == 8 && secondary == 3)))
+        // Kinsect: its shell rewrites the hit's primary kind to 6 after the
+        // hunter-shell setup (main+0x4816c0), keeping subtype 1 and the hunter at +0x70.
+        || (primary == 6 && subtype == 1 && secondary == 0))
         && owner != Owner::Unknown
     {
         return Some(Source::Attack);
@@ -422,4 +433,79 @@ pub fn seconds(tick: u64, origin: u64, frequency: u32) -> Option<f32> {
 // using the same age conversion as visible events.
 pub fn fresh(tick: u64, now: u64, frequency: u32, limit: f32) -> bool {
     tick != 0 && seconds(now, tick, frequency).is_some_and(|age| age < limit)
+}
+/// sEnemy lists at most ten monsters (getMonsterInMap rejects index > 9).
+pub const MONSTERS: usize = 10;
+// An unexplained drop waits SETTLE seconds for late mailbox records before it
+// becomes "other" damage. Captured damage the game never subtracts (HP floors,
+// capture limits) is forgotten after EXPIRE seconds so it cannot hide later loss.
+const SETTLE: f32 = 0.15;
+const EXPIRE: f32 = 1.0;
+#[derive(Clone, Copy, Debug, Default)]
+struct Vital {
+    monster: u32,
+    max: i32,
+    hp: i32,
+    credit: i32,
+    credit_at: f32,
+    debt: i32,
+    debt_at: f32,
+}
+/// HP bookkeeping for opt-in "other" numbers. The game subtracts captured hits,
+/// poison, blast and mount damage from HP in its monster update, so HP loss beyond
+/// those records came from something the hooks did not see.
+#[derive(Default)]
+pub struct Vitals {
+    slots: [Vital; MONSTERS],
+}
+impl Vitals {
+    pub fn clear(&mut self) {
+        self.slots = [Vital::default(); MONSTERS];
+    }
+    /// Record damage the game will subtract from this monster. Repays an unexplained drop first.
+    pub fn expect(&mut self, monster: u32, amount: i32, now: f32) {
+        if monster == 0 || amount <= 0 {
+            return;
+        }
+        if let Some(v) = self.slots.iter_mut().find(|v| v.monster == monster) {
+            let paid = amount.min(v.debt);
+            v.debt -= paid;
+            if amount > paid {
+                v.credit = v.credit.saturating_add(amount - paid);
+                v.credit_at = now;
+            }
+        }
+    }
+    /// One frame's HP for sEnemy slot `slot`. Returns settled HP loss no record explained.
+    /// A new monster, a changed maximum or an empty slot only resets the baseline.
+    pub fn observe(&mut self, slot: usize, monster: u32, hp: i32, max: i32, now: f32) -> Option<i32> {
+        let v = self.slots.get_mut(slot)?;
+        if monster == 0 || max <= 0 {
+            *v = Vital::default();
+            return None;
+        }
+        if v.monster != monster || v.max != max {
+            *v = Vital { monster, max, hp, ..Vital::default() };
+            return None;
+        }
+        let drop = v.hp.saturating_sub(hp);
+        v.hp = hp;
+        if drop > 0 {
+            let used = drop.min(v.credit);
+            v.credit -= used;
+            if drop > used {
+                if v.debt == 0 {
+                    v.debt_at = now;
+                }
+                v.debt = v.debt.saturating_add(drop - used);
+            }
+        }
+        if v.credit > 0 && now - v.credit_at > EXPIRE {
+            v.credit = 0;
+        }
+        if v.debt > 0 && now - v.debt_at >= SETTLE {
+            return Some(core::mem::take(&mut v.debt));
+        }
+        None
+    }
 }

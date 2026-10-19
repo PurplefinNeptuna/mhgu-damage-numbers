@@ -45,8 +45,9 @@ static void reset(void) {
 }
 int main(void) {
     assert(forge_hook_init() == 0);
-    uint32_t targets[8][2];
-    for (unsigned i = 0; i < 8; ++i) {
+    /* Production installs eleven ordinary hooks (hooks.rs COUNT). */
+    uint32_t targets[11][2];
+    for (unsigned i = 0; i < 11; ++i) {
         targets[i][0] = 0xe92d4010;
         targets[i][1] = 0xe1a04000;
         void* original = NULL;
@@ -58,8 +59,8 @@ int main(void) {
         assert(trampoline[2] == 0xe51ff004);
         assert(trampoline[3] == (uint32_t)(uintptr_t)(targets[i] + 2));
     }
-    assert(created == 1 && s_jitChunkCount == 1 && s_jitChunks[0].used == 128);
-    assert(flushed == 16 && invalidated == 16);
+    assert(created == 1 && s_jitChunkCount == 1 && s_jitChunks[0].used == 176);
+    assert(flushed == 22 && invalidated == 22);
     reset();
 
     // JIT creation failure and the unsupported fallback leave targets untouched.
@@ -87,5 +88,5 @@ int main(void) {
     forge_hook_create(target, (void*)(uintptr_t)0x30000000, &original);
     assert(!original && target[0] == 0xe92d4010 && target[1] == 0xe1a04000);
     reset();
-    puts("PASS: native pool shares 128 bytes for eight hooks; allocation, fallback and capacity failures preserve targets");
+    puts("PASS: native pool shares 176 bytes for eleven hooks; allocation, fallback and capacity failures preserve targets");
 }

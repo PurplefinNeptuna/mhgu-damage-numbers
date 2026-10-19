@@ -87,21 +87,21 @@ def verify():
         if image[address:address + 64] != expected:
             raise ValueError('Game signature mismatch: ' + offset)
         windows.append(hex(address))
-    if len(windows) != 12:
+    if len(windows) != 15:
         raise ValueError('Signature count changed')
     if digest(MOD / 'src/gateway.S') != lock['gateway_sha256']:
         raise ValueError('Audited gateway source changed')
     compiler = Path(CONFIG['devkitarm']) / 'bin'
     elf = CARGO_TARGET / 'armv7a-none-eabi/release/libdamage_numbers.so'
     names = symbols(compiler, elf)
-    for name in [*[f'dn_gateway_{site}' for site in range(8)], 'dn_gateway_after']:
+    for name in [*[f'dn_gateway_{site}' for site in range(11)], 'dn_gateway_after']:
         address = names[name]
         words = struct.unpack('<25I', data[address:address + 100])
         if words.count(0xe128f002) != 1 or 0xe12cf002 in words or 0xe124f002 in words:
             raise ValueError('Incorrect NZCVQ gateway restore: ' + name)
     disassembly = subprocess.check_output([compiler / 'arm-none-eabi-objdump', '-d', elf], text=True)
     msr = [line for line in disassembly.splitlines() if '\tmsr\t' in line]
-    if len(msr) != 9 or any('CPSR_f, r2' not in line for line in msr):
+    if len(msr) != 12 or any('CPSR_f, r2' not in line for line in msr):
         raise ValueError('Unexpected status-register write in compiled plugin')
     expressions, native = native_layouts(compiler)
     address = names['dn_abi']
@@ -127,13 +127,13 @@ def verify():
     report = {'status': 'PASSED', 'nro_sha256': digest(package / 'damage_numbers.nro'), 'elf_sha256': digest(elf),
               'exports': sorted(exports), 'strong_imports': sorted(imports), 'native_inputs': inputs,
               'signature_windows': windows, 'layouts': dict(zip(expressions, struct.unpack('<30I', native))),
-              'gateway_sha256': lock['gateway_sha256'], 'nzcvq_restores': 9, 'compiled_status_writes': msr,
+              'gateway_sha256': lock['gateway_sha256'], 'nzcvq_restores': 12, 'compiled_status_writes': msr,
               'asset_sha256': hashes, 'embedded_artwork': False, 'production_decoder': False,
               'nro_bytes': len(data), 'bss_bytes': struct.unpack_from('<I', data, 56)[0], 'text_relocations': False,
-              'ordinary_hook_slot_bytes': 8 * 16, 'forge_pool_chunk_bytes': 16384,
+              'ordinary_hook_slot_bytes': 11 * 16, 'forge_pool_chunk_bytes': 16384,
               'forge_pool_max_chunks': 2, 'allocation_evidence': 'native host fixture; runtime allocation not measured', 'runtime_test': 'NOT RUN'}
     (BUILD_ROOT / 'verify.json').write_text(json.dumps(report, indent=2) + '\n')
-    print(f'PASS: ARM32 layouts, {len(imports)} resolved imports, callbacks, 12 game windows and nine NZCVQ restores')
+    print(f'PASS: ARM32 layouts, {len(imports)} resolved imports, callbacks, 15 game windows and twelve NZCVQ restores')
 
 
 if __name__ == '__main__':

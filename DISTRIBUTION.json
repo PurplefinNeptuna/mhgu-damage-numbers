@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "mod": "damage-numbers",
-  "status": "READY_TO_DISTRIBUTE",
-  "reason": "User approved distribution of the existing r30 visible-crop correction. Promote the validated NRO and assets unchanged, with no rebuild. Affected-device gameplay remains unconfirmed.",
+  "status": "DEVELOPMENT",
+  "reason": "Candidate for the user-reported missing kinsect, poison, blast and mount numbers: accept kinsect hit tags, add poison-tick, blast and mount-finisher hooks, and add an opt-in Show other damage setting (default off) for unattributed monster HP loss. Gameplay NOT RUN.",
   "publication": {
     "published": false,
     "url": null,
     "date": null
   },
-  "version": "r30",
+  "version": "r31",
   "package_name": "damage-numbers",
-  "archive": "damage-numbers-r30.zip",
+  "archive": "damage-numbers-r31-candidate.zip",
   "runtime_test": "NOT RUN",
   "gamebanana": {
     "ai_code": {
@@ -19,6 +19,10 @@
         {
           "name": "OpenAI Codex",
           "url": "https://openai.com/codex/"
+        },
+        {
+          "name": "Claude Code",
+          "url": "https://claude.com/claude-code"
         }
       ],
       "scope": "Implementing and refactoring the Rust port, tests, build and packaging scripts, and explanatory code comments."
@@ -59,9 +63,11 @@
   },
   "target": "MHGU Nintendo Switch 1.4.0; upstream Forge 1.5.1; Eden/Ryujinx.",
   "limitations": [
-    "The user reports r28 works docked but has misplaced numbers in handheld mode on Switch and Android. Exact tested hashes/live dimensions were not supplied.",
-    "r30 has not yet been run on the affected devices.",
-    "If the native applied crop is unavailable or invalid, the mod retains Forge display bounds and may retain the original displacement.",
+    "r31 has not been run. Kinsect, poison, blast and mount detection come from static research of MHGU 1.4.0 code without a gameplay trace.",
+    "The mount number is taken from the fixed HP subtraction in ride state 0xd; identifying it as the mount finisher is an inference from the surrounding ride code.",
+    "Poison, blast and mount numbers have no owner and appear for every player at the monster root position.",
+    "Show other damage cannot attribute its numbers: online it includes other hunters, and it includes traps, cannons and environmental damage.",
+    "r30 has not yet been run on the affected devices; if the native applied crop is unavailable or invalid, the mod retains Forge display bounds.",
     "The existing camera-admission policy still cannot prove presentation ownership of a same-aspect offscreen camera."
   ],
   "dependencies": [
@@ -89,19 +95,19 @@
   ],
   "payloads": {
     "romfs/nativeNX/plugins/damage_numbers.nro": {
-      "source": "build/damage-numbers/candidates/r30/package/romfs/nativeNX/plugins/damage_numbers.nro",
-      "sha256": "415682347ba61fbb10ad4c03cdd73b2141f59bdbb9ffd191f36559c9ea858550"
+      "source": "build/damage-numbers/candidates/r31/package/romfs/nativeNX/plugins/damage_numbers.nro",
+      "sha256": "023fd55c06182bd89d5ab1c466b94ddba8a7576ee666619bddf8b020af5ea866"
     },
     "romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf": {
-      "source": "build/damage-numbers/candidates/r30/package/romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf",
+      "source": "build/damage-numbers/candidates/r31/package/romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf",
       "sha256": "10b26270e158e51b7f26327aff359a7f7170ccc5904c1c82523bf5e372d5f117"
     },
     "romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba": {
-      "source": "build/damage-numbers/candidates/r30/package/romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba",
+      "source": "build/damage-numbers/candidates/r31/package/romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba",
       "sha256": "d4724a2caff4c13e91a541f0e7d203c74e05c40dedd6f78c55426ccd3396230e"
     },
     "romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba": {
-      "source": "build/damage-numbers/candidates/r30/package/romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba",
+      "source": "build/damage-numbers/candidates/r31/package/romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba",
       "sha256": "fe15190c98259443a01add264777b2b4bee994bbd58f9c8f5f12338abb399f2b"
     }
   },
@@ -112,15 +118,13 @@
     "manual": [
       "mods/damage-numbers/EVIDENCE.json"
     ],
-    "static_summary": "r30: 14 core tests, 5 config tests, 8 hook tests, native pool checks, 243 parity scenarios, 2800 policy/projection cases, 24 base-renderer scenes with zero pixel differences, 256 gateway calls, four original ARM crop-update cases, and 12-window/ABI/import/relocation checks passed. Affected-device runtime acceptance pending.",
-    "manual_summary": "NOT RUN for r30. The user reports docked works and handheld fails with the prior rebuilt payload on Switch and Android; r29 diagnostics was not run."
+    "static_summary": "r31: 21 core tests (including kinsect, poison, blast, mount, remote-hit accounting, visibility, monster list and HP bookkeeping), 5 config tests, 8 hook tests over eleven sites, native pool with eleven hooks, 243 parity scenarios, 2800 policy/projection cases, 24 base-renderer scenes with zero pixel differences, 352 gateway calls across twelve gateways, four original ARM crop-update cases, and 15-window/ABI/import/relocation checks passed. Gameplay NOT RUN.",
+    "manual_summary": "NOT RUN for r31."
   },
   "support": {
     "DEVELOPMENT.md": "mods/damage-numbers/DEVELOPMENT.md",
     "EVIDENCE.json": "mods/damage-numbers/EVIDENCE.json"
   },
-  "approval": {
-    "date": "2026-10-18",
-    "basis": "User request: promote this to ready to distribute. Approval applies to the unchanged r30 candidate; it does not supply a new gameplay acceptance report."
-  }
+  "candidate": "build/damage-numbers/candidates/r31/delivery",
+  "candidate_builder": "scripts/build.py"
 }

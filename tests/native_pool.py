@@ -56,7 +56,7 @@ typedef struct { void* rw_addr; void* rx_addr; size_t size; int type; } Jit;
     BUILD_ROOT.mkdir(parents=True, exist_ok=True)
     (BUILD_ROOT / 'native-pool.json').write_text(json.dumps({
         'status': 'PASSED', 'source': 'research/native-hook.c',
-        'ordinary_hooks': 8, 'slot_bytes': 128, 'chunks_for_eight_hooks': 1,
+        'ordinary_hooks': 11, 'slot_bytes': 176, 'chunks_for_eleven_hooks': 1,
         'chunk_bytes': 16384, 'max_chunks': 2, 'capacity_hooks': 2048,
         'allocation_failure_preserves_target': True,
         'fallback_rejected': True, 'full_pool_preserves_target': True,

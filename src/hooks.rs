@@ -12,10 +12,12 @@ use damage_numbers_core::capture::Memory;
 use forge::patch::Patch;
 #[cfg(target_pointer_width = "32")]
 use forge::sys::hook::Hook;
-// ACTIVE is published only after all eight continuations are ready. Each
+/// Number of patched sites; SIGNATURES[..COUNT] and the gateway kinds share this order.
+pub const COUNT: usize = 11;
+// ACTIVE is published only after all continuations are ready. Each
 // ORIGINALS entry holds Forge's trampoline address for the matching gateway.
 pub static ACTIVE: AtomicBool = AtomicBool::new(false);
-pub static ORIGINALS: [AtomicU32; 8] = [const { AtomicU32::new(0) }; 8];
+pub static ORIGINALS: [AtomicU32; COUNT] = [const { AtomicU32::new(0) }; COUNT];
 #[cfg(target_pointer_width = "32")]
 const _: () = assert!(core::mem::size_of::<Hook>() == 24);
 #[cfg(target_pointer_width = "32")]
@@ -29,10 +31,13 @@ unsafe extern "C" {
     fn dn_gateway_5();
     fn dn_gateway_6();
     fn dn_gateway_7();
+    fn dn_gateway_8();
+    fn dn_gateway_9();
+    fn dn_gateway_10();
 }
-// Order is the wire contract: indices match SIGNATURES[0..8] and the kind
+// Order is the wire contract: indices match SIGNATURES[..COUNT] and the kind
 // argument passed by gateway.S. Reordering only one list changes hook meaning.
-pub fn detours() -> [u32; 8] {
+pub fn detours() -> [u32; COUNT] {
     [
         dn_gateway_0 as *const () as u32,
         dn_gateway_1 as *const () as u32,
@@ -42,6 +47,9 @@ pub fn detours() -> [u32; 8] {
         dn_gateway_5 as *const () as u32,
         dn_gateway_6 as *const () as u32,
         dn_gateway_7 as *const () as u32,
+        dn_gateway_8 as *const () as u32,
+        dn_gateway_9 as *const () as u32,
+        dn_gateway_10 as *const () as u32,
     ]
 }
 // Forge copies the first two instructions into a trampoline. Accept only the
@@ -51,6 +59,8 @@ pub fn detours() -> [u32; 8] {
 fn relocatable(op: u32) -> bool {
     if [
         0xed2d8b02, 0xed2d8b0a, 0xe28db018, 0xe28db01c, 0xe5c40000, 0xecbd8b0a,
+        // Mount-finisher tap: ldr r7,[sp,#60] and ldr r0,[r7]; neither reads PC.
+        0xe59d703c, 0xe5970000,
     ]
     .contains(&op)
     {
@@ -91,7 +101,7 @@ fn overlaps(a: u32, bytes: u32, b: u32, other_bytes: u32) -> bool {
 }
 // Validate the complete eight-byte ARM redirects before allocating snapshots or
 // calling Forge. Wider arithmetic prevents a wrapped end from passing a check.
-pub(crate) fn validate_recipe(base: u32, targets: &[u32; 8], detours: &[u32; 8]) -> bool {
+pub(crate) fn validate_recipe(base: u32, targets: &[u32; COUNT], detours: &[u32; COUNT]) -> bool {
     for (i, (&target, &detour)) in targets.iter().zip(detours).enumerate() {
         if target == 0
             || detour == 0
@@ -183,7 +193,7 @@ impl Installed {
         if !validate_recipe(base, &targets, &detours) {
             return Err("invalid or overlapping hook recipe");
         }
-        for &(_, bytes) in &SIGNATURES[..8] {
+        for &(_, bytes) in &SIGNATURES[..COUNT] {
             for at in [0, 4] {
                 if !relocatable(u32::from_le_bytes(bytes[at..at + 4].try_into().unwrap())) {
                     return Err("unsupported displaced instruction");
@@ -191,11 +201,11 @@ impl Installed {
             }
         }
         let mut installed = Self {
-            patches: Vec::with_capacity(8),
+            patches: Vec::with_capacity(COUNT),
         };
         // Capture all originals while the recipe still matches, before Forge
         // publishes anything. ARM LDR pc,[pc,#-4] plus its literal uses 8 bytes.
-        for i in 0..8 {
+        for i in 0..COUNT {
             let mut branch = [0; 8];
             branch[..4].copy_from_slice(&0xe51ff004u32.to_le_bytes());
             branch[4..].copy_from_slice(&detours[i].to_le_bytes());
@@ -203,7 +213,7 @@ impl Installed {
                 .patches
                 .push(Patch::new(targets[i], &branch, false));
         }
-        for i in 0..8 {
+        for i in 0..COUNT {
             let address = targets[i];
             let mut original = core::ptr::null();
             // SAFETY: Forge invokes initialization before original_sApp_run;

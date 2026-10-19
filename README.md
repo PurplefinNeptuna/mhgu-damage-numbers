@@ -13,7 +13,7 @@ The Forge loader is supplied separately.
 ## Installation
 
 1. Close MHGU.
-2. Extract `damage-numbers-r30.zip`.
+2. Extract `damage-numbers-r31.zip`.
 3. Copy the whole `damage-numbers` folder into your emulator's MHGU mod directory:
    - Eden: `~/.local/share/eden/load/0100770008DD8000/`
    - Ryujinx: `mods/contents/0100770008dd8000/` inside its data directory.
@@ -34,8 +34,10 @@ Keep `romfs/nativeNX/plugins/damage_numbers.nro` and its accompanying files:
 Number placement and size follow the game's visible viewport automatically.
 There is no handheld/docked setting to change in the mod.
 
-Numbers appear for hunter, Prowler and Palico attacks, bombs and
-monster-to-monster hits. Wilds uses outlined digits and glowing stars for
+Numbers appear for hunter, Prowler and Palico attacks, Insect Glaive kinsect
+hits, bombs and monster-to-monster hits. Poison ticks, blast explosions and the
+mount knockdown also show their damage. These appear at the monster's position
+and show for everyone's poison, blast and mounts in multiplayer. Wilds uses outlined digits and glowing stars for
 critical hits. Rise has slanted critical slashes and larger weak-point numbers.
 Classic has straight critical markers. All sizes scale with screen height.
 
@@ -54,6 +56,7 @@ row leaves numbers running.
 | Setting | Default | Effect |
 | --- | --- | --- |
 | Show damage numbers | On | Turns the display on or off. |
+| Show other damage | Off | Also shows monster HP loss the mod could not match to a hit it saw, at the monster's position. Hover the option for details. |
 | Style | Wilds | Choose Wilds, Rise or Classic. |
 | Number size | 1.0x | Adjust from 0.5x to 3.0x. |
 | Duration | 0.9 seconds | Adjust from 0.4 to 2.0 seconds. |
@@ -76,10 +79,11 @@ enabled = true
 style = wilds
 scale = 1
 lifetime = 0.9
+other = false
 ```
 
-Set `enabled` to `true` or `false` and `style` to lowercase `wilds`, `classic`
-or `rise`. Size and duration use the ranges above. Missing or invalid settings
+Set `enabled` and `other` to `true` or `false`, and `style` to lowercase
+`wilds`, `classic` or `rise`. Size and duration use the ranges above. Missing or invalid settings
 use their individual defaults. Restart the game to load your edits.
 
 ## Update and removal
@@ -87,8 +91,9 @@ use their individual defaults. Restart the game to load your edits.
 Close MHGU before updating or removing the mod. To update, replace
 its `damage-numbers` folder with the one from the new ZIP. To remove it,
 disable the package or delete its folder from the emulator's mod directory.
-This version uses the same settings file as earlier versions. If updating from
-r28 or r29 with all accompanying files already present, you can replace only
+This version uses the same settings file as earlier versions. Show other damage
+starts off until you turn it on and save. If updating from r28, r29 or r30 with
+all accompanying files already present, you can replace only
 `romfs/nativeNX/plugins/damage_numbers.nro`.
 
 On Switch, update the files under
@@ -103,6 +108,10 @@ If numbers remain displaced, report whether the game is in handheld or docked
 mode and retain the emulator log.
 
 Rise slashes are drawn over the screen and may appear over foreground scenery.
+
+Show other damage can't tell where the damage came from. In online play it
+shows other hunters' hits. It also shows traps, cannons and environmental
+damage, and several sources that land together can appear as one number.
 
 If an artwork file is missing or unreadable, numbers continue without that
 file's effects. If OpenSans.ttf is unavailable, numbers use Forge's font.
