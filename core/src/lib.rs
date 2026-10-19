@@ -17,7 +17,7 @@ pub enum Source {
     Monster,
     Object,
     Tick,
-    /// Mount finisher; native status code, not a hit.
+    /// Mount finisher; native status code, not a hit. Drawn in the weak-point colour.
     Status,
     /// Monster HP loss that no captured record explains; shown only when opted in.
     Other,
@@ -173,11 +173,11 @@ pub fn visible(e: Event, s: Settings) -> bool {
 }
 // Bounce feedback takes precedence over the weak-hitzone threshold of 45.
 // An unavailable hitzone falls through to ordinary white digits.
-// Poison and blast keep their family colour regardless of hitzone.
+// Poison, blast and mount knockdown keep their family colour regardless of hitzone.
 pub fn tint(e: Event) -> Tint {
     if e.bounced || e.source == Source::Poison {
         Tint::Gray
-    } else if e.physical_hzv >= 45 || e.source == Source::Blast {
+    } else if e.physical_hzv >= 45 || matches!(e.source, Source::Blast | Source::Status) {
         Tint::Weak
     } else {
         Tint::White

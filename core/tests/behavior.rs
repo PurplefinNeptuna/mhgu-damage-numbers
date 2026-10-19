@@ -717,7 +717,7 @@ fn poison_is_gray_and_blast_uses_the_weak_point_colour() {
     e.source = Source::Blast;
     assert_eq!(tint(e), Tint::Weak);
     e.source = Source::Status;
-    assert_eq!(tint(e), Tint::White);
+    assert_eq!(tint(e), Tint::Weak);
     e.owner = Owner::Unknown;
     for source in [Source::Poison, Source::Blast, Source::Status] {
         e.source = source;
