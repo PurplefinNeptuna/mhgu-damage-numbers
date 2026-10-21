@@ -1,12 +1,17 @@
 # Damage Numbers: development and research
 
-**Current state.** r35 is a DEVELOPMENT candidate; gameplay is NOT RUN. The
-last approved release is r30, archived unchanged at
+**Current state.** r35 is READY_TO_DISTRIBUTE following user approval on
+2026-10-21; gameplay is NOT RUN. The validated candidate NRO and three assets
+were promoted unchanged, without rebuilding. The local, unpublished release is
+`build/damage-numbers/releases/r35/damage-numbers-r35.zip`. The candidate and
+pre-promotion records are preserved under
+`backups/accepted/damage-numbers/r35-distribution-approved/`. The previous
+release r30 is archived unchanged at
 `backups/accepted/damage-numbers/r30-before-status-damage/`. DISTRIBUTION.json
 is authoritative for status and hashes; EVIDENCE.json holds exact validation
 results. Further runtime edits need a new version and new output directories.
 
-Runtime checks still needed for r35 after an authorized install: kinsect hits
+Runtime checks still needed for r35 (approval added no gameplay result) after an authorized install: kinsect hits
 (local and online), a poison tick, a blast detonation, a mount finisher and a
 map-fired siege shell each show one number of the expected size and colour.
 With "Show other damage" off nothing extra appears. With it on, solo hits and
@@ -19,12 +24,12 @@ copies and pre-change records are under `backups/accepted/damage-numbers/`.
 
 | Version | Status | Change |
 | --- | --- | --- |
-| r35 | DEVELOPMENT, NOT RUN | Map-fired siege shells (owner type 9) show as object damage. |
+| r35 | READY_TO_DISTRIBUTE 2026-10-21, NOT RUN | Map-fired siege shells (owner type 9) show as object damage. |
 | r34 | superseded, unrun | "Show other damage" tooltip rewritten with the humanizer skill; no longer names traps or cannons and warns that simultaneous damage can merge. Text only. |
 | r33 | superseded, unrun | Mount knockdown uses the weak-point colour (`Status` maps to Weak). |
 | r32 | superseded, unrun | r31's single Status family split into `Poison` (wire 6, Gray), `Blast` (wire 7, Weak, with Rise's weak-point enlargement) and `Status` (mount, wire 4). |
 | r31 | superseded, unrun | Kinsect, poison, blast and mount damage (hooks 8–10); opt-in "Show other damage". |
-| r30 | READY_TO_DISTRIBUTE 2026-10-18, archived | Projection uses the applied visible crop. Approval added no affected-device result. Candidate records in `r30-distribution-approved/`. |
+| r30 | READY_TO_DISTRIBUTE 2026-10-18, superseded by r35 | Projection uses the applied visible crop. Approval added no affected-device result. Candidate records in `r30-distribution-approved/`. |
 | r29-diagnostics | retired | Bounded camera/hit logs and screen crosses for the handheld report. Never run. Records in `r29-before-visible-crop/`. |
 | r28 | hardware-test rebuild | `-nostartfiles` and `-Wl,-z,text`; the user reports it displays damage on Switch and Android with misplaced positions in handheld mode. Records in `r28-before-projection-diagnostics/`. |
 | r27 | READY_TO_DISTRIBUTE 2026-10-15 | Centre fallback for missing positions and cameras; user reported it working well. Records in `r27-before-hardware-link/` and `r27-tested-candidate/`. |

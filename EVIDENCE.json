@@ -1817,6 +1817,94 @@
     "runtime_rebuilt_for_promotion": false
   },
   "current": {
+    "version": "r35",
+    "date": "2026-10-21",
+    "status": "READY_TO_DISTRIBUTE",
+    "scope": "Kinsect, poison-tick, blast and mount-finisher numbers; map-fired siege shells shown as object damage; opt-in Show other damage (default off). Builds on r30's visible-crop projection.",
+    "runtime_test": "NOT RUN",
+    "previous_accepted": "r27",
+    "previous_release": "r30",
+    "nro_sha256": "3b955b917698fadfb80b8e2a4becff0ffe689ebeb00ba04088eb2ab89917b488",
+    "elf_sha256": "d36185c31b4516fed839f5995f7b9a43bcd70755932492b9597d60c97f1639d6",
+    "text_relocations": false,
+    "validation": {
+      "build": {
+        "path": "build/damage-numbers/candidates/r35/build.json",
+        "sha256": "fa3874fed81a22efd682ed5e8de375ea5f283a28ac88a997136a7ebeadc4e760",
+        "status": "BUILT"
+      },
+      "tests": {
+        "path": "build/damage-numbers/candidates/r35/tests.json",
+        "sha256": "4213e13c6f4859e412a45449406ccb2816215e7e5a0ec60023fd7ddbc436b605",
+        "status": "PASSED"
+      },
+      "verify": {
+        "path": "build/damage-numbers/candidates/r35/verify.json",
+        "sha256": "9eea180199a5a513d28e572e27fcd11a5a9e43a2e70178b966f5b3ca05973c8b",
+        "status": "PASSED"
+      },
+      "parity": {
+        "path": "build/damage-numbers/candidates/r35/parity.json",
+        "sha256": "39a603b15100232cb4fb57518de0e212a5450c24f0dd1c60d36eb20bf0e74400",
+        "status": "PASSED"
+      },
+      "visual": {
+        "path": "build/damage-numbers/candidates/r35/visual.json",
+        "sha256": "ac3ebb4e3429b93e4cf9a244ff8061fefe5fc1ed82a4d15fb51ce17190ac2a8a",
+        "status": "PASSED"
+      },
+      "gateways": {
+        "path": "build/damage-numbers/candidates/r35/gateways.json",
+        "sha256": "ea3e6e7b4579bc013da6d438b851aef3880ee5f1a2e9e2f8f01fdd80ab1aef2f",
+        "status": "PASSED"
+      },
+      "native-pool": {
+        "path": "build/damage-numbers/candidates/r35/native-pool.json",
+        "sha256": "dcaf2f08845ca20713192928bfdc0aa17bba43a552dc2d051e16142fa17bb3a9",
+        "status": "PASSED"
+      },
+      "viewport": {
+        "path": "build/damage-numbers/candidates/r35/viewport.json",
+        "sha256": "e8ad0ef7e557a2a72d50a2b0d7a44ad081d0bf183f9861551aae75a108030915",
+        "status": "PASSED"
+      }
+    },
+    "static_summary": "r35: 23 core tests (including kinsect, poison, blast, mount, remote-hit accounting, visibility, poison/blast/mount colours, map-fired shells, monster list and HP bookkeeping), 5 config tests, 8 hook tests over eleven sites, native pool with eleven hooks, 243 parity scenarios, 2800 policy/projection cases, 24 base-renderer scenes with zero pixel differences, 352 gateway calls across twelve gateways, four original ARM crop-update cases, and 15-window/ABI/import/relocation checks passed. Gameplay NOT RUN.",
+    "package": {
+      "path": "build/damage-numbers/releases/r35/damage-numbers-r35.zip",
+      "sha256": "49746e5989003ff315670bdc14d182981d59e66192e5cd25e58338cbcaa19f29",
+      "bytes": 146570,
+      "status": "VERIFIED_LOCAL_RELEASE"
+    },
+    "candidate_archive": {
+      "path": "build/damage-numbers/candidates/r35/delivery/damage-numbers-r35-candidate.zip",
+      "sha256": "3c8b111af37afacf4c6bab3a5d145bd9e8f5e6d7be2cb76cbd9284a5a08fa316",
+      "status": "VERIFIED_DEVELOPMENT_CANDIDATE"
+    },
+    "distribution_check": {
+      "status": "PASSED",
+      "mod_records": 11
+    },
+    "runtime_limits": "No installation, launch or gameplay for this exact NRO. Kinsect, poison, blast, mount and siege-shell detection come from static research only.",
+    "approval": {
+      "date": "2026-10-21",
+      "basis": "User request: promote damage number to ready to distribute. Approval applies to the unchanged r35 candidate; it does not supply a gameplay acceptance report."
+    },
+    "preserved_candidate": "backups/accepted/damage-numbers/r35-distribution-approved/PRESERVATION.json",
+    "promotion": {
+      "date": "2026-10-21",
+      "source_commit": "fc68e54",
+      "runtime_rebuilt": false,
+      "payload_hashes_unchanged": true,
+      "candidate_receipt_hashes_verified": true,
+      "preservation": "backups/accepted/damage-numbers/r35-distribution-approved/PRESERVATION.json",
+      "installed": false,
+      "published": false,
+      "pushed": false,
+      "gameplay_acceptance": "No r35 result supplied with the distribution request."
+    }
+  },
+  "r30_before_status_damage": {
     "version": "r30",
     "date": "2026-10-18",
     "status": "READY_TO_DISTRIBUTE",

@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "mod": "damage-numbers",
-  "status": "DEVELOPMENT",
-  "reason": "r35 candidate for the user-reported missing kinsect, poison, blast and mount numbers: accept kinsect hit tags, add poison-tick, blast and mount-finisher hooks, and add an opt-in Show other damage setting (default off) for unattributed monster HP loss. Poison numbers are gray and blast and mount knockdown numbers use the weak-point colour. Gameplay NOT RUN. Map-fired siege shells (owner type 9) show as object damage.",
+  "status": "READY_TO_DISTRIBUTE",
+  "reason": "User approved distribution of the existing r35 candidate: kinsect, poison, blast, mount and map-fired siege shell numbers plus the opt-in Show other damage setting. Promote the validated NRO and assets unchanged, with no rebuild. Gameplay remains NOT RUN.",
   "publication": {
     "published": false,
     "url": null,
@@ -10,7 +10,7 @@
   },
   "version": "r35",
   "package_name": "damage-numbers",
-  "archive": "damage-numbers-r35-candidate.zip",
+  "archive": "damage-numbers-r35.zip",
   "runtime_test": "NOT RUN",
   "gamebanana": {
     "ai_code": {
@@ -126,6 +126,8 @@
     "DEVELOPMENT.md": "mods/damage-numbers/DEVELOPMENT.md",
     "EVIDENCE.json": "mods/damage-numbers/EVIDENCE.json"
   },
-  "candidate": "build/damage-numbers/candidates/r35/delivery",
-  "candidate_builder": "scripts/build.py"
+  "approval": {
+    "date": "2026-10-21",
+    "basis": "User request: promote damage number to ready to distribute. Approval applies to the unchanged r35 candidate; it does not supply a gameplay acceptance report."
+  }
 }
