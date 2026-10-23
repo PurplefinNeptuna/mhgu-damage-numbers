@@ -513,17 +513,27 @@ pub fn layout(
         (0.0, -1.0),
         (0.0, 1.0),
     ];
+    // View::screen carries a zero matrix; only a finite non-zero matrix is a camera.
+    let camera = view.world_to_clip.iter().all(|x| x.is_finite())
+        && view.world_to_clip.iter().any(|&x| x != 0.0);
     let mut count = 0;
     for &e in &model.numbers[..model.count] {
         let age = now - e.captured_at;
         if age < 0.0 || age >= s.lifetime || !visible(e, s) {
             continue;
         }
-        // Keep damage visible when impact capture, clipping or camera projection fails.
-        let anchor = e.position.and_then(|p| project(p, view)).unwrap_or(Point {
-            x: view.x + view.width * 0.5,
-            y: view.y + view.height * 0.5,
-        });
+        // With a camera, an out-of-view hit stays hidden at its world position and
+        // appears once the view turns to it. Failed captures/cameras use screen centre.
+        let anchor = match e.position {
+            Some(p) if camera => match project(p, view) {
+                Some(anchor) => anchor,
+                None => continue,
+            },
+            _ => Point {
+                x: view.x + view.width * 0.5,
+                y: view.y + view.height * 0.5,
+            },
+        };
         let m = motion(age, s.lifetime, s.style);
         // Rise weak-hitzone digits are 1.4 times the ordinary settled size. Other
         // styles indicate weak hitzones with tint while keeping their base size.

@@ -167,7 +167,7 @@ def package():
         raise ValueError('Unexpected old candidate payload files; preserve them before repackaging')
     shutil.copytree(source, package_dir, dirs_exist_ok=True)
     guide = (MOD / 'README.md').read_bytes()
-    archive = dest / 'damage-numbers-r35-candidate.zip'
+    archive = dest / 'damage-numbers-r36-candidate.zip'
     with zipfile.ZipFile(archive, 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zipped:
         zipped.writestr('README.md', guide)
         for name in sorted(payloads):
@@ -188,7 +188,7 @@ def package():
     evidence = {name: json.loads((BUILD_ROOT / (name + '.json')).read_text())
                 for name in ['tests', 'native-pool', 'parity', 'visual', 'gateways', 'viewport', 'verify']}
     (dest / 'VALIDATION.json').write_text(json.dumps(evidence, indent=2) + '\n')
-    manifest = {'mod': 'damage-numbers', 'version': 'r35', 'status': 'DEVELOPMENT', 'runtime_test': 'NOT RUN',
+    manifest = {'mod': 'damage-numbers', 'version': 'r36', 'status': 'DEVELOPMENT', 'runtime_test': 'NOT RUN',
                 'package_name': 'damage-numbers', 'payloads': payloads, 'archive_sha256': digest(archive)}
     (dest / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
     (dest / 'SHA256SUMS').write_text(''.join(digest(path) + '  ' + str(path.relative_to(dest)) + '\n'

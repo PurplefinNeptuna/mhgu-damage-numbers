@@ -1,17 +1,20 @@
 # Damage Numbers: development and research
 
-**Current state.** r35 is READY_TO_DISTRIBUTE following user approval on
-2026-10-21; gameplay is NOT RUN. The validated candidate NRO and three assets
-were promoted unchanged, without rebuilding. The local, unpublished release is
-`build/damage-numbers/releases/r35/damage-numbers-r35.zip`. The candidate and
-pre-promotion records are preserved under
-`backups/accepted/damage-numbers/r35-distribution-approved/`. The previous
-release r30 is archived unchanged at
-`backups/accepted/damage-numbers/r30-before-status-damage/`. DISTRIBUTION.json
-is authoritative for status and hashes; EVIDENCE.json holds exact validation
-results. Further runtime edits need a new version and new output directories.
+**Current state.** r36 is a DEVELOPMENT candidate (2026-10-23); gameplay is
+NOT RUN. Hits outside a usable camera view stay hidden at their world position
+instead of moving to screen centre, and appear if the camera turns to them before
+they expire. The candidate is
+`build/damage-numbers/candidates/r36/delivery/damage-numbers-r36-candidate.zip`.
+The approved r35 release is archived unchanged at
+`backups/accepted/damage-numbers/r35-before-hidden-offscreen/`; its candidate
+records stay in `r35-distribution-approved/`. DISTRIBUTION.json is authoritative
+for status and hashes; EVIDENCE.json holds exact validation results for r35.
+Further runtime edits need a new version and new output directories.
 
-Runtime checks still needed for r35 (approval added no gameplay result) after an authorized install: kinsect hits
+Runtime checks still needed after an authorized install: a hit landing outside
+the camera view shows no number at screen centre, and turning the camera to it
+within the lifetime shows it at the impact. Missing positions still show at
+centre. The r35 checks also remain open: kinsect hits
 (local and online), a poison tick, a blast detonation, a mount finisher and a
 map-fired siege shell each show one number of the expected size and colour.
 With "Show other damage" off nothing extra appears. With it on, solo hits and
@@ -24,7 +27,8 @@ copies and pre-change records are under `backups/accepted/damage-numbers/`.
 
 | Version | Status | Change |
 | --- | --- | --- |
-| r35 | READY_TO_DISTRIBUTE 2026-10-21, NOT RUN | Map-fired siege shells (owner type 9) show as object damage. |
+| r36 | DEVELOPMENT 2026-10-23, NOT RUN | Hits outside a usable camera view stay hidden until the camera turns to them, instead of using the centre fallback. |
+| r35 | READY_TO_DISTRIBUTE 2026-10-21, superseded by r36, NOT RUN | Map-fired siege shells (owner type 9) show as object damage. |
 | r34 | superseded, unrun | "Show other damage" tooltip rewritten with the humanizer skill; no longer names traps or cannons and warns that simultaneous damage can merge. Text only. |
 | r33 | superseded, unrun | Mount knockdown uses the weak-point colour (`Status` maps to Weak). |
 | r32 | superseded, unrun | r31's single Status family split into `Poison` (wire 6, Gray), `Blast` (wire 7, Weak, with Rise's weak-point enlargement) and `Status` (mount, wire 4). |
@@ -72,7 +76,7 @@ Copy `build.local.example.json` to ignored `build.local.json` and supply the too
 
 Preparation, builds and packaging do not install, activate, publish or push. The runtime package contains `damage_numbers.nro`, `OpenSans.ttf` and two external RGBA artwork files. The workspace coordinator packages the registered candidate with `python3 scripts/mod_distribution.py package damage-numbers`; run the full `python3 scripts/mod_distribution.py check` afterwards.
 
-Workspace outputs are under `build/damage-numbers/candidates/r35/` and `work/damage-numbers/candidates/r35/`. Cargo caches, the unstripped ELF and converter output stay under `work/damage-numbers/candidates/r35/cargo-target/`. The pinned converter requires a temporary `target` symlink and loose NRO in the source root while building; the wrapper removes both when the converter exits, including on failure. An independent source export uses its own ignored build/work folders. Registry sources are vendored, including metadata needed by this nightly's build-std resolver. Host tests explicitly load the source-only Cargo configuration so they do not inherit the ARM target or build-std settings. Default builds and tests are offline.
+Workspace outputs are under `build/damage-numbers/candidates/r36/` and `work/damage-numbers/candidates/r36/`. Cargo caches, the unstripped ELF and converter output stay under `work/damage-numbers/candidates/r36/cargo-target/`. The pinned converter requires a temporary `target` symlink and loose NRO in the source root while building; the wrapper removes both when the converter exits, including on failure. An independent source export uses its own ignored build/work folders. Registry sources are vendored, including metadata needed by this nightly's build-std resolver. Host tests explicitly load the source-only Cargo configuration so they do not inherit the ARM target or build-std settings. Default builds and tests are offline.
 
 After adding source files, refresh the allowlist with `python3 scripts/export_source.py --refresh`. Exports omit native game inputs, outputs, private configurations, caches and Git metadata. They retain dependency bytes exactly so Cargo checksum validation remains meaningful. Supply your toolchain/input paths in the exported repo's own configuration. No sibling mod import is needed.
 
@@ -272,10 +276,14 @@ dereferenced by deferred rendering.
 
 A failed impact-position copy marks the position unavailable while keeping the
 collision scope and native return chain intact; the consumer represents it with
-`None`. A genuine captured world origin remains valid. Missing positions,
-missing/stale/invalid cameras and clipped projections use the display centre,
-with normal animation and overlap spacing, including hits behind or outside the
-camera. Invalid display dimensions still prevent drawing.
+`None`. A genuine captured world origin remains valid. Missing positions and
+missing/stale/invalid cameras use the display centre, with normal animation and
+overlap spacing. Since r36, a position that a usable (finite, non-zero) camera
+clips, including hits behind the camera, is skipped for that frame only. Layout
+re-projects every live number each frame, so the hit appears at its world
+position if the camera turns to it before its lifetime ends; its placement
+offset is chosen when it first becomes visible. Invalid display dimensions
+still prevent drawing.
 
 The viewport guard checks origin and aspect ratio, not presentation-target
 ownership. A same-aspect offscreen view can still pass. Requiring equal native

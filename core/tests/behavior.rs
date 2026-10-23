@@ -387,6 +387,9 @@ fn crop_drives_projection_fallback_and_all_style_geometry() {
     }
 }
 fn draw(position: Option<Vec3>, view: &View, style: Style) -> DrawNumber {
+    try_draw(position, view, style).expect("one number")
+}
+fn try_draw(position: Option<Vec3>, view: &View, style: Style) -> Option<DrawNumber> {
     let mut model = Model::default();
     model.reset(1);
     model.configure(Settings {
@@ -400,32 +403,31 @@ fn draw(position: Option<Vec3>, view: &View, style: Style) -> DrawNumber {
     }));
     model.update(0.2, true);
     let mut output = [DrawNumber::default(); 128];
-    assert_eq!(
-        layout(
-            &model,
-            view,
-            0.2,
-            &mut output,
-            &mut Placement::default(),
-            |text, pixels, _| {
-                let width = text.iter().take_while(|&&n| n != 0).count() as f32 * pixels * 0.55;
-                Some(TextMetrics {
-                    advance: width,
-                    ink: Rect {
-                        left: 0.0,
-                        top: 0.0,
-                        right: width,
-                        bottom: pixels,
-                    },
-                })
-            }
-        ),
-        1
-    );
-    output[0]
+    let count = layout_at(&model, view, 0.2, &mut output, &mut Placement::default());
+    (count == 1).then_some(output[0])
+}
+fn layout_at(
+    model: &Model,
+    view: &View,
+    now: f32,
+    output: &mut [DrawNumber; 128],
+    placement: &mut Placement,
+) -> usize {
+    layout(model, view, now, output, placement, |text, pixels, _| {
+        let width = text.iter().take_while(|&&n| n != 0).count() as f32 * pixels * 0.55;
+        Some(TextMetrics {
+            advance: width,
+            ink: Rect {
+                left: 0.0,
+                top: 0.0,
+                right: width,
+                bottom: pixels,
+            },
+        })
+    })
 }
 #[test]
-fn unavailable_or_clipped_projection_uses_screen_centre_in_every_style() {
+fn unavailable_projection_uses_screen_centre_and_out_of_view_hits_stay_hidden() {
     let id = [
         1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1.,
     ];
@@ -458,9 +460,7 @@ fn unavailable_or_clipped_projection_uses_screen_centre_in_every_style() {
                     z: 2.0,
                 },
             ] {
-                let fallback = draw(Some(position), &camera, style);
-                assert_eq!(fallback.position, centre.position);
-                assert_eq!(fallback.slash.origin, centre.slash.origin);
+                assert!(try_draw(Some(position), &camera, style).is_none());
             }
             let fallback = draw(hit(1).position, &no_camera, style);
             assert_eq!(fallback.position, centre.position);
@@ -472,10 +472,7 @@ fn unavailable_or_clipped_projection_uses_screen_centre_in_every_style() {
             );
             let mut behind = camera;
             behind.world_to_clip[15] = -1.0;
-            assert_eq!(
-                draw(hit(1).position, &behind, style).position,
-                centre.position
-            );
+            assert!(try_draw(hit(1).position, &behind, style).is_none());
         }
     }
     for (width, height) in [
@@ -497,6 +494,30 @@ fn unavailable_or_clipped_projection_uses_screen_centre_in_every_style() {
         },
         Settings::default()
     ));
+}
+#[test]
+fn out_of_view_hit_appears_when_the_camera_turns_to_it() {
+    let id = [
+        1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1.,
+    ];
+    let camera = native_camera(&id, &id, [0, 0, 1280, 720], 1280., 720.).unwrap();
+    let mut model = Model::default();
+    model.reset(1);
+    assert!(model.capture(Event {
+        position: Some(Vec3 { x: 2.0, y: 0.0, z: 0.5 }),
+        ..hit(1)
+    }));
+    model.update(0.2, true);
+    let mut output = [DrawNumber::default(); 128];
+    let mut placement = Placement::default();
+    assert_eq!(layout_at(&model, &camera, 0.2, &mut output, &mut placement), 0);
+    // Shifting clip x by -2 brings the same world point to the screen centre.
+    let mut turned = camera;
+    turned.world_to_clip[3] = -2.0;
+    assert_eq!(layout_at(&model, &turned, 0.3, &mut output, &mut placement), 1);
+    let centre = draw(None, &camera, Settings::default().style);
+    assert!((output[0].position.x + output[0].advance * 0.5 - 640.0).abs() < 1.0);
+    assert!(output[0].position.y < centre.position.y + 720.0 * 0.1);
 }
 #[test]
 fn overflow_quarantines_until_unwind() {

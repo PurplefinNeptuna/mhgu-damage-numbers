@@ -44,8 +44,9 @@ critical hits. Rise has slanted critical slashes and larger weak-point numbers.
 Classic has straight critical markers. All sizes scale with screen height.
 
 If the impact position or camera projection is unavailable, numbers appear at
-screen centre with the usual animation and spacing. Hits outside the camera
-view also use this fallback.
+screen centre with the usual animation and spacing. A hit outside the camera
+view stays hidden. It appears where it landed if you turn the camera toward it
+before the number fades.
 
 Numbers are gold when the physical hitzone value is 45 or higher, and white
 when it is below 45 or unknown. Bounced attacks appear grey. Poison damage is
