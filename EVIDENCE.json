@@ -1817,6 +1817,109 @@
     "runtime_rebuilt_for_promotion": false
   },
   "current": {
+    "version": "r36",
+    "date": "2026-10-30",
+    "status": "READY_TO_DISTRIBUTE",
+    "scope": "Hits outside a usable camera view stay hidden at their world position until the camera turns to them within the number's lifetime, instead of the screen-centre fallback. Missing positions and missing, stale or invalid cameras still use screen centre. Otherwise r35.",
+    "runtime_test": "USER REPORTED (Eden, log not retained)",
+    "previous_accepted": "r27",
+    "previous_release": "r35",
+    "nro_sha256": "cfbeb3a364f727fc91d10ba9e02ca5e54ba7e204547aa7531b7b409cfcc8622a",
+    "validation": {
+      "build": {
+        "path": "build/damage-numbers/candidates/r36/build.json",
+        "sha256": "dbb35d4445f5ea0bfe90f7defc4037e122ed82d279afb62b5c07657a1ae34bf6",
+        "status": "BUILT"
+      },
+      "tests": {
+        "path": "build/damage-numbers/candidates/r36/tests.json",
+        "sha256": "e684832c821e785955311fcaeab74df8ed7ad679a045ab187d42011510569a36",
+        "status": "PASSED"
+      },
+      "verify": {
+        "path": "build/damage-numbers/candidates/r36/verify.json",
+        "sha256": "3874697dcdf8492ef3b5c0c50b251d3eba2c508483642b19197a52d407024ba8",
+        "status": "PASSED"
+      },
+      "parity": {
+        "path": "build/damage-numbers/candidates/r36/parity.json",
+        "sha256": "39a603b15100232cb4fb57518de0e212a5450c24f0dd1c60d36eb20bf0e74400",
+        "status": "PASSED"
+      },
+      "visual": {
+        "path": "build/damage-numbers/candidates/r36/visual.json",
+        "sha256": "ac3ebb4e3429b93e4cf9a244ff8061fefe5fc1ed82a4d15fb51ce17190ac2a8a",
+        "status": "PASSED"
+      },
+      "gateways": {
+        "path": "build/damage-numbers/candidates/r36/gateways.json",
+        "sha256": "ea3e6e7b4579bc013da6d438b851aef3880ee5f1a2e9e2f8f01fdd80ab1aef2f",
+        "status": "PASSED"
+      },
+      "native-pool": {
+        "path": "build/damage-numbers/candidates/r36/native-pool.json",
+        "sha256": "dcaf2f08845ca20713192928bfdc0aa17bba43a552dc2d051e16142fa17bb3a9",
+        "status": "PASSED"
+      },
+      "viewport": {
+        "path": "build/damage-numbers/candidates/r36/viewport.json",
+        "sha256": "e8ad0ef7e557a2a72d50a2b0d7a44ad081d0bf183f9861551aae75a108030915",
+        "status": "PASSED"
+      }
+    },
+    "static_summary": "r36: 24 core tests (including out-of-view hits staying hidden until the camera turns to them, kinsect, poison, blast, mount, remote-hit accounting, visibility, poison/blast/mount colours, map-fired shells, monster list and HP bookkeeping), 5 config tests, 8 hook tests over eleven sites, native pool with eleven hooks, 243 parity scenarios, 2800 policy/projection cases, 24 base-renderer scenes with zero pixel differences, 352 gateway calls across twelve gateways, four original ARM crop-update cases, and 15-window/ABI/import/relocation checks passed. Gameplay NOT RUN.",
+    "candidate_archive": {
+      "path": "build/damage-numbers/candidates/r36/delivery/damage-numbers-r36-candidate.zip",
+      "sha256": "9a5bdcf263358a7ea3637f380d63851b380ae96ce0aede48d723e5bbec9fcb48",
+      "status": "VERIFIED_DEVELOPMENT_CANDIDATE"
+    },
+    "user_reports": [
+      {
+        "date": "2026-10-30",
+        "build": "r36",
+        "emulator": "Eden",
+        "report": "User states r36 already ran.",
+        "log": "Not retained (Eden keeps two log files); hashes not confirmable."
+      },
+      {
+        "date": "2026-10-30",
+        "build": "r37-projection-ab",
+        "nro_sha256": "1af52d18112643312d2c5f247eaa6528c08898151438ec0a7daf61901fa41621",
+        "emulator": "Eden, docked 1920x1080",
+        "report": "Numbers looked right. r37-projection-ab displays with r36 code plus diagnostic logs; installed hash matched in the Eden load folder.",
+        "log": "ab: lines saved in work/damage-numbers/projection-call/r37-run1/"
+      }
+    ],
+    "runtime_limits": "No handheld run and no reported out-of-view-hit check for r36. Kinsect, poison, blast, mount and siege-shell detection remain without a reported gameplay check.",
+    "approval": {
+      "date": "2026-10-30",
+      "basis": "User approval 2026-10-30: \"r36 is actually better to be ready to distribute and the mod we will use mainly, its already ran\". Approval applies to the unchanged r36 candidate. The user reports an earlier Eden run of r36, but its log was rotated out, so no log ties that run to these exact hashes, and no handheld or out-of-view-hit result was reported."
+    },
+    "preserved_candidate": "backups/accepted/damage-numbers/r36-distribution-approved/PRESERVATION.json",
+    "promotion": {
+      "date": "2026-10-30",
+      "source_commit": "10b7dd8",
+      "runtime_rebuilt": false,
+      "payload_hashes_unchanged": true,
+      "candidate_receipt_hashes_verified": true,
+      "preservation": "backups/accepted/damage-numbers/r36-distribution-approved/PRESERVATION.json",
+      "installed": false,
+      "published": false,
+      "pushed": false,
+      "gameplay_acceptance": "User report without a retained log; see user_reports."
+    },
+    "package": {
+      "path": "build/damage-numbers/releases/r36/damage-numbers-r36.zip",
+      "sha256": "758dc41f9f3bd8ad37ca24af0e725b8a9caf80af3bc38175199b71d213aeb412",
+      "bytes": 147054,
+      "status": "VERIFIED_LOCAL_RELEASE"
+    },
+    "distribution_check": {
+      "status": "PASSED",
+      "mod_records": 13
+    }
+  },
+  "r35_before_hidden_offscreen": {
     "version": "r35",
     "date": "2026-10-21",
     "status": "READY_TO_DISTRIBUTE",

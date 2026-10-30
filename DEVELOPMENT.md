@@ -1,26 +1,26 @@
 # Damage Numbers: development and research
 
-**Current state.** r37-projection-ab is a DEVELOPMENT diagnostic candidate
-(2026-10-30); gameplay is NOT RUN. Display behaviour is r36's. It adds capped
-ERROR-level logs comparing hook 4's projection with the game's own projection
-call main+0x18a48, made from `forge_onUpdate` (see "Projection A/B" below and
-`work/damage-numbers/projection-call/RESEARCH.md`). The candidate is
-`build/damage-numbers/candidates/r37-projection-ab/delivery/damage-numbers-r37-projection-ab-candidate.zip`.
-Run 1 on Eden (2026-10-30, exact hash, docked) failed the A/B gate; see
-"Projection A/B" below. The user reported that the displayed numbers, which
-use r36's hook-4 path, looked right. Handheld and the specific r36/r35 checks
-below were not reported. Decision: hooks 3 and 4 stay, and the native-call
-idea is closed. Releasing r36 behaviour without the A/B logs needs a new
-version.
+**Current state.** r36 is READY_TO_DISTRIBUTE (2026-10-30), promoted
+unchanged from its candidate to
+`build/damage-numbers/releases/r36/damage-numbers-r36.zip`. Hits outside a
+usable camera view stay hidden at their world position instead of moving to
+screen centre, and appear if the camera turns to them before they expire.
+Approval records and the preserved candidate are in
+`backups/accepted/damage-numbers/r36-distribution-approved/`. The user reports
+an Eden run of r36, but its log was rotated out. The r37-projection-ab
+diagnostic, which displays with r36's code, ran docked on Eden with its exact
+NRO, and the user reported that the numbers looked right. Handheld and the
+out-of-view checks below were not reported.
 
-r36 is a DEVELOPMENT candidate (2026-10-23); gameplay is NOT RUN. Hits outside a usable camera view stay hidden at their world position
-instead of moving to screen centre, and appear if the camera turns to them before
-they expire. The candidate is
-`build/damage-numbers/candidates/r36/delivery/damage-numbers-r36-candidate.zip`.
-The approved r35 release is archived unchanged at
+r37-projection-ab (2026-10-30) was a diagnostic candidate only. Its A/B
+gate failed (see "Projection A/B" below), so hooks 3 and 4 stay and the
+native-call idea is closed. Its source was reverted for the r36 release; the
+candidate folder stays under `build/damage-numbers/candidates/r37-projection-ab/`.
+
+The previous release r35 is archived unchanged at
 `backups/accepted/damage-numbers/r35-before-hidden-offscreen/`; its candidate
 records stay in `r35-distribution-approved/`. DISTRIBUTION.json is authoritative
-for status and hashes; EVIDENCE.json holds exact validation results for r35.
+for status and hashes; EVIDENCE.json holds exact validation results for r36.
 Further runtime edits need a new version and new output directories.
 
 Runtime checks still needed after an authorized install: a hit landing outside
@@ -39,8 +39,8 @@ copies and pre-change records are under `backups/accepted/damage-numbers/`.
 
 | Version | Status | Change |
 | --- | --- | --- |
-| r37-projection-ab | DEVELOPMENT 2026-10-30, Eden run 1: gate FAILED | Diagnostic only: r36 plus capped logs comparing hook 4 with the native projection call main+0x18a48 from `forge_onUpdate`. Signature window 15 covers the call target. |
-| r36 | DEVELOPMENT 2026-10-23, NOT RUN | Hits outside a usable camera view stay hidden until the camera turns to them, instead of using the centre fallback. |
+| r37-projection-ab | diagnostic, Eden run 1 2026-10-30: gate FAILED; source reverted | Diagnostic only: r36 plus capped logs comparing hook 4 with the native projection call main+0x18a48 from `forge_onUpdate`. Signature window 15 covers the call target. |
+| r36 | READY_TO_DISTRIBUTE 2026-10-30; user-reported Eden run, log not retained | Hits outside a usable camera view stay hidden until the camera turns to them, instead of using the centre fallback. |
 | r35 | READY_TO_DISTRIBUTE 2026-10-21, superseded by r36, NOT RUN | Map-fired siege shells (owner type 9) show as object damage. |
 | r34 | superseded, unrun | "Show other damage" tooltip rewritten with the humanizer skill; no longer names traps or cannons and warns that simultaneous damage can merge. Text only. |
 | r33 | superseded, unrun | Mount knockdown uses the weak-point colour (`Status` maps to Weak). |

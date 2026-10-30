@@ -53,7 +53,6 @@ struct Consumer {
     viewport_warning: bool,
     vitals: Vitals,
     other_serial: u32,
-    ab: crate::ab::Ab,
 }
 // Call the closure while holding Forge's scoped mutex guard. Both the mutable
 // Consumer borrow and lock end when the closure returns, including early exits.
@@ -78,7 +77,7 @@ pub fn start() {
     let installed = if clock.is_some() {
         match Installed::install() {
             Ok(value) => {
-                log::info!("[damage-numbers] r37-projection-ab loaded: {} Forge hooks", value.count());
+                log::info!("[damage-numbers] r35 loaded: {} Forge hooks", value.count());
                 Some(value)
             }
             Err(reason) => {
@@ -108,7 +107,6 @@ pub fn start() {
             viewport_warning: false,
             vitals: Vitals::default(),
             other_serial: 0,
-            ab: crate::ab::Ab::default(),
         }),
     });
 }
@@ -318,14 +316,7 @@ impl Consumer {
     }
 }
 pub fn update() {
-    with_state(|state| {
-        state.load_config();
-        // r37-projection-ab: Forge runs this after the game's frame update, the
-        // point where a native-projection design would call main+0x18a48.
-        if state.installed.is_some() {
-            state.ab.sample(&state.model, state.player, &state.camera);
-        }
-    });
+    with_state(|state| state.load_config());
 }
 pub fn init_imgui() {
     with_state(|state| {
@@ -378,8 +369,6 @@ pub fn render() {
         };
         let view = native_view.or_else(|| presentation::View::screen(size[0], size[1]));
         state.model.update(time, view.is_some());
-        // Compare only against a real hook-4 camera; the centre fallback has no matrices.
-        state.ab.compare(&state.model, native_view.as_ref(), size);
         let Some(view) = view else {
             state.placement.reset();
             return;
