@@ -6,7 +6,9 @@ ERROR-level logs comparing hook 4's projection with the game's own projection
 call main+0x18a48, made from `forge_onUpdate` (see "Projection A/B" below and
 `work/damage-numbers/projection-call/RESEARCH.md`). The candidate is
 `build/damage-numbers/candidates/r37-projection-ab/delivery/damage-numbers-r37-projection-ab-candidate.zip`.
-Running it also exercises r36, which was never run.
+Run 1 on Eden (2026-10-30, exact hash) failed the A/B gate; see "Projection
+A/B" below. The user reported nothing about r36's visible behaviour, so r36
+is still unassessed.
 
 r36 is a DEVELOPMENT candidate (2026-10-23); gameplay is NOT RUN. Hits outside a usable camera view stay hidden at their world position
 instead of moving to screen centre, and appear if the camera turns to them before
@@ -34,7 +36,7 @@ copies and pre-change records are under `backups/accepted/damage-numbers/`.
 
 | Version | Status | Change |
 | --- | --- | --- |
-| r37-projection-ab | DEVELOPMENT 2026-10-30, NOT RUN | Diagnostic only: r36 plus capped logs comparing hook 4 with the native projection call main+0x18a48 from `forge_onUpdate`. Signature window 15 covers the call target. |
+| r37-projection-ab | DEVELOPMENT 2026-10-30, Eden run 1: gate FAILED | Diagnostic only: r36 plus capped logs comparing hook 4 with the native projection call main+0x18a48 from `forge_onUpdate`. Signature window 15 covers the call target. |
 | r36 | DEVELOPMENT 2026-10-23, NOT RUN | Hits outside a usable camera view stay hidden until the camera turns to them, instead of using the centre fallback. |
 | r35 | READY_TO_DISTRIBUTE 2026-10-21, superseded by r36, NOT RUN | Map-fired siege shells (owner type 9) show as object damage. |
 | r34 | superseded, unrun | "Show other damage" tooltip rewritten with the humanizer skill; no longer names traps or cannons and warns that simultaneous damage can merge. Text only. |
@@ -331,6 +333,22 @@ and blend, and override 0,0, every hit's `max_axis` is at most 2 px apart from
 camera cuts. Up to one frame of lag while the camera moves is expected, because
 `onUpdate` and render sample at different points. Report the size of that lag
 rather than loosening the gate.
+
+Run 1 (Eden, 2026-10-30, NRO `1af52d18…`; lines saved under
+`work/damage-numbers/projection-call/r37-run1/`):
+- `onUpdate` and render run on the same thread (`00204200`).
+- One context line: every condition held (view 0 = hook view 0, same camera,
+  mode 0, sampling, offset and blend 0, no override object).
+- No skipped call and no crash.
+- 64 hits, all at 1920x1080, inside about 50 s before the cap.
+
+Gate FAILED. max_axis was at most 2 px for only 6 of 64 hits (median 7.2 px,
+p90 28.8 px, max 102.4 px). Still-camera hits and first samples are within
+about 2 px; the error grows with camera motion. Conclusion: 0x18a48 called
+from `onUpdate` does not reproduce the drawn frame's matrices while the camera
+moves, so it cannot replace hook 4 as is. Inference: the record matrices
+(rec+0xe0/+0x120) lag the camera fields by one update. The next test reads
+those stored matrices directly; see RESEARCH.md.
 
 ## Validation scope
 
