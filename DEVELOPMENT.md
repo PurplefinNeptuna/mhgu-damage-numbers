@@ -1,7 +1,14 @@
 # Damage Numbers: development and research
 
-**Current state.** r36 is a DEVELOPMENT candidate (2026-10-23); gameplay is
-NOT RUN. Hits outside a usable camera view stay hidden at their world position
+**Current state.** r37-projection-ab is a DEVELOPMENT diagnostic candidate
+(2026-10-30); gameplay is NOT RUN. Display behaviour is r36's. It adds capped
+ERROR-level logs comparing hook 4's projection with the game's own projection
+call main+0x18a48, made from `forge_onUpdate` (see "Projection A/B" below and
+`work/damage-numbers/projection-call/RESEARCH.md`). The candidate is
+`build/damage-numbers/candidates/r37-projection-ab/delivery/damage-numbers-r37-projection-ab-candidate.zip`.
+Running it also exercises r36, which was never run.
+
+r36 is a DEVELOPMENT candidate (2026-10-23); gameplay is NOT RUN. Hits outside a usable camera view stay hidden at their world position
 instead of moving to screen centre, and appear if the camera turns to them before
 they expire. The candidate is
 `build/damage-numbers/candidates/r36/delivery/damage-numbers-r36-candidate.zip`.
@@ -27,6 +34,7 @@ copies and pre-change records are under `backups/accepted/damage-numbers/`.
 
 | Version | Status | Change |
 | --- | --- | --- |
+| r37-projection-ab | DEVELOPMENT 2026-10-30, NOT RUN | Diagnostic only: r36 plus capped logs comparing hook 4 with the native projection call main+0x18a48 from `forge_onUpdate`. Signature window 15 covers the call target. |
 | r36 | DEVELOPMENT 2026-10-23, NOT RUN | Hits outside a usable camera view stay hidden until the camera turns to them, instead of using the centre fallback. |
 | r35 | READY_TO_DISTRIBUTE 2026-10-21, superseded by r36, NOT RUN | Map-fired siege shells (owner type 9) show as object damage. |
 | r34 | superseded, unrun | "Show other damage" tooltip rewritten with the humanizer skill; no longer names traps or cannons and warns that simultaneous damage can merge. Text only. |
@@ -296,6 +304,33 @@ To investigate a displacement report after an authorized install, compare the
 same stationary hit with a stationary camera at 1.0× and 1.25×, then rotate the
 camera and repeat with each style. Use the matched plugin/loader hashes, an
 actual launch log and video showing both the impact and number.
+
+### Projection A/B (r37-projection-ab)
+
+Question: can hooks 3 and 4 be replaced by calling main+0x18a48, the game's
+own world-to-screen function, from `forge_onUpdate`? Static research
+(`work/damage-numbers/projection-call/RESEARCH.md`) found that both paths build
+matrices with the same uQuestCamera getters. The draw path additionally blends
+by sCamera+0x24, offsets by sCamera+0x1c/+0x20, and handles mode-10 viewports
+and a view override differently.
+
+`src/ab.rs` reads cell 0x184d750 (sFestaCamera), sGUI+0xec (view), the record's
+mpCamera (uQuestCamera, state 1 or 2), then calls 0x18a48 for each live number in
+`onUpdate`. The render callback projects the same numbers with hook 4's
+matrices and compares them. Logs, all `[damage-numbers] ab:` at ERROR:
+
+| Line | Cap | Content |
+| --- | --- | --- |
+| `threads` | 1 | TPIDRURO of the update and render callbacks |
+| `context` | 24, on change | view, hook-3 view, same camera, mode, camera state, Region, sCamera +0x59/+0x1c/+0x20/+0x24, override flags |
+| `hit` | 64, at expiry | samples, largest per-axis delta (display px), mean, frames where only one side projects, first pair |
+| `native projection skipped` | 1 per reason | which guard refused the call |
+
+Gate: with view == hook_view, same_camera, mode != 10, sampling 0, zero offset
+and blend, and override 0,0, every hit's `max_axis` is at most 2 px apart from
+camera cuts. Up to one frame of lag while the camera moves is expected, because
+`onUpdate` and render sample at different points. Report the size of that lag
+rather than loosening the gate.
 
 ## Validation scope
 

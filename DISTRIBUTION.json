@@ -2,15 +2,15 @@
   "schema_version": 1,
   "mod": "damage-numbers",
   "status": "DEVELOPMENT",
-  "reason": "r36 candidate: with a usable camera, hits outside the camera view are no longer moved to screen centre. They stay hidden at their world position and appear if the camera turns to them before the number expires. Missing positions and missing, stale or invalid cameras still use screen centre. Gameplay NOT RUN.",
+  "reason": "r37-projection-ab diagnostic candidate: r36 behaviour unchanged, plus capped ERROR-level logs that compare hook 4's captured-matrix projection with the game's own projection call main+0x18a48 made from forge_onUpdate (per-hit pixel deltas, the viewport/camera conditions they depend on, and the update/render thread identities). It decides whether hooks 3 and 4 can be replaced. Gameplay NOT RUN.",
   "publication": {
     "published": false,
     "url": null,
     "date": null
   },
-  "version": "r36",
+  "version": "r37-projection-ab",
   "package_name": "damage-numbers",
-  "archive": "damage-numbers-r36-candidate.zip",
+  "archive": "damage-numbers-r37-projection-ab-candidate.zip",
   "runtime_test": "NOT RUN",
   "gamebanana": {
     "ai_code": {
@@ -63,14 +63,15 @@
   },
   "target": "MHGU Nintendo Switch 1.4.0; upstream Forge 1.5.1; Eden/Ryujinx.",
   "limitations": [
-    "r36 has not been run. Kinsect, poison, blast and mount detection come from static research of MHGU 1.4.0 code without a gameplay trace.",
+    "r37-projection-ab (and r36) has not been run. Kinsect, poison, blast and mount detection come from static research of MHGU 1.4.0 code without a gameplay trace.",
     "The mount number is taken from the fixed HP subtraction in ride state 0xd; identifying it as the mount finisher is an inference from the surrounding ride code.",
     "Poison, blast and mount numbers have no owner and appear for every player at the monster root position.",
     "Show other damage cannot attribute its numbers. Online it may include other hunters' attacks, and damage landing at once can merge into one number.",
     "r30 has not yet been run on the affected devices; if the native applied crop is unavailable or invalid, the mod retains Forge display bounds.",
     "The existing camera-admission policy still cannot prove presentation ownership of a same-aspect offscreen camera.",
     "Map-fired shells have no hunter owner; their numbers show for every player. Cannon, huge cannon and Dragonator projectiles were not traced.",
-    "Hits outside the camera view show only if the camera turns to them within the number's lifetime (0.4 to 2 seconds); there is no edge indicator."
+    "Hits outside the camera view show only if the camera turns to them within the number's lifetime (0.4 to 2 seconds); there is no edge indicator.",
+    "r37-projection-ab calls main+0x18a48 from forge_onUpdate for each live number. Static research supports reading the camera there, but which thread runs that callback, and whether it runs after the camera update, is unconfirmed until the logged thread identities are read."
   ],
   "dependencies": [
     {
@@ -97,19 +98,19 @@
   ],
   "payloads": {
     "romfs/nativeNX/plugins/damage_numbers.nro": {
-      "source": "build/damage-numbers/candidates/r36/package/romfs/nativeNX/plugins/damage_numbers.nro",
-      "sha256": "cfbeb3a364f727fc91d10ba9e02ca5e54ba7e204547aa7531b7b409cfcc8622a"
+      "source": "build/damage-numbers/candidates/r37-projection-ab/package/romfs/nativeNX/plugins/damage_numbers.nro",
+      "sha256": "1af52d18112643312d2c5f247eaa6528c08898151438ec0a7daf61901fa41621"
     },
     "romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf": {
-      "source": "build/damage-numbers/candidates/r36/package/romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf",
+      "source": "build/damage-numbers/candidates/r37-projection-ab/package/romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf",
       "sha256": "10b26270e158e51b7f26327aff359a7f7170ccc5904c1c82523bf5e372d5f117"
     },
     "romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba": {
-      "source": "build/damage-numbers/candidates/r36/package/romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba",
+      "source": "build/damage-numbers/candidates/r37-projection-ab/package/romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba",
       "sha256": "d4724a2caff4c13e91a541f0e7d203c74e05c40dedd6f78c55426ccd3396230e"
     },
     "romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba": {
-      "source": "build/damage-numbers/candidates/r36/package/romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba",
+      "source": "build/damage-numbers/candidates/r37-projection-ab/package/romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba",
       "sha256": "fe15190c98259443a01add264777b2b4bee994bbd58f9c8f5f12338abb399f2b"
     }
   },
@@ -120,13 +121,13 @@
     "manual": [
       "mods/damage-numbers/EVIDENCE.json"
     ],
-    "static_summary": "r36: 24 core tests (including out-of-view hits staying hidden until the camera turns to them, kinsect, poison, blast, mount, remote-hit accounting, visibility, poison/blast/mount colours, map-fired shells, monster list and HP bookkeeping), 5 config tests, 8 hook tests over eleven sites, native pool with eleven hooks, 243 parity scenarios, 2800 policy/projection cases, 24 base-renderer scenes with zero pixel differences, 352 gateway calls across twelve gateways, four original ARM crop-update cases, and 15-window/ABI/import/relocation checks passed. Gameplay NOT RUN.",
-    "manual_summary": "NOT RUN for r36."
+    "static_summary": "r37-projection-ab: 25 core tests (adds the native projection call port against captured matrices) (including out-of-view hits staying hidden until the camera turns to them, kinsect, poison, blast, mount, remote-hit accounting, visibility, poison/blast/mount colours, map-fired shells, monster list and HP bookkeeping), 5 config tests, 8 hook tests over eleven sites, native pool with eleven hooks, 243 parity scenarios, 2800 policy/projection cases, 24 base-renderer scenes with zero pixel differences, 352 gateway calls across twelve gateways, four original ARM crop-update cases, and 16-window/ABI/import/relocation checks passed. Gameplay NOT RUN.",
+    "manual_summary": "NOT RUN for r37-projection-ab or r36."
   },
   "support": {
     "DEVELOPMENT.md": "mods/damage-numbers/DEVELOPMENT.md",
     "EVIDENCE.json": "mods/damage-numbers/EVIDENCE.json"
   },
-  "candidate": "build/damage-numbers/candidates/r36/delivery",
+  "candidate": "build/damage-numbers/candidates/r37-projection-ab/delivery",
   "candidate_builder": "scripts/build.py"
 }

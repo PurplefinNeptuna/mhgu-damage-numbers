@@ -326,6 +326,50 @@ fn native_projection_preserves_positions_across_display_scales() {
         }
     }
 }
+// Port of main+0x18a48's arithmetic: view-space = [p,1]·V, clip = view·P, then
+// Region pixels ((ndc_x+1)·w/2, (1-ndc_y)·h/2), -view_z and the sign of clip w.
+fn native_output(p: [f32; 3], view: &[f32; 16], projection: &[f32; 16], region: [i32; 4]) -> [f32; 4] {
+    let row = |v: [f32; 4], m: &[f32; 16]| -> [f32; 4] {
+        core::array::from_fn(|c| (0..4).map(|k| v[k] * m[k * 4 + c]).sum())
+    };
+    let eye = row([p[0], p[1], p[2], 1.], view);
+    let clip = row(eye, projection);
+    let (w, h) = ((region[2] - region[0]) as f32, (region[3] - region[1]) as f32);
+    [
+        (clip[0] / clip[3] + 1.) * w * 0.5,
+        (1. - clip[1] / clip[3]) * h * 0.5,
+        -eye[2],
+        if clip[3] >= 0. { 1. } else { -1. },
+    ]
+}
+#[test]
+fn native_projection_call_matches_captured_matrices() {
+    // Same matrices as above: hook 4's composed projection and the native call's
+    // Region pixels must land on the same display fraction at every size.
+    let view = [
+        0., 1., 0., 0., -1., 0., 0., 0., 0., 0., 1., 0., 0.2, -0.1, 0.2, 1.,
+    ];
+    let projection = [
+        2., 0., 0., 0., 0., 3., 0., 0., 0., 0., 1., 1., 0., 0., 0., 1.,
+    ];
+    for region in [[0, 0, 1280, 720], [0, 0, 1920, 1080]] {
+        let native = native_fraction(native_output([0.2, 0.3, 0.4], &view, &projection, region), region).unwrap();
+        for (width, height) in [(1280., 720.), (1920., 1080.)] {
+            let camera = native_camera(&view, &projection, region, width, height).unwrap();
+            let hook = project(Vec3 { x: 0.2, y: 0.3, z: 0.4 }, &camera).unwrap();
+            assert!((native.x * width - hook.x).abs() < 0.001);
+            assert!((native.y * height - hook.y).abs() < 0.001);
+        }
+    }
+    let region = [0, 0, 1280, 720];
+    // Behind the camera (clip w < 0), outside the Region, an empty Region and NaN are rejected.
+    assert!(native_fraction([640., 360., -1., -1.], region).is_none());
+    assert!(native_fraction([1281., 360., 1., 1.], region).is_none());
+    assert!(native_fraction([640., -1., 1., 1.], region).is_none());
+    assert!(native_fraction([0., 0., 1., 1.], [0, 0, 0, 720]).is_none());
+    assert!(native_fraction([f32::NAN, 0., 1., 1.], region).is_none());
+    assert_eq!(native_fraction([640., 180., 1., 1.], region), Some(Point { x: 0.5, y: 0.25 }));
+}
 #[test]
 fn applied_crop_is_checked_and_recopied_across_mode_changes() {
     let renderer = 0x1000;

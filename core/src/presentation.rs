@@ -215,6 +215,23 @@ pub fn project(p: Vec3, v: &View) -> Option<Point> {
     };
     (point.x.is_finite() && point.y.is_finite()).then_some(point)
 }
+// r37-projection-ab: native main+0x18a48 writes x/y in pixels inside the
+// viewport Region [x0,y0,x1,y1], -view_z, and +1/-1 for clip w >= 0 / < 0.
+// Return the point as a fraction of the Region so it can be compared with
+// project() at any display size. Behind the camera or outside the Region is None,
+// matching project()'s x/y clip test; project() also tests depth, this cannot.
+pub fn native_fraction(out: [f32; 4], region: [i32; 4]) -> Option<Point> {
+    let width = region[2] as f32 - region[0] as f32;
+    let height = region[3] as f32 - region[1] as f32;
+    if !out.iter().all(|x| x.is_finite()) || out[3] <= 0.0 || width <= 0.0 || height <= 0.0 {
+        return None;
+    }
+    let point = Point {
+        x: out[0] / width,
+        y: out[1] / height,
+    };
+    ((0.0..=1.0).contains(&point.x) && (0.0..=1.0).contains(&point.y)).then_some(point)
+}
 /// Positive int32 damage fits ten digits plus NUL; rendering never formats through the heap.
 pub fn digits(mut value: i32) -> [u8; 12] {
     let mut out = [0; 12];

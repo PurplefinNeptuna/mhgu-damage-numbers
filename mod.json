@@ -2,7 +2,7 @@
   "schema_version": 1,
   "mod": "damage-numbers",
   "kind": "plugin",
-  "version": "r36",
+  "version": "r37-projection-ab",
   "candidate": false,
   "package_name": "damage-numbers"
 }

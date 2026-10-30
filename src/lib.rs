@@ -1,8 +1,9 @@
-//! Damage Numbers r36: out-of-view hits stay hidden until seen, map-fired siege shells, kinsect, gray poison, weak-point-coloured blast and mount knockdown, plus opt-in unattributed HP loss.
+//! Damage Numbers r37-projection-ab (r36 behaviour plus native-projection A/B logs): out-of-view hits stay hidden until seen, map-fired siege shells, kinsect, gray poison, weak-point-coloured blast and mount knockdown, plus opt-in unattributed HP loss.
 // The Switch plugin has no Rust standard library. alloc provides owned buffers
 // through Forge's allocator; portable logic lives in the separate core crate.
 #![no_std]
 extern crate alloc;
+mod ab;
 mod abi;
 mod config;
 mod hooks;
@@ -26,7 +27,7 @@ const _: () = assert!(core::mem::size_of::<PluginMetadata>() == 70);
 pub unsafe extern "C" fn forge_onLoad(params: *mut forge::PluginInitParams) {
     if params.is_null() { return; }
     let mut name = [0; 64];
-    let label = b"Damage Numbers r36";
+    let label = b"Damage Numbers r37-projection-ab";
     name[..label.len()].copy_from_slice(label);
     // SAFETY: Forge owns the writable native metadata record for this call.
     unsafe { params.cast::<PluginMetadata>().write(PluginMetadata {
