@@ -122,7 +122,7 @@
       "mods/damage-numbers/EVIDENCE.json"
     ],
     "static_summary": "r37-projection-ab: 25 core tests (adds the native projection call port against captured matrices) (including out-of-view hits staying hidden until the camera turns to them, kinsect, poison, blast, mount, remote-hit accounting, visibility, poison/blast/mount colours, map-fired shells, monster list and HP bookkeeping), 5 config tests, 8 hook tests over eleven sites, native pool with eleven hooks, 243 parity scenarios, 2800 policy/projection cases, 24 base-renderer scenes with zero pixel differences, 352 gateway calls across twelve gateways, four original ARM crop-update cases, and 16-window/ABI/import/relocation checks passed. Gameplay NOT RUN.",
-    "manual_summary": "r37-projection-ab diagnostic run 1 on Eden 2026-10-30 with the exact NRO: A/B gate FAILED (native call from onUpdate differs from hook 4 by a median 7.2 px per hit while the camera moves). No visible-behaviour report for r37-projection-ab or r36."
+    "manual_summary": "r37-projection-ab diagnostic run 1 on Eden 2026-10-30 with the exact NRO (docked, 1920x1080): A/B gate FAILED (native call from onUpdate differs from hook 4 by a median 7.2 px per hit while the camera moves). The user reported the displayed numbers, which use r36's hook-4 path, looked right. Handheld and the specific r36/r35 checks were not reported."
   },
   "support": {
     "DEVELOPMENT.md": "mods/damage-numbers/DEVELOPMENT.md",

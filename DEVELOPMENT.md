@@ -6,9 +6,12 @@ ERROR-level logs comparing hook 4's projection with the game's own projection
 call main+0x18a48, made from `forge_onUpdate` (see "Projection A/B" below and
 `work/damage-numbers/projection-call/RESEARCH.md`). The candidate is
 `build/damage-numbers/candidates/r37-projection-ab/delivery/damage-numbers-r37-projection-ab-candidate.zip`.
-Run 1 on Eden (2026-10-30, exact hash) failed the A/B gate; see "Projection
-A/B" below. The user reported nothing about r36's visible behaviour, so r36
-is still unassessed.
+Run 1 on Eden (2026-10-30, exact hash, docked) failed the A/B gate; see
+"Projection A/B" below. The user reported that the displayed numbers, which
+use r36's hook-4 path, looked right. Handheld and the specific r36/r35 checks
+below were not reported. Decision: hooks 3 and 4 stay, and the native-call
+idea is closed. Releasing r36 behaviour without the A/B logs needs a new
+version.
 
 r36 is a DEVELOPMENT candidate (2026-10-23); gameplay is NOT RUN. Hits outside a usable camera view stay hidden at their world position
 instead of moving to screen centre, and appear if the camera turns to them before
