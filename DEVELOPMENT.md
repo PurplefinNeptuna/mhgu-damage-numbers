@@ -12,16 +12,7 @@ diagnostic, which displays with r36's code, ran docked on Eden with its exact
 NRO, and the user reported that the numbers looked right. Handheld and the
 out-of-view checks below were not reported.
 
-r37-projection-ab (2026-10-30) was a diagnostic candidate only. Its A/B
-gate failed (see "Projection A/B" below), so hooks 3 and 4 stay and the
-native-call idea is closed. Its source was reverted for the r36 release; the
-candidate folder stays under `build/damage-numbers/candidates/r37-projection-ab/`.
-
-The previous release r35 is archived unchanged at
-`backups/accepted/damage-numbers/r35-before-hidden-offscreen/`; its candidate
-records stay in `r35-distribution-approved/`. DISTRIBUTION.json is authoritative
-for status and hashes; EVIDENCE.json holds exact validation results for r36.
-Further runtime edits need a new version and new output directories.
+DISTRIBUTION.json is authoritative for status and hashes; EVIDENCE.json holds exact validation results for r36. Further runtime edits need a new version and new output directories.
 
 Runtime checks still needed after an authorized install: a hit landing outside
 the camera view shows no number at screen centre, and turning the camera to it
@@ -31,43 +22,6 @@ centre. The r35 checks also remain open: kinsect hits
 map-fired siege shell each show one number of the expected size and colour.
 With "Show other damage" off nothing extra appears. With it on, solo hits and
 status damage add no extra numbers.
-
-## Release history
-
-Each runtime change got its own version and build/work folders. Preserved
-copies and pre-change records are under `backups/accepted/damage-numbers/`.
-
-| Version | Status | Change |
-| --- | --- | --- |
-| r37-projection-ab | diagnostic, Eden run 1 2026-10-30: gate FAILED; source reverted | Diagnostic only: r36 plus capped logs comparing hook 4 with the native projection call main+0x18a48 from `forge_onUpdate`. Signature window 15 covers the call target. |
-| r36 | READY_TO_DISTRIBUTE 2026-10-30; user-reported Eden run, log not retained | Hits outside a usable camera view stay hidden until the camera turns to them, instead of using the centre fallback. |
-| r35 | READY_TO_DISTRIBUTE 2026-10-21, superseded by r36, NOT RUN | Map-fired siege shells (owner type 9) show as object damage. |
-| r34 | superseded, unrun | "Show other damage" tooltip rewritten with the humanizer skill; no longer names traps or cannons and warns that simultaneous damage can merge. Text only. |
-| r33 | superseded, unrun | Mount knockdown uses the weak-point colour (`Status` maps to Weak). |
-| r32 | superseded, unrun | r31's single Status family split into `Poison` (wire 6, Gray), `Blast` (wire 7, Weak, with Rise's weak-point enlargement) and `Status` (mount, wire 4). |
-| r31 | superseded, unrun | Kinsect, poison, blast and mount damage (hooks 8–10); opt-in "Show other damage". |
-| r30 | READY_TO_DISTRIBUTE 2026-10-18, superseded by r35 | Projection uses the applied visible crop. Approval added no affected-device result. Candidate records in `r30-distribution-approved/`. |
-| r29-diagnostics | retired | Bounded camera/hit logs and screen crosses for the handheld report. Never run. Records in `r29-before-visible-crop/`. |
-| r28 | hardware-test rebuild | `-nostartfiles` and `-Wl,-z,text`; the user reports it displays damage on Switch and Android with misplaced positions in handheld mode. Records in `r28-before-projection-diagnostics/`. |
-| r27 | READY_TO_DISTRIBUTE 2026-10-15 | Centre fallback for missing positions and cameras; user reported it working well. Records in `r27-before-hardware-link/` and `r27-tested-candidate/`. |
-| r26 | accepted | Rust implementation replacing the C++ project. Preserved in `r26-before-centre-fallback/`. |
-| r25 and earlier | accepted | C++ releases, preserved in `r25/` and `historical/`. |
-
-r29-diagnostics design, kept for reference: the camera record kept its 248-byte
-ABI and carried checked copies of sCamera::Viewport metadata (scene texture
-+0x2c, test camera +0x28, visible +0x30, packed subscene/number/mode/display at
-+4/+0x31/+0x33/+0x34). The scene-texture field is verified by native
-main+0xb89900 and saved DTI. Logs were capped at 16 camera snapshots, 32 hit keys
-and 4 display changes per process, written at ERROR because stock Forge filters
-at ERROR by default, kept under Forge's 512-byte message buffer. Cyan marked
-the screen centre, magenta projected impacts and yellow the fallback.
-Read-only original-byte research is under `work/damage-numbers/placement-r28/`.
-
-The Rust port (published separately as Damage Numbers RS r3, Forge 1.5.0 and
-forge-rs 1.5.0) kept r25's eight capture sites, ownership and damage rules,
-duplicate suppression, projection and placement, and Wilds, Rise and Classic
-presentation. It was READY_TO_DISTRIBUTE after user acceptance on 2026-10-15
-and is preserved under `backups/accepted/damage-numbers-rs/r3/`.
 
 ## Build and validate
 
@@ -310,49 +264,6 @@ same stationary hit with a stationary camera at 1.0× and 1.25×, then rotate th
 camera and repeat with each style. Use the matched plugin/loader hashes, an
 actual launch log and video showing both the impact and number.
 
-### Projection A/B (r37-projection-ab)
-
-Question: can hooks 3 and 4 be replaced by calling main+0x18a48, the game's
-own world-to-screen function, from `forge_onUpdate`? Static research
-(`work/damage-numbers/projection-call/RESEARCH.md`) found that both paths build
-matrices with the same uQuestCamera getters. The draw path additionally blends
-by sCamera+0x24, offsets by sCamera+0x1c/+0x20, and handles mode-10 viewports
-and a view override differently.
-
-`src/ab.rs` reads cell 0x184d750 (sFestaCamera), sGUI+0xec (view), the record's
-mpCamera (uQuestCamera, state 1 or 2), then calls 0x18a48 for each live number in
-`onUpdate`. The render callback projects the same numbers with hook 4's
-matrices and compares them. Logs, all `[damage-numbers] ab:` at ERROR:
-
-| Line | Cap | Content |
-| --- | --- | --- |
-| `threads` | 1 | TPIDRURO of the update and render callbacks |
-| `context` | 24, on change | view, hook-3 view, same camera, mode, camera state, Region, sCamera +0x59/+0x1c/+0x20/+0x24, override flags |
-| `hit` | 64, at expiry | samples, largest per-axis delta (display px), mean, frames where only one side projects, first pair |
-| `native projection skipped` | 1 per reason | which guard refused the call |
-
-Gate: with view == hook_view, same_camera, mode != 10, sampling 0, zero offset
-and blend, and override 0,0, every hit's `max_axis` is at most 2 px apart from
-camera cuts. Up to one frame of lag while the camera moves is expected, because
-`onUpdate` and render sample at different points. Report the size of that lag
-rather than loosening the gate.
-
-Run 1 (Eden, 2026-10-30, NRO `1af52d18…`; lines saved under
-`work/damage-numbers/projection-call/r37-run1/`):
-- `onUpdate` and render run on the same thread (`00204200`).
-- One context line: every condition held (view 0 = hook view 0, same camera,
-  mode 0, sampling, offset and blend 0, no override object).
-- No skipped call and no crash.
-- 64 hits, all at 1920x1080, inside about 50 s before the cap.
-
-Gate FAILED. max_axis was at most 2 px for only 6 of 64 hits (median 7.2 px,
-p90 28.8 px, max 102.4 px). Still-camera hits and first samples are within
-about 2 px; the error grows with camera motion. Conclusion: 0x18a48 called
-from `onUpdate` does not reproduce the drawn frame's matrices while the camera
-moves, so it cannot replace hook 4 as is. Inference: the record matrices
-(rec+0xe0/+0x120) lag the camera fields by one update. The next test reads
-those stored matrices directly; see RESEARCH.md.
-
 ## Validation scope
 
 Host tests exercise copied-value capture nesting, scope overflow/quarantine, ownership/source policy (including kinsect, stage-owned shells, poison/blast/mount records and remote-hit publication without bounce association), bounded model/mailbox overflow, duplicate suppression, the monster list and HP bookkeeping, disabled settings, concurrent publication and queued records surviving thread exit. Failed/non-finite position reads inside nested scopes, valid world origin, matrix order, 720p/900p/1080p/1440p mapping, crop reads, invalid dimensions/mappings, pointer overflow, applied versus requested size, repeated mode changes and centre fallback for all three styles are covered. `tests/viewport.py` executes the original ARM SetCrop wrapper and applied-size stores with an NVN double.
@@ -373,106 +284,21 @@ Gameplay, config persistence across a real restart, loader allocation limits, GP
 
 ## GE preservation audit
 
-Checked 2026-10-06 for the eight original capture hooks (0–7) and the released
-r16 plugin; extended to hooks 8–10 for r31. GE restoration is unnecessary at
-these hook locations. The gateway's general transparent-state contract
-originally included GE, but the captured game computations do not consume it.
+Checked for capture hooks 0 to 7 and extended to hooks 8 to 10. GE restoration is unnecessary at these sites. The shared RESTORE macro uses `msr APSR_nzcvq, r2`, which preserves NZCVQ and leaves GE untouched. Ryujinx-Nextendo at `05577ab543f4322cb7534c1f5caca0e0079791bf` handles MSR mask 8 (NZCVQ) and throws `APSR_g` for mask 4 (GE), so this avoids that translation path.
 
-The bounded compatibility change is `msr APSR_nzcvqg, r2` to
-`msr APSR_nzcvq, r2` in the shared RESTORE macro, applied in production from
-r17. This preserves NZCVQ and leaves GE untouched by that instruction. It does
-not zero GE. The original Ryujinx-Nextendo translator at reference commit
-`05577ab543f4322cb7534c1f5caca0e0079791bf` handles MSR mask 8 (NZCVQ) and throws
-`APSR_g` for mask 4 (GE), so the reduced instruction avoids that unsupported
-translation path. Its MRS also omits GE, but the capture helpers do not consume
-the saved GE bits.
+- None of the hooked function bodies, plus the poison tick's caller 0xc8ddc (2,056 bytes), contains `SEL`, `MRS`, `MSR` or a GE-setting parallel add or subtract.
+- Melee tail hook 5 follows `vselge.f32 s0, s0, s2` at 0x16dd78. `vselge` uses `N == V`, not GE, and the continuation stores an integer and returns.
+- A raw scan of the 20,913,644-byte main text found no `SEL` and no GE access in the 47,986 indexed functions. Eight MRS/MSR-shaped words outside those ranges stay candidates, so this supports the result and does not prove every byte is GE-free.
+- Imported helpers (`memcpy`, SDK TLS and clock, the query-memory SVC) were not proved GE-preserving. GE is dead at the audited continuations, so correctness does not depend on them.
+- Scratch gateway checks passed 9,031 checks across 1,769 fixture calls, and all 16 GE patterns across all eight entries. These are Unicorn fixtures, not gameplay. r17 was user-confirmed on Eden and Ryujinx with this restore.
 
-### Original game instructions
+Recheck any new hook, especially a tap between GE-setting arithmetic and a `SEL`, or code that reads GE through `MRS`. A generic gateway should keep GE preservation unless liveness is ruled out.
 
-None of the hooked function bodies (table above, plus the poison tick's caller
-0xc8ddc, 2,056 bytes) contains a `SEL`, `MRS`, `MSR`, or GE-setting parallel
-integer add/subtract instruction. Ordinary comparisons, conditional branches and
-floating-point calculations do not consume GE[3:0].
+## Do not
 
-The melee tail tap (hook 5) is particularly narrow. Immediately before it, the
-game compares floating-point values and selects the result:
-
-```asm
-0x16dd6c: vcmpe.f32 s0, s2
-0x16dd70: vmrs APSR_nzcv, fpscr
-0x16dd74: movwlt r0, #1
-0x16dd78: vselge.f32 s0, s0, s2
-0x16dd7c: strb r0, [r4]                 // hook begins here
-0x16dd80: vpop {d8-d12}
-0x16dd84: pop {r4, r5, r11, pc}
-```
-
-`vselge` uses the signed condition `N == V`, not the four GE bits. That selection
-has already completed when the tap runs. The continuation stores the integer
-result and returns; it does not read GE or perform another flag-dependent
-selection. Preserving the captured registers and floating-point state still
-matters. Instruction semantics:
-[Arm instruction guide, VSEL](https://documentation-service.arm.com/static/6245c734b059dc5ff9a8bdab),
-[Arm VFP condition codes](https://developer.arm.com/community/arm-community-blogs/b/architectures-and-processors-blog/posts/condition-codes-4-floating-point-comparisons-using-vfp).
-
-At public function interfaces, the Arm calling convention defines NZCVQ and
-GE as unspecified on entry and return. See
-[AAPCS32, section 6.1.1](https://github.com/ARM-software/abi-aa/blob/main/aapcs32/aapcs32.rst#611core-registers).
-This ABI rule alone would not justify removing preservation at an arbitrary
-interior tap; the exact continuation above supplies the additional evidence.
-
-A broader raw-encoding scan of the 20,913,644-byte main text found no ARM or
-Thumb `SEL` candidate and no GE-access candidate inside the 47,986 indexed
-functions. Eight ARM MRS/MSR-shaped words outside those indexed ranges were
-retained as candidates, not asserted to be executable instructions. This
-scan is supporting evidence, not a proof that every module or unindexed byte
-is GE-free.
-
-### Capture helper instructions
-
-Disassembly of the r16 ELF (SHA-256
-`589f0b39e9e80f5321cbd1e2725a62ba6bc11b9f50a7d780707065de8ed245c0`, which
-reproduces the r16 NRO `5f59506f88d5156ed8db7cffd5747651717b3bab7ecdfd398800a0402fe4f33e`
-through `elf_to_nro`) found no GE arithmetic or GE consumers in the compiled C++
-code. Its nine `MRS`/`MSR` pairs belong to the eight assembly entries and the
-shared return gateway. No C++ callback reads `RawFrame::cpsr`.
-
-Capture helpers also call imported `memcpy`, SDK TLS/clock functions and a
-private query-memory SVC wrapper. The imported implementations were not
-proved GE-preserving. They may clobber GE under the calling convention; GE is
-dead at the audited game continuations, so correctness does not depend on those
-callees preserving it.
-
-### Scratch execution checks
-
-The compiled gateway fixture (SHA-256
-`ffe6fb1e27c8e8483c622667fc96e12a9f6eef38c3ba70e860bccfccbddb8928`) was verified
-against its manifest and source hashes. A scratch copy changed only nine
-instruction words: `e12cf002` (NZCVQ+GE) to `e128f002` (NZCVQ). Scratch SHA-256:
-`03a310467d9f72f897caf0d28052f22d506b35ce6193d1fe1bebce694557b36f`.
-
-- The unchanged gateway passed 9,031 existing checks across 1,769 fixture calls.
-- The scratch gateway passed the same 9,031 checks and 1,769 calls with GE
-  excluded from the deliberately stronger full-state comparison. Integer
-  registers, all d0-d31, NZCVQ, FPSCR, LR, SP, stack arguments, nesting/capacity
-  behavior and copied native damage/hitzone results remained checked.
-- All 16 GE patterns across all eight entries passed 128 additional full-state
-  comparisons when the helper stub preserved GE.
-- Another 128 comparisons deliberately changed GE in the helper. The scratch
-  gateway correctly left that changed GE in place while all other checked
-  state matched.
-
-Tests used pinned Unicorn 2.1.4 with fixture stubs for capture callbacks and
-native services; they are not live gameplay tests. The original evidence folder
-(`work/damage-numbers/ge-audit/`) is no longer present in the workspace; the
-hashes above are the remaining record. r17 was user-confirmed on Eden and
-Ryujinx with the reduced restore, and r18 revalidated byte-identical gateway
-source.
-
-### Limits
-
-This result applies to the recorded game build and the current hook sites.
-Recheck new hooks, especially a tap between GE-setting parallel arithmetic and
-a `SEL`, or code that reads GE through `MRS`. A generic transparent gateway
-should retain GE preservation when such liveness has not been ruled out.
-Gameplay compatibility of a changed NRO still requires a user-run emulator test.
+- **Replace hooks 3 and 4 with main+0x18a48 from `forge_onUpdate`.** The A/B gate failed: 6 of 64 hits within 2 px, median 7.2 px, max 102.4 px, growing with camera motion. See `work/damage-numbers/projection-call/RESEARCH.md`. The user closed this idea on 2026-10-30.
+- **Move an off-screen hit to screen centre.** A position a usable camera clips stays hidden until the camera turns to it. Centre is only for missing positions and missing or invalid cameras.
+- **Require native and display dimensions to match in the viewport guard.** That rejects legitimate resolution scaling.
+- **Log per frame or above budget in a diagnostic.** Stock Forge filters below ERROR and its message buffer is 512 bytes, so cap lines per process and keep them short. A hit cap that ends the run early loses the later segments.
+- **Treat the handheld placement report as fixed.** It was against r28, on real Switch and Android. No affected device has run r29-diagnostics or later. Ask for matched plugin and loader hashes, a launch log and a video.
+- **Expect an NRO hash to match across build roots.** Hashes differ by root.
