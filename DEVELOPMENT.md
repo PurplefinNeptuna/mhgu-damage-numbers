@@ -27,7 +27,7 @@ status damage add no extra numbers.
 
 Copy `build.local.example.json` to ignored `build.local.json` and supply the tool paths and copied native inputs. Use Rust nightly-2026-10-02 with rust-src, the pinned cargo-forge 1.4.1 converter built from revision `7f572ed8d0e0a6cfc562571fdbc1ad57441a8438` (retained independently of the 1.5.0 runtime crates), devkitARM GCC 15.2.0, and the Python dependencies recorded in requirements files. The Rust compiler and cargo-forge binary fingerprints are in `dependencies.lock.json`. No installed emulator package is an input.
 
-`inputs` points to a directory with `main`, `sdk`, and the mutex-corrected Forge 1.5.0 NSO named `forge`. Expected hashes are recorded in the lock. `main` must be the MHGU 1.4.0 executable with build ID `FB08F1D20FD1204FE7070672777F869B`. Preserve supplied originals. Configure `arm_python` separately if Unicorn and the visual-test Python packages are installed in different environments.
+`inputs` points to a directory with `main`, `sdk`, and the upstream Forge 1.5.1 NSO named `forge`. Expected hashes are recorded in the lock. `main` must be the MHGU 1.4.0 executable with build ID `FB08F1D20FD1204FE7070672777F869B`. Preserve supplied originals. Configure `arm_python` separately if Unicorn and the visual-test Python packages are installed in different environments.
 
 | Command | Purpose |
 | --- | --- |
@@ -47,7 +47,7 @@ Workspace outputs are under `build/damage-numbers/candidates/r36/` and `work/dam
 
 After adding source files, refresh the allowlist with `python3 scripts/export_source.py --refresh`. Exports omit native game inputs, outputs, private configurations, caches and Git metadata. They retain dependency bytes exactly so Cargo checksum validation remains meaningful. Supply your toolchain/input paths in the exported repo's own configuration. No sibling mod import is needed.
 
-forge-rs source is pinned at `d1865b68e9b194eb3eacc8bd71bbf601a5fac63e`; the native hook fixture is pinned to Forge `1671ad1526f6df5ee8d6e61a03518e0a427e202e`. The copied loader input has SHA-256 `1e452243cc85108a2271dda99167f9728d051887075766b38e36a1ce94a29b42`. The native fixture compiles the actual allocator with host JIT/TLS/cache doubles, omits ARM barriers, and uses ASan/UBSan. LeakSanitizer is disabled under sandbox tracing; the fixture counts creation and closure of every mock JIT chunk. These checks do not measure emulator allocation or establish gameplay acceptance.
+forge-rs source is pinned at `d1865b68e9b194eb3eacc8bd71bbf601a5fac63e`; the native hook fixture is pinned to Forge `1671ad1526f6df5ee8d6e61a03518e0a427e202e`. The native fixture compiles the actual allocator with host JIT/TLS/cache doubles, omits ARM barriers, and uses ASan/UBSan. LeakSanitizer is disabled under sandbox tracing; the fixture counts creation and closure of every mock JIT chunk. These checks do not measure emulator allocation or establish gameplay acceptance.
 
 The owned `assets/` folder contains the exact prepared runtime files and their hash/provenance manifest. Ordinary builds need no FontTools or image-generation dependencies, and the runtime contains no artwork payloads or compression decoder. `requirements.txt` supplies Pillow/NumPy only for visual tests. Deleted authoring tools remain recoverable from Git.
 
@@ -75,7 +75,7 @@ The consumer copies records into `core/src/lib.rs`'s bounded Model: 256 pending 
 
 Forge owns entry, callbacks, logging, memory lookup, thread-local storage, singleton lookup, configuration, Patch objects, native trampoline construction and ImGui wrappers. Specialized font/texture operations use its raw ImGui bindings. TLS borrows end before assembly invokes native continuations. Queued records live in independent process-lifetime mailboxes, so thread teardown cannot invalidate them.
 
-The vendored Hook binding matches Forge 1.5.0's native ARM32 declaration: 24 bytes, with context and its update cell. Forge shares trampoline storage across hooks. `verify` compares compiler-derived Rust and C++ layouts in the actual target artifact. Assembly preserves NZCVQ and all GPR/VFP/FPSCR state under the GE audit below.
+The vendored Hook binding matches Forge's native ARM32 declaration: 24 bytes, with context and its update cell. Forge shares trampoline storage across hooks. `verify` compares compiler-derived Rust and C++ layouts in the actual target artifact. Assembly preserves NZCVQ and all GPR/VFP/FPSCR state under the GE audit below.
 
 `forge_onLoad` writes the 70-byte native metadata record: requested version 1.5.1 and the name `Damage Numbers rNN` at offset 6 (`src/lib.rs`; `tests/gateways.py` checks the label). Forge compares only major/minor, so this is not a strict loader-equality guard. Initialization takes no arguments, matching the loader callback. Game-code signatures and instruction checks remain in place.
 
@@ -287,7 +287,19 @@ Gameplay, config persistence across a real restart, loader allocation limits, GP
 Checked for capture hooks 0 to 7 and extended to hooks 8 to 10. GE restoration is unnecessary at these sites. The shared RESTORE macro uses `msr APSR_nzcvq, r2`, which preserves NZCVQ and leaves GE untouched. Ryujinx-Nextendo at `05577ab543f4322cb7534c1f5caca0e0079791bf` handles MSR mask 8 (NZCVQ) and throws `APSR_g` for mask 4 (GE), so this avoids that translation path.
 
 - None of the hooked function bodies, plus the poison tick's caller 0xc8ddc (2,056 bytes), contains `SEL`, `MRS`, `MSR` or a GE-setting parallel add or subtract.
-- Melee tail hook 5 follows `vselge.f32 s0, s0, s2` at 0x16dd78. `vselge` uses `N == V`, not GE, and the continuation stores an integer and returns.
+- Melee tail hook 5 has already passed the selection when it runs. `vselge` uses `N == V`, not GE, and the continuation stores an integer and returns:
+
+  ```asm
+  0x16dd6c: vcmpe.f32 s0, s2
+  0x16dd70: vmrs APSR_nzcv, fpscr
+  0x16dd74: movwlt r0, #1
+  0x16dd78: vselge.f32 s0, s0, s2
+  0x16dd7c: strb r0, [r4]                 // hook begins here
+  0x16dd80: vpop {d8-d12}
+  0x16dd84: pop {r4, r5, r11, pc}
+  ```
+
+  AAPCS32 leaves NZCVQ and GE unspecified across public interfaces, but that alone does not justify dropping preservation at an interior tap. This continuation is the evidence.
 - A raw scan of the 20,913,644-byte main text found no `SEL` and no GE access in the 47,986 indexed functions. Eight MRS/MSR-shaped words outside those ranges stay candidates, so this supports the result and does not prove every byte is GE-free.
 - Imported helpers (`memcpy`, SDK TLS and clock, the query-memory SVC) were not proved GE-preserving. GE is dead at the audited continuations, so correctness does not depend on them.
 - Scratch gateway checks passed 9,031 checks across 1,769 fixture calls, and all 16 GE patterns across all eight entries. These are Unicorn fixtures, not gameplay. r17 was user-confirmed on Eden and Ryujinx with this restore.
