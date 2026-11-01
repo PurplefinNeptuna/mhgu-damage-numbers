@@ -5,8 +5,7 @@ unchanged from its candidate to
 `build/damage-numbers/releases/r36/damage-numbers-r36.zip`. Hits outside a
 usable camera view stay hidden at their world position instead of moving to
 screen centre, and appear if the camera turns to them before they expire.
-Approval records and the preserved candidate are in
-`backups/accepted/damage-numbers/r36-distribution-approved/`. The user reports
+The approval is in `DISTRIBUTION.json`. The user reports
 an Eden run of r36, but its log was rotated out. The r37-projection-ab
 diagnostic, which displays with r36's code, ran docked on Eden with its exact
 NRO, and the user reported that the numbers looked right. Handheld and the
@@ -212,10 +211,10 @@ local/ownerless subset.
 ### Visible crop
 
 MHGU can display a smaller crop of an unchanged swapchain allocation. Forge's
-ImGui DisplaySize describes that allocation, so the r29 and earlier mapping could
-use 1920×1080 bounds for a visible 1280×720 region. The user reports correct
-docked placement and displaced handheld placement on Switch and Android. Exact
-live dimensions and the r30 correction remain unconfirmed on those devices.
+ImGui DisplaySize describes that allocation, so it can report 1920×1080 bounds for a
+visible 1280×720 region. The user reported correct docked placement and displaced
+handheld placement on Switch and Android against an older build. Exact live
+dimensions and this correction remain unconfirmed on those devices.
 
 The render callback obtains the actual sFestaRender singleton through Forge's
 exact-type ID lookup (0x300a6cd8). The sRender base ID is not registered for that
