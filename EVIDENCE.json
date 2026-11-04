@@ -2419,5 +2419,18 @@
       "damage_numbers.nro": "b80e1b7b09eb16a0aaf8954a4863f780691d56660c6b6fe267423d06caf04472"
     },
     "runtime": "NOT RUN"
+  },
+  "runtime_r38_2026_11_05": {
+    "version": "r38",
+    "emulators": [
+      "Eden master-07677aa500-master",
+      "suyu v14.1.0-v14.1.0 (Android), the other player; its installed hashes were not available"
+    ],
+    "installed_nro_sha256": "b80e1b7b09eb16a0aaf8954a4863f780691d56660c6b6fe267423d06caf04472",
+    "scope": "Logs only. Two-player session with one quest. No player report of what appeared on screen.",
+    "lines_eden": [],
+    "note": "No line from this mod: Forge's config.ini has level = error and this mod logs below it, so the log shows neither a loaded line nor a refusal. The hooks are not shown installed. MHGU DPS Meter's binary targets hooks 0 and 1 (0x170968, 0x9d6f8) and support window 0x276278, and has the strings 'already patched' and 'chained hooks installed after first update', so it would lie over this mod after install. That is not the load-time check, and neither plugin's log line shows it happened.",
+    "foreign_plugins": "Foreign plugins active on Eden: 11 NRO loads match the 11 NROs in the load folder, including BetterBox, better-inputs and MHGU-DPS-Meter-v1.2.0; only 'finish cheat' is disabled. No foreign hook is shown over an entry at this mod's install. KatLib and UIScale were not installed.",
+    "exceptions": "No exception, data abort or panic text in either log. Eden stopped through ForceStop."
   }
 }

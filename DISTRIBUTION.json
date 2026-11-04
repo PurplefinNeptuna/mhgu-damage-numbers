@@ -11,7 +11,7 @@
   "version": "r38",
   "package_name": "damage-numbers",
   "archive": "damage-numbers-r38-candidate.zip",
-  "runtime_test": "NOT RUN for r38. USER REPORTED (Eden, log not retained)",
+  "runtime_test": "LOG ONLY for r38: Eden master-07677aa500-master, 2026-11-05, installed NRO matches, no player report. See EVIDENCE.json runtime_r38_2026_11_05.",
   "gamebanana": {
     "ai_code": {
       "used": true,
@@ -63,7 +63,7 @@
   },
   "target": "MHGU Nintendo Switch 1.4.0; upstream Forge 1.5.1; Eden/Ryujinx.",
   "limitations": [
-    "r38 has no run on any emulator: loading beside another plugin's hook on the same entry rests on Forge's hook.c and host fixtures",
+    "r38 ran on Eden master-07677aa500-master with logs only and no player report; loading beside a foreign hook on the same entry has not been exercised and rests on Forge's hook.c and host fixtures",
     "r36 has not been run. Kinsect, poison, blast and mount detection come from static research of MHGU 1.4.0 code without a gameplay trace.",
     "The mount number is taken from the fixed HP subtraction in ride state 0xd; identifying it as the mount finisher is an inference from the surrounding ride code.",
     "Poison, blast and mount numbers have no owner and appear for every player at the monster root position.",
