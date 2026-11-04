@@ -1,11 +1,13 @@
 # Damage Numbers: development and research
 
-**Current state.** r36 is READY_TO_DISTRIBUTE (2026-10-30), promoted
-unchanged from its candidate to
-`build/damage-numbers/releases/r36/damage-numbers-r36.zip`. Hits outside a
+**Current state.** r38 DEVELOPMENT candidate at `build/damage-numbers/candidates/r38/`,
+gameplay not run. r38 is r36 with one compatibility change: entry hooks accept
+another plugin's Forge hook on the same function (see *Hook sites*). r36 is the
+approved release, preserved in `backups/accepted/damage-numbers/r36-before-chaining/`,
+and the rollback is its ZIP in `build/damage-numbers/candidates/r36/`. Hits outside a
 usable camera view stay hidden at their world position instead of moving to
 screen centre, and appear if the camera turns to them before they expire.
-The approval is in `DISTRIBUTION.json`. The user reports
+The user reports
 an Eden run of r36, but its log was rotated out. The r37-projection-ab
 diagnostic, which displays with r36's code, ran docked on Eden with its exact
 NRO, and the user reported that the numbers looked right. Handheld and the
@@ -146,6 +148,13 @@ amount. The poison function's tail branch at 0xa2740 returns through the
 substituted LR, like the collision function. No workspace mod patches these
 offsets, and none is in the reserved list. The gateway source hash in
 `dependencies.lock.json` covers the three ENTRY lines for hooks 8–10.
+
+Hooks 0-4 and 6-9 run at a function entry and only observe around the original, so their windows accept
+another plugin's Forge hook over the first eight bytes (see "Chaining" in the forge-modding hooks reference); supporting
+windows do too, since they are only compared. `window_matches` in `src/hooks.rs` is the check. Hook 5 (melee
+hitzone tail) and hook 10 (mount finisher) sit inside a function and stay exact. The around hooks keep the
+caller and SP only to return through, and classify nothing by caller, so a foreign hook above or below them
+changes no capture.
 
 A twelfth signature window checks the crop call and applied-field stores (below)
 before any hook is installed.

@@ -90,6 +90,18 @@ fn relocatable(op: u32) -> bool {
     }
     false
 }
+// A window as it may legitimately be found: the original bytes, or the original bytes with another
+// plugin's Forge entry hook over the first eight. Forge moves that position-independent pair into the
+// next trampoline as it stands, so the call still reaches the game's function. Hooks 5 and 10 sit
+// inside a function and depend on the exact words they displace; every other hook runs at an entry
+// and only observes around the original, and supporting windows are only compared.
+pub(crate) fn window_matches(index: usize, actual: &[u8; 64], expected: &[u8; 64]) -> bool {
+    actual == expected
+        || (index != 5
+            && index != 10
+            && actual[..4] == 0xe51ff004u32.to_le_bytes()
+            && actual[8..] == expected[8..])
+}
 // Known game offsets used by Forge, Better Input and maintained plugins. Each
 // redirect occupies eight bytes; signatures also reject unknown modifications.
 const RESERVED: [u32; 14] = [
@@ -176,7 +188,7 @@ impl Installed {
         let memory = NativeMemory;
         // Compare every window before touching any target. Supporting windows
         // check the expected MHGU build, ownership code and applied crop layout.
-        for &(offset, bytes) in SIGNATURES {
+        for (index, &(offset, bytes)) in SIGNATURES.iter().enumerate() {
             let Some(address) = base
                 .checked_add(offset)
                 .filter(|a| a.checked_add(63).is_some())
@@ -184,7 +196,7 @@ impl Installed {
                 return Err("invalid signature address");
             };
             let mut actual = [0; 64];
-            if !memory.copy(address, &mut actual) || actual != bytes {
+            if !memory.copy(address, &mut actual) || !window_matches(index, &actual, &bytes) {
                 return Err("MHGU 1.4.0 signature mismatch");
             }
         }
@@ -236,7 +248,7 @@ impl Installed {
                     .iter()
                     .any(|&target| overlaps(continuation, 16, target, 8))
                 && memory.copy(continuation, &mut trampoline)
-                && trampoline[..8] == SIGNATURES[i].1[..8]
+                && trampoline[..8] == *installed.patches[i].original_bytes()
                 && trampoline[8..12] == 0xe51ff004u32.to_le_bytes()
                 && trampoline[12..] == (address + 8).to_le_bytes();
             if valid {

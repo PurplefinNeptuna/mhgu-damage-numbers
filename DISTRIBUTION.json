@@ -1,17 +1,17 @@
 {
   "schema_version": 1,
   "mod": "damage-numbers",
-  "status": "READY_TO_DISTRIBUTE",
-  "reason": "User approved distribution of the existing r36 candidate: hits outside a usable camera view stay hidden at their world position and appear if the camera turns to them before they expire, instead of moving to screen centre. Promote the validated NRO and assets unchanged, with no rebuild.",
+  "status": "DEVELOPMENT",
+  "reason": "r38 is r36 with one compatibility change. Nine of its eleven hooks now accept another plugin's Forge hook on the same function entry. Hook 5 (melee hitzone tail) and hook 10 (mount finisher) sit inside a function and stay exact. Not approved and gameplay not run.",
   "publication": {
     "published": false,
     "url": null,
     "date": null
   },
-  "version": "r36",
+  "version": "r38",
   "package_name": "damage-numbers",
-  "archive": "damage-numbers-r36.zip",
-  "runtime_test": "USER REPORTED (Eden, log not retained)",
+  "archive": "damage-numbers-r38-candidate.zip",
+  "runtime_test": "NOT RUN for r38. USER REPORTED (Eden, log not retained)",
   "gamebanana": {
     "ai_code": {
       "used": true,
@@ -63,6 +63,7 @@
   },
   "target": "MHGU Nintendo Switch 1.4.0; upstream Forge 1.5.1; Eden/Ryujinx.",
   "limitations": [
+    "r38 has no run on any emulator: loading beside another plugin's hook on the same entry rests on Forge's hook.c and host fixtures",
     "r36 has not been run. Kinsect, poison, blast and mount detection come from static research of MHGU 1.4.0 code without a gameplay trace.",
     "The mount number is taken from the fixed HP subtraction in ride state 0xd; identifying it as the mount finisher is an inference from the surrounding ride code.",
     "Poison, blast and mount numbers have no owner and appear for every player at the monster root position.",
@@ -97,19 +98,19 @@
   ],
   "payloads": {
     "romfs/nativeNX/plugins/damage_numbers.nro": {
-      "source": "build/damage-numbers/candidates/r36/package/romfs/nativeNX/plugins/damage_numbers.nro",
-      "sha256": "cfbeb3a364f727fc91d10ba9e02ca5e54ba7e204547aa7531b7b409cfcc8622a"
+      "source": "build/damage-numbers/candidates/r38/package/romfs/nativeNX/plugins/damage_numbers.nro",
+      "sha256": "b80e1b7b09eb16a0aaf8954a4863f780691d56660c6b6fe267423d06caf04472"
     },
     "romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf": {
-      "source": "build/damage-numbers/candidates/r36/package/romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf",
+      "source": "build/damage-numbers/candidates/r38/package/romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf",
       "sha256": "10b26270e158e51b7f26327aff359a7f7170ccc5904c1c82523bf5e372d5f117"
     },
     "romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba": {
-      "source": "build/damage-numbers/candidates/r36/package/romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba",
+      "source": "build/damage-numbers/candidates/r38/package/romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba",
       "sha256": "d4724a2caff4c13e91a541f0e7d203c74e05c40dedd6f78c55426ccd3396230e"
     },
     "romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba": {
-      "source": "build/damage-numbers/candidates/r36/package/romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba",
+      "source": "build/damage-numbers/candidates/r38/package/romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba",
       "sha256": "fe15190c98259443a01add264777b2b4bee994bbd58f9c8f5f12338abb399f2b"
     }
   },
@@ -120,15 +121,13 @@
     "manual": [
       "mods/damage-numbers/EVIDENCE.json"
     ],
-    "static_summary": "r36: 24 core tests (including out-of-view hits staying hidden until the camera turns to them, kinsect, poison, blast, mount, remote-hit accounting, visibility, poison/blast/mount colours, map-fired shells, monster list and HP bookkeeping), 5 config tests, 8 hook tests over eleven sites, native pool with eleven hooks, 243 parity scenarios, 2800 policy/projection cases, 24 base-renderer scenes with zero pixel differences, 352 gateway calls across twelve gateways, four original ARM crop-update cases, and 15-window/ABI/import/relocation checks passed. Gameplay NOT RUN.",
+    "static_summary": "r38: pinned toolchain build; 38 Rust host tests passed plus the mod's ARM and native suites in ./build.sh test; verify: \"PASS: ARM32 layouts, 69 resolved imports, callbacks, 15 game windows and twelve NZCVQ restores\". Stacking on a foreign Forge hook is covered by host fixtures and Forge's hook.c source, with no ARM execution of a stacked chain and no run on any emulator.",
     "manual_summary": "User reports r36 ran on Eden before 2026-10-30 (log rotated out, hashes not confirmable). The r37-projection-ab diagnostic, which displays numbers with r36's code, ran docked on Eden 2026-10-30 with its exact NRO and the user reported the numbers looked right. Handheld and the out-of-view-hit checks were not reported."
   },
   "support": {
     "DEVELOPMENT.md": "mods/damage-numbers/DEVELOPMENT.md",
     "EVIDENCE.json": "mods/damage-numbers/EVIDENCE.json"
   },
-  "approval": {
-    "date": "2026-10-30",
-    "basis": "User approval 2026-10-30: \"r36 is actually better to be ready to distribute and the mod we will use mainly, its already ran\". Approval applies to the unchanged r36 candidate. The user reports an earlier Eden run of r36, but its log was rotated out, so no log ties that run to these exact hashes, and no handheld or out-of-view-hit result was reported."
-  }
+  "candidate": "build/damage-numbers/candidates/r38/delivery",
+  "candidate_builder": "scripts/build.py"
 }

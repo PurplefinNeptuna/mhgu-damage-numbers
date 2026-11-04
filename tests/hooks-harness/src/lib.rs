@@ -384,6 +384,26 @@ fn partial_publication_and_invalid_continuations_restore_all_sites() {
     }
 }
 #[test]
+fn entry_hooks_chain_onto_a_foreign_forge_hook_and_interior_taps_refuse_it() {
+    let _guard = SERIAL.lock().unwrap();
+    for i in 0..hooks::COUNT {
+        reset(None, None);
+        let address = mem::text_addr() + signatures::SIGNATURES[i].0;
+        let foreign = [0xe51ff004u32.to_le_bytes(), 0x0320_1000u32.to_le_bytes()].concat();
+        write(&mut NATIVE.lock().unwrap(), address, &foreign);
+        let result = hooks::Installed::install();
+        if i == 5 || i == 10 {
+            assert!(result.is_err(), "hook {i}");
+            assert_eq!(NATIVE.lock().unwrap().calls, 0);
+        } else {
+            let installed = result.unwrap_or_else(|e| panic!("hook {i}: {e}"));
+            let continuation = hooks::ORIGINALS[i].load(core::sync::atomic::Ordering::Acquire);
+            assert_eq!(read(&NATIVE.lock().unwrap(), continuation, 8), foreign, "hook {i}");
+            core::mem::forget(installed);
+        }
+    }
+}
+#[test]
 fn foreign_changes_survive_rollback_with_continuations_retained() {
     let _guard = SERIAL.lock().unwrap();
     for i in 0..hooks::COUNT {

@@ -2410,5 +2410,14 @@
       "mod_records": 11,
       "generated_baseline_repair": "Existing Key Quest Markers r18 ZIP bytes already matched its candidate manifest/checksums, but were stored under the old archive name. Restored the expected filename without changing ZIP/runtime bytes; preserved old-named ZIP and checksums at backups/key-quest-markers/r18-candidate-archive-name-20261018/. No Key Quest Markers source changes."
     }
+  },
+  "static_r38": {
+    "version": "r38",
+    "date": "2026-11-04",
+    "summary": "r38: pinned toolchain build; 38 Rust host tests passed plus the mod's ARM and native suites in ./build.sh test; verify: \"PASS: ARM32 layouts, 69 resolved imports, callbacks, 15 game windows and twelve NZCVQ restores\". Stacking on a foreign Forge hook is covered by host fixtures and Forge's hook.c source, with no ARM execution of a stacked chain and no run on any emulator.",
+    "nro_sha256": {
+      "damage_numbers.nro": "b80e1b7b09eb16a0aaf8954a4863f780691d56660c6b6fe267423d06caf04472"
+    },
+    "runtime": "NOT RUN"
   }
 }

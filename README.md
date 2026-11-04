@@ -13,7 +13,7 @@ The Forge loader is supplied separately.
 ## Installation
 
 1. Close MHGU.
-2. Extract `damage-numbers-r36.zip`.
+2. Extract `damage-numbers-r38-candidate.zip`.
 3. Copy the whole `damage-numbers` folder into your emulator's MHGU mod directory:
    - Eden: `~/.local/share/eden/load/0100770008DD8000/`
    - Ryujinx: `mods/contents/0100770008dd8000/` inside its data directory.
@@ -123,6 +123,8 @@ appear as one number.
 If an artwork file is missing or unreadable, numbers continue without that
 file's effects. If OpenSans.ttf is unavailable, numbers use Forge's font.
 Restore the packaged files and restart the game to restore the full styling.
+
+It can load alongside plugins that hook most of the same game functions. That pairing has not been tested yet.
 
 ## Credits
 
