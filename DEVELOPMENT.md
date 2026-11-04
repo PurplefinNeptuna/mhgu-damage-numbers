@@ -1,7 +1,7 @@
 # Damage Numbers: development and research
 
 **Current state.** r38 DEVELOPMENT candidate at `build/damage-numbers/candidates/r38/`,
-installed on Eden with logs read from one Eden session and no player report; this mod logs nothing at Forge's error level. r38 is r36 with one compatibility change: entry hooks accept
+the gameplay-accepted build for damage numbers on Eden, on the user's report (see `EVIDENCE.json`); it logs nothing at Forge's error level. r38 is r36 with one compatibility change: entry hooks accept
 another plugin's Forge hook on the same function (see *Hook sites*). r36 is the
 approved release, preserved in `backups/accepted/damage-numbers/r36-before-chaining/`,
 and the rollback is its ZIP in `build/damage-numbers/candidates/r36/`. Hits outside a
@@ -158,7 +158,7 @@ changes no capture.
 
 MHGU DPS Meter v1.2.0 holds the constants of hooks 0 and 1 and supporting window `0x276278`. Its binary says it chains onto an
 already patched site after the first update, so it lies over this mod's branch rather than meeting the load check.
-Whether both ran together needs a player report or a Forge log level below error.
+Numbers worked with DPS Meter active in the same Eden session. Whether its hooks actually stacked needs a Forge log level below error.
 
 A twelfth signature window checks the crop call and applied-field stores (below)
 before any hook is installed.
