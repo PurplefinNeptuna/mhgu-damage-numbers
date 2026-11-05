@@ -13,7 +13,7 @@ The Forge loader is supplied separately.
 ## Installation
 
 1. Close MHGU.
-2. Extract `damage-numbers-r38-candidate.zip`.
+2. Extract `damage-numbers-r38.zip`.
 3. Copy the whole `damage-numbers` folder into your emulator's MHGU mod directory:
    - Eden: `~/.local/share/eden/load/0100770008DD8000/`
    - Ryujinx: `mods/contents/0100770008dd8000/` inside its data directory.
@@ -124,7 +124,7 @@ If an artwork file is missing or unreadable, numbers continue without that
 file's effects. If OpenSans.ttf is unavailable, numbers use Forge's font.
 Restore the packaged files and restart the game to restore the full styling.
 
-It can load alongside plugins that hook most of the same game functions. That pairing has not been tested yet.
+It can load alongside plugins that hook most of the same game functions.
 
 ## Credits
 
@@ -133,3 +133,5 @@ It can load alongside plugins that hook most of the same game functions. That pa
 - [forge-rs](https://github.com/Fexty12573/forge-rs) by Fexty.
 - [libnx](https://github.com/switchbrew/libnx) by Hydrosphere Developers.
 - [Open Sans](https://github.com/googlefonts/opensans) by The Open Sans Project Authors.
+
+On MHGURecomp the mod can't adjust its drawn text, so Wilds numbers lose their text outline and Rise numbers lose their outline and wider digits. Classic numbers are unaffected.

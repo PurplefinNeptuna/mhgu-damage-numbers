@@ -2451,5 +2451,13 @@
       "[forge] [WARN] damage_numbers.nro: 4-byte read at 0x00000050 (null page) by code at +0x475C (pc 0324475C) r0=3 r1=64 r2=50 r3=4464C000"
     ],
     "note": "Twelve read and twelve write null-page warnings, from +0x475C to +0x490C: the inlined outline loops of Renderer::number writing through VtxBuffer.Data at [r6,#32], which Recomp's mirror leaves 0. The mod's ini has style = wilds. The visible loss of the outline is inferred from the source; no player report describes it."
+  },
+  "approval_r38_2026_11_05": {
+    "version": "r38",
+    "user_request": "\"ok, make notes about them and promote all the lenient patched mods to ready to distribute, and maybe other mods that still has dev status that i use in eden, while notes the recomp incompabilities when exists (like in please do better)\"",
+    "nro_sha256": {
+      "romfs/nativeNX/plugins/damage_numbers.nro": "726f55a9c127763f3ec013f627745db5f20e4a1c4d36d447de35a5faa9734e3d"
+    },
+    "basis": "The user's report \"all working well\" is on the earlier r38 bytes b80e1b7b09eb16a0aaf8954a4863f780691d56660c6b6fe267423d06caf04472 on Eden. These bytes differ only in the loaded log line and logged \"r38 loaded: 11 Forge hooks\" on MHGURecomp 0.14.0."
   }
 }
