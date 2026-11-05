@@ -107,9 +107,9 @@ folder from that directory.
 
 ## Compatibility and known issues
 
-This correction has not yet been confirmed on the affected tablet or Switch.
-If numbers remain displaced, report whether the game is in handheld or docked
-mode and retain the emulator log.
+Number placement on tablets and on Switch is unconfirmed. If numbers look
+displaced, note whether the game is in handheld or docked mode and keep the
+emulator log.
 
 Rise slashes are drawn over the screen and may appear over foreground scenery.
 
@@ -122,9 +122,12 @@ appear as one number.
 
 If an artwork file is missing or unreadable, numbers continue without that
 file's effects. If OpenSans.ttf is unavailable, numbers use Forge's font.
-Restore the packaged files and restart the game to restore the full styling.
+Put the packaged files back and restart the game to get the full styling.
 
 It can load alongside plugins that hook most of the same game functions.
+
+On MHGURecomp the mod can't adjust its drawn text, so Wilds numbers lose their text outline and Rise numbers
+lose their outline and wider digits. Classic numbers are unaffected.
 
 ## Credits
 
@@ -133,5 +136,3 @@ It can load alongside plugins that hook most of the same game functions.
 - [forge-rs](https://github.com/Fexty12573/forge-rs) by Fexty.
 - [libnx](https://github.com/switchbrew/libnx) by Hydrosphere Developers.
 - [Open Sans](https://github.com/googlefonts/opensans) by The Open Sans Project Authors.
-
-On MHGURecomp the mod can't adjust its drawn text, so Wilds numbers lose their text outline and Rise numbers lose their outline and wider digits. Classic numbers are unaffected.
