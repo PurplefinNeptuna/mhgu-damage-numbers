@@ -1,17 +1,17 @@
 {
   "schema_version": 1,
   "mod": "damage-numbers",
-  "status": "READY_TO_DISTRIBUTE",
-  "reason": "r38 approved for distribution. Entry hooks accept another plugin's Forge hook on the same function.",
+  "status": "DEVELOPMENT",
+  "reason": "r39 is r38 with the hit bookkeeping capped in unsigned arithmetic instead of i32 saturating adds, whose QADD/QSUB stop the game on Ryubing. No other behaviour change.",
   "publication": {
     "published": false,
     "url": null,
     "date": null
   },
-  "version": "r38",
+  "version": "r39",
   "package_name": "damage-numbers",
-  "archive": "damage-numbers-r38.zip",
-  "runtime_test": "The user's report \"all working well\" is on the earlier r38 bytes b80e1b7b09eb16a0aaf8954a4863f780691d56660c6b6fe267423d06caf04472 on Eden. These bytes differ only in the loaded log line and logged \"r38 loaded: 11 Forge hooks\" on MHGURecomp 0.14.0.",
+  "archive": "damage-numbers-r39-candidate.zip",
+  "runtime_test": "r39 NOT RUN. r38 is the accepted build on Eden (\"all working well\", earlier r38 bytes b80e1b7b09eb16a0aaf8954a4863f780691d56660c6b6fe267423d06caf04472). r38 carries QADD/QSUB, which Ryubing 1.3.3 cannot decode.",
   "gamebanana": {
     "ai_code": {
       "used": true,
@@ -63,6 +63,8 @@
   },
   "target": "MHGU Nintendo Switch 1.4.0; upstream Forge 1.5.1; Eden/Ryujinx.",
   "limitations": [
+    "r39 gameplay NOT RUN; r38 is the accepted build, on Eden",
+    "Ryubing: r38 and earlier stop the game with an undefined QADD/QSUB once monster HP bookkeeping runs; r39 has none, but has not run on Ryubing",
     "on MHGURecomp the Wilds text outline is missing, confirmed by the user: \"damage number recomp note is true, i played it\"; the mod's ini there has style = wilds, so the Rise effect rests on the source",
     "r38 ran on Eden master-07677aa500-master with a player report for damage numbers; loading beside a foreign hook on the same entry has not been exercised and rests on Forge's hook.c and host fixtures",
     "r36 has not been run. Kinsect, poison, blast and mount detection come from static research of MHGU 1.4.0 code without a gameplay trace.",
@@ -99,19 +101,19 @@
   ],
   "payloads": {
     "romfs/nativeNX/plugins/damage_numbers.nro": {
-      "source": "build/damage-numbers/candidates/r38/package/romfs/nativeNX/plugins/damage_numbers.nro",
-      "sha256": "726f55a9c127763f3ec013f627745db5f20e4a1c4d36d447de35a5faa9734e3d"
+      "source": "build/damage-numbers/candidates/r39/package/romfs/nativeNX/plugins/damage_numbers.nro",
+      "sha256": "e307b490744475520c4d3870bf110d3c55085bd92415c832489918cb709058ed"
     },
     "romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf": {
-      "source": "build/damage-numbers/candidates/r38/package/romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf",
+      "source": "build/damage-numbers/candidates/r39/package/romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf",
       "sha256": "10b26270e158e51b7f26327aff359a7f7170ccc5904c1c82523bf5e372d5f117"
     },
     "romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba": {
-      "source": "build/damage-numbers/candidates/r38/package/romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba",
+      "source": "build/damage-numbers/candidates/r39/package/romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba",
       "sha256": "d4724a2caff4c13e91a541f0e7d203c74e05c40dedd6f78c55426ccd3396230e"
     },
     "romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba": {
-      "source": "build/damage-numbers/candidates/r38/package/romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba",
+      "source": "build/damage-numbers/candidates/r39/package/romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba",
       "sha256": "fe15190c98259443a01add264777b2b4bee994bbd58f9c8f5f12338abb399f2b"
     }
   },
@@ -122,15 +124,13 @@
     "manual": [
       "mods/damage-numbers/EVIDENCE.json"
     ],
-    "static_summary": "r38: pinned toolchain build; 38 Rust host tests passed plus the mod's ARM and native suites in ./build.sh test; verify: \"PASS: ARM32 layouts, 69 resolved imports, callbacks, 15 game windows and twelve NZCVQ restores\". Stacking on a foreign Forge hook is covered by host fixtures and Forge's hook.c source, with no ARM execution of a stacked chain and no run on any emulator.",
-    "manual_summary": "The user's report \"all working well\" is on the earlier r38 bytes b80e1b7b09eb16a0aaf8954a4863f780691d56660c6b6fe267423d06caf04472 on Eden. These bytes differ only in the loaded log line and logged \"r38 loaded: 11 Forge hooks\" on MHGURecomp 0.14.0."
+    "static_summary": "r39: pinned toolchain build; host tests passed, including the new cap test, plus the ARM and native suites in ./build.sh test; verify: \"PASS: ARM32 layouts, 69 resolved imports, callbacks, 15 game windows and twelve NZCVQ restores\", with a gate against saturating instructions Ryubing cannot decode. Stacking on a foreign Forge hook is covered by host fixtures and Forge's hook.c source, with no ARM execution of a stacked chain and no run on any emulator.",
+    "manual_summary": "r39 NOT RUN. The user's report \"all working well\" is on the earlier r38 bytes b80e1b7b09eb16a0aaf8954a4863f780691d56660c6b6fe267423d06caf04472 on Eden. These bytes differ only in the loaded log line and logged \"r38 loaded: 11 Forge hooks\" on MHGURecomp 0.14.0."
   },
   "support": {
     "DEVELOPMENT.md": "mods/damage-numbers/DEVELOPMENT.md",
     "EVIDENCE.json": "mods/damage-numbers/EVIDENCE.json"
   },
-  "approval": {
-    "date": "2026-11-05",
-    "basis": "The user approved this on 2026-11-05: \"ok, make notes about them and promote all the lenient patched mods to ready to distribute, and maybe other mods that still has dev status that i use in eden, while notes the recomp incompabilities when exists (like in please do better)\". The user's report \"all working well\" is on the earlier r38 bytes b80e1b7b09eb16a0aaf8954a4863f780691d56660c6b6fe267423d06caf04472 on Eden. These bytes differ only in the loaded log line and logged \"r38 loaded: 11 Forge hooks\" on MHGURecomp 0.14.0. Ryujinx and Switch hardware are unconfirmed."
-  }
+  "candidate": "build/damage-numbers/candidates/r39/delivery",
+  "candidate_builder": "scripts/build.py"
 }

@@ -451,6 +451,20 @@ pub const MONSTERS: usize = 10;
 // An unexplained drop waits SETTLE seconds for late mailbox records before it
 // becomes "other" damage. Captured damage the game never subtracts (HP floors,
 // capture limits) is forgotten after EXPIRE seconds so it cannot hide later loss.
+// Ryubing 1.3.3's ARM32 JIT cannot run QADD/QSUB, which i32 saturating_add/sub emit, so the
+// caps are taken in u32, where neither sum nor difference of two i32 values can overflow.
+/// `a + b` capped at `i32::MAX`, for the non-negative credit, debt and their increments.
+fn add_capped(a: i32, b: i32) -> i32 {
+    debug_assert!(a >= 0 && b >= 0);
+    (a as u32 + b as u32).min(i32::MAX as u32) as i32
+}
+/// HP lost from `before` to `after`, capped at `i32::MAX`; 0 when HP did not go down.
+fn drop_capped(before: i32, after: i32) -> i32 {
+    if after >= before {
+        return 0;
+    }
+    (before.wrapping_sub(after) as u32).min(i32::MAX as u32) as i32
+}
 const SETTLE: f32 = 0.15;
 const EXPIRE: f32 = 1.0;
 #[derive(Clone, Copy, Debug, Default)]
@@ -483,7 +497,7 @@ impl Vitals {
             let paid = amount.min(v.debt);
             v.debt -= paid;
             if amount > paid {
-                v.credit = v.credit.saturating_add(amount - paid);
+                v.credit = add_capped(v.credit, amount - paid);
                 v.credit_at = now;
             }
         }
@@ -500,7 +514,7 @@ impl Vitals {
             *v = Vital { monster, max, hp, ..Vital::default() };
             return None;
         }
-        let drop = v.hp.saturating_sub(hp);
+        let drop = drop_capped(v.hp, hp);
         v.hp = hp;
         if drop > 0 {
             let used = drop.min(v.credit);
@@ -509,7 +523,7 @@ impl Vitals {
                 if v.debt == 0 {
                     v.debt_at = now;
                 }
-                v.debt = v.debt.saturating_add(drop - used);
+                v.debt = add_capped(v.debt, drop - used);
             }
         }
         if v.credit > 0 && now - v.credit_at > EXPIRE {
@@ -519,5 +533,20 @@ impl Vitals {
             return Some(core::mem::take(&mut v.debt));
         }
         None
+    }
+}
+
+#[cfg(test)]
+mod capped_tests {
+    use super::{add_capped, drop_capped};
+    #[test]
+    fn caps_match_saturating_results() {
+        assert_eq!(add_capped(2, 3), 5);
+        assert_eq!(add_capped(i32::MAX, 5), i32::MAX);
+        assert_eq!(add_capped(i32::MAX, i32::MAX), i32::MAX);
+        assert_eq!(drop_capped(10, 4), 6);
+        assert_eq!(drop_capped(4, 10), 0);
+        assert_eq!(drop_capped(i32::MAX, i32::MIN), i32::MAX);
+        assert_eq!(drop_capped(0, i32::MIN + 1), i32::MAX);
     }
 }

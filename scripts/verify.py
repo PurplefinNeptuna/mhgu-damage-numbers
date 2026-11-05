@@ -103,6 +103,15 @@ def verify():
     msr = [line for line in disassembly.splitlines() if '\tmsr\t' in line]
     if len(msr) != 12 or any('CPSR_f, r2' not in line for line in msr):
         raise ValueError('Unexpected status-register write in compiled plugin')
+    # Ryubing 1.3.3's ARM32 JIT decodes only these saturating ops and stops the game on the rest
+    # (QADD, QSUB, QDADD, QDSUB, QSUB16, QASX ...). Rust's i32 saturating_add/sub emit QADD/QSUB.
+    supported = {'qadd16', 'uqadd8', 'uqadd16', 'uqsub8', 'uqsub16'}
+    saturating = [line for line in disassembly.splitlines()
+                  if (m := re.search(r'\t(u?q(?:d?add|d?sub|add8|add16|sub8|sub16|asx|sax))'
+                                     r'(?:eq|ne|cs|hs|cc|lo|mi|pl|vs|vc|hi|ls|ge|lt|gt|le)?\t', line))
+                  and m.group(1) not in supported]
+    if saturating:
+        raise ValueError('Saturating instructions Ryubing cannot run: ' + str(saturating))
     expressions, native = native_layouts(compiler)
     address = names['dn_abi']
     actual = data[address:address + len(native)]

@@ -1,7 +1,6 @@
 # Damage Numbers: development and research
 
-**Current state.** r38 READY_TO_DISTRIBUTE (2026-11-05), unpublished, release at `build/damage-numbers/releases/r38/`,
-differing only in its loaded log line from the gameplay-accepted build for damage numbers on Eden, on the user's report, kept at `build/damage-numbers/candidates/r38-accepted/` (see `EVIDENCE.json`); it logs nothing at Forge's error level. r38 is r36 with one compatibility change: entry hooks accept
+**Current state.** r39 DEVELOPMENT candidate, gameplay NOT RUN, at `build/damage-numbers/candidates/r39/`. It is r38 with the hit bookkeeping's caps taken in unsigned arithmetic (`add_capped`, `drop_capped` in `core/src/lib.rs`), because the i32 saturating adds emitted QADD/QSUB, which stop the game on Ryubing 1.3.3; `verify.py` rejects every saturating instruction Ryubing lacks. r38 is the approved release, preserved in `backups/accepted/damage-numbers/r38-before-ryubing-qadd/`, and differs only in its loaded log line from the gameplay-accepted build for damage numbers on Eden, on the user's report, kept at `build/damage-numbers/candidates/r38-accepted/` (see `EVIDENCE.json`); it logs nothing at Forge's error level. r38 is r36 with one compatibility change: entry hooks accept
 another plugin's Forge hook on the same function (see *Hook sites*). r36 is the
 approved release, preserved in `backups/accepted/damage-numbers/r36-before-chaining/`,
 and the rollback is its ZIP in `build/damage-numbers/candidates/r36/`. Hits outside a
@@ -327,4 +326,5 @@ Recheck any new hook, especially a tap between GE-setting arithmetic and a `SEL`
 - **Require native and display dimensions to match in the viewport guard.** That rejects legitimate resolution scaling.
 - **Log per frame or above budget in a diagnostic.** Stock Forge filters below ERROR and its message buffer is 512 bytes, so cap lines per process and keep them short. A hit cap that ends the run early loses the later segments.
 - **Treat the handheld placement report as fixed.** It was against r28, on real Switch and Android. No affected device has run r29-diagnostics or later. Ask for matched plugin and loader hashes, a launch log and a video.
+- **Use `i32::saturating_add`/`saturating_sub` in plugin code.** They emit QADD/QSUB, which stop the game on Ryubing 1.3.3; `-dsp` does not remove them in ARM mode.
 - **Expect an NRO hash to match across build roots.** Hashes differ by root.
