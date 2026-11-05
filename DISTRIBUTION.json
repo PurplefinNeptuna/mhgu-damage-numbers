@@ -2,7 +2,7 @@
   "schema_version": 1,
   "mod": "damage-numbers",
   "status": "DEVELOPMENT",
-  "reason": "r38 is r36 with one compatibility change. Nine of its eleven hooks now accept another plugin's Forge hook on the same function entry. Hook 5 (melee hitzone tail) and hook 10 (mount finisher) sit inside a function and stay exact. Not approved. The user reported damage numbers working on Eden.",
+  "reason": "r38 is r36 with one compatibility change. Nine of its eleven hooks now accept another plugin's Forge hook on the same function entry. Hook 5 (melee hitzone tail) and hook 10 (mount finisher) sit inside a function and stay exact. Not approved. The user reported damage numbers working on Eden. r38 was amended in place, on the user's request, to correct the version in its loaded log line; the current bytes have no run.",
   "publication": {
     "published": false,
     "url": null,
@@ -11,7 +11,7 @@
   "version": "r38",
   "package_name": "damage-numbers",
   "archive": "damage-numbers-r38-candidate.zip",
-  "runtime_test": "USER REPORTED for r38 on Eden, 2026-11-05, installed NRO matches: Damage numbers, quest badges, the ZR remap and luck highlights, asked together: \"all working well\". See EVIDENCE.json runtime_r38_2026_11_05.",
+  "runtime_test": "USER REPORTED for r38 on Eden, 2026-11-05, on the earlier r38 bytes b80e1b7b09eb16a0aaf8954a4863f780691d56660c6b6fe267423d06caf04472, kept at build/damage-numbers/candidates/r38-accepted/: Damage numbers, quest badges, the ZR remap and luck highlights, asked together: \"all working well\". See EVIDENCE.json runtime_r38_2026_11_05.",
   "gamebanana": {
     "ai_code": {
       "used": true,
@@ -99,7 +99,7 @@
   "payloads": {
     "romfs/nativeNX/plugins/damage_numbers.nro": {
       "source": "build/damage-numbers/candidates/r38/package/romfs/nativeNX/plugins/damage_numbers.nro",
-      "sha256": "b80e1b7b09eb16a0aaf8954a4863f780691d56660c6b6fe267423d06caf04472"
+      "sha256": "726f55a9c127763f3ec013f627745db5f20e4a1c4d36d447de35a5faa9734e3d"
     },
     "romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf": {
       "source": "build/damage-numbers/candidates/r38/package/romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf",

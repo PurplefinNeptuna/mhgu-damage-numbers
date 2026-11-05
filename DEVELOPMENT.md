@@ -1,7 +1,7 @@
 # Damage Numbers: development and research
 
 **Current state.** r38 DEVELOPMENT candidate at `build/damage-numbers/candidates/r38/`,
-the gameplay-accepted build for damage numbers on Eden, on the user's report (see `EVIDENCE.json`); it logs nothing at Forge's error level. r38 is r36 with one compatibility change: entry hooks accept
+differing only in its loaded log line from the gameplay-accepted build for damage numbers on Eden, on the user's report, kept at `build/damage-numbers/candidates/r38-accepted/` (see `EVIDENCE.json`); it logs nothing at Forge's error level. r38 is r36 with one compatibility change: entry hooks accept
 another plugin's Forge hook on the same function (see *Hook sites*). r36 is the
 approved release, preserved in `backups/accepted/damage-numbers/r36-before-chaining/`,
 and the rollback is its ZIP in `build/damage-numbers/candidates/r36/`. Hits outside a

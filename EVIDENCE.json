@@ -2416,7 +2416,7 @@
     "date": "2026-11-04",
     "summary": "r38: pinned toolchain build; 38 Rust host tests passed plus the mod's ARM and native suites in ./build.sh test; verify: \"PASS: ARM32 layouts, 69 resolved imports, callbacks, 15 game windows and twelve NZCVQ restores\". Stacking on a foreign Forge hook is covered by host fixtures and Forge's hook.c source, with no ARM execution of a stacked chain and no run on any emulator.",
     "nro_sha256": {
-      "damage_numbers.nro": "b80e1b7b09eb16a0aaf8954a4863f780691d56660c6b6fe267423d06caf04472"
+      "damage_numbers.nro": "726f55a9c127763f3ec013f627745db5f20e4a1c4d36d447de35a5faa9734e3d"
     },
     "runtime": "NOT RUN"
   },
@@ -2433,5 +2433,13 @@
     "foreign_plugins": "Foreign plugins active on Eden: 11 NRO loads match the 11 NROs in the load folder, including BetterBox, better-inputs and MHGU-DPS-Meter-v1.2.0; only 'finish cheat' is disabled. No foreign hook is shown over an entry at this mod's install. KatLib and UIScale were not installed.",
     "exceptions": "No exception, data abort or panic text in either log. Eden stopped through ForceStop.",
     "user_report": "Damage numbers, quest badges, the ZR remap and luck highlights, asked together: \"all working well\""
+  },
+  "amend_r38_2026_11_05": {
+    "request": "wait, cant you update while amend r38?",
+    "change": "src/runtime.rs loaded log line says r38 instead of r35. Nothing else in the source changed.",
+    "accepted_nro_sha256": "b80e1b7b09eb16a0aaf8954a4863f780691d56660c6b6fe267423d06caf04472",
+    "accepted_build": "build/damage-numbers/candidates/r38-accepted/",
+    "current_nro_sha256": "726f55a9c127763f3ec013f627745db5f20e4a1c4d36d447de35a5faa9734e3d",
+    "validation": "build, test and verify passed; current bytes not run"
   }
 }
