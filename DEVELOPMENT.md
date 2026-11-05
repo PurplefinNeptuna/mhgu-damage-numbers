@@ -158,7 +158,7 @@ changes no capture.
 
 MHGU DPS Meter v1.2.0 holds the constants of hooks 0 and 1 and supporting window `0x276278`. Its binary says it chains onto an
 already patched site after the first update, so it lies over this mod's branch rather than meeting the load check.
-Numbers worked with DPS Meter active in the same Eden session. Whether its hooks actually stacked needs a Forge log level below error.
+On MHGURecomp it logged `main+0x00170968 already patched (0xE51FF004); chaining`, the second word being this mod's gateway, then `chained hooks installed after first update`, so it stacks on these hooks there.
 
 A twelfth signature window checks the crop call and applied-field stores (below)
 before any hook is installed.
