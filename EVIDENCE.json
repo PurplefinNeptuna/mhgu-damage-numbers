@@ -2450,7 +2450,8 @@
       "[forge] [WARN] mhgu-dps-meter: main+0x0017096C already patched (0x03245F58); chaining",
       "[forge] [WARN] damage_numbers.nro: 4-byte read at 0x00000050 (null page) by code at +0x475C (pc 0324475C) r0=3 r1=64 r2=50 r3=4464C000"
     ],
-    "note": "Twelve read and twelve write null-page warnings, from +0x475C to +0x490C: the inlined outline loops of Renderer::number writing through VtxBuffer.Data at [r6,#32], which Recomp's mirror leaves 0. The mod's ini has style = wilds. The visible loss of the outline is inferred from the source; no player report describes it."
+    "note": "Twelve read and twelve write null-page warnings, from +0x475C to +0x490C: the inlined outline loops of Renderer::number writing through VtxBuffer.Data at [r6,#32], which Recomp's mirror leaves 0. The mod's ini has style = wilds. The README's note on the lost outline is confirmed by the user's play. Rise was not reported.",
+    "user_report": "\"damage number recomp note is true, i played it\""
   },
   "approval_r38_2026_11_05": {
     "version": "r38",

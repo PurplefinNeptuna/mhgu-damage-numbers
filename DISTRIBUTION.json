@@ -63,7 +63,7 @@
   },
   "target": "MHGU Nintendo Switch 1.4.0; upstream Forge 1.5.1; Eden/Ryujinx.",
   "limitations": [
-    "the MHGURecomp text outline loss comes from reading its draw list mirror and the mod's null-page warnings; no player has described it on screen",
+    "on MHGURecomp the Wilds text outline is missing, confirmed by the user: \"damage number recomp note is true, i played it\"; the mod's ini there has style = wilds, so the Rise effect rests on the source",
     "r38 ran on Eden master-07677aa500-master with a player report for damage numbers; loading beside a foreign hook on the same entry has not been exercised and rests on Forge's hook.c and host fixtures",
     "r36 has not been run. Kinsect, poison, blast and mount detection come from static research of MHGU 1.4.0 code without a gameplay trace.",
     "The mount number is taken from the fixed HP subtraction in ride state 0xd; identifying it as the mount finisher is an inference from the surrounding ride code.",
