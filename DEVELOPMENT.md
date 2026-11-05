@@ -160,6 +160,8 @@ MHGU DPS Meter v1.2.0 holds the constants of hooks 0 and 1 and supporting window
 already patched site after the first update, so it lies over this mod's branch rather than meeting the load check.
 On MHGURecomp it logged `main+0x00170968 already patched (0xE51FF004); chaining`, the second word being this mod's gateway, then `chained hooks installed after first update`, so it stacks on these hooks there.
 
+On MHGURecomp, `DrawList` is a guest mirror of a host object, and `VtxBuffer.Data` (guest +32, `MF_DATA` in its `forge_imgui_thunks.inc`) points at host memory with no guest address, so it reads 0 while `Size` is real. The vertex edits in `Renderer::number` then land on the null page (`null page` warnings at +0x475C..+0x490C) instead of the vertices. Wilds outline copies stay under the fill, Rise loses its outline and width stretch, and Classic is unaffected because it passes offsets to the text call. Not fixed. Writing through `VtxBuffer.Data` works on Forge only.
+
 A twelfth signature window checks the crop call and applied-field stores (below)
 before any hook is installed.
 
