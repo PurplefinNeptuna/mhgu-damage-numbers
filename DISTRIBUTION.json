@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "mod": "damage-numbers",
-  "status": "DEVELOPMENT",
-  "reason": "r39 is r38 with the hit bookkeeping capped in unsigned arithmetic instead of i32 saturating adds, whose QADD/QSUB stop the game on Ryubing. No other behaviour change.",
+  "status": "READY_TO_DISTRIBUTE",
+  "reason": "r39 approved for distribution. It runs on Ryubing, which stopped the game on r38's saturating arithmetic.",
   "publication": {
     "published": false,
     "url": null,
@@ -10,7 +10,7 @@
   },
   "version": "r39",
   "package_name": "damage-numbers",
-  "archive": "damage-numbers-r39-candidate.zip",
+  "archive": "damage-numbers-r39.zip",
   "runtime_test": "The user reported r39 on Ryubing 1.3.3 and Eden: \"run done on both eden and ryubing, good on both\", unitemized. r38 is the accepted build for damage numbers on Eden.",
   "gamebanana": {
     "ai_code": {
@@ -130,6 +130,8 @@
     "DEVELOPMENT.md": "mods/damage-numbers/DEVELOPMENT.md",
     "EVIDENCE.json": "mods/damage-numbers/EVIDENCE.json"
   },
-  "candidate": "build/damage-numbers/candidates/r39/delivery",
-  "candidate_builder": "scripts/build.py"
+  "approval": {
+    "date": "2026-11-06",
+    "basis": "The user approved this on 2026-11-06: \"world sharpness and damage number promote them, wishlist still in development\". The user reported r39 on Ryubing 1.3.3 and Eden: \"run done on both eden and ryubing, good on both\". Switch hardware is unconfirmed."
+  }
 }
