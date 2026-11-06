@@ -134,6 +134,16 @@ pub fn singleton(name: &str) -> Option<u32> {
 // object-kind DTI identifies the actual game singleton as sFestaRender (ID 0x300a6cd8),
 // not its sRender base class; Forge's registry resolves exact types only.
 pub fn visible_size(width: f32, height: f32) -> Option<[f32; 2]> {
+    // MHGURecomp draws ImGui on a host surface scaled over the whole window, so the
+    // game's crop (its internal render size there) does not apply. Its guest DrawList
+    // is a mirror whose vector Data has no guest address: CmdBuffer always holds a
+    // command after NewFrame, yet Data reads null. On Forge, Capacity > 0 means Data
+    // is set.
+    // SAFETY: the render callback runs inside an ImGui frame; only two words are read.
+    let list = unsafe { &*forge::imgui::DrawList::background().raw() };
+    if list.CmdBuffer.Capacity > 0 && list.CmdBuffer.Data.is_null() {
+        return Some([width, height]);
+    }
     let renderer = SingletonManager::get_by_id(0x300a6cd8)? as *mut _ as u32;
     damage_numbers_core::capture::visible_size(&NativeMemory, renderer, width, height)
 }

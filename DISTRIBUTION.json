@@ -1,17 +1,17 @@
 {
   "schema_version": 1,
   "mod": "damage-numbers",
-  "status": "READY_TO_DISTRIBUTE",
-  "reason": "r39 approved for distribution. It runs on Ryubing, which stopped the game on r38's saturating arithmetic.",
+  "status": "DEVELOPMENT",
+  "reason": "r40 is r39 with the visible-crop size ignored when ImGui draws on a host surface (MHGURecomp), where the game's crop field holds the internal render size and the overlay covers the whole window. No other behaviour change.",
   "publication": {
     "published": false,
     "url": null,
     "date": null
   },
-  "version": "r39",
+  "version": "r40",
   "package_name": "damage-numbers",
-  "archive": "damage-numbers-r39.zip",
-  "runtime_test": "The user reported r39 on Ryubing 1.3.3 and Eden: \"run done on both eden and ryubing, good on both\", unitemized. r38 is the accepted build for damage numbers on Eden.",
+  "archive": "damage-numbers-r40-candidate.zip",
+  "runtime_test": "r40 NOT RUN. The user reported r39 \"good on both\" on Ryubing 1.3.3 and Eden, unitemized; r38 is the accepted build on Eden. On MHGURecomp with a lowered render resolution r39 drew numbers small and toward the top left (user video, 2026-11-06).",
   "gamebanana": {
     "ai_code": {
       "used": true,
@@ -63,6 +63,7 @@
   },
   "target": "MHGU Nintendo Switch 1.4.0; upstream Forge 1.5.1; Eden/Ryujinx.",
   "limitations": [
+    "r40 gameplay NOT RUN; on MHGURecomp with a lowered render resolution r39 placed numbers small and toward the top left",
     "Ryubing: r38 and earlier stop the game with an undefined QADD/QSUB once monster HP bookkeeping runs; r39 ran there, unitemized",
     "on MHGURecomp the Wilds text outline is missing, confirmed by the user: \"damage number recomp note is true, i played it\"; the mod's ini there has style = wilds, so the Rise effect rests on the source",
     "r38 ran on Eden master-07677aa500-master with a player report for damage numbers; loading beside a foreign hook on the same entry has not been exercised and rests on Forge's hook.c and host fixtures",
@@ -100,19 +101,19 @@
   ],
   "payloads": {
     "romfs/nativeNX/plugins/damage_numbers.nro": {
-      "source": "build/damage-numbers/candidates/r39/package/romfs/nativeNX/plugins/damage_numbers.nro",
-      "sha256": "e307b490744475520c4d3870bf110d3c55085bd92415c832489918cb709058ed"
+      "source": "build/damage-numbers/candidates/r40/package/romfs/nativeNX/plugins/damage_numbers.nro",
+      "sha256": "80619090a03b6031cfdddf73460737f4f9089827f02596e9b7bd5a925089c01c"
     },
     "romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf": {
-      "source": "build/damage-numbers/candidates/r39/package/romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf",
+      "source": "build/damage-numbers/candidates/r40/package/romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf",
       "sha256": "10b26270e158e51b7f26327aff359a7f7170ccc5904c1c82523bf5e372d5f117"
     },
     "romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba": {
-      "source": "build/damage-numbers/candidates/r39/package/romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba",
+      "source": "build/damage-numbers/candidates/r40/package/romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba",
       "sha256": "d4724a2caff4c13e91a541f0e7d203c74e05c40dedd6f78c55426ccd3396230e"
     },
     "romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba": {
-      "source": "build/damage-numbers/candidates/r39/package/romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba",
+      "source": "build/damage-numbers/candidates/r40/package/romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba",
       "sha256": "fe15190c98259443a01add264777b2b4bee994bbd58f9c8f5f12338abb399f2b"
     }
   },
@@ -123,15 +124,11 @@
     "manual": [
       "mods/damage-numbers/EVIDENCE.json"
     ],
-    "static_summary": "r39: pinned toolchain build; host tests passed, including the new cap test, plus the ARM and native suites in ./build.sh test; verify: \"PASS: ARM32 layouts, 69 resolved imports, callbacks, 15 game windows and twelve NZCVQ restores\", with a gate against saturating instructions Ryubing cannot decode. Stacking on a foreign Forge hook is covered by host fixtures and Forge's hook.c source, with no ARM execution of a stacked chain and no run on any emulator.",
-    "manual_summary": "The user reported r39 on Ryubing 1.3.3 and Eden: \"run done on both eden and ryubing, good on both\", unitemized. r38 is the accepted build for damage numbers on Eden."
+    "static_summary": "r40: pinned toolchain build; ./build.sh test passed (host, ARM gateway, viewport and real-renderer suites); verify: \"PASS: ARM32 layouts, 69 resolved imports, callbacks, 15 game windows and twelve NZCVQ restores\". The Recomp branch rests on Recomp's forge_imgui mirror source (CmdBuffer.Data is MF_DATA, read through h2g_quiet) and has no host test or emulator run.",
+    "manual_summary": "r40 NOT RUN. The user reported r39 \"good on both\" on Ryubing 1.3.3 and Eden, unitemized; r38 is the accepted build on Eden. On MHGURecomp with a lowered render resolution r39 drew numbers small and toward the top left (user video, 2026-11-06)."
   },
   "support": {
     "DEVELOPMENT.md": "mods/damage-numbers/DEVELOPMENT.md",
     "EVIDENCE.json": "mods/damage-numbers/EVIDENCE.json"
-  },
-  "approval": {
-    "date": "2026-11-06",
-    "basis": "The user approved this on 2026-11-06: \"world sharpness and damage number promote them, wishlist still in development\". The user reported r39 on Ryubing 1.3.3 and Eden: \"run done on both eden and ryubing, good on both\". Switch hardware is unconfirmed."
   }
 }

@@ -2487,5 +2487,19 @@
       "romfs/nativeNX/plugins/damage_numbers.nro": "e307b490744475520c4d3870bf110d3c55085bd92415c832489918cb709058ed"
     },
     "basis": "The user reported r39 on Ryubing 1.3.3 and Eden: \"run done on both eden and ryubing, good on both\"."
+  },
+  "recomp_r39_2026_11_06": {
+    "emulator": "MHGURecomp 0.14.3 Linux",
+    "installed_nro_sha256": "e307b490744475520c4d3870bf110d3c55085bd92415c832489918cb709058ed",
+    "video": "/mnt/storage/Videos/2026-11-06 19-26-12.mp4",
+    "user_report": "\"look at damage number / this happened because i lower the render resolution / also changing screen resolution to same size dont fix them / its recomp exclusive bug\"",
+    "observed": "In the 1920x1080 video, numbers are drawn at about half size and toward the top left of the hits.",
+    "note": "log.txt was last written before the video and logs RenderResolution at 1920x1080, so no log covers this run. Inferred cause, not read at runtime: on Recomp sFestaRender +0xb8/+0xbc holds the internal render size while ImGui covers the whole window, and r39 treated that size as a visible crop."
+  },
+  "static_r40": {
+    "date": "2026-11-06",
+    "nro_sha256": "80619090a03b6031cfdddf73460737f4f9089827f02596e9b7bd5a925089c01c",
+    "runtime_test": "NOT RUN",
+    "change": "platform::visible_size returns Forge's display size when the background DrawList's CmdBuffer has Capacity > 0 and a null Data, which identifies MHGURecomp's host-side ImGui; elsewhere the sFestaRender crop is read as before"
   }
 }
