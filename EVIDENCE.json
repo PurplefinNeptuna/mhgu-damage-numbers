@@ -2501,5 +2501,29 @@
     "nro_sha256": "80619090a03b6031cfdddf73460737f4f9089827f02596e9b7bd5a925089c01c",
     "runtime_test": "NOT RUN",
     "change": "platform::visible_size returns Forge's display size when the background DrawList's CmdBuffer has Capacity > 0 and a null Data, which identifies MHGURecomp's host-side ImGui; elsewhere the sFestaRender crop is read as before"
+  },
+  "runtime_r40_2026_11_06": {
+    "date": "2026-11-06",
+    "emulators": [
+      "Eden master-07677aa500-master",
+      "MHGURecomp 0.14.3 Linux"
+    ],
+    "tester": "\"ok position corrected now, tested on eden and recomp\"",
+    "installed_nro_matches": true,
+    "nro_sha256": "80619090a03b6031cfdddf73460737f4f9089827f02596e9b7bd5a925089c01c",
+    "recomp_log": "/mnt/storage2/Programs/MHGURecomp/recomplog.txt",
+    "recomp_lines": [
+      "[forge] [INFO] [damage-numbers] r40 loaded: 11 Forge hooks"
+    ],
+    "eden_log": "~/.local/share/eden/log/eden_log.txt",
+    "note": "recomplog.txt holds twelve null-page warnings from the outline vertex edits (+0x4774..), the known missing Wilds outline. Eden's Forge filters INFO, so its log has no load line. The render resolution used for the Recomp run is not in the report."
+  },
+  "approval_r40_2026_11_06": {
+    "version": "r40",
+    "user_request": "\"ok position corrected now, tested on eden and recomp, please promote\"",
+    "nro_sha256": {
+      "romfs/nativeNX/plugins/damage_numbers.nro": "80619090a03b6031cfdddf73460737f4f9089827f02596e9b7bd5a925089c01c"
+    },
+    "basis": "The user reported r40 on Eden and MHGURecomp: \"ok position corrected now, tested on eden and recomp\"."
   }
 }

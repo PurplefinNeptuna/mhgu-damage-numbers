@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "mod": "damage-numbers",
-  "status": "DEVELOPMENT",
-  "reason": "r40 is r39 with the visible-crop size ignored when ImGui draws on a host surface (MHGURecomp), where the game's crop field holds the internal render size and the overlay covers the whole window. No other behaviour change.",
+  "status": "READY_TO_DISTRIBUTE",
+  "reason": "r40 approved for distribution. It ignores the game's visible crop on MHGURecomp, where a lowered render resolution placed r39's numbers small and toward the top left.",
   "publication": {
     "published": false,
     "url": null,
@@ -10,8 +10,8 @@
   },
   "version": "r40",
   "package_name": "damage-numbers",
-  "archive": "damage-numbers-r40-candidate.zip",
-  "runtime_test": "r40 NOT RUN. The user reported r39 \"good on both\" on Ryubing 1.3.3 and Eden, unitemized; r38 is the accepted build on Eden. On MHGURecomp with a lowered render resolution r39 drew numbers small and toward the top left (user video, 2026-11-06).",
+  "archive": "damage-numbers-r40.zip",
+  "runtime_test": "The user reported r40 on Eden and MHGURecomp 0.14.3: \"ok position corrected now, tested on eden and recomp\". Both installed NROs match the payload hash. r38 is the accepted build for damage numbers on Eden.",
   "gamebanana": {
     "ai_code": {
       "used": true,
@@ -63,7 +63,7 @@
   },
   "target": "MHGU Nintendo Switch 1.4.0; upstream Forge 1.5.1; Eden/Ryujinx.",
   "limitations": [
-    "r40 gameplay NOT RUN; on MHGURecomp with a lowered render resolution r39 placed numbers small and toward the top left",
+    "r40 ran on Eden and MHGURecomp 0.14.3 with a player report of correct placement; Ryubing and Switch hardware were not run with r40",
     "Ryubing: r38 and earlier stop the game with an undefined QADD/QSUB once monster HP bookkeeping runs; r39 ran there, unitemized",
     "on MHGURecomp the Wilds text outline is missing, confirmed by the user: \"damage number recomp note is true, i played it\"; the mod's ini there has style = wilds, so the Rise effect rests on the source",
     "r38 ran on Eden master-07677aa500-master with a player report for damage numbers; loading beside a foreign hook on the same entry has not been exercised and rests on Forge's hook.c and host fixtures",
@@ -125,10 +125,14 @@
       "mods/damage-numbers/EVIDENCE.json"
     ],
     "static_summary": "r40: pinned toolchain build; ./build.sh test passed (host, ARM gateway, viewport and real-renderer suites); verify: \"PASS: ARM32 layouts, 69 resolved imports, callbacks, 15 game windows and twelve NZCVQ restores\". The Recomp branch rests on Recomp's forge_imgui mirror source (CmdBuffer.Data is MF_DATA, read through h2g_quiet) and has no host test or emulator run.",
-    "manual_summary": "r40 NOT RUN. The user reported r39 \"good on both\" on Ryubing 1.3.3 and Eden, unitemized; r38 is the accepted build on Eden. On MHGURecomp with a lowered render resolution r39 drew numbers small and toward the top left (user video, 2026-11-06)."
+    "manual_summary": "The user reported r40 on Eden and MHGURecomp 0.14.3: \"ok position corrected now, tested on eden and recomp\". Both installed NROs match the payload hash. r38 is the accepted build for damage numbers on Eden."
   },
   "support": {
     "DEVELOPMENT.md": "mods/damage-numbers/DEVELOPMENT.md",
     "EVIDENCE.json": "mods/damage-numbers/EVIDENCE.json"
+  },
+  "approval": {
+    "date": "2026-11-06",
+    "basis": "The user approved this on 2026-11-06: \"ok position corrected now, tested on eden and recomp, please promote\". That covers placement on Eden and MHGURecomp; it does not cover Ryubing, Switch hardware, or the Wilds outline still missing on MHGURecomp."
   }
 }
