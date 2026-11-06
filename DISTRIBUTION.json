@@ -11,7 +11,7 @@
   "version": "r39",
   "package_name": "damage-numbers",
   "archive": "damage-numbers-r39-candidate.zip",
-  "runtime_test": "r39 NOT RUN. r38 is the accepted build on Eden (\"all working well\", earlier r38 bytes b80e1b7b09eb16a0aaf8954a4863f780691d56660c6b6fe267423d06caf04472). r38 carries QADD/QSUB, which Ryubing 1.3.3 cannot decode.",
+  "runtime_test": "The user reported r39 on Ryubing 1.3.3 and Eden: \"run done on both eden and ryubing, good on both\", unitemized. r38 is the accepted build for damage numbers on Eden.",
   "gamebanana": {
     "ai_code": {
       "used": true,
@@ -63,8 +63,7 @@
   },
   "target": "MHGU Nintendo Switch 1.4.0; upstream Forge 1.5.1; Eden/Ryujinx.",
   "limitations": [
-    "r39 gameplay NOT RUN; r38 is the accepted build, on Eden",
-    "Ryubing: r38 and earlier stop the game with an undefined QADD/QSUB once monster HP bookkeeping runs; r39 has none, but has not run on Ryubing",
+    "Ryubing: r38 and earlier stop the game with an undefined QADD/QSUB once monster HP bookkeeping runs; r39 ran there, unitemized",
     "on MHGURecomp the Wilds text outline is missing, confirmed by the user: \"damage number recomp note is true, i played it\"; the mod's ini there has style = wilds, so the Rise effect rests on the source",
     "r38 ran on Eden master-07677aa500-master with a player report for damage numbers; loading beside a foreign hook on the same entry has not been exercised and rests on Forge's hook.c and host fixtures",
     "r36 has not been run. Kinsect, poison, blast and mount detection come from static research of MHGU 1.4.0 code without a gameplay trace.",
@@ -125,7 +124,7 @@
       "mods/damage-numbers/EVIDENCE.json"
     ],
     "static_summary": "r39: pinned toolchain build; host tests passed, including the new cap test, plus the ARM and native suites in ./build.sh test; verify: \"PASS: ARM32 layouts, 69 resolved imports, callbacks, 15 game windows and twelve NZCVQ restores\", with a gate against saturating instructions Ryubing cannot decode. Stacking on a foreign Forge hook is covered by host fixtures and Forge's hook.c source, with no ARM execution of a stacked chain and no run on any emulator.",
-    "manual_summary": "r39 NOT RUN. The user's report \"all working well\" is on the earlier r38 bytes b80e1b7b09eb16a0aaf8954a4863f780691d56660c6b6fe267423d06caf04472 on Eden. These bytes differ only in the loaded log line and logged \"r38 loaded: 11 Forge hooks\" on MHGURecomp 0.14.0."
+    "manual_summary": "The user reported r39 on Ryubing 1.3.3 and Eden: \"run done on both eden and ryubing, good on both\", unitemized. r38 is the accepted build for damage numbers on Eden."
   },
   "support": {
     "DEVELOPMENT.md": "mods/damage-numbers/DEVELOPMENT.md",
