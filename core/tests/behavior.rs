@@ -358,6 +358,18 @@ fn projection_shape_places_a_letterboxed_or_stretched_picture() {
     assert!(v.x == 0. && v.y == 0. && v.width == 1920. && v.height == 1080.);
 }
 #[test]
+fn an_upscalers_projection_jitter_does_not_move_a_number() {
+    let identity = [1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1.];
+    let mut perspective = [1.0, 0., 0., 0., 0., 1.7777778, 0., 0., 0., 0., 1., 1., 0., 0., 0., 0.];
+    let point = Vec3 { x: 0.3, y: -0.2, z: 2.0 };
+    let still = project(point, &native_camera(&identity, &perspective, [0, 0, 1920, 1080], 1920., 1080.).unwrap());
+    // FSR's jitter: half a render pixel each way, in NDC.
+    (perspective[8], perspective[9]) = (-1.0 / 1920.0, 1.0 / 1080.0);
+    let jittered = project(point, &native_camera(&identity, &perspective, [0, 0, 1920, 1080], 1920., 1080.).unwrap());
+    assert!(still.is_some());
+    assert_eq!(still, jittered);
+}
+#[test]
 fn applied_crop_is_checked_and_recopied_across_mode_changes() {
     let renderer = 0x1000;
     let mut memory = Fake::new();

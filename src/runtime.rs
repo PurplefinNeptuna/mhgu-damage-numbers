@@ -77,7 +77,7 @@ pub fn start() {
     let installed = if clock.is_some() {
         match Installed::install() {
             Ok(value) => {
-                log::info!("[damage-numbers] r41 loaded: {} Forge hooks", value.count());
+                log::info!("[damage-numbers] r42 loaded: {} Forge hooks", value.count());
                 Some(value)
             }
             Err(reason) => {

@@ -178,6 +178,11 @@ pub fn native_camera(
             result.x = (width - result.width) * 0.5;
         }
     }
+    // The game's perspective leaves the third row's x/y (m[8], m[9]) at zero; a temporal upscaler
+    // (MHGURecomp's and gu-native's FSR) writes its sub-pixel jitter there every frame. A number
+    // drawn through it shakes, so the projection is used without it.
+    let mut projection = *projection;
+    (projection[8], projection[9]) = (0.0, 0.0);
     // For each output element, sum four products from view and projection.
     // The swapped row/column indices also transpose the native row-vector result,
     // so project can multiply column vectors with ordinary row-major indexing.

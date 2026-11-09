@@ -2534,5 +2534,18 @@
     "change": "presentation::native_camera keeps a camera whose viewport shape differs from the display when the projection's [5]/[0] shape matches the viewport or the display, and places the view as the largest centred rectangle of that shape",
     "native": "main+0x7c617c stores s4 = (1/tan)/aspect at +0 and s0 = 1/tan at +20 (vstr at 0x7c6244/0x7c6248); getter main+0x1c358 loads aspect from camera+0x38",
     "tests": "./build.sh test PASSED with projection_shape_places_a_letterboxed_or_stretched_picture; verify: \"PASS: ARM32 layouts, 69 resolved imports, callbacks, 15 game windows and twelve NZCVQ restores\""
+  },
+  "recomp_r41_2026_11_10": {
+    "emulator": "MHGURecomp, 1920x1080, FSR 3.1 NativeAA",
+    "log": "[damage-numbers] r41 loaded: 11 Forge hooks",
+    "user_report": "\"number shaky\"",
+    "cause": "FSR jitter in projection m[8]/m[9] (MHGURecomp runtime/camera_jitter.c, source)"
+  },
+  "static_r42": {
+    "date": "2026-11-10",
+    "nro_sha256": "3f884e8be29e2fa6d8a5508d1f3756daeaba3fb01860c292cc7862eddb65524b",
+    "runtime_test": "NOT RUN",
+    "change": "native_camera zeroes projection m[8], m[9] before multiplying",
+    "tests": "./build.sh test PASSED with an_upscalers_projection_jitter_does_not_move_a_number"
   }
 }
