@@ -1,17 +1,17 @@
 {
   "schema_version": 1,
   "mod": "damage-numbers",
-  "status": "READY_TO_DISTRIBUTE",
-  "reason": "r40 approved for distribution. It ignores the game's visible crop on MHGURecomp, where a lowered render resolution placed r39's numbers small and toward the top left.",
+  "status": "DEVELOPMENT",
+  "reason": "r41 is r40 with the camera kept when the picture has another shape than the overlay: the projection's own shape places the picture, letterboxed or stretched, inside Forge's display (gu-native, an Android/Windows port, draws the overlay over the whole window). No other behaviour change.",
   "publication": {
     "published": false,
     "url": null,
     "date": null
   },
-  "version": "r40",
+  "version": "r41",
   "package_name": "damage-numbers",
-  "archive": "damage-numbers-r40.zip",
-  "runtime_test": "The user reported r40 on Eden and MHGURecomp 0.14.3: \"ok position corrected now, tested on eden and recomp\". Both installed NROs match the payload hash. r38 is the accepted build for damage numbers on Eden.",
+  "archive": "damage-numbers-r41-candidate.zip",
+  "runtime_test": "r41 NOT RUN. The user reported r40 on Eden and MHGURecomp 0.14.3: \"ok position corrected now, tested on eden and recomp\". The user reported that gu-native broke damage numbers (2026-11-10, no log).",
   "gamebanana": {
     "ai_code": {
       "used": true,
@@ -63,6 +63,7 @@
   },
   "target": "MHGU Nintendo Switch 1.4.0; upstream Forge 1.5.1; Eden/Ryujinx.",
   "limitations": [
+    "r41 gameplay NOT RUN; on gu-native the picture's place comes from its source (device.c backend_present), not from a run",
     "r40 ran on Eden and MHGURecomp 0.14.3 with a player report of correct placement; Ryubing and Switch hardware were not run with r40",
     "Ryubing: r38 and earlier stop the game with an undefined QADD/QSUB once monster HP bookkeeping runs; r39 ran there, unitemized",
     "on MHGURecomp the Wilds text outline is missing, confirmed by the user: \"damage number recomp note is true, i played it\"; the mod's ini there has style = wilds, so the Rise effect rests on the source",
@@ -101,19 +102,19 @@
   ],
   "payloads": {
     "romfs/nativeNX/plugins/damage_numbers.nro": {
-      "source": "build/damage-numbers/candidates/r40/package/romfs/nativeNX/plugins/damage_numbers.nro",
-      "sha256": "80619090a03b6031cfdddf73460737f4f9089827f02596e9b7bd5a925089c01c"
+      "source": "build/damage-numbers/candidates/r41/package/romfs/nativeNX/plugins/damage_numbers.nro",
+      "sha256": "dac7149c07885e915f6f30412751b9cbb45de08dda8e239b55c07ec00567ce7c"
     },
     "romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf": {
-      "source": "build/damage-numbers/candidates/r40/package/romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf",
+      "source": "build/damage-numbers/candidates/r41/package/romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf",
       "sha256": "10b26270e158e51b7f26327aff359a7f7170ccc5904c1c82523bf5e372d5f117"
     },
     "romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba": {
-      "source": "build/damage-numbers/candidates/r40/package/romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba",
+      "source": "build/damage-numbers/candidates/r41/package/romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba",
       "sha256": "d4724a2caff4c13e91a541f0e7d203c74e05c40dedd6f78c55426ccd3396230e"
     },
     "romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba": {
-      "source": "build/damage-numbers/candidates/r40/package/romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba",
+      "source": "build/damage-numbers/candidates/r41/package/romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba",
       "sha256": "fe15190c98259443a01add264777b2b4bee994bbd58f9c8f5f12338abb399f2b"
     }
   },
@@ -124,15 +125,11 @@
     "manual": [
       "mods/damage-numbers/EVIDENCE.json"
     ],
-    "static_summary": "r40: pinned toolchain build; ./build.sh test passed (host, ARM gateway, viewport and real-renderer suites); verify: \"PASS: ARM32 layouts, 69 resolved imports, callbacks, 15 game windows and twelve NZCVQ restores\". The Recomp branch rests on Recomp's forge_imgui mirror source (CmdBuffer.Data is MF_DATA, read through h2g_quiet) and has no host test or emulator run.",
-    "manual_summary": "The user reported r40 on Eden and MHGURecomp 0.14.3: \"ok position corrected now, tested on eden and recomp\". Both installed NROs match the payload hash. r38 is the accepted build for damage numbers on Eden."
+    "static_summary": "r41: pinned toolchain build; ./build.sh test passed (host, ARM gateway, viewport and real-renderer suites, plus projection_shape_places_a_letterboxed_or_stretched_picture); verify: \"PASS: ARM32 layouts, 69 resolved imports, callbacks, 15 game windows and twelve NZCVQ restores\". The [5]/[0] shape rests on main+0x7c617c's stores (s4 at +0, s0 at +20), read in the original bytes; no emulator or gu-native run.",
+    "manual_summary": "r41 NOT RUN. The user reported r40 on Eden and MHGURecomp 0.14.3: \"ok position corrected now, tested on eden and recomp\". The user reported that gu-native broke damage numbers (2026-11-10, no log)."
   },
   "support": {
     "DEVELOPMENT.md": "mods/damage-numbers/DEVELOPMENT.md",
     "EVIDENCE.json": "mods/damage-numbers/EVIDENCE.json"
-  },
-  "approval": {
-    "date": "2026-11-06",
-    "basis": "The user approved this on 2026-11-06: \"ok position corrected now, tested on eden and recomp, please promote\". That covers placement on Eden and MHGURecomp; it does not cover Ryubing, Switch hardware, or the Wilds outline still missing on MHGURecomp."
   }
 }

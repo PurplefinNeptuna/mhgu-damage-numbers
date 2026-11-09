@@ -146,17 +146,37 @@ pub fn native_camera(
     height: f32,
 ) -> Option<View> {
     let mut result = View::screen(width, height)?;
-    // Accept an origin-aligned viewport with a matching aspect ratio (within 2%).
+    // Accept an origin-aligned viewport whose shape matches the display (within 2%).
     // Dimensions may differ from the display under resolution scaling; this does
     // not prove that a same-aspect offscreen view belongs to the presented frame.
+    let near = |a: f32, b: f32| (a / b - 1.0).abs() <= 0.02;
+    let display = width / height;
     if rect[0] != 0
         || rect[1] != 0
         || rect[2] <= 0
         || rect[3] <= 0
-        || ((rect[2] as f32 / rect[3] as f32) / (width / height) - 1.0).abs() > 0.02
         || view.iter().chain(projection).any(|x| !x.is_finite())
     {
         return None;
+    }
+    let rect_aspect = rect[2] as f32 / rect[3] as f32;
+    if !near(rect_aspect, display) {
+        // A port can present the picture inside a larger overlay (black bars) or
+        // stretch it to a resized window. The perspective builder main+0x7c617c
+        // stores cot(fov/2)/aspect at [0] and cot(fov/2) at [5], so [5]/[0] is
+        // the picture's shape; it must match the viewport or the display. The
+        // picture is the largest of that shape that fits, centred.
+        let picture = projection[5] / projection[0];
+        if !(picture.is_finite() && picture > 0.0 && (near(picture, rect_aspect) || near(picture, display))) {
+            return None;
+        }
+        if picture > display {
+            result.height = width / picture;
+            result.y = (height - result.height) * 0.5;
+        } else {
+            result.width = height * picture;
+            result.x = (width - result.width) * 0.5;
+        }
     }
     // For each output element, sum four products from view and projection.
     // The swapped row/column indices also transpose the native row-vector result,

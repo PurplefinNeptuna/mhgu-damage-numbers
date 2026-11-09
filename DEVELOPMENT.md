@@ -1,6 +1,6 @@
 # Damage Numbers: development and research
 
-**Current state.** r40 READY_TO_DISTRIBUTE (2026-11-06), unpublished, release at `build/damage-numbers/releases/r40/`, reported "position corrected" on Eden and MHGURecomp 0.14.3. It is r39 with the visible crop ignored when ImGui draws on a host surface (MHGURecomp; see *Visible crop*), because r39 on Recomp with a lowered render resolution drew numbers at about half size toward the top left. r39, the previous release, reported "good on both" on Ryubing 1.3.3 and Eden (unitemized), is preserved in `backups/accepted/damage-numbers/r39-before-recomp-crop/`; it is r38 with the hit bookkeeping's caps taken in unsigned arithmetic (`add_capped`, `drop_capped` in `core/src/lib.rs`), because the i32 saturating adds emitted QADD/QSUB, which stop the game on Ryubing 1.3.3; `verify.py` rejects every saturating instruction Ryubing lacks. r38, the previous release, is preserved in `backups/accepted/damage-numbers/r38-before-ryubing-qadd/`, and differs only in its loaded log line from the gameplay-accepted build for damage numbers on Eden, on the user's report, kept at `build/damage-numbers/candidates/r38-accepted/` (see `EVIDENCE.json`); it logs nothing at Forge's error level. r38 is r36 with one compatibility change: entry hooks accept
+**Current state.** r41 DEVELOPMENT, gameplay NOT RUN, candidate at `build/damage-numbers/candidates/r41/`. It is r40 with the camera kept when the picture's shape differs from Forge's display: the projection's shape places the picture, letterboxed or stretched, inside the display (see *Projection and centre fallback*), because gu-native draws the overlay over its whole window and r40 then fell back to screen centre. r40, the previous release (unpublished), is preserved in `backups/accepted/damage-numbers/r40-before-letterbox/` and was reported "position corrected" on Eden and MHGURecomp 0.14.3. r40 is r39 with the visible crop ignored when ImGui draws on a host surface (MHGURecomp; see *Visible crop*), because r39 on Recomp with a lowered render resolution drew numbers at about half size toward the top left. r39, the previous release, reported "good on both" on Ryubing 1.3.3 and Eden (unitemized), is preserved in `backups/accepted/damage-numbers/r39-before-recomp-crop/`; it is r38 with the hit bookkeeping's caps taken in unsigned arithmetic (`add_capped`, `drop_capped` in `core/src/lib.rs`), because the i32 saturating adds emitted QADD/QSUB, which stop the game on Ryubing 1.3.3; `verify.py` rejects every saturating instruction Ryubing lacks. r38, the previous release, is preserved in `backups/accepted/damage-numbers/r38-before-ryubing-qadd/`, and differs only in its loaded log line from the gameplay-accepted build for damage numbers on Eden, on the user's report, kept at `build/damage-numbers/candidates/r38-accepted/` (see `EVIDENCE.json`); it logs nothing at Forge's error level. r38 is r36 with one compatibility change: entry hooks accept
 another plugin's Forge hook on the same function (see *Hook sites*). r36 is the
 approved release, preserved in `backups/accepted/damage-numbers/r36-before-chaining/`,
 and the rollback is its ZIP in `build/damage-numbers/candidates/r36/`. Hits outside a
@@ -274,7 +274,15 @@ still prevent drawing.
 The viewport guard checks origin and aspect ratio, not presentation-target
 ownership. A same-aspect offscreen view can still pass. Requiring equal native
 and display dimensions would reject legitimate resolution scaling, so the guard
-stays. Read-only native exports and original-byte comparisons are in
+stays. When the viewport's shape differs from the display's (more than 2%), the
+projection decides: the perspective builder main+0x7c617c stores
+`cot(fov/2)/aspect` at `[0]` and `cot(fov/2)` at `[5]`, so `[5]/[0]` is the
+picture's shape. It must match the viewport (bars around the picture) or the
+display (a window resized after the 3D picture was made), and the view is the
+largest rectangle of that shape that fits, centred. gu-native (an Android and
+Windows port with its own Forge) needs both: its overlay covers the whole
+window, and its picture is fitted inside with the screen's shape
+(`device.c` `backend_present`, source only). Read-only native exports and original-byte comparisons are in
 `work/damage-numbers/projection-r27/native/`. They do not identify the r3
 third-party reporter's camera; that report remains unreproduced.
 

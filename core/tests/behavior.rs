@@ -327,6 +327,37 @@ fn native_projection_preserves_positions_across_display_scales() {
     }
 }
 #[test]
+fn projection_shape_places_a_letterboxed_or_stretched_picture() {
+    let identity = [1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1.];
+    // A 20:9 perspective as main+0x7c617c builds it: [0] = [5] / aspect.
+    let wide = |aspect: f32| [1. / aspect, 0., 0., 0., 0., 1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1.];
+    let centre = Vec3 { x: 0., y: 0., z: 0.5 };
+    let right = Vec3 { x: 1., y: 0., z: 0.5 };
+    // A 2400x1080 picture with bars inside a 2400x1350 (16:9) overlay.
+    let p = wide(20. / 9.);
+    let v = native_camera(&identity, &p, [0, 0, 1920, 864], 2400., 1350.).unwrap();
+    assert!((v.y - 135.).abs() < 0.01 && (v.height - 1080.).abs() < 0.01 && v.x == 0. && v.width == 2400.);
+    assert_eq!(project(centre, &v), Some(Point { x: 1200., y: 675. }));
+    // A 16:9 picture with bars at the sides of a 2400x1080 overlay.
+    let p = wide(16. / 9.);
+    let v = native_camera(&identity, &p, [0, 0, 1280, 720], 2400., 1080.).unwrap();
+    assert!((v.x - 240.).abs() < 0.01 && (v.width - 1920.).abs() < 0.01);
+    let edge = project(Vec3 { x: 16. / 9., ..right }, &v).unwrap();
+    assert!((edge.x - 2160.).abs() < 0.01);
+    // A window resized to 21:9: the viewport keeps its 16:9 size, the projection the window's shape.
+    let p = wide(21. / 9.);
+    let v = native_camera(&identity, &p, [0, 0, 1920, 1080], 2520., 1080.).unwrap();
+    assert!(v.x.abs() < 0.01 && (v.width - 2520.).abs() < 0.01);
+    // A shape matching neither the viewport nor the display, or a degenerate one, is refused.
+    assert!(native_camera(&identity, &wide(4. / 3.), [0, 0, 1280, 720], 2400., 1080.).is_none());
+    let mut flat = identity;
+    flat[0] = 0.;
+    assert!(native_camera(&identity, &flat, [0, 0, 1280, 720], 2400., 1080.).is_none());
+    // A matching viewport keeps the whole display whatever the projection says.
+    let v = native_camera(&identity, &identity, [0, 0, 1280, 720], 1920., 1080.).unwrap();
+    assert!(v.x == 0. && v.y == 0. && v.width == 1920. && v.height == 1080.);
+}
+#[test]
 fn applied_crop_is_checked_and_recopied_across_mode_changes() {
     let renderer = 0x1000;
     let mut memory = Fake::new();

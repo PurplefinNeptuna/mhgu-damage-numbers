@@ -2525,5 +2525,14 @@
       "romfs/nativeNX/plugins/damage_numbers.nro": "80619090a03b6031cfdddf73460737f4f9089827f02596e9b7bd5a925089c01c"
     },
     "basis": "The user reported r40 on Eden and MHGURecomp: \"ok position corrected now, tested on eden and recomp\"."
+  },
+  "static_r41": {
+    "date": "2026-11-10",
+    "nro_sha256": "dac7149c07885e915f6f30412751b9cbb45de08dda8e239b55c07ec00567ce7c",
+    "runtime_test": "NOT RUN",
+    "user_report": "\"it broke all my mod that need screen size/position like world-sharpness and damage numbers\" (gu-native, no log or screenshot)",
+    "change": "presentation::native_camera keeps a camera whose viewport shape differs from the display when the projection's [5]/[0] shape matches the viewport or the display, and places the view as the largest centred rectangle of that shape",
+    "native": "main+0x7c617c stores s4 = (1/tan)/aspect at +0 and s0 = 1/tan at +20 (vstr at 0x7c6244/0x7c6248); getter main+0x1c358 loads aspect from camera+0x38",
+    "tests": "./build.sh test PASSED with projection_shape_places_a_letterboxed_or_stretched_picture; verify: \"PASS: ARM32 layouts, 69 resolved imports, callbacks, 15 game windows and twelve NZCVQ restores\""
   }
 }
