@@ -1,23 +1,21 @@
 # Damage Numbers: development and research
 
-**Current state.** r42 DEVELOPMENT, gameplay NOT RUN, candidate at `build/damage-numbers/candidates/r42/`. r42 projects without the projection's m[8]/m[9], where MHGURecomp's FSR writes its per-frame sub-pixel jitter (its `runtime/camera_jitter.c`: "zero as made"); r41 shook with FSR on. r41 was r40 with the camera kept when the picture's shape differs from Forge's display: the projection's shape places the picture, letterboxed or stretched, inside the display (see *Projection and centre fallback*), because gu-native draws the overlay over its whole window and r40 then fell back to screen centre. r40, the previous release (unpublished), is preserved in `backups/accepted/damage-numbers/r40-before-letterbox/` and was reported "position corrected" on Eden and MHGURecomp 0.14.3. r40 is r39 with the visible crop ignored when ImGui draws on a host surface (MHGURecomp; see *Visible crop*), because r39 on Recomp with a lowered render resolution drew numbers at about half size toward the top left. r39, the previous release, reported "good on both" on Ryubing 1.3.3 and Eden (unitemized), is preserved in `backups/accepted/damage-numbers/r39-before-recomp-crop/`; it is r38 with the hit bookkeeping's caps taken in unsigned arithmetic (`add_capped`, `drop_capped` in `core/src/lib.rs`), because the i32 saturating adds emitted QADD/QSUB, which stop the game on Ryubing 1.3.3; `verify.py` rejects every saturating instruction Ryubing lacks. r38, the previous release, is preserved in `backups/accepted/damage-numbers/r38-before-ryubing-qadd/`, and differs only in its loaded log line from the gameplay-accepted build for damage numbers on Eden, on the user's report, kept at `build/damage-numbers/candidates/r38-accepted/` (see `EVIDENCE.json`); it logs nothing at Forge's error level. r38 is r36 with one compatibility change: entry hooks accept
-another plugin's Forge hook on the same function (see *Hook sites*). r36 is the
-approved release, preserved in `backups/accepted/damage-numbers/r36-before-chaining/`,
-and the rollback is its ZIP in `build/damage-numbers/candidates/r36/`. Hits outside a
-usable camera view stay hidden at their world position instead of moving to
-screen centre, and appear if the camera turns to them before they expire.
-The user reports
-an Eden run of r36, but its log was rotated out. The r37-projection-ab
-diagnostic, which displays with r36's code, ran docked on Eden with its exact
-NRO, and the user reported that the numbers looked right. Handheld and the
-out-of-view checks below were not reported.
+**Current state.** r42 DEVELOPMENT, gameplay NOT RUN, candidate at `build/damage-numbers/candidates/r42/`. The last release is r40 (unpublished), reported "position corrected" on Eden and MHGURecomp 0.14.3; the last gameplay-accepted build is `build/damage-numbers/candidates/r38-accepted/` (Eden). Handheld is unreported. DISTRIBUTION.json is authoritative for status and hashes; EVIDENCE.json holds every version's runs. Runtime edits need a new version and new output directories.
 
-DISTRIBUTION.json is authoritative for status and hashes; EVIDENCE.json holds exact validation results for r36. Further runtime edits need a new version and new output directories.
+What the current build does at its compatibility edges:
+
+- It zeroes the projection's m[8]/m[9] before projecting, where MHGURecomp's FSR writes its per-frame sub-pixel jitter (its `runtime/camera_jitter.c`: "zero as made").
+- When the picture's shape differs from Forge's display (gu-native draws the overlay over its whole window), the projection's shape places the picture, letterboxed or stretched, inside the display (see *Projection and centre fallback*).
+- When ImGui draws on a host surface (MHGURecomp), the visible crop is ignored (see *Visible crop*); otherwise a lowered render resolution draws numbers at about half size toward the top left.
+- Hit bookkeeping caps use unsigned arithmetic (`add_capped`, `drop_capped` in `core/src/lib.rs`), because i32 saturating adds emit QADD/QSUB, which stop the game on Ryubing 1.3.3; `verify.py` rejects every saturating instruction Ryubing lacks.
+- Entry hooks accept another plugin's Forge hook on the same function (see *Hook sites*).
+- Hits outside a usable camera view stay hidden at their world position and appear if the camera turns to them before they expire.
+- Nothing logs at Forge's error level.
 
 Runtime checks still needed after an authorized install: a hit landing outside
 the camera view shows no number at screen centre, and turning the camera to it
 within the lifetime shows it at the impact. Missing positions still show at
-centre. The r35 checks also remain open: kinsect hits
+centre. Also open: kinsect hits
 (local and online), a poison tick, a blast detonation, a mount finisher and a
 map-fired siege shell each show one number of the expected size and colour.
 With "Show other damage" off nothing extra appears. With it on, solo hits and
@@ -43,7 +41,7 @@ Copy `build.local.example.json` to ignored `build.local.json` and supply the too
 
 Preparation, builds and packaging do not install, activate, publish or push. The runtime package contains `damage_numbers.nro`, `OpenSans.ttf` and two external RGBA artwork files. The workspace coordinator packages the registered candidate with `python3 scripts/mod_distribution.py package damage-numbers`; run the full `python3 scripts/mod_distribution.py check` afterwards.
 
-Workspace outputs are under `build/damage-numbers/candidates/r36/` and `work/damage-numbers/candidates/r36/`. Cargo caches, the unstripped ELF and converter output stay under `work/damage-numbers/candidates/r36/cargo-target/`. The pinned converter requires a temporary `target` symlink and loose NRO in the source root while building; the wrapper removes both when the converter exits, including on failure. An independent source export uses its own ignored build/work folders. Registry sources are vendored, including metadata needed by this nightly's build-std resolver. Host tests explicitly load the source-only Cargo configuration so they do not inherit the ARM target or build-std settings. Default builds and tests are offline.
+Workspace outputs are under `build/damage-numbers/candidates/VERSION/` and `work/damage-numbers/candidates/VERSION/`. Cargo caches, the unstripped ELF and converter output stay under `work/damage-numbers/candidates/VERSION/cargo-target/`. The pinned converter requires a temporary `target` symlink and loose NRO in the source root while building; the wrapper removes both when the converter exits, including on failure. An independent source export uses its own ignored build/work folders. Registry sources are vendored, including metadata needed by this nightly's build-std resolver. Host tests explicitly load the source-only Cargo configuration so they do not inherit the ARM target or build-std settings. Default builds and tests are offline.
 
 After adding source files, refresh the allowlist with `python3 scripts/export_source.py --refresh`. Exports omit native game inputs, outputs, private configurations, caches and Git metadata. They retain dependency bytes exactly so Cargo checksum validation remains meaningful. Supply your toolchain/input paths in the exported repo's own configuration. No sibling mod import is needed.
 
