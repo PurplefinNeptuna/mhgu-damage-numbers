@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "mod": "damage-numbers",
-  "status": "DEVELOPMENT",
-  "reason": "r42 is r41 with the projection's m[8]/m[9] zeroed before projecting: MHGURecomp's FSR writes its per-frame sub-pixel jitter there (runtime/camera_jitter.h, camera_jitter.c: \"m[8], m[9], zero as made\"), which shook the numbers. r41 kept the camera when the picture has another shape than the overlay (gu-native).",
+  "status": "READY_TO_DISTRIBUTE",
+  "reason": "r42 approved for distribution. It zeroes the projection's m[8]/m[9] before projecting, where MHGURecomp's FSR writes its per-frame sub-pixel jitter, so the numbers no longer shake with FSR on.",
   "publication": {
     "published": false,
     "url": null,
@@ -10,8 +10,8 @@
   },
   "version": "r42",
   "package_name": "damage-numbers",
-  "archive": "damage-numbers-r42-candidate.zip",
-  "runtime_test": "r42 NOT RUN. The user ran Damage Numbers r41 and World Sharpness Gauge r69 on MHGURecomp (1920x1080, 16:9, FSR 3.1 NativeAA on) on 2026-11-10: \"gauge broken, number shaky\"; \"about gauge, there are no dark part, the gauge should be full\". recomplog.txt: \"[damage-numbers] r41 loaded: 11 Forge hooks\", \"WSG r69 bar drawn plain: drawn=[110, 38, 238, 166] rect=[110, 38, 238, 166]\", \"WSG r69 geometric cut: bar=120 effect=120 edge=0 shade=120 of 120 bar draws\".",
+  "archive": "damage-numbers-r42.zip",
+  "runtime_test": "The user ran r42 on MHGURecomp (updater 0.16.0), 1920x1080, FSR 3.1 NativeAA on 2026-11-10 and answered \"Both work\" when asked whether the 22:26 MHGURecomp run gave steady numbers and a full gauge with the dark part where it belongs. recomplog.txt: \"[damage-numbers] r42 loaded: 11 Forge hooks\". Installed NROs in Eden and MHGURecomp match the payload hash. Eden, Ryubing and Switch hardware were not run with r42.",
   "gamebanana": {
     "ai_code": {
       "used": true,
@@ -63,8 +63,8 @@
   },
   "target": "MHGU Nintendo Switch 1.4.0; upstream Forge 1.5.1; Eden/Ryujinx.",
   "limitations": [
-    "r42 gameplay NOT RUN; r41 shook with FSR on in MHGURecomp; on gu-native the picture's place comes from its source (device.c backend_present), not from a run",
-    "r40 ran on Eden and MHGURecomp 0.14.3 with a player report of correct placement; Ryubing and Switch hardware were not run with r40",
+    "r42 ran on MHGURecomp with FSR on and a player report of steady numbers; Eden, Ryubing and Switch hardware were not run with r42; on gu-native the picture's place comes from its source (device.c backend_present), not from a run",
+    "r40 ran on Eden and MHGURecomp 0.14.3 with a player report of correct placement",
     "Ryubing: r38 and earlier stop the game with an undefined QADD/QSUB once monster HP bookkeeping runs; r39 ran there, unitemized",
     "on MHGURecomp the Wilds text outline is missing, confirmed by the user: \"damage number recomp note is true, i played it\"; the mod's ini there has style = wilds, so the Rise effect rests on the source",
     "r38 ran on Eden master-07677aa500-master with a player report for damage numbers; loading beside a foreign hook on the same entry has not been exercised and rests on Forge's hook.c and host fixtures",
@@ -126,10 +126,14 @@
       "mods/damage-numbers/EVIDENCE.json"
     ],
     "static_summary": "r42: pinned toolchain build; ./build.sh test passed (host, ARM gateway, viewport and real-renderer suites, plus projection_shape_places_a_letterboxed_or_stretched_picture and an_upscalers_projection_jitter_does_not_move_a_number); verify: \"PASS: ARM32 layouts, 69 resolved imports, callbacks, 15 game windows and twelve NZCVQ restores\". The [5]/[0] shape rests on main+0x7c617c's stores (s4 at +0, s0 at +20), read in the original bytes; no emulator or gu-native run.",
-    "manual_summary": "r42 NOT RUN. The user ran Damage Numbers r41 and World Sharpness Gauge r69 on MHGURecomp (1920x1080, 16:9, FSR 3.1 NativeAA on) on 2026-11-10: \"gauge broken, number shaky\"; \"about gauge, there are no dark part, the gauge should be full\". recomplog.txt: \"[damage-numbers] r41 loaded: 11 Forge hooks\", \"WSG r69 bar drawn plain: drawn=[110, 38, 238, 166] rect=[110, 38, 238, 166]\", \"WSG r69 geometric cut: bar=120 effect=120 edge=0 shade=120 of 120 bar draws\"."
+    "manual_summary": "The user ran r42 on MHGURecomp (updater 0.16.0), 1920x1080, FSR 3.1 NativeAA on 2026-11-10 and answered \"Both work\" when asked whether the 22:26 MHGURecomp run gave steady numbers and a full gauge with the dark part where it belongs. recomplog.txt: \"[damage-numbers] r42 loaded: 11 Forge hooks\". Installed NROs in Eden and MHGURecomp match the payload hash. Eden, Ryubing and Switch hardware were not run with r42."
   },
   "support": {
     "DEVELOPMENT.md": "mods/damage-numbers/DEVELOPMENT.md",
     "EVIDENCE.json": "mods/damage-numbers/EVIDENCE.json"
+  },
+  "approval": {
+    "date": "2026-11-10",
+    "basis": "The user approved r42 on 2026-11-10: \"also promote damage number and world sharpness gauge\", and answered \"Both work\" when asked whether the 22:26 MHGURecomp run gave steady numbers and a full gauge with the dark part where it belongs. That covers steady numbers on MHGURecomp with FSR on; it does not cover Eden, Ryubing, Switch hardware, gu-native, or the Wilds outline still missing on MHGURecomp."
   }
 }

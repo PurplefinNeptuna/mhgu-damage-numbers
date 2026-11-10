@@ -2547,5 +2547,23 @@
     "runtime_test": "NOT RUN",
     "change": "native_camera zeroes projection m[8], m[9] before multiplying",
     "tests": "./build.sh test PASSED with an_upscalers_projection_jitter_does_not_move_a_number"
+  },
+  "recomp_r42_2026_11_10": {
+    "emulator": "MHGURecomp (updater 0.16.0), 1920x1080, FSR 3.1 NativeAA",
+    "log": "/mnt/storage2/Programs/MHGURecomp/recomplog.txt",
+    "recomp_lines": [
+      "[forge] [INFO] [damage-numbers] r42 loaded: 11 Forge hooks"
+    ],
+    "user_report": "\"Both work\" (answer to: steady numbers?)",
+    "installed_nro_matches": true,
+    "nro_sha256": "3f884e8be29e2fa6d8a5508d1f3756daeaba3fb01860c292cc7862eddb65524b"
+  },
+  "approval_r42_2026_11_10": {
+    "version": "r42",
+    "user_request": "\"also promote damage number and world sharpness gauge\"",
+    "nro_sha256": {
+      "romfs/nativeNX/plugins/damage_numbers.nro": "3f884e8be29e2fa6d8a5508d1f3756daeaba3fb01860c292cc7862eddb65524b"
+    },
+    "basis": "The user answered \"Both work\" when asked whether the 22:26 MHGURecomp run gave steady numbers and a full gauge with the dark part where it belongs."
   }
 }

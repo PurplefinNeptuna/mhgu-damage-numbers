@@ -1,6 +1,6 @@
 # Damage Numbers: development and research
 
-**Current state.** r42 DEVELOPMENT, gameplay NOT RUN, candidate at `build/damage-numbers/candidates/r42/`. The last release is r40 (unpublished), reported "position corrected" on Eden and MHGURecomp 0.14.3; the last gameplay-accepted build is `build/damage-numbers/candidates/r38-accepted/` (Eden). Handheld is unreported. DISTRIBUTION.json is authoritative for status and hashes; EVIDENCE.json holds every version's runs. Runtime edits need a new version and new output directories.
+**Current state.** r42 READY_TO_DISTRIBUTE (2026-11-10), unpublished, release at `build/damage-numbers/releases/r42/`. It is the last gameplay-accepted build: the user reported steady numbers on MHGURecomp with FSR on. Eden, Ryubing and handheld were not run with r42; the last Eden-accepted build is `build/damage-numbers/candidates/r38-accepted/`. DISTRIBUTION.json is authoritative for status and hashes; EVIDENCE.json holds every version's runs. Runtime edits need a new version and new output directories.
 
 What the current build does at its compatibility edges:
 
