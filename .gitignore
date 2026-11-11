@@ -21,3 +21,5 @@ __pycache__/
 # Downloaded by ./build.sh fetch
 /vendor/crates/
 /vendor/forge-rs/
+/vendor/cimgui/
+/vendor/fonts/Roboto-Medium.ttf

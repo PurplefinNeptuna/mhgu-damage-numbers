@@ -1,0 +1,28 @@
+forge-rs d1865b6 passes Rust byte pointers where cimgui's bindings take C char pointers.
+C char is u8 on the ARM target but i8 on x86_64, so the host render harness needs these casts.
+The NRO is identical with or without them.
+
+--- a/forge/src/imgui/draw.rs
++++ b/forge/src/imgui/draw.rs
+@@ -96,8 +96,8 @@
+                 self.0,
+                 pos,
+                 col,
+-                text.as_ptr(),
+-                text.as_ptr().add(text.len()),
++                text.as_ptr().cast(),
++                text.as_ptr().add(text.len()).cast(),
+             )
+         }
+     }
+@@ -110,8 +110,8 @@
+                 font_size,
+                 pos,
+                 col,
+-                text.as_ptr(),
+-                text.as_ptr().add(text.len()),
++                text.as_ptr().cast(),
++                text.as_ptr().add(text.len()).cast(),
+                 0.0,
+                 core::ptr::null(),
+             )

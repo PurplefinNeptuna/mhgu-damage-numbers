@@ -177,7 +177,7 @@ def package():
                 'vendor/libnx/LICENSE-MIT', 'licenses/CFG-IF-MIT.txt',
                 'licenses/LOG-MIT.txt', 'licenses/INI-CORE-MIT.txt',
                 'licenses/RUST-MIT.txt', 'licenses/UNICODE-3.0.txt', 'licenses/COMPILER_BUILTINS.txt',
-                'vendor/cimgui/LICENSE', 'vendor/cimgui/imgui/LICENSE.txt']
+                'licenses/CIMGUI-MIT.txt', 'licenses/IMGUI-MIT.txt']
     notices = '\n\n'.join((MOD / name).read_text() for name in licenses)
     (dest / 'NOTICES.txt').write_text(notices)
     (dest / 'NOTICES.html').write_text('<pre>' + escape(notices) + '</pre>\n')

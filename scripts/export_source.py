@@ -4,7 +4,7 @@ import argparse, hashlib, json, re, shutil, subprocess, tempfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 FORBIDDEN={'.git','build','work','tools','.venv','__pycache__','backups','history','target'}
-FETCHED={('vendor','crates'),('vendor','forge-rs')}  # build.sh fetch downloads these
+FETCHED={('vendor','crates'),('vendor','forge-rs'),('vendor','cimgui'),('vendor','fonts')}  # build.sh fetch downloads these
 BINARY={'.arc','.tex','.mod','.lmt','.gmd','.nsp','.xci','.nca','.zip','.7z','.nro','.elf','.o','.exe','.dll','.gzf','.gpr'}
 def digest(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 def safe(name):

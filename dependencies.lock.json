@@ -80,7 +80,7 @@
     "vendor/forge-rs/forge/src/imgui/color.rs": "08c52ec1135bba5c264e4f611f3fc29fa06b62eebe4db72200b12dc7c5a886f0",
     "vendor/forge-rs/forge/src/imgui/context.rs": "7d48d02d6575f3f5ad433012bc64de2028a7dc17bf5e4dae14b418b42b3eff1f",
     "vendor/forge-rs/forge/src/imgui/drag.rs": "17160b16307b2356b16c0d0ea7d32c374ed70b7b6626af56523d72c2c4bfd57c",
-    "vendor/forge-rs/forge/src/imgui/draw.rs": "861c2c4c98bee6f55ce1732c2478c22a8456b66494c7b74316bdc9dc560f3ff2",
+    "vendor/forge-rs/forge/src/imgui/draw.rs": "c34a98011832a3e73890d449e452e6172112e0ac83b994a16ce1e624f33bcbb6",
     "vendor/forge-rs/forge/src/imgui/font.rs": "275e5a5f81bccc8ff6a9443c5c7226a520718ba548e4c3d40acd435885eec91f",
     "vendor/forge-rs/forge/src/imgui/input.rs": "fe1af67ab7c7753f506b8a5675286cd8c00fe864a245f164daaa124f04e2bdf0",
     "vendor/forge-rs/forge/src/imgui/item.rs": "83d13be7e14e1751ccae42c27b1dfc4c1b55e2363b0d838959cbf5e627e4af61",
@@ -181,5 +181,31 @@
     "rustc": "b6997c79798426bd064c304f8687fd7b83e5c7a5d7a954ce67e3d5f7c455d70a",
     "cargo_forge": "77f9bbda4b0bd374ee945758d9687d39e99a4df48f2861ca3cb5ed7662b04dc0"
   },
-  "forge_revision": "1671ad1526f6df5ee8d6e61a03518e0a427e202e"
+  "forge_revision": "1671ad1526f6df5ee8d6e61a03518e0a427e202e",
+  "archives": [
+    {
+      "dest": "vendor/forge-rs/",
+      "repo": "Fexty12573/forge-rs",
+      "rev": "d1865b68e9b194eb3eacc8bd71bbf601a5fac63e",
+      "patches": [
+        "patches/forge-rs-c-char.patch"
+      ]
+    },
+    {
+      "dest": "vendor/cimgui/",
+      "repo": "cimgui/cimgui",
+      "rev": "d298666861ebf00dcfeb2407409931c04e47e33c"
+    },
+    {
+      "dest": "vendor/cimgui/imgui/",
+      "repo": "ocornut/imgui",
+      "rev": "8936b58fe26e8c3da834b8f60b06511d537b4c63"
+    },
+    {
+      "dest": "vendor/fonts/Roboto-Medium.ttf",
+      "repo": "Fexty12573/forge",
+      "rev": "b23e114a23f41c9a8e2fd34b2f4df2a2102d0ee1",
+      "source": "data/fonts/Roboto-Medium.ttf"
+    }
+  ]
 }

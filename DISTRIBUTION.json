@@ -97,8 +97,8 @@
     "mods/damage-numbers/licenses/RUST-MIT.txt",
     "mods/damage-numbers/licenses/UNICODE-3.0.txt",
     "mods/damage-numbers/licenses/COMPILER_BUILTINS.txt",
-    "mods/damage-numbers/vendor/cimgui/LICENSE",
-    "mods/damage-numbers/vendor/cimgui/imgui/LICENSE.txt"
+    "mods/damage-numbers/licenses/CIMGUI-MIT.txt",
+    "mods/damage-numbers/licenses/IMGUI-MIT.txt"
   ],
   "payloads": {
     "romfs/nativeNX/plugins/damage_numbers.nro": {
