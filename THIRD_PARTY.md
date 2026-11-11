@@ -4,7 +4,7 @@ forge-rs is fetched unchanged at `d1865b68e9b194eb3eacc8bd71bbf601a5fac63e` (MIT
 
 Cargo.lock pins runtime/procedural-macro dependencies. `./build.sh fetch` puts their source and license files in ignored vendor/crates. The additional sysroot packages supply this nightly's full resolver metadata; only core/alloc/compiler_builtins are built into the ARM runtime. `research/sysroot-Cargo.lock` pins that metadata. WASI libraries are not built for this ARM32 plugin. Runtime component notices are separate from these build-only dependencies.
 
-The pinned C++ oracle and the gateway were copied from this workspace's Damage Numbers r25 source baseline at parent commit `6558bd1`. Oracle code exists only in host tests; it is never linked into damage_numbers.nro. The production gateway is byte-identical to the existing audited assembly. Its GE audit and native declarations are retained under research for reproducible validation. ARM SVC wrappers originate in the project's maintained libnx integration, with the ENTRY macro namespaced to avoid assembler collisions.
+The pinned C++ oracle and the gateway were copied from this workspace's Damage Numbers r25 source baseline at parent commit `b4c6874`. Oracle code exists only in host tests; it is never linked into damage_numbers.nro. The production gateway is byte-identical to the existing audited assembly. Its GE audit and native declarations are retained under research for reproducible validation. ARM SVC wrappers originate in the project's maintained libnx integration, with the ENTRY macro namespaced to avoid assembler collisions.
 
 The host renderer uses pinned ImGui/cimgui 1.92.8 snapshots and their MIT licenses in vendor/cimgui. The prepared font originated from Open Sans at Google Fonts revision `9710da1eacb3be272583c3224dcb70f9da6eadbb` and the Forge/Roboto Medium reference for matching metrics. Font licenses and input hashes are preserved. Roboto and the host renderer are development inputs; the runtime ships the prepared Open Sans Semibold subset and two external procedural RGBA files. Font naming metadata was restored without changing outlines, hinting or metrics. Their current hashes and provenance are in assets/manifest.json.
 
@@ -12,7 +12,7 @@ The new Rust implementation, fixtures, recipes and explanatory documentation wer
 
 The native allocator fixture retains Forge `hook.c` and `hook.h` from revision `1671ad1526f6df5ee8d6e61a03518e0a427e202e`, with their MIT copyright/license text. It is development-only and is not linked into the NRO. The fixture substitutes host platform operations and omits the two ARM barriers while keeping allocator and branch construction source unchanged.
 
-The frozen C++ asset headers and decoder are test-only reference inputs. The 24 r2 golden images and atlas hashes were captured from production renderer source at `9aebd26` before changing its asset-loading or drawing implementation. They contain generated test scenes and licensed font/artwork pixels, not game captures.
+The frozen C++ asset headers and decoder are test-only reference inputs. The 24 r2 golden images and atlas hashes were captured from production renderer source at `fa587f8` before changing its asset-loading or drawing implementation. They contain generated test scenes and licensed font/artwork pixels, not game captures.
 
 Rust `core` and `alloc` are compiled into the ARM plugin by `.cargo/config.toml`
 with `compiler_builtins` memory support. The pinned toolchain is
