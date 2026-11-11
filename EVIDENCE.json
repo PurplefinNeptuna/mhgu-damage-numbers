@@ -1898,7 +1898,7 @@
     "preserved_candidate": "backups/accepted/damage-numbers/r36-distribution-approved/PRESERVATION.json",
     "promotion": {
       "date": "2026-10-30",
-      "source_commit": "6a7d2aa",
+      "source_commit": "d9dc00e",
       "runtime_rebuilt": false,
       "payload_hashes_unchanged": true,
       "candidate_receipt_hashes_verified": true,
@@ -1996,7 +1996,7 @@
     "preserved_candidate": "backups/accepted/damage-numbers/r35-distribution-approved/PRESERVATION.json",
     "promotion": {
       "date": "2026-10-21",
-      "source_commit": "c35ae71",
+      "source_commit": "e17973c",
       "runtime_rebuilt": false,
       "payload_hashes_unchanged": true,
       "candidate_receipt_hashes_verified": true,
@@ -2162,7 +2162,7 @@
     "preserved_candidate": "backups/accepted/damage-numbers/r30-distribution-approved/PRESERVATION.json",
     "promotion": {
       "date": "2026-10-18",
-      "source_commit": "e86a375",
+      "source_commit": "4f5235d",
       "runtime_rebuilt": false,
       "payload_hashes_unchanged": true,
       "candidate_receipt_hashes_verified": true,
