@@ -4,10 +4,12 @@ import argparse, hashlib, json, re, shutil, subprocess, tempfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 FORBIDDEN={'.git','build','work','tools','.venv','__pycache__','backups','history','target'}
+FETCHED={('vendor','crates'),('vendor','forge-rs')}  # build.sh fetch downloads these
 BINARY={'.arc','.tex','.mod','.lmt','.gmd','.nsp','.xci','.nca','.zip','.7z','.nro','.elf','.o','.exe','.dll','.gzf','.gpr'}
 def digest(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 def safe(name):
  p=Path(name)
+ if p.parts[:2] in FETCHED:raise ValueError('Fetched dependency, not source: '+name)
  if p.is_absolute() or '..' in p.parts or any(x in {'.git','__pycache__'} for x in p.parts) or p.parts[0] in FORBIDDEN or (p.parts[0]=='tests'and 'target'in p.parts) or p.suffix.lower() in BINARY or p.name in ('build.local.json','source-export.json'):raise ValueError('Non-source export path: '+name)
  return p
 def refresh(mod):

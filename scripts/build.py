@@ -54,6 +54,7 @@ def doctor():
     for name, path in [('rustc', rust / 'rustc'), ('cargo_forge', converter())]:
         if digest(path) != lock['tool_sha256'][name]:
             raise ValueError('Pinned tool binary differs: ' + name)
+    if not (MOD/'vendor/crates').is_dir(): raise ValueError('Dependencies missing: run ./build.sh fetch')
     for name, expected in lock['files'].items():
         if digest(MOD / name) != expected:
             raise ValueError('Pinned dependency differs: ' + name)
@@ -74,13 +75,8 @@ def asset_hashes():
     return result
 
 
-def prepare(fetch=False):
-    env, rust = environment()
-    if fetch:
-        from vendor_sysroot import fetch as fetch_sysroot
-        fetch_sysroot(rust)
-        env['CARGO_NET_OFFLINE'] = 'false'
-        run([rust / 'cargo', 'fetch', '--locked', '--manifest-path', MOD / 'Cargo.toml'], cwd=MOD, env=env)
+def prepare():
+    environment()  # an export without build.local.json stops here with an input error
     asset_hashes()
     print('Prepared asset files checked; no generation required')
 
@@ -177,9 +173,9 @@ def package():
     spec = json.loads((MOD / 'DISTRIBUTION.json').read_text())
     (dest / 'README.html').write_bytes(distribution.readme_html(guide))
     (dest / 'GAMEBANANA_README.html').write_bytes(distribution.gamebanana_readme_html(guide, spec['gamebanana']))
-    licenses = ['DISTRIBUTION_NOTICES.md', 'LICENSE', 'vendor/forge-rs/LICENSE', 'fonts/OFL.txt',
-                'vendor/libnx/LICENSE-MIT', 'vendor/crates/cfg-if-1.0.5/LICENSE-MIT',
-                'vendor/crates/log-0.4.34/LICENSE-MIT', 'vendor/crates/ini_core-0.2.0/license.txt',
+    licenses = ['DISTRIBUTION_NOTICES.md', 'LICENSE', 'licenses/FORGE-RS-MIT.txt', 'fonts/OFL.txt',
+                'vendor/libnx/LICENSE-MIT', 'licenses/CFG-IF-MIT.txt',
+                'licenses/LOG-MIT.txt', 'licenses/INI-CORE-MIT.txt',
                 'licenses/RUST-MIT.txt', 'licenses/UNICODE-3.0.txt', 'licenses/COMPILER_BUILTINS.txt',
                 'vendor/cimgui/LICENSE', 'vendor/cimgui/imgui/LICENSE.txt']
     notices = '\n\n'.join((MOD / name).read_text() for name in licenses)
@@ -205,16 +201,17 @@ def package():
     print('Verified candidate:', archive)
 
 
+def fetch():
+    import fetch_vendor;fetch_vendor.main()
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('command', choices=['doctor', 'prepare', 'build', 'test', 'verify', 'package', 'export'])
+    parser.add_argument('command', choices=['doctor', 'fetch', 'prepare', 'build', 'test', 'verify', 'package', 'export'])
     parser.add_argument('--host', action='store_true')
-    parser.add_argument('--fetch', action='store_true')
     parser.add_argument('--output', type=Path)
     args = parser.parse_args()
-    if args.command == 'prepare':
-        prepare(args.fetch)
-    elif args.command == 'test':
+    if args.command == 'test':
         test(args.host)
     elif args.command == 'export':
         if not args.output:
