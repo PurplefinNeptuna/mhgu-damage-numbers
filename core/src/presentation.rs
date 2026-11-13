@@ -146,8 +146,8 @@ pub fn native_camera(
     height: f32,
 ) -> Option<View> {
     let mut result = View::screen(width, height)?;
-    // Accept an origin-aligned viewport whose shape matches the display (within 2%).
-    // Dimensions may differ from the display under resolution scaling; this does
+    // Accept an origin-aligned viewport shaped like the display (within 2%) or, below, one the
+    // projection places inside it. Dimensions may differ under resolution scaling; this does
     // not prove that a same-aspect offscreen view belongs to the presented frame.
     let near = |a: f32, b: f32| (a / b - 1.0).abs() <= 0.02;
     let display = width / height;
