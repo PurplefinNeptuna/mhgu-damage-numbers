@@ -162,42 +162,9 @@ On MHGURecomp, `DrawList` is a guest mirror of a host object, and `VtxBuffer.Dat
 A twelfth signature window checks the crop call and applied-field stores (below)
 before any hook is installed.
 
-### How monster HP falls
+### How monster HP falls, and damage outside ordinary hits
 
-- The monster work block is `*(monster+0x1428)`. The network sync record
-  `nFestaNetwork::netEmMasterChange` (DTI `mParam.hp_vital`, s32) is filled by
-  main+0xcba54 from `work+0x370`. The regeneration helpers main+0x9ce9c/0x9cf7c
-  clamp `work+0x370` against the maximum at `work+0x374`. The same record maps
-  the root position to `work+0x40/44/48`.
-- HP is not reduced at hit time. main+0x9d6f8 (hook 1) adds each hit's
-  contribution to the part counter `work+0x488+part*2`. The per-frame monster
-  update main+0x97ddc sums the raw part counters (`local_4c += counter`) and
-  subtracts the sum from HP. It then subtracts the s16 pending amount at
-  `work+0x5d66` and clears it.
-- All five hit handlers are reached from the collision function (hook 0):
-  main+0x171350 by call and 0x172bf0/0x173a24/0x174c0c/0x176ad0 by tail branch
-  from 0x170a20..0x170ab0. The collision scope therefore encloses every hit.
-
-### Damage sources outside ordinary hits
-
-| Damage | Native path | Source |
-| --- | --- | --- |
-| Kinsect | Collision path. The w13 shell hit setup main+0x4816c0 calls the shared shell hit initialiser (vtable +0x140, main+0x4a2790) with subtype 1, then rewrites the entry: +0x10 = 6, +0xc = kinsect, +0x6e = 0, +0x70 = owner hunter (main+0x4a1b6c). | Tags (6, 1, 0) with a known owner are Attack. Ownership rules are unchanged. |
-| Poison | Poison tick main+0xa2664 clears `work+0x5d66`. While `work+0x5e08 & 2` is set it advances the timer at `work+0x5ca8`, and at each interval stores the poison table's s16 +0xc in `work+0x5d66`. | Hook 8 reads `work+0x5d66` after the native function returns. |
-| Blast | Detonation main+0xaac54 obtains the blast table at `(*(monster+0x75ec)+100)+0x54` (the getter main+0x71078 is that expression) and returns early when it is null. Otherwise it resets the blast point and adds the table's s16 +0xc to the part counter directly, bypassing main+0x9d6f8. | Hook 9 reads the same table. |
-| Mount | Hits on a ridden monster (`main+0x812a8`: ride action states or category 0xd) go to main+0x170adc, which adds the hit to the rider's mount gauge (main+0x2f6778), not to HP. In category 0xd the monster update reaches main+0x99764, loads a fixed amount from monster data +0x8c (×1.5 when the unidentified singleton query main+0x49938 returns ≥ 2), subtracts it from HP at 0x9979c and sets action 0x2b. | Hook 10 reads r4 (the amount) and `[sp+60]` (monster+0x1428). |
-| Map-fired shells | Shell hit setup main+0x4a2790 rewrites owner fields only for hunters, Palicoes and monsters. Shells fired by the map's uStageShellOwner (character type 9, main+0x51c440 -> main+0x53985c) keep secondary kind 2 with the shell at +0x70; the rail cannon (uShellSt006, main+0x497040) is one. | `attack_owner` follows the shell's owner `*(*(shell+0x136c)+0xc)` (same activity check as main+0x4a1b6c) and returns `Owner::Stage` (wire 5) for type 9. Tags (2, any, 2) with a Stage owner become Object damage. |
-
-Identifying the 0x2b branch as the mount finisher is an inference. It depends on
-the ride-state gate, the rider-gauge path and the mount point `work+0x5d9a`
-(DTI `mParam.nori_dmg_point`, updated by main+0xa3528 from the same update).
-No string names the branch. If gameplay shows a different event, only the
-label changes; the amount is still real HP damage.
-
-Ballista shots were already Object (tags 2, 8, 0 with the hunter at +0x70).
-Cannon, huge cannon and Dragonator projectiles are not traced; they show only if
-they use map-owned shells. Hits with other unrecognised tags stay hidden. Shell
-research is in `work/damage-numbers/siege-weapons-research.md`.
+The native routes (part counters, the pending amount, the collision scope, kinsect, poison, blast, mount, map-fired shells, ballista, siege weapons) are in `.agents/skills/mhgu-understanding/references/damage-and-cameras.md`, sections How monster HP actually falls and Shells and siege weapons. Each route here has its own hook: poison is hook 8, blast hook 9, the mount finisher hook 10; kinsect, map-fired shells and ballista arrive through the collision path. The mount finisher label is an inference; if gameplay shows a different event, only the label changes, the amount is still real HP damage. Hits with unrecognised tags stay hidden.
 
 Status and stage records carry no owner and are shown for every player, like
 monster and object damage. Status positions are the monster root, not an
