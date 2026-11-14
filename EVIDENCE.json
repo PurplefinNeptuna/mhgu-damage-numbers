@@ -2674,5 +2674,11 @@
     "installed_nro_matches": true,
     "nro_sha256": "b352c01651b72e81b6c762c85d18f91665a7c943703cdba69dc8e29205d4a9ac",
     "user_report": "\"its ran\""
+  },
+  "user_handheld_fixed_2026_11_14": {
+    "subject": "Handheld placement report on real Switch and Android (reported against r28)",
+    "user_report": "\"it was fixed a long time ago\"",
+    "fixed_in_build": "Not stated",
+    "hashes_or_log": "Not supplied"
   }
 }

@@ -200,8 +200,8 @@ Blast 7) because `runtime.rs` decodes those values.
 MHGU can display a smaller crop of an unchanged swapchain allocation. Forge's
 ImGui DisplaySize describes that allocation, so it can report 1920×1080 bounds for a
 visible 1280×720 region. The user reported correct docked placement and displaced
-handheld placement on Switch and Android against an older build. Exact live
-dimensions and this correction remain unconfirmed on those devices.
+handheld placement on Switch and Android against r28, and later reported it fixed
+(build and hashes not stated). Exact live dimensions were never measured.
 
 The render callback obtains the actual sFestaRender singleton through Forge's
 exact-type ID lookup (0x300a6cd8). The sRender base ID is not registered for that
@@ -313,7 +313,6 @@ Recheck any new hook, especially a tap between GE-setting arithmetic and a `SEL`
 - **Move an off-screen hit to screen centre.** A position a usable camera clips stays hidden until the camera turns to it. Centre is only for missing positions and missing or invalid cameras.
 - **Require native and display dimensions to match in the viewport guard.** That rejects legitimate resolution scaling.
 - **Log per frame or above budget in a diagnostic.** Stock Forge filters below ERROR and its message buffer is 512 bytes, so cap lines per process and keep them short. A hit cap that ends the run early loses the later segments.
-- **Treat the handheld placement report as fixed.** It was against r28, on real Switch and Android. No affected device has run r29-diagnostics or later. Ask for matched plugin and loader hashes, a launch log and a video.
 - **Use `i32::saturating_add`/`saturating_sub` in plugin code.** They emit QADD/QSUB, which stop the game on Ryubing 1.3.3; `-dsp` does not remove them in ARM mode.
 - **Expect an NRO hash to match across build roots.** Hashes differ by root.
 - **Accept `uVillageCamera` (main+0x1730e10) in the camera capture.** Its samples reached the mod in r46 but lagged the view (user report on MHGURecomp); the cause is unknown, so the village preview stays flat.
