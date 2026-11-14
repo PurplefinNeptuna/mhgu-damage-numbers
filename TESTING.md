@@ -1,6 +1,6 @@
-# Damage Numbers r46: testing
+# Damage Numbers r47: testing
 
-r46 removes Show other damage, adds Spread, and puts the settings on a Mod Options page with a
+r47 removes Show other damage, adds Spread, and puts the settings on a Mod Options page with a
 help topic per setting and a live preview. The page needs Purple-lib r17 or later installed
 beside it; with Purple-lib r19 the preview also hides while the page's help is open. Without
 Purple-lib, the Plugin UI panel and the INI work as in r42 and no Purple-lib line appears.
@@ -26,11 +26,11 @@ Purple-lib, the Plugin UI panel and the INI work as in r42 and no Purple-lib lin
 6. Press the help button ((−) "Mod Help", or (+) if you swapped them): a help titled "Damage
    Numbers" with seven topics, each page fitting its box. With Purple-lib r19 the preview is gone
    while the help is open and returns when you close it; with r17 or r18 it stays.
-7. Open the page and walk (in the village the camera angle stays locked; in a quest also turn the
-   camera): the dots and their numbers stay at their places in the world, loop after loop, and
-   move on screen as you move. When a dot leaves the screen, all three come back inside the frame.
-   The log says `preview spots anchored in the world`, in the village too; `anchored on screen:
-   no live camera` means the mod got no camera there. Close the page: the preview disappears.
+7. In a quest, open the page, walk and turn the camera: the dots and their numbers stay at their
+   places in the world, loop after loop, and move on screen as you move. When a dot leaves the
+   screen, all three come back inside the frame. The log says `preview spots anchored in the
+   world`. In the village the dots stay at their places in the frame and the log says `anchored
+   on screen: no live camera`. Close the page: the preview disappears.
 8. Close the page after changing Number size: the `settings saved` line appears. Close it after
    changing only Preview mode: no save line.
 9. Restart the game: the saved settings are kept, Preview mode is Single and Random hit types Off.
@@ -45,7 +45,7 @@ These are info lines; MHGURecomp's `recomplog.txt` shows them.
 
 | Line | Meaning |
 | --- | --- |
-| `[damage-numbers] r46 loaded: 11 Forge hooks` | Started with every hook installed |
+| `[damage-numbers] r47 loaded: 11 Forge hooks` | Started with every hook installed |
 | `[damage-numbers] settings and help added to Purple-lib` | Purple-lib took the page and its seven topics |
 | `[damage-numbers] preview spots anchored in the world` | The preview found a live camera; its dots stay in the world |
 | `[damage-numbers] preview spots anchored on screen: no live camera` | No camera reached the mod while the page was open; the dots stay on screen |

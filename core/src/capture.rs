@@ -572,8 +572,8 @@ impl CaptureState {
                 }
             }
         // Camera tap runs inside viewport scope 3. Validate its camera vtable (uQuestCamera
-        // main+0x1730d0c or uVillageCamera main+0x1730e10, the saved DTI), then copy
-        // view/projection matrices and the rectangle while arguments live.
+        // main+0x1730d0c), then copy view/projection matrices and the rectangle while arguments
+        // live. uVillageCamera (main+0x1730e10) is left out: its samples lag the view.
         // No borrowed matrix pointer crosses into the rendering callback.
         } else if kind == 4 {
             if let Some(index) = self.find(3) {
@@ -581,7 +581,7 @@ impl CaptureState {
                 if memory.readable(viewport.subject, 0x28) {
                     let camera = memory.word(viewport.subject + 0x24);
                     if memory.readable(camera, 4)
-                        && matches!(memory.word(camera).wrapping_sub(memory.base()), 0x1730d0c | 0x1730e10)
+                        && memory.word(camera).wrapping_sub(memory.base()) == 0x1730d0c
                     {
                         let mut record = Record {
                             kind: 3,

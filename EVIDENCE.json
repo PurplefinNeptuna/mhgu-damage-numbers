@@ -2622,5 +2622,22 @@
     "runtime_test": "NOT RUN",
     "change": "camera capture accepts uVillageCamera (main+0x1730e10) besides uQuestCamera (main+0x1730d0c), from the saved DTI; r45's reuse of stale camera samples reverted; preview dots smaller (radius 3/2 at 720p)",
     "tests": "./build.sh test PASSED (41 core behavior tests, config, parity, 24 r2 scenes, ARM gateways); verify: 74 resolved imports"
+  },
+  "recomp_r46_2026_11_14": {
+    "emulator": "MHGURecomp",
+    "log": "/mnt/storage2/Programs/MHGURecomp/recomplog.txt",
+    "recomp_lines": [
+      "[forge] [INFO] [damage-numbers] r46 loaded: 11 Forge hooks",
+      "[forge] [INFO] [damage-numbers] preview spots anchored in the world"
+    ],
+    "user_report": "\"the non quest camera update is so slow, if you cant find why, go back to flat 2d position\""
+  },
+  "static_r47": {
+    "date": "2026-11-14",
+    "nro_sha256": "d6ec2465936bf15f79d93d72e31e48d2d7d6c88b405f9e9045613bb762f3f19e",
+    "archive_sha256": "d7786ab2b51ffb773a18409acd530737f9d6c3ffbf4d7e5eb8359915d302f5f1",
+    "runtime_test": "NOT RUN",
+    "change": "camera capture accepts only uQuestCamera again; the village preview is flat on screen",
+    "tests": "./build.sh test PASSED (41 core behavior tests, config, parity, 24 r2 scenes, ARM gateways); verify: 74 resolved imports"
   }
 }
