@@ -10,8 +10,8 @@ Purple-lib, the Plugin UI panel and the INI work as in r42 and no Purple-lib lin
 1. Keep an r42 `damage_numbers.ini` (with its `other =` line) and start the game. The mod loads,
    the Plugin UI panel shows Spread at 0.8 and no Show other damage, and the other settings are
    the ones the file had.
-2. In the village or hub, in English, open **Options > Mod Options** and press L or R to reach
-   **Damage Numbers**: eight rows, Show damage numbers through Restore defaults. A frame labelled
+2. In the village or hub, in English, open **Options > Mod Options** and choose **Damage Numbers**
+   in the list: eight rows, Show damage numbers through Restore defaults. A frame labelled
    "Damage number preview" sits on the left of the screen, clear of the Options window, with
    three white dots in it.
 3. With Preview mode on Single, each dot gets one number, then the frame is empty for about half
