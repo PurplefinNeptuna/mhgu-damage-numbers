@@ -475,6 +475,40 @@ impl Resources {
             }
         }
     }
+    /// The Mod Options preview's frame: a thin border with no fill, a filled label tab at its top
+    /// left, and a dot at each example spot that is on screen. Every size follows the view's
+    /// height (reference 720), so no measure is a fixed pixel count. Drawn on the background list
+    /// before the preview's numbers, so it stays under them.
+    pub fn preview_frame(&self, view: &View, frame: Rect, dots: [Option<Point>; 3]) {
+        const LABEL: &str = "Damage number preview";
+        let draw = DrawList::background();
+        if draw.raw().is_null() {
+            return;
+        }
+        let k = view.height / 720.0;
+        let (min, max) = (ImVec2::new(frame.left, frame.top), ImVec2::new(frame.right, frame.bottom));
+        // A dark stroke under the light one keeps the border visible on bright ground.
+        draw.add_rect(min, max, imgui_color(0x0c0906, 0.55), 0.0, 2.5 * k, ImDrawFlags(0));
+        draw.add_rect(min, max, imgui_color(0xf2e8d0, 0.9), 0.0, 1.0 * k, ImDrawFlags(0));
+        // Forge's default font, as Classic numbers use; calc_text_size measures at its own size.
+        let font = Font::current();
+        let size = 15.0 * k;
+        let base = Font::current_size();
+        let width = if base > 0.0 { forge::imgui::calc_text_size(LABEL, false, -1.0).x * size / base } else { 0.0 };
+        let (pad_x, pad_y) = (8.0 * k, 4.0 * k);
+        draw.add_rect_filled(
+            min,
+            ImVec2::new(frame.left + width + 2.0 * pad_x, frame.top + size + 2.0 * pad_y),
+            imgui_color(0x702c24, 0.94),
+            0.0,
+        );
+        draw.add_text_with_font(&font, size, ImVec2::new(frame.left + pad_x, frame.top + pad_y), imgui_color(0xf3d36b, 1.0), LABEL);
+        for dot in dots.into_iter().flatten() {
+            let at = ImVec2::new(dot.x, dot.y);
+            draw.add_circle_filled(at, 6.0 * k, imgui_color(0x0c0906, 0.6), 0);
+            draw.add_circle_filled(at, 4.0 * k, imgui_color(0xffffff, 0.95), 0);
+        }
+    }
     pub fn draw(&mut self, view: &View, numbers: &[DrawNumber]) {
         if numbers.is_empty() {
             return;

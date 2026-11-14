@@ -31,6 +31,17 @@ pub mod imgui {
         ));
     }
     pub use draw::DrawList;
+    // forge-rs layout.rs's calc_text_size, cast for the host's signed C char.
+    pub fn calc_text_size(text: &str, hide_text_after_double_hash: bool, wrap_width: f32) -> sys::imgui::ImVec2 {
+        unsafe {
+            sys::imgui::igCalcTextSize(
+                text.as_ptr().cast(),
+                text.as_ptr().add(text.len()).cast(),
+                hide_text_after_double_hash,
+                wrap_width,
+            )
+        }
+    }
 }
 #[path = "../../../src/render.rs"]
 mod render;

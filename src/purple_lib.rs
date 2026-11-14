@@ -8,7 +8,7 @@
 use crate::runtime::{EDITED, SETTINGS};
 use core::cell::UnsafeCell;
 use core::ffi::{c_char, c_void};
-use core::sync::atomic::{AtomicBool, Ordering};
+use core::sync::atomic::{AtomicBool, AtomicPtr, Ordering};
 use damage_numbers_core::Settings;
 use damage_numbers_core::purple_lib::{self as api, Api, Help, LANGUAGES, OptionRow, Options, ROW_TEXT};
 
@@ -16,6 +16,15 @@ use damage_numbers_core::purple_lib::{self as api, Api, Help, LANGUAGES, OptionR
 pub static SAVE: AtomicBool = AtomicBool::new(false);
 /// A saved row changed since the page opened; `closed` turns it into `SAVE`.
 static DIRTY: AtomicBool = AtomicBool::new(false);
+/// Purple-lib's table, kept from a successful registration; it stays valid for the whole run.
+static API: AtomicPtr<Api> = AtomicPtr::new(core::ptr::null_mut());
+
+/// Whether the Options window shows this page now; false without Purple-lib. Any thread.
+pub fn shown() -> bool {
+    // SAFETY: only Purple-lib's process-lifetime table is ever stored.
+    let Some(api) = (unsafe { API.load(Ordering::Acquire).as_ref() }) else { return false };
+    (api.options_shown)(&OPTIONS.0)
+}
 
 extern "C" fn title(_: *mut c_void, _: u32) -> *const c_char {
     api::TITLE.as_ptr()
@@ -169,6 +178,9 @@ pub fn register(purple: &Api) -> Registered {
     }
     // The page's help names the page, so it goes in after the page; topics show in this order.
     let options = (purple.add_options)(&OPTIONS.0);
+    if options {
+        API.store((purple as *const Api).cast_mut(), Ordering::Release);
+    }
     let help = options && HELP.0.iter().all(|topic| (purple.add_set_help)(&OPTIONS.0, topic));
     if options && help { Registered::Done } else { Registered::Refused { options, help } }
 }

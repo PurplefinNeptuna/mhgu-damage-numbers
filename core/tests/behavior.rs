@@ -905,3 +905,125 @@ fn purple_lib_text_fits_in_every_language() {
         }
     }
 }
+// ---- Mod Options preview ----
+use damage_numbers_core::preview::{self, PreviewState};
+
+// A perspective camera (clip w = view depth) turned and moved off the origin.
+fn perspective() -> View {
+    let mut v = View::screen(1920.0, 1080.0).unwrap();
+    v.world_to_clip = [
+        0.98, 0.0, -0.3, 40.0, //
+        0.0, 1.73, 0.1, -25.0, //
+        0.0, 0.0, 0.001, 0.5, //
+        0.3, -0.1, 0.95, 120.0,
+    ];
+    v
+}
+#[test]
+fn unproject_returns_the_world_point_at_the_given_depth() {
+    let v = perspective();
+    for p in preview::spots(preview::frame(&v)) {
+        let world = preview::unproject(p, &v, preview::DEPTH).unwrap();
+        let m = &v.world_to_clip;
+        let w = m[12] * world.x + m[13] * world.y + m[14] * world.z + m[15];
+        assert!((w - preview::DEPTH).abs() < 0.01, "w {w}");
+        let back = project(world, &v).unwrap();
+        assert!((back.x - p.x).abs() < 0.05 && (back.y - p.y).abs() < 0.05, "{back:?} vs {p:?}");
+    }
+    // A matrix with no depth row (the no-camera view) has no answer.
+    assert_eq!(preview::unproject(Point { x: 10.0, y: 10.0 }, &View::screen(1920.0, 1080.0).unwrap(), 600.0), None);
+}
+#[test]
+fn frame_and_spots_are_fractions_of_the_view() {
+    for (w, h) in [(1280.0, 720.0), (1920.0, 1080.0), (2560.0, 1080.0)] {
+        let v = View::screen(w, h).unwrap();
+        let f = preview::frame(&v);
+        assert!((f.left - w * 0.025).abs() < 1e-3 && (f.right - w * 0.595).abs() < 1e-2);
+        assert!(((f.top + f.bottom) * 0.5 - h * 0.5).abs() < 1e-2, "vertically centred");
+        let s = preview::spots(f);
+        assert!(s[0].x < s[1].x && s[1].x < s[2].x && s.iter().all(|p| p.y == s[0].y));
+    }
+}
+#[test]
+fn loop_timing_follows_the_mode() {
+    assert_eq!(preview::spawn_times(Preview::Single), &[0.0]);
+    assert_eq!(preview::spawn_times(Preview::Burst), &[0.0, 0.15, 0.3, 0.45, 0.6]);
+    assert_eq!(preview::spawn_times(Preview::Multi), &[0.0; 5]);
+    assert!((preview::loop_length(Preview::Single, 0.9) - 1.4).abs() < 1e-6);
+    assert!((preview::loop_length(Preview::Burst, 0.9) - 2.0).abs() < 1e-6);
+    assert!((preview::loop_length(Preview::Multi, 2.0) - 2.5).abs() < 1e-6);
+}
+fn preview_counts(mode: Preview, times: &[f32]) -> Vec<usize> {
+    let mut p = PreviewState::default();
+    let s = Settings { preview: mode, ..Settings::default() };
+    let v = perspective();
+    times.iter().map(|&t| { p.update(100.0 + t, s, &v); p.model.count }).collect()
+}
+#[test]
+fn each_mode_spawns_its_hits_and_loops() {
+    // Single: three hits, gone after 0.9 s, back after the 0.5 s pause.
+    assert_eq!(preview_counts(Preview::Single, &[0.0, 0.5, 1.0, 1.39, 1.41]), [3, 3, 0, 0, 3]);
+    // Burst: one more hit per spot every 0.15 s.
+    assert_eq!(preview_counts(Preview::Burst, &[0.0, 0.16, 0.31, 0.61, 1.0, 1.99, 2.01]), [3, 6, 9, 15, 12, 0, 3]);
+    // Multi: fifteen at once.
+    assert_eq!(preview_counts(Preview::Multi, &[0.0, 0.8, 0.95]), [15, 15, 0]);
+}
+#[test]
+fn normal_hit_types_and_their_colours_in_every_style() {
+    for style in [Style::Wilds, Style::Rise, Style::Classic] {
+        let mut p = PreviewState::default();
+        // Show damage numbers off does not hide the preview.
+        let s = Settings { style, enabled: false, ..Settings::default() };
+        let view = p.update(5.0, s, &perspective());
+        let mut out = [DrawNumber::default(); 128];
+        let count = layout_at(&p.model, &view, 5.1, &mut out, &mut p.placement);
+        assert_eq!(count, 3, "{style:?}");
+        let mut drawn: Vec<_> = out[..count].iter().collect();
+        drawn.sort_by_key(|n| n.key.target);
+        let expected = [(Tint::Weak, Critical::Positive), (Tint::White, Critical::Negative), (Tint::Gray, Critical::None)];
+        for (n, (tint, critical)) in drawn.iter().zip(expected) {
+            assert_eq!((n.color, n.critical, n.style), (rgb(tint, style), critical, style));
+        }
+        for e in &p.model.numbers[..p.model.count] {
+            assert!((1..=150).contains(&e.total_damage));
+        }
+    }
+}
+#[test]
+fn without_a_camera_the_spots_stay_at_their_screen_points() {
+    let screen = View::screen(1280.0, 720.0).unwrap();
+    let mut p = PreviewState::default();
+    let view = p.update(1.0, Settings::default(), &screen);
+    let spots = preview::spots(preview::frame(&screen));
+    for (anchor, spot) in p.anchors().unwrap().iter().zip(spots) {
+        let at = project(*anchor, &view).unwrap();
+        assert!((at.x - spot.x).abs() < 0.01 && (at.y - spot.y).abs() < 0.01);
+    }
+    // A camera appearing starts a new loop anchored in the world.
+    p.update(1.1, Settings::default(), &perspective());
+    let world = p.anchors().unwrap()[0];
+    assert!(world.z.abs() > 1.0, "{world:?}");
+}
+#[test]
+fn random_types_cover_every_kind_and_damage_stays_in_range() {
+    let mut p = PreviewState::default();
+    let s = Settings { random: true, preview: Preview::Multi, ..Settings::default() };
+    let (mut tints, mut crits) = (std::collections::BTreeSet::new(), std::collections::BTreeSet::new());
+    for n in 0..40 {
+        p.update(n as f32 * 3.0, s, &perspective());
+        for e in &p.model.numbers[..p.model.count] {
+            tints.insert(tint(*e) as u8);
+            crits.insert(e.critical as u8);
+            assert!((1..=150).contains(&e.total_damage));
+        }
+    }
+    assert_eq!((tints.len(), crits.len()), (3, 3));
+}
+#[test]
+fn stopping_clears_the_preview() {
+    let mut p = PreviewState::default();
+    p.update(1.0, Settings::default(), &perspective());
+    assert!(p.model.count > 0);
+    p.stop();
+    assert_eq!((p.model.count, p.anchors()), (0, None));
+}

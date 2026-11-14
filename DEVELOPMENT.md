@@ -1,6 +1,6 @@
 # Damage Numbers: development and research
 
-**Current state.** r43 DEVELOPMENT, not built as a candidate and not run. It removes Show other damage, adds Spread, and puts the settings on a Purple-lib Mod Options page with help in seven languages; the page's preview is the next phase of `work/damage-numbers/PLAN.md`. The last gameplay-accepted build is r42 (`build/damage-numbers/candidates/r42/`, release ZIP and SHA256SUMS there): the user reported steady numbers on MHGURecomp with FSR on. Eden, Ryubing and handheld were not run with r42; the last Eden-accepted build is `build/damage-numbers/candidates/r38-accepted/`. DISTRIBUTION.json is authoritative for status and hashes; EVIDENCE.json holds every version's runs.
+**Current state.** r43 DEVELOPMENT, not built as a candidate and not run. It removes Show other damage, adds Spread, and puts the settings on a Purple-lib Mod Options page with help in seven languages and a live preview; packaging the candidate is the last phase of `work/damage-numbers/PLAN.md`. The last gameplay-accepted build is r42 (`build/damage-numbers/candidates/r42/`, release ZIP and SHA256SUMS there): the user reported steady numbers on MHGURecomp with FSR on. Eden, Ryubing and handheld were not run with r42; the last Eden-accepted build is `build/damage-numbers/candidates/r38-accepted/`. DISTRIBUTION.json is authoritative for status and hashes; EVIDENCE.json holds every version's runs.
 
 What the current build does at its compatibility edges:
 
@@ -100,6 +100,14 @@ Optional: Purple-lib r17 or later calls the exported `purplelib_on_register` (`l
 - Rows: Show damage numbers and Random hit types use the game's Off/On (StartMenuMsg 175/176); Style is Wilds, Rise, Classic (row values 0..2, not `Style`'s numbering); Number size is 50%..300% and Spread 0%..200%, numbers rows in steps of 10; Duration is a text row, 0.4 s..2.0 s, with comma decimals for French, Spanish, German and Italian and 秒 for Chinese; Preview mode is Single, Burst, Multi; Restore defaults is an action row. A step value divided by 10 gives the decimal literal's f32, so the defaults compare equal; `get` shows the nearest step for a slider value between steps.
 - `get`/`set` run in the game's update and touch only `runtime::SETTINGS`. A saved row (0..4) marks the page dirty; `closed` turns that into `purple_lib::SAVE`, and the render thread saves the INI on its next frame. Preview rows never save. Restore defaults sets `SAVE` itself, because Purple-lib calls `closed` only after a `set`.
 - Text: English, French, Spanish, German, Italian, Traditional and Simplified Chinese, from the game's language byte; anything else is English. Help pages hold five lines of 40 columns, help-bar lines two, and values 11 columns, a CJK character counting two. The translations are agent-drafted and no native speaker has reviewed them.
+
+### Mod Options preview
+
+While `purple_lib::shown()` (Purple-lib's `options_shown` for this page) is true, `runtime::render` draws a preview after the real numbers; otherwise it stops it. `core/src/preview.rs` holds the logic and `PreviewState`, which has its own `Model` and `Placement`, so preview hits never mix with real ones. The production `layout` and `Resources::draw` draw them, so style, size, duration and spread apply as for real hits, and Show damage numbers off does not hide the preview.
+
+- Frame: fractions of the visible view (left 2.5%, 57% wide, 38% tall, vertically centred), so it ends before the Options window. `Resources::preview_frame` draws a light border over a dark one, a filled label tab "Damage number preview" in English in Forge's default font, and a dot per spot; all sizes scale with view height / 720.
+- Spots at 1/6, 1/2 and 5/6 of the frame's width. At each loop start a spot becomes the world point at clip depth `preview::DEPTH` (600, unverified world units) that projects to it, so turning the camera moves the spots and their hits like real ones. With no usable camera the spots are anchored in a flat identity view and stay put; a camera appearing or vanishing starts a new loop.
+- Loop: Single one hit per spot at 0 s, Burst five at 0.15 s intervals, Multi five at once; the loop lasts the last spawn plus the duration plus 0.5 s, and a mode change starts a new one. Normal types: left weak point (hitzone 60) with positive critical, middle hitzone 20 with negative critical, right a bounce. Random hit types pick weak/normal/bounce and the critical evenly. Damage is 1..150 (xorshift32).
 
 ### Unsafe boundaries
 

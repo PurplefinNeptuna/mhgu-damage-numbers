@@ -13,6 +13,7 @@ use damage_numbers_core::{
     capture::{CaptureState, Memory, RawFrame, Record},
     mailbox::{Cursor, Mailbox},
     presentation::{self, DrawNumber, Placement},
+    preview,
     *,
 };
 use forge::os::{lock::ScopedLock, mutex::Mutex, once_lock::OnceLock, tls::ThreadLocal};
@@ -55,6 +56,7 @@ struct Consumer {
     retry: u64,
     feedback: alloc::string::String,
     viewport_warning: bool,
+    preview: preview::PreviewState,
 }
 // Call the closure while holding Forge's scoped mutex guard. Both the mutable
 // Consumer borrow and lock end when the closure returns, including early exits.
@@ -107,6 +109,7 @@ pub fn start() {
             retry: 0,
             feedback: alloc::string::String::new(),
             viewport_warning: false,
+            preview: preview::PreviewState::default(),
         }),
     });
 }
@@ -371,6 +374,27 @@ pub fn render() {
             |text, pixels, style| state.resources.measure(text, pixels, style),
         );
         state.resources.draw(&view, &numbers[..count]);
+        // The Mod Options preview, while Purple-lib shows this mod's page. Its hits live in their own
+        // Model, so they never mix with real ones; the production layout and renderer draw them.
+        if !(time.is_finite() && crate::purple_lib::shown()) {
+            state.preview.stop();
+            return;
+        }
+        let preview_view = state.preview.update(time, SETTINGS.load(), &view);
+        let dots = state
+            .preview
+            .anchors()
+            .map_or([None; 3], |a| a.map(|p| presentation::project(p, &preview_view)));
+        state.resources.preview_frame(&view, preview::frame(&view), dots);
+        let count = presentation::layout(
+            &state.preview.model,
+            &preview_view,
+            time,
+            &mut numbers,
+            &mut state.preview.placement,
+            |text, pixels, style| state.resources.measure(text, pixels, style),
+        );
+        state.resources.draw(&preview_view, &numbers[..count]);
     });
 }
 /// Closing the settings tree affects only this callback. The overlay keeps processing through free_render.

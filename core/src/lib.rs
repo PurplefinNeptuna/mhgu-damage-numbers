@@ -3,6 +3,7 @@
 pub mod capture;
 pub mod mailbox;
 pub mod presentation;
+pub mod preview;
 pub mod purple_lib;
 use core::fmt;
 use core::str::FromStr;
