@@ -2661,5 +2661,18 @@
     "runtime_test": "NOT RUN (r47 is the run)",
     "change": "P7: the preview anchor diagnostic log removed; no other change",
     "tests": "./build.sh test PASSED (41 core behavior tests, config, parity, 24 r2 scenes, ARM gateways); verify: 74 resolved imports"
+  },
+  "recomp_r48_2026_11_14": {
+    "emulator": "MHGURecomp, with Purple-lib r20",
+    "log": "/mnt/storage2/Programs/MHGURecomp/recomplog.txt",
+    "recomp_lines": [
+      "[forge] [INFO] [damage-numbers] r48 loaded: 11 Forge hooks",
+      "[forge] [INFO] [purple-lib] r20 loaded: 11 hooks; API version 4",
+      "[forge] [INFO] [damage-numbers] settings and help added to Purple-lib",
+      "[forge] [INFO] [damage-numbers] settings saved"
+    ],
+    "installed_nro_matches": true,
+    "nro_sha256": "b352c01651b72e81b6c762c85d18f91665a7c943703cdba69dc8e29205d4a9ac",
+    "user_report": "\"its ran\""
   }
 }

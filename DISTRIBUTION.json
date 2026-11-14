@@ -11,7 +11,7 @@
   "version": "r48",
   "package_name": "damage-numbers",
   "archive": "damage-numbers-r48.zip",
-  "runtime_test": "The user ran r47 on MHGURecomp with Purple-lib r20 and reported \"okay, it working at least\" (installed NRO matches the r47 candidate). r48 is r47 with its preview diagnostic log line removed and was promoted on static validation; r48 itself has not run.",
+  "runtime_test": "The user ran r48 on MHGURecomp with Purple-lib r20 (\"its ran\"); recomplog.txt logs \"r48 loaded: 11 Forge hooks\", the Purple-lib registration and a settings save, and the installed NRO matches the release. r47 ran there before with \"okay, it working at least\".",
   "gamebanana": {
     "ai_code": {
       "used": true,
@@ -63,7 +63,7 @@
   },
   "target": "MHGU Nintendo Switch 1.4.0; upstream Forge 1.5.1; Eden/Ryujinx.",
   "limitations": [
-    "r48 was promoted on static validation; its runtime evidence is r47 on MHGURecomp with Purple-lib r20. Eden, Ryubing and Switch hardware were not run with r47 or r48",
+    "r48 ran on MHGURecomp with Purple-lib r20; Eden, Ryubing and Switch hardware were not run with r47 or r48",
     "In the village the preview stays flat on screen: uVillageCamera samples lagged the view (r46)",
     "Mod Options and help text other than English is agent-translated and not reviewed by native speakers",
     "Ryubing: r38 and earlier stop the game with an undefined QADD/QSUB once monster HP bookkeeping runs; r39 ran there, unitemized",
@@ -131,7 +131,7 @@
       "mods/damage-numbers/EVIDENCE.json"
     ],
     "static_summary": "r48: pinned toolchain build; ./build.sh test passed (41 core behavior tests including the Purple-lib rows and text limits and the preview, its spots kept in the world across loops, 7 config tests including an r42 INI with other and no spread, r25 parity, 24 r2 pixel scenes unchanged at spread 1.0, ARM gateways); verify: \"PASS: ARM32 layouts, 74 resolved imports, callbacks, 15 game windows and twelve NZCVQ restores\" with purplelib_on_register exported. No emulator run.",
-    "manual_summary": "The user ran r47 on MHGURecomp with Purple-lib r20 and reported \"okay, it working at least\"; recomplog.txt logs \"[damage-numbers] r47 loaded: 11 Forge hooks\", the Purple-lib registration and two settings saves, and the installed NRO matches the r47 candidate. r48 removes only the preview's diagnostic log line."
+    "manual_summary": "The user ran r48 on MHGURecomp with Purple-lib r20 (\"its ran\"): recomplog.txt logs \"[damage-numbers] r48 loaded: 11 Forge hooks\", \"settings and help added to Purple-lib\" and \"settings saved\", and the installed NRO matches the release (b352c016). r47 ran there before (\"okay, it working at least\")."
   },
   "support": {
     "DEVELOPMENT.md": "mods/damage-numbers/DEVELOPMENT.md",
