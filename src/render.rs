@@ -505,8 +505,8 @@ impl Resources {
         draw.add_text_with_font(&font, size, ImVec2::new(frame.left + pad_x, frame.top + pad_y), imgui_color(0xf3d36b, 1.0), LABEL);
         for dot in dots.into_iter().flatten() {
             let at = ImVec2::new(dot.x, dot.y);
-            draw.add_circle_filled(at, 6.0 * k, imgui_color(0x0c0906, 0.6), 0);
-            draw.add_circle_filled(at, 4.0 * k, imgui_color(0xffffff, 0.95), 0);
+            draw.add_circle_filled(at, 3.0 * k, imgui_color(0x0c0906, 0.6), 0);
+            draw.add_circle_filled(at, 2.0 * k, imgui_color(0xffffff, 0.95), 0);
         }
     }
     pub fn draw(&mut self, view: &View, numbers: &[DrawNumber]) {

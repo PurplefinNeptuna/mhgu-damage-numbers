@@ -2610,5 +2610,17 @@
     "runtime_test": "NOT RUN",
     "change": "preview anchors with this player's last camera sample at any age (real numbers keep 0.2 s); diagnostic log adds the sample's age",
     "tests": "./build.sh test PASSED (41 core behavior tests, config, parity, 24 r2 scenes, ARM gateways); verify: 74 resolved imports"
+  },
+  "user_r45_2026_11_14": {
+    "user_report": "\"nah, there are no camera at all in village, not moving\"",
+    "run_log": "not provided"
+  },
+  "static_r46": {
+    "date": "2026-11-14",
+    "nro_sha256": "075a55b2e2208dc982e0a14a5d6e2d392796ae02950d63dee57788412ef99cf9",
+    "archive_sha256": "e593502fce37405eb7ea5de26fb3b06532dcfebe94502475d98818812c05fa9e",
+    "runtime_test": "NOT RUN",
+    "change": "camera capture accepts uVillageCamera (main+0x1730e10) besides uQuestCamera (main+0x1730d0c), from the saved DTI; r45's reuse of stale camera samples reverted; preview dots smaller (radius 3/2 at 720p)",
+    "tests": "./build.sh test PASSED (41 core behavior tests, config, parity, 24 r2 scenes, ARM gateways); verify: 74 resolved imports"
   }
 }
