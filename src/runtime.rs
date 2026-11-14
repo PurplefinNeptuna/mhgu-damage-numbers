@@ -7,10 +7,10 @@ use crate::{
 };
 use core::{
     cell::UnsafeCell,
-    sync::atomic::{AtomicU32, Ordering},
+    sync::atomic::{AtomicBool, AtomicU32, Ordering},
 };
 use damage_numbers_core::{
-    capture::{self, CaptureState, Memory, RawFrame, Record},
+    capture::{CaptureState, Memory, RawFrame, Record},
     mailbox::{Cursor, Mailbox},
     presentation::{self, DrawNumber, Placement},
     *,
@@ -24,6 +24,10 @@ static CLAIMED: AtomicU32 = AtomicU32::new(0);
 static CONSUMER: AtomicU32 = AtomicU32::new(0);
 static MAILBOXES: [Mailbox; 16] = [const { Mailbox::new() }; 16];
 static STATE: OnceLock<Shared> = OnceLock::new();
+// The current settings. Every writer (INI load, ImGui panel, Mod Options) stores here;
+// consume copies them into the Model. EDITED stops a late INI load replacing a user edit.
+pub static SETTINGS: SharedSettings = SharedSettings::new();
+pub static EDITED: AtomicBool = AtomicBool::new(false);
 // Mutex protects the Consumer, while UnsafeCell permits mutable access
 // through a shared static reference. with_state is the sole access gate.
 // Native capture uses TLS/mailboxes and never takes this display lock.
@@ -51,8 +55,6 @@ struct Consumer {
     retry: u64,
     feedback: alloc::string::String,
     viewport_warning: bool,
-    vitals: Vitals,
-    other_serial: u32,
 }
 // Call the closure while holding Forge's scoped mutex guard. Both the mutable
 // Consumer borrow and lock end when the closure returns, including early exits.
@@ -77,7 +79,7 @@ pub fn start() {
     let installed = if clock.is_some() {
         match Installed::install() {
             Ok(value) => {
-                log::info!("[damage-numbers] r42 loaded: {} Forge hooks", value.count());
+                log::info!("[damage-numbers] r43 loaded: {} Forge hooks", value.count());
                 Some(value)
             }
             Err(reason) => {
@@ -105,8 +107,6 @@ pub fn start() {
             retry: 0,
             feedback: alloc::string::String::new(),
             viewport_warning: false,
-            vitals: Vitals::default(),
-            other_serial: 0,
         }),
     });
 }
@@ -142,9 +142,16 @@ impl Consumer {
         }
         self.loaded = true;
         match config::load() {
-            Ok(settings) => {
-                self.model.configure(settings);
+            // An edit made before storage was ready wins over the file. The preview fields are
+            // session-only, so the file's defaults for them are replaced by the current values.
+            Ok(mut settings) if !EDITED.load(Ordering::Acquire) => {
+                let current = SETTINGS.load();
+                (settings.preview, settings.random) = (current.preview, current.random);
+                if SETTINGS.store(settings) {
+                    self.model.configure(settings);
+                }
             }
+            Ok(_) => {}
             Err(reason) => {
                 log::warn!("[damage-numbers] config: {}", reason);
             }
@@ -159,20 +166,22 @@ impl Consumer {
         }
         self.model.reset(epoch);
         self.placement.reset();
-        self.vitals.clear();
     }
     fn consume(&mut self) {
         if self.installed.is_none() {
             return;
         }
         self.load_config();
+        let settings = SETTINGS.load();
+        if settings != self.model.settings {
+            self.model.configure(settings);
+        }
         let memory = NativeMemory;
         let player = memory.local_player();
         let now = platform::tick();
         let Some((origin, frequency)) = self.clock else {
             return;
         };
-        let time = seconds(now, origin, frequency);
         // A changed local-player identity ends the display session: camera and queued
         // hits from the previous player must not appear for this one.
         if player != self.player {
@@ -199,11 +208,6 @@ impl Consumer {
                 // The mailbox slot becomes application in HitKey to disambiguate serials.
                 1 => {
                     hits += 1;
-                    // Every published amount, shown or not, repays HP loss before
-                    // "other" numbers consider it unexplained.
-                    if let Some(time) = time {
-                        self.vitals.expect(record.monster, record.damage, time);
-                    }
                     let source = match record.feedback[0].reserved {
                         0 => Some(Source::Attack),
                         1 => Some(Source::Monster),
@@ -281,39 +285,6 @@ impl Consumer {
             }
         }
     }
-    // Opt-in HP accounting: HP loss nothing published within the settle window
-    // becomes one ownerless "other" number at the monster root. Mailbox slot 16
-    // does not exist, so its application value cannot collide with a producer's.
-    fn other(&mut self, now: f32) {
-        if !self.model.settings.enabled || !self.model.settings.other || self.player == 0 {
-            self.vitals.clear();
-            return;
-        }
-        for slot in 0..MONSTERS {
-            let (monster, hp, max, position) =
-                capture::monster_vital(&NativeMemory, slot).unwrap_or_default();
-            let Some(amount) = self.vitals.observe(slot, monster, hp, max, now) else {
-                continue;
-            };
-            self.other_serial = self.other_serial.wrapping_add(1).max(1);
-            self.model.capture(Event {
-                key: HitKey {
-                    epoch: self.model.epoch,
-                    serial: self.other_serial,
-                    target: monster,
-                    application: 16,
-                },
-                position: position.valid().then_some(position),
-                total_damage: amount,
-                physical_hzv: -1,
-                source: Source::Other,
-                owner: Owner::Unknown,
-                critical: Critical::None,
-                bounced: false,
-                captured_at: now,
-            });
-        }
-    }
 }
 pub fn update() {
     with_state(|state| state.load_config());
@@ -338,9 +309,6 @@ pub fn render() {
         };
         let now = platform::tick();
         let time = seconds(now, origin, frequency).unwrap_or(f32::NAN);
-        if time.is_finite() {
-            state.other(time);
-        }
         let backing = forge::imgui::get_io().DisplaySize;
         // Forge reports the allocation size. MHGU can present a smaller crop in
         // handheld mode, so projection, layout and fallback share its applied size.
@@ -408,17 +376,10 @@ pub fn panel() {
         state.consume();
         // Widgets edit a copy, then configure validates and applies it as one snapshot.
         // The ## suffixes give each setting a stable plugin-specific ImGui identity.
-        let mut settings = state.model.settings;
+        let mut settings = SETTINGS.load();
         let mut changed = forge::imgui::checkbox(
             c"Show damage numbers##damage-numbers",
             &mut settings.enabled,
-        );
-        changed |= forge::imgui::checkbox(
-            c"Show other damage##damage-numbers",
-            &mut settings.other,
-        );
-        forge::imgui::set_item_tooltip(
-            c"Shows monster HP loss that no detected hit, poison, blast or mount accounts for.\nDamage Numbers can't tell where it came from; online, it may include other hunters' attacks.\nDamage landing at the same moment can show as one number.",
         );
         let preview = match settings.style {
             Style::Wilds => c"Wilds",
@@ -461,6 +422,14 @@ pub fn panel() {
             2.0,
             forge::sys::imgui::ImGuiSliderFlags::AlwaysClamp,
         );
+        changed |= forge::imgui::slider_float(
+            c"Spread##damage-numbers",
+            &mut settings.spread,
+            0.0,
+            2.0,
+            forge::sys::imgui::ImGuiSliderFlags::AlwaysClamp,
+        );
+        forge::imgui::set_item_tooltip(c"How far apart numbers move when they would overlap. 0 stacks them on the hit.");
         if forge::imgui::button(
             c"Restore defaults##damage-numbers",
             forge::sys::imgui::ImVec2::new(0.0, 0.0),
@@ -470,7 +439,9 @@ pub fn panel() {
         }
         // Mark load complete after a user edit so a delayed disk load cannot replace
         // what the player just chose. Reset follows this same in-memory path.
-        if changed && state.model.configure(settings) {
+        if changed && SETTINGS.store(settings) {
+            EDITED.store(true, Ordering::Release);
+            state.model.configure(settings);
             state.loaded = true;
             state.feedback = alloc::string::String::from("Settings changed");
         }
@@ -479,7 +450,7 @@ pub fn panel() {
             forge::sys::imgui::ImVec2::new(0.0, 0.0),
         ) {
             state.loaded = true;
-            match config::save(state.model.settings) {
+            match config::save(SETTINGS.load()) {
                 Ok(()) => {
                     state.feedback = alloc::string::String::from(
                         "Saved damage_numbers.ini in MHGU's save folder",

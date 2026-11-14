@@ -58,6 +58,7 @@ macro_rules! bounded_setting {
 // These limits match the settings sliders and Settings::valid in the core.
 bounded_setting!(Scale, 1.0, 0.5, 3.0);
 bounded_setting!(Lifetime, 0.9, 0.4, 2.0);
+bounded_setting!(Spread, 0.8, 0.0, 2.0);
 // The derives turn this typed structure into the DamageNumbers INI section.
 // The section attribute starts the section; the following fields belong to it.
 #[derive(Default, Clone, Copy, Debug, PartialEq, forge::IniSerialize, forge::IniDeserialize)]
@@ -67,8 +68,9 @@ pub struct Config {
     pub style: Style,
     pub scale: Scale,
     pub lifetime: Lifetime,
-    // Plain bool defaults to false, matching the opt-in "other damage" default.
-    pub other: bool,
+    // A missing key (any r42 INI) loads the 0.8 default. The preview mode and random hit
+    // types are session-only and never written here.
+    pub spread: Spread,
 }
 // Unwrap the INI-specific field types into the portable gameplay settings.
 // The reverse conversion below wraps a settings snapshot for serialization.
@@ -79,7 +81,8 @@ impl From<Config> for Settings {
             style: c.style,
             scale: c.scale.0,
             lifetime: c.lifetime.0,
-            other: c.other,
+            spread: c.spread.0,
+            ..Settings::default()
         }
     }
 }
@@ -90,7 +93,7 @@ impl From<Settings> for Config {
             style: s.style,
             scale: Scale(s.scale),
             lifetime: Lifetime(s.lifetime),
-            other: s.other,
+            spread: Spread(s.spread),
         }
     }
 }

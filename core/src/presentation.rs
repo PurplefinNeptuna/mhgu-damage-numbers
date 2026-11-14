@@ -655,9 +655,10 @@ pub fn layout(
         } else {
             let mut best: Option<(Point, f32, f32)> = None;
             for (x, y) in CANDIDATES {
+                // Spread scales every offset; at 1.0 the products equal the unscaled ones exactly.
                 let offset = Point {
-                    x: x * base,
-                    y: y * base,
+                    x: x * base * s.spread,
+                    y: y * base * s.spread,
                 };
                 let r = reserved.shifted(offset);
                 if !r.inside(view) {

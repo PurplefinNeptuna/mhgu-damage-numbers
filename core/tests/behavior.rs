@@ -716,61 +716,33 @@ fn remote_hits_are_published_for_accounting_but_not_for_bounces() {
     assert_eq!(state.last_damage.serial, 0);
 }
 #[test]
-fn status_is_always_visible_and_other_needs_opt_in() {
+fn status_is_always_visible() {
     let mut e = hit(1);
     e.owner = Owner::Unknown;
     e.source = Source::Status;
-    let mut s = Settings::default();
-    assert!(visible(e, s));
-    e.source = Source::Other;
-    assert!(!visible(e, s));
-    s.other = true;
-    assert!(visible(e, s));
+    assert!(visible(e, Settings::default()));
 }
 #[test]
-fn monster_list_copies_hp_and_root() {
-    let mut memory = monster_scene();
-    memory.region(0x1851fe0, 4);
-    memory.put(0x1851fe0, 0xb000);
-    memory.region(0xb000, 0x1c + 40);
-    memory.put(0xb000 + 0x1c + 4, 0x9000);
-    memory.put(0x20370, 900);
-    memory.put(0x20374, 1000);
-    assert_eq!(capture::monster_vital(&memory, 0), None);
-    assert_eq!(
-        capture::monster_vital(&memory, 1),
-        Some((0x9000, 900, 1000, Vec3 { x: 1.0, y: 2.0, z: 3.0 }))
-    );
-    assert_eq!(capture::monster_vital(&memory, MONSTERS), None);
+fn mailbox_source_bytes_stay_fixed() {
+    // capture writes `source as u8` and the consumer decodes these values.
+    assert_eq!([Source::Attack as u8, Source::Monster as u8, Source::Object as u8], [0, 1, 2]);
+    assert_eq!([Source::Status as u8, Source::Poison as u8, Source::Blast as u8], [4, 6, 7]);
 }
 #[test]
-fn vitals_report_only_settled_unexplained_hp_loss() {
-    let mut v = Vitals::default();
-    assert_eq!(v.observe(0, 0x9000, 1000, 1000, 0.0), None, "baseline");
-    // A captured hit before the HP drop explains it completely.
-    v.expect(0x9000, 100, 0.1);
-    assert_eq!(v.observe(0, 0x9000, 900, 1000, 0.1), None);
-    assert_eq!(v.observe(0, 0x9000, 900, 1000, 0.5), None);
-    // A late record repays a drop inside the settle window.
-    assert_eq!(v.observe(0, 0x9000, 850, 1000, 1.0), None);
-    v.expect(0x9000, 50, 1.05);
-    assert_eq!(v.observe(0, 0x9000, 850, 1000, 1.2), None);
-    // Partly explained loss reports only the remainder after settling.
-    v.expect(0x9000, 30, 2.0);
-    assert_eq!(v.observe(0, 0x9000, 780, 1000, 2.0), None);
-    assert_eq!(v.observe(0, 0x9000, 780, 1000, 2.1), None);
-    assert_eq!(v.observe(0, 0x9000, 780, 1000, 2.2), Some(40));
-    // Damage the game never subtracts (an HP floor) expires instead of hiding later loss.
-    v.expect(0x9000, 500, 3.0);
-    assert_eq!(v.observe(0, 0x9000, 780, 1000, 4.1), None);
-    assert_eq!(v.observe(0, 0x9000, 700, 1000, 4.2), None);
-    assert_eq!(v.observe(0, 0x9000, 700, 1000, 4.4), Some(80));
-    // Healing, a different monster or a new maximum only move the baseline.
-    assert_eq!(v.observe(0, 0x9000, 750, 1000, 5.0), None);
-    assert_eq!(v.observe(0, 0x9100, 10, 2000, 5.1), None);
-    assert_eq!(v.observe(0, 0x9100, 10, 2000, 6.0), None);
-    assert_eq!(v.observe(0, 0, 0, 0, 6.1), None);
-    assert_eq!(v.observe(MONSTERS, 0x9000, 1, 1, 6.2), None);
+fn shared_settings_round_trip_and_reject_invalid() {
+    let shared = SharedSettings::new();
+    assert_eq!(shared.load(), Settings::default());
+    for style in [Style::Wilds, Style::Classic, Style::Rise] {
+        for preview in [Preview::Single, Preview::Burst, Preview::Multi] {
+            let s = Settings { enabled: false, style, scale: 2.5, lifetime: 1.7, spread: 1.4, preview, random: true };
+            assert!(shared.store(s));
+            assert_eq!(shared.load(), s);
+        }
+    }
+    let kept = shared.load();
+    assert!(!shared.store(Settings { spread: 2.1, ..kept }));
+    assert!(!shared.store(Settings { spread: f32::NAN, ..kept }));
+    assert_eq!(shared.load(), kept);
 }
 #[test]
 fn poison_is_gray_and_blast_uses_the_weak_point_colour() {
@@ -811,4 +783,28 @@ fn map_fired_shells_show_as_object_damage() {
     assert_eq!(source_outcome(0x020802, Owner::Unknown), None);
     memory.put(0xb00c, 0);
     assert_eq!(attack_owner(&memory, 0x7000), Owner::Unknown, "inactive owner");
+}
+// Five hits at one point: spread scales how far the later ones move, and 0 stacks them.
+fn spread_offsets(spread: f32) -> Vec<Point> {
+    let mut model = Model::default();
+    model.reset(1);
+    assert!(model.configure(Settings { spread, ..Settings::default() }));
+    for serial in 1..=5 {
+        assert!(model.capture(Event { position: None, ..hit(serial) }));
+    }
+    model.update(0.2, true);
+    let view = View::screen(1280.0, 720.0).unwrap();
+    let mut output = [DrawNumber::default(); 128];
+    let count = layout_at(&model, &view, 0.2, &mut output, &mut Placement::default());
+    assert_eq!(count, 5);
+    output[..count].iter().map(|n| n.offset).collect()
+}
+#[test]
+fn spread_scales_placement_offsets() {
+    let one = spread_offsets(1.0);
+    assert!(one.iter().any(|p| p.x != 0.0 || p.y != 0.0));
+    assert!(spread_offsets(0.0).iter().all(|p| p.x == 0.0 && p.y == 0.0));
+    let far = |v: &[Point]| v.iter().map(|p| p.x.abs() + p.y.abs()).fold(0.0, f32::max);
+    assert!(far(&spread_offsets(0.5)) < far(&one));
+    assert!(far(&spread_offsets(2.0)) > far(&one));
 }

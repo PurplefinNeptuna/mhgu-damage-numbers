@@ -13,7 +13,7 @@ The Forge loader is supplied separately.
 ## Installation
 
 1. Close MHGU.
-2. Extract `damage-numbers-r42.zip`.
+2. Extract `damage-numbers-r43.zip`.
 3. Copy the whole `damage-numbers` folder into your emulator's MHGU mod directory:
    - Eden: `~/.local/share/eden/load/0100770008DD8000/`
    - Ryujinx: `mods/contents/0100770008dd8000/` inside its data directory.
@@ -65,10 +65,10 @@ Mods tab of its settings menu (F1, or Plus and Minus on a controller).
 | Setting | Default | Effect |
 | --- | --- | --- |
 | Show damage numbers | On | Turns the display on or off. |
-| Show other damage | Off | Shows monster HP loss that no detected damage accounts for, at the monster's position. |
 | Style | Wilds | Choose Wilds, Rise or Classic. |
 | Number size | 1.0x | Adjust from 0.5x to 3.0x. |
 | Duration | 0.9 seconds | Adjust from 0.4 to 2.0 seconds. |
+| Spread | 0.8 | How far apart numbers move when they would overlap, from 0 (stacked on the hit) to 2.0. |
 
 Use **Save settings** to keep your changes for the next session.
 **Restore defaults** resets the current session's settings. Press Save settings
@@ -88,11 +88,11 @@ enabled = true
 style = wilds
 scale = 1
 lifetime = 0.9
-other = false
+spread = 0.8
 ```
 
-Set `enabled` and `other` to `true` or `false`, and `style` to lowercase
-`wilds`, `classic` or `rise`. Size and duration use the ranges above. Missing or invalid settings
+Set `enabled` to `true` or `false`, and `style` to lowercase
+`wilds`, `classic` or `rise`. Size, duration and spread use the ranges above. Missing or invalid settings
 use their individual defaults. Restart the game to load your edits.
 
 ## Update and removal
@@ -101,7 +101,8 @@ Close MHGU before updating or removing the mod. To update, replace
 its `damage-numbers` folder with the one from the new ZIP. To remove it,
 disable the package or delete its folder from the emulator's mod directory.
 This version uses the same settings file as earlier versions. Show other damage
-starts off until you turn it on and save. If updating from r28, r29 or r30 with
+is gone, and its line in the file is ignored. Spread starts at 0.8, so numbers sit
+a little closer together than before; set it to 1.0 for the old spacing. If updating from r28, r29 or r30 with
 all accompanying files already present, you can replace only
 `romfs/nativeNX/plugins/damage_numbers.nro`.
 
@@ -120,10 +121,6 @@ Rise slashes are drawn over the screen and may appear over foreground scenery.
 
 Map-fired shots have no owner in the game's data, so their numbers show even
 when another hunter triggered the weapon.
-
-Show other damage can't tell where its damage came from. Online, it may
-include other hunters' attacks. Damage from several sources landing at once can
-appear as one number.
 
 If an artwork file is missing or unreadable, numbers continue without that
 file's effects. If OpenSans.ttf is unavailable, numbers use Forge's font.

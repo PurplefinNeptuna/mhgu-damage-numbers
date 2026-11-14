@@ -220,24 +220,6 @@ pub fn visible_size(memory: &impl Memory, renderer: u32, width: f32, height: f32
     }
     Some([size[0] as f32, size[1] as f32])
 }
-/// Copy one listed monster's identity, HP, maximum HP and root position.
-// sEnemy::Instance (main+0x1851fe0) lists up to ten monsters at +0x1c, as
-// getMonsterInMap (main+0x5ceb4) reads them. The work block at monster+0x1428
-// holds HP at +0x370 and maximum HP at +0x374 (the s32 pair the monster update
-// and the regeneration helpers write) and the root position at +0x40.
-pub fn monster_vital(memory: &impl Memory, slot: usize) -> Option<(u32, i32, i32, Vec3)> {
-    let list = memory.cell(0x1851fe0);
-    if slot >= MONSTERS || !memory.readable(list, 0x1c + 4 * MONSTERS) {
-        return None;
-    }
-    let monster = memory.word(list + 0x1c + 4 * slot as u32);
-    let work = if memory.readable(monster, 0x142c) { memory.word(monster + 0x1428) } else { 0 };
-    let (mut hp, mut position) = ([0_i32; 2], Vec3::default());
-    if work == 0 || !copy_value(memory, work + 0x370, &mut hp) || !copy_value(memory, work + 0x40, &mut position) {
-        return None;
-    }
-    Some((monster, hp[0], hp[1], position))
-}
 // Entry-time facts retained until the corresponding native function returns.
 // subject/auxiliary vary by kind; caller is the original LR and sp proves that
 // the shared after gateway is unwinding the same native call.
@@ -425,8 +407,8 @@ impl CaptureState {
                             if memory.copy(player.wrapping_add(0x2522), &mut counter) {
                                 record.attack_counter = u16::from_le_bytes(counter) as u32;
                             }
-                            // Every amount is published so "other" HP accounting can repay it; the
-                            // consumer still shows only local attacks and ownerless families.
+                            // Every amount is published; the consumer shows only local attacks and
+                            // ownerless families.
                             let published = self.publish(record, memory, mailbox);
                             // Bounce matching keeps its audited subset; remote hits must not replace it.
                             if matches!(hit.owner, Owner::LocalPlayer | Owner::LocalPalico)

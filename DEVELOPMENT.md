@@ -1,13 +1,13 @@
 # Damage Numbers: development and research
 
-**Current state.** r42 READY_TO_DISTRIBUTE (2026-11-10), unpublished, release at `build/damage-numbers/releases/r42/`. It is the last gameplay-accepted build: the user reported steady numbers on MHGURecomp with FSR on. Eden, Ryubing and handheld were not run with r42; the last Eden-accepted build is `build/damage-numbers/candidates/r38-accepted/`. DISTRIBUTION.json is authoritative for status and hashes; EVIDENCE.json holds every version's runs. Runtime edits need a new version and new output directories.
+**Current state.** r43 DEVELOPMENT, not built as a candidate and not run. It removes Show other damage and adds Spread; the Mod Options page and its preview are the next phases of `work/damage-numbers/PLAN.md`. The last gameplay-accepted build is r42 (`build/damage-numbers/candidates/r42/`, release ZIP and SHA256SUMS there): the user reported steady numbers on MHGURecomp with FSR on. Eden, Ryubing and handheld were not run with r42; the last Eden-accepted build is `build/damage-numbers/candidates/r38-accepted/`. DISTRIBUTION.json is authoritative for status and hashes; EVIDENCE.json holds every version's runs.
 
 What the current build does at its compatibility edges:
 
 - It zeroes the projection's m[8]/m[9] before projecting, where MHGURecomp's FSR writes its per-frame sub-pixel jitter (its `runtime/camera_jitter.c`: "zero as made").
 - When the picture's shape differs from Forge's display (gu-native draws the overlay over its whole window), the projection's shape places the picture, letterboxed or stretched, inside the display (see *Projection and centre fallback*).
 - When ImGui draws on a host surface (MHGURecomp), the visible crop is ignored (see *Visible crop*); otherwise a lowered render resolution draws numbers at about half size toward the top left.
-- Hit bookkeeping caps use unsigned arithmetic (`add_capped`, `drop_capped` in `core/src/lib.rs`), because i32 saturating adds emit QADD/QSUB, which stop the game on Ryubing 1.3.3; `verify.py` rejects every saturating instruction Ryubing lacks.
+- No plugin code uses i32 saturating arithmetic, which emits QADD/QSUB that stop the game on Ryubing 1.3.3; `verify.py` rejects every saturating instruction Ryubing lacks.
 - Entry hooks accept another plugin's Forge hook on the same function (see *Hook sites*).
 - Hits outside a usable camera view stay hidden at their world position and appear if the camera turns to them before they expire.
 - Nothing logs at Forge's error level.
@@ -18,8 +18,8 @@ within the lifetime shows it at the impact. Missing positions still show at
 centre. Also open: kinsect hits
 (local and online), a poison tick, a blast detonation, a mount finisher and a
 map-fired siege shell each show one number of the expected size and colour.
-With "Show other damage" off nothing extra appears. With it on, solo hits and
-status damage add no extra numbers.
+Spread 0 stacks numbers on their hit, 2.0 scatters them further than r42; an
+r42 INI loads with spread 0.8.
 
 ## Build and validate
 
@@ -89,7 +89,7 @@ Font loading uses `ImFont::load_with` from RomFS OpenSans.ttf. Its configuration
 
 ### Settings
 
-`src/config.rs` derives upstream IniSerialize/IniDeserialize. Individual field wrappers define true, 1.0 and 0.9 defaults, and reject invalid or nonfinite values; Style defaults to Wilds. The `other` key is a plain bool, so a missing or invalid value means off. Once save data and MtFile are available, stock `config::load` reads the file or creates it with defaults. Save uses stock ScopedMount and Writer. Reset updates session settings; Save persists them. These are the explicitly requested forge-rs saving semantics, superseding the older custom persistence rules for this mod.
+`src/config.rs` derives upstream IniSerialize/IniDeserialize. Individual field wrappers define true, 1.0 and 0.9 defaults, and reject invalid or nonfinite values; Style defaults to Wilds. Spread (INI key `spread`, 0.0–2.0, default 0.8) multiplies the 17 placement offsets in `presentation::layout`; at 1.0 the products equal r42's unscaled offsets exactly, so the reference comparisons pin it to 1.0. An r42 INI has no `spread` key and loads with 0.8; its `other` key is ignored, because the derive reads only declared fields. The preview mode and random hit types are session-only `Settings` fields, never written to the INI, and have no ImGui widgets. Once save data and MtFile are available, stock `config::load` reads the file or creates it with defaults. Save uses stock ScopedMount and Writer. Reset updates session settings; Save persists them. The live settings are `runtime::SETTINGS` (`SharedSettings` in the core: atomics, no lock), because Purple-lib's get/set run in the game's update and may not lock. Every writer stores there; `consume` copies a changed value into the Model each frame, and `EDITED` stops a late INI load replacing a user edit. These are the explicitly requested forge-rs saving semantics, superseding the older custom persistence rules for this mod.
 
 The unframed settings tree is closed by default. Its guard balances TreePop on every opened path. Free-render processing runs independently of whether that tree is open.
 
@@ -171,21 +171,12 @@ monster and object damage. Status positions are the monster root, not an
 impact point. Poison numbers are gray; blast and mount use the weak-point colour
 because each comes from its own native subtraction, not HP watching.
 
-### Opt-in other damage
+### What capture publishes
 
-`Settings::other` (INI key `other`, default false) enables the per-frame HP
-check. `sEnemy::Instance` (main+0x1851fe0) lists up to ten monsters at +0x1c;
-main+0x5ceb4 (`getMonsterInMap`) reads the same slots. Every published damage
-record, including remote and unclassified hits that stay hidden, repays HP loss
-in `Vitals`. Loss nothing explains waits 0.15 s for late mailbox records, then
-becomes one ownerless number at the monster root. Captured damage the game never
-subtracts (HP floors, capture limits) expires after 1 s. A new monster pointer
-or maximum resets the baseline; healing is ignored. Other hunters' attacks
-online are a possible source of these numbers, not a confirmed one.
-
-Capture publishes all finalized hit amounts, not only shown families. The
-consumer's visibility rules are unchanged, and bounce association uses only the
-local/ownerless subset.
+Capture publishes every finalized hit amount, not only shown families; the
+consumer's visibility rules decide what appears, and bounce association uses only
+the local/ownerless subset. The `Source` byte in each record is fixed (Poison 6,
+Blast 7) because `runtime.rs` decodes those values.
 
 ### Visible crop
 
@@ -261,7 +252,7 @@ actual launch log and video showing both the impact and number.
 
 Host tests exercise copied-value capture nesting, scope overflow/quarantine, ownership/source policy (including kinsect, stage-owned shells, poison/blast/mount records and remote-hit publication without bounce association), bounded model/mailbox overflow, duplicate suppression, the monster list and HP bookkeeping, disabled settings, concurrent publication and queued records surviving thread exit. Failed/non-finite position reads inside nested scopes, valid world origin, matrix order, 720p/900p/1080p/1440p mapping, crop reads, invalid dimensions/mappings, pointer overflow, applied versus requested size, repeated mode changes and centre fallback for all three styles are covered. `tests/viewport.py` executes the original ARM SetCrop wrapper and applied-size stores with an NVN double.
 
-The config harness compiles the pinned upstream config/INI modules and derives, plus production src/config.rs, against test MtFile and counted-mount I/O. It checks automatic default-file creation, individual defaults and invalid parsing, all style round trips, the `other` key, Save and Reset.
+The config harness compiles the pinned upstream config/INI modules and derives, plus production src/config.rs, against test MtFile and counted-mount I/O. It checks automatic default-file creation, individual defaults and invalid parsing, all style round trips, spread limits, an r42 file with `other` and no `spread`, preview fields never saved, Save and Reset.
 
 The hook harness compiles production src/hooks.rs and the stock Patch wrapper against a native API double. It rejects invalid recipes, reserved/overlapping spans and changed game signatures; injects failures before, during and after branch publication at all eleven sites; checks invalid/non-executable trampoline and returned-record evidence; and exercises cache, restoration and foreign-change failures. Owned changes must roll back and capture must remain disabled on failure. Foreign changes remain untouched, valid continuations remain published and incomplete restoration requires restart. Success activates all eleven.
 

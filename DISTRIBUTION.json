@@ -1,17 +1,17 @@
 {
   "schema_version": 1,
   "mod": "damage-numbers",
-  "status": "READY_TO_DISTRIBUTE",
-  "reason": "r42 approved for distribution. It zeroes the projection's m[8]/m[9] before projecting, where MHGURecomp's FSR writes its per-frame sub-pixel jitter, so the numbers no longer shake with FSR on.",
+  "status": "DEVELOPMENT",
+  "reason": "r43 removes Show other damage and adds a Spread setting (how far apart overlapping numbers move, default 80%). A Mod Options page with a live preview follows in later phases of work/damage-numbers/PLAN.md.",
   "publication": {
     "published": false,
     "url": null,
     "date": null
   },
-  "version": "r42",
+  "version": "r43",
   "package_name": "damage-numbers",
-  "archive": "damage-numbers-r42.zip",
-  "runtime_test": "The user ran r42 on MHGURecomp (updater 0.16.0), 1920x1080, FSR 3.1 NativeAA on 2026-11-10 and answered \"Both work\" when asked whether the 22:26 MHGURecomp run gave steady numbers and a full gauge with the dark part where it belongs. recomplog.txt: \"[damage-numbers] r42 loaded: 11 Forge hooks\". Installed NROs in Eden and MHGURecomp match the payload hash. Eden, Ryubing and Switch hardware were not run with r42.",
+  "archive": "damage-numbers-r43-candidate.zip",
+  "runtime_test": "r43 NOT RUN. r42 is the last gameplay-accepted build: The user ran r42 on MHGURecomp (updater 0.16.0), 1920x1080, FSR 3.1 NativeAA on 2026-11-10 and answered \"Both work\" when asked whether the 22:26 MHGURecomp run gave steady numbers and a full gauge with the dark part where it belongs. recomplog.txt: \"[damage-numbers] r42 loaded: 11 Forge hooks\". Installed NROs in Eden and MHGURecomp match the payload hash. Eden, Ryubing and Switch hardware were not run with r42.",
   "gamebanana": {
     "ai_code": {
       "used": true,
@@ -63,6 +63,7 @@
   },
   "target": "MHGU Nintendo Switch 1.4.0; upstream Forge 1.5.1; Eden/Ryujinx.",
   "limitations": [
+    "r43 gameplay NOT RUN",
     "r42 ran on MHGURecomp with FSR on and a player report of steady numbers; Eden, Ryubing and Switch hardware were not run with r42; on gu-native the picture's place comes from its source (device.c backend_present), not from a run",
     "r40 ran on Eden and MHGURecomp 0.14.3 with a player report of correct placement",
     "Ryubing: r38 and earlier stop the game with an undefined QADD/QSUB once monster HP bookkeeping runs; r39 ran there, unitemized",
@@ -131,9 +132,5 @@
   "support": {
     "DEVELOPMENT.md": "mods/damage-numbers/DEVELOPMENT.md",
     "EVIDENCE.json": "mods/damage-numbers/EVIDENCE.json"
-  },
-  "approval": {
-    "date": "2026-11-10",
-    "basis": "The user approved r42 on 2026-11-10: \"also promote damage number and world sharpness gauge\", and answered \"Both work\" when asked whether the 22:26 MHGURecomp run gave steady numbers and a full gauge with the dark part where it belongs. That covers steady numbers on MHGURecomp with FSR on; it does not cover Eden, Ryubing, Switch hardware, gu-native, or the Wilds outline still missing on MHGURecomp."
   }
 }

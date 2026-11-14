@@ -5,6 +5,7 @@ pub mod mailbox;
 pub mod presentation;
 use core::fmt;
 use core::str::FromStr;
+use core::sync::atomic::{AtomicU32, Ordering};
 
 // Source describes which native damage family produced the finalized amount.
 // Owner describes who controls an attack. Keeping them separate allows
@@ -19,12 +20,11 @@ pub enum Source {
     Tick,
     /// Mount finisher; native status code, not a hit. Drawn in the weak-point colour.
     Status,
-    /// Monster HP loss that no captured record explains; shown only when opted in.
-    Other,
+    // The mailbox carries `source as u8` and the consumer decodes 6 and 7, so these values are fixed.
     /// Poison tick from main+0xa2664; drawn gray like a bounce.
-    Poison,
+    Poison = 6,
     /// Blast detonation from main+0xaac54; drawn in the weak-point colour.
-    Blast,
+    Blast = 7,
 }
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -86,6 +86,39 @@ impl fmt::Display for Style {
         })
     }
 }
+/// How the Mod Options preview spawns hits at each source point.
+#[repr(u8)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum Preview {
+    /// One hit, then a pause.
+    #[default]
+    Single,
+    /// Five hits, one every 0.15 s.
+    Burst,
+    /// Five hits at once.
+    Multi,
+}
+// Lowercase names are the stable INI values, as for Style.
+impl FromStr for Preview {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, ()> {
+        match s {
+            "single" => Ok(Self::Single),
+            "burst" => Ok(Self::Burst),
+            "multi" => Ok(Self::Multi),
+            _ => Err(()),
+        }
+    }
+}
+impl fmt::Display for Preview {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(match self {
+            Self::Single => "single",
+            Self::Burst => "burst",
+            Self::Multi => "multi",
+        })
+    }
+}
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Vec3 {
@@ -132,8 +165,11 @@ pub struct Settings {
     pub style: Style,
     pub scale: f32,
     pub lifetime: f32,
-    /// Opt-in unattributed HP loss; it can include other hunters, traps and the environment.
-    pub other: bool,
+    /// Multiplier on the placement offsets that keep numbers apart; 0 stacks them on the hit.
+    pub spread: f32,
+    /// Mod Options preview only: how hits spawn, and whether their types are random.
+    pub preview: Preview,
+    pub random: bool,
 }
 impl Default for Settings {
     fn default() -> Self {
@@ -142,7 +178,9 @@ impl Default for Settings {
             style: Style::Wilds,
             scale: 1.0,
             lifetime: 0.9,
-            other: false,
+            spread: 0.8,
+            preview: Preview::Single,
+            random: false,
         }
     }
 }
@@ -152,6 +190,70 @@ impl Settings {
             && (0.5..=3.0).contains(&self.scale)
             && self.lifetime.is_finite()
             && (0.4..=2.0).contains(&self.lifetime)
+            && self.spread.is_finite()
+            && (0.0..=2.0).contains(&self.spread)
+    }
+}
+/// The current settings, readable and writable from any thread without a lock. Purple-lib's
+/// get/set run in the game's update and may not lock; rendering copies this into the Model.
+// shortcut: fields are stored one by one, so two writers at once can mix their edits; the
+// ImGui panel and the Options window are never edited together. Upgrade to one packed word
+// if a writer ever runs concurrently with another.
+pub struct SharedSettings {
+    // bit 0 enabled, bit 1 random, bits 8..16 style, bits 16..24 preview.
+    flags: AtomicU32,
+    scale: AtomicU32,
+    lifetime: AtomicU32,
+    spread: AtomicU32,
+}
+impl SharedSettings {
+    pub const fn new() -> Self {
+        Self {
+            flags: AtomicU32::new(1),
+            scale: AtomicU32::new(1.0f32.to_bits()),
+            lifetime: AtomicU32::new(0.9f32.to_bits()),
+            spread: AtomicU32::new(0.8f32.to_bits()),
+        }
+    }
+    pub fn load(&self) -> Settings {
+        let flags = self.flags.load(Ordering::Acquire);
+        Settings {
+            enabled: flags & 1 != 0,
+            random: flags & 2 != 0,
+            style: match (flags >> 8) as u8 {
+                1 => Style::Classic,
+                2 => Style::Rise,
+                _ => Style::Wilds,
+            },
+            preview: match (flags >> 16) as u8 {
+                1 => Preview::Burst,
+                2 => Preview::Multi,
+                _ => Preview::Single,
+            },
+            scale: f32::from_bits(self.scale.load(Ordering::Acquire)),
+            lifetime: f32::from_bits(self.lifetime.load(Ordering::Acquire)),
+            spread: f32::from_bits(self.spread.load(Ordering::Acquire)),
+        }
+    }
+    /// Stores `s` if it is valid; returns whether it did.
+    pub fn store(&self, s: Settings) -> bool {
+        if !s.valid() {
+            return false;
+        }
+        self.scale.store(s.scale.to_bits(), Ordering::Release);
+        self.lifetime.store(s.lifetime.to_bits(), Ordering::Release);
+        self.spread.store(s.spread.to_bits(), Ordering::Release);
+        let flags = s.enabled as u32
+            | (s.random as u32) << 1
+            | (s.style as u32) << 8
+            | (s.preview as u32) << 16;
+        self.flags.store(flags, Ordering::Release);
+        true
+    }
+}
+impl Default for SharedSettings {
+    fn default() -> Self {
+        Self::new()
     }
 }
 // Apply the same admission rules to pending events and already shown numbers.
@@ -170,7 +272,6 @@ pub fn visible(e: Event, s: Settings) -> bool {
             Source::Attack => matches!(e.owner, Owner::LocalPlayer | Owner::LocalPalico),
             Source::Monster | Source::Object | Source::Status | Source::Poison | Source::Blast => true,
             Source::Tick => false,
-            Source::Other => s.other,
         }
 }
 // Bounce feedback takes precedence over the weak-hitzone threshold of 45.
@@ -445,108 +546,4 @@ pub fn seconds(tick: u64, origin: u64, frequency: u32) -> Option<f32> {
 // using the same age conversion as visible events.
 pub fn fresh(tick: u64, now: u64, frequency: u32, limit: f32) -> bool {
     tick != 0 && seconds(now, tick, frequency).is_some_and(|age| age < limit)
-}
-/// sEnemy lists at most ten monsters (getMonsterInMap rejects index > 9).
-pub const MONSTERS: usize = 10;
-// An unexplained drop waits SETTLE seconds for late mailbox records before it
-// becomes "other" damage. Captured damage the game never subtracts (HP floors,
-// capture limits) is forgotten after EXPIRE seconds so it cannot hide later loss.
-// Ryubing 1.3.3's ARM32 JIT cannot run QADD/QSUB, which i32 saturating_add/sub emit, so the
-// caps are taken in u32, where neither sum nor difference of two i32 values can overflow.
-/// `a + b` capped at `i32::MAX`, for the non-negative credit, debt and their increments.
-fn add_capped(a: i32, b: i32) -> i32 {
-    debug_assert!(a >= 0 && b >= 0);
-    (a as u32 + b as u32).min(i32::MAX as u32) as i32
-}
-/// HP lost from `before` to `after`, capped at `i32::MAX`; 0 when HP did not go down.
-fn drop_capped(before: i32, after: i32) -> i32 {
-    if after >= before {
-        return 0;
-    }
-    (before.wrapping_sub(after) as u32).min(i32::MAX as u32) as i32
-}
-const SETTLE: f32 = 0.15;
-const EXPIRE: f32 = 1.0;
-#[derive(Clone, Copy, Debug, Default)]
-struct Vital {
-    monster: u32,
-    max: i32,
-    hp: i32,
-    credit: i32,
-    credit_at: f32,
-    debt: i32,
-    debt_at: f32,
-}
-/// HP bookkeeping for opt-in "other" numbers. The game subtracts captured hits,
-/// poison, blast and mount damage from HP in its monster update, so HP loss beyond
-/// those records came from something the hooks did not see.
-#[derive(Default)]
-pub struct Vitals {
-    slots: [Vital; MONSTERS],
-}
-impl Vitals {
-    pub fn clear(&mut self) {
-        self.slots = [Vital::default(); MONSTERS];
-    }
-    /// Record damage the game will subtract from this monster. Repays an unexplained drop first.
-    pub fn expect(&mut self, monster: u32, amount: i32, now: f32) {
-        if monster == 0 || amount <= 0 {
-            return;
-        }
-        if let Some(v) = self.slots.iter_mut().find(|v| v.monster == monster) {
-            let paid = amount.min(v.debt);
-            v.debt -= paid;
-            if amount > paid {
-                v.credit = add_capped(v.credit, amount - paid);
-                v.credit_at = now;
-            }
-        }
-    }
-    /// One frame's HP for sEnemy slot `slot`. Returns settled HP loss no record explained.
-    /// A new monster, a changed maximum or an empty slot only resets the baseline.
-    pub fn observe(&mut self, slot: usize, monster: u32, hp: i32, max: i32, now: f32) -> Option<i32> {
-        let v = self.slots.get_mut(slot)?;
-        if monster == 0 || max <= 0 {
-            *v = Vital::default();
-            return None;
-        }
-        if v.monster != monster || v.max != max {
-            *v = Vital { monster, max, hp, ..Vital::default() };
-            return None;
-        }
-        let drop = drop_capped(v.hp, hp);
-        v.hp = hp;
-        if drop > 0 {
-            let used = drop.min(v.credit);
-            v.credit -= used;
-            if drop > used {
-                if v.debt == 0 {
-                    v.debt_at = now;
-                }
-                v.debt = add_capped(v.debt, drop - used);
-            }
-        }
-        if v.credit > 0 && now - v.credit_at > EXPIRE {
-            v.credit = 0;
-        }
-        if v.debt > 0 && now - v.debt_at >= SETTLE {
-            return Some(core::mem::take(&mut v.debt));
-        }
-        None
-    }
-}
-
-#[cfg(test)]
-mod capped_tests {
-    use super::{add_capped, drop_capped};
-    #[test]
-    fn caps_match_saturating_results() {
-        assert_eq!(add_capped(2, 3), 5);
-        assert_eq!(add_capped(i32::MAX, 5), i32::MAX);
-        assert_eq!(add_capped(i32::MAX, i32::MAX), i32::MAX);
-        assert_eq!(drop_capped(10, 4), 6);
-        assert_eq!(drop_capped(4, 10), 0);
-        assert_eq!(drop_capped(i32::MAX, i32::MIN), i32::MAX);
-        assert_eq!(drop_capped(0, i32::MIN + 1), i32::MAX);
-    }
 }

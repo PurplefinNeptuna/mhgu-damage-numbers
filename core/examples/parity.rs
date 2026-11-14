@@ -26,6 +26,8 @@ fn main() {
                     model.reset(1);
                     model.configure(Settings {
                         style,
+                        // The r25 oracle has r42's placement, which is spread 1.0.
+                        spread: 1.0,
                         ..Settings::default()
                     });
                     for i in 0..8 {

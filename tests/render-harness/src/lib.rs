@@ -79,6 +79,8 @@ pub unsafe extern "C" fn rs_scene(style: u32, age: f32, width: f32, height: f32,
         model.configure(Settings {
             style,
             scale,
+            // The r2 scenes were captured with r42's placement, which is spread 1.0.
+            spread: 1.0,
             ..Settings::default()
         });
         for i in 0..9 {

@@ -92,7 +92,7 @@ pub mod mt {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use damage_numbers_core::{Settings, Style};
+    use damage_numbers_core::{Preview, Settings, Style};
     fn clear() {
         FILES.with(|files| files.borrow_mut().clear());
         assert_eq!(MOUNTS.with(|v| v.get()), 0);
@@ -105,19 +105,22 @@ mod tests {
         let data = FILES.with(|files| files.borrow()["savedata:/damage_numbers.ini"].clone());
         let text = String::from_utf8(data).unwrap();
         assert!(text.contains("enabled = true") && text.contains("lifetime = 0.9"));
-        assert!(text.contains("other = false"));
+        assert!(text.contains("spread = 0.8"));
+        // Session-only preview settings are never written.
+        assert!(!text.contains("preview") && !text.contains("random"));
         assert_eq!(MOUNTS.with(|v| v.get()), 0);
     }
     #[test]
     fn save_round_trips_all_settings_and_styles() {
         clear();
-        for (style, other) in [(Style::Wilds, true), (Style::Classic, false), (Style::Rise, true)] {
+        for (style, spread) in [(Style::Wilds, 0.0), (Style::Classic, 1.3), (Style::Rise, 2.0)] {
             let value = Settings {
                 enabled: false,
                 style,
                 scale: 2.75,
                 lifetime: 1.8,
-                other,
+                spread,
+                ..Settings::default()
             };
             settings::save(value).unwrap();
             assert_eq!(settings::load().unwrap(), value);
@@ -136,6 +139,26 @@ mod tests {
         assert_eq!(settings::load().unwrap(), Settings::default());
     }
     #[test]
+    fn r42_file_with_other_and_no_spread_loads_with_the_new_default() {
+        clear();
+        FILES.with(|files| {
+            files.borrow_mut().insert(
+                "savedata:/damage_numbers.ini".into(),
+                b"[DamageNumbers]\nenabled = true\nstyle = rise\nscale = 1.5\nlifetime = 1.2\nother = true\n".to_vec(),
+            )
+        });
+        let loaded = settings::load().unwrap();
+        assert_eq!((loaded.style, loaded.scale, loaded.lifetime), (Style::Rise, 1.5, 1.2));
+        assert_eq!(loaded.spread, 0.8);
+    }
+    #[test]
+    fn preview_settings_are_not_saved() {
+        clear();
+        settings::save(Settings { preview: Preview::Multi, random: true, ..Settings::default() }).unwrap();
+        let loaded = settings::load().unwrap();
+        assert_eq!((loaded.preview, loaded.random), (Preview::Single, false));
+    }
+    #[test]
     fn restore_defaults_then_save_uses_upstream_writer() {
         clear();
         settings::save(Settings {
@@ -143,7 +166,8 @@ mod tests {
             style: Style::Rise,
             scale: 3.0,
             lifetime: 2.0,
-            other: true,
+            spread: 0.0,
+            ..Settings::default()
         })
         .unwrap();
         settings::save(Settings::default()).unwrap();
@@ -156,6 +180,9 @@ mod tests {
         }
         for value in ["NaN", "0.3", "2.1"] {
             assert!(value.parse::<settings::Lifetime>().is_err());
+        }
+        for value in ["NaN", "-0.1", "2.1"] {
+            assert!(value.parse::<settings::Spread>().is_err());
         }
     }
 }
