@@ -25,7 +25,7 @@
           "url": "https://claude.com/claude-code"
         }
       ],
-      "scope": "Implementing and refactoring the Rust port, tests, build and packaging scripts, and explanatory code comments."
+      "scope": "Implementing and refactoring the Rust port, tests, build and packaging scripts, and explanatory code comments; writing the Mod Options and help text and its French, Spanish, German, Italian and Chinese translations, which no native speaker has reviewed."
     },
     "ai_assets": [],
     "credits": [

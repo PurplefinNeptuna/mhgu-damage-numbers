@@ -7,6 +7,7 @@ mod abi;
 mod config;
 mod hooks;
 mod platform;
+mod purple_lib;
 mod render;
 mod runtime;
 mod signatures;
@@ -40,6 +41,28 @@ pub extern "C" fn forge_onInit() {
 }
 // no_mangle keeps the name Forge looks up, and extern "C" selects the native
 // calling convention. This callback can load settings before ImGui is ready.
+/// Purple-lib calls this once, from its first `forge_onUpdate`, with its table of functions: the
+/// one time it accepts records. It finds the function by name in this plugin's symbol table
+/// (`link/exported.txt`). Without Purple-lib nothing calls it.
+///
+/// # Safety
+/// `api` is null or Purple-lib's table, which stays valid for the whole run.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn purplelib_on_register(api: *const damage_numbers_core::purple_lib::Api) {
+    // SAFETY: the caller's contract.
+    let Some(api) = (unsafe { api.as_ref() }) else { return };
+    match purple_lib::register(api) {
+        purple_lib::Registered::Done => log::info!("[damage-numbers] settings and help added to Purple-lib"),
+        purple_lib::Registered::Repeated => {}
+        purple_lib::Registered::OlderVersion(v) => log::warn!(
+            "[damage-numbers] Purple-lib API version {v} is older than the supported {}; Mod Options not added",
+            damage_numbers_core::purple_lib::API_VERSION
+        ),
+        purple_lib::Registered::Refused { options, help } => {
+            log::warn!("[damage-numbers] Purple-lib refused the registration (settings {options}, help {help})")
+        }
+    }
+}
 #[unsafe(no_mangle)]
 pub extern "C" fn forge_onUpdate(_delta: f32) {
     runtime::update();

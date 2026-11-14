@@ -125,6 +125,19 @@ fn render_thread() -> bool {
     CONSUMER.load(Ordering::SeqCst) == id
 }
 impl Consumer {
+    // Shared by the panel's Save button and Mod Options; the feedback line shows in the panel.
+    fn save(&mut self) {
+        match config::save(SETTINGS.load()) {
+            Ok(()) => {
+                self.feedback = alloc::string::String::from("Saved damage_numbers.ini in MHGU's save folder");
+                log::info!("[damage-numbers] settings saved");
+            }
+            Err(reason) => {
+                self.feedback = alloc::format!("Save failed: {}", reason);
+                log::warn!("[damage-numbers] {}", self.feedback);
+            }
+        }
+    }
     fn load_config(&mut self) {
         if self.loaded {
             return;
@@ -300,6 +313,11 @@ pub fn render() {
         return;
     }
     with_state(|state| {
+        // Mod Options closed after a saved row changed, or Restore defaults was chosen there.
+        if crate::purple_lib::SAVE.swap(false, Ordering::AcqRel) {
+            state.loaded = true;
+            state.save();
+        }
         state.consume();
         if state.installed.is_none() {
             return;
@@ -450,18 +468,7 @@ pub fn panel() {
             forge::sys::imgui::ImVec2::new(0.0, 0.0),
         ) {
             state.loaded = true;
-            match config::save(SETTINGS.load()) {
-                Ok(()) => {
-                    state.feedback = alloc::string::String::from(
-                        "Saved damage_numbers.ini in MHGU's save folder",
-                    );
-                    log::info!("[damage-numbers] settings saved");
-                }
-                Err(reason) => {
-                    state.feedback = alloc::format!("Save failed: {}", reason);
-                    log::warn!("[damage-numbers] {}", state.feedback);
-                }
-            }
+            state.save();
         }
         forge::imgui::text(&state.feedback);
     });

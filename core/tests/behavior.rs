@@ -808,3 +808,100 @@ fn spread_scales_placement_offsets() {
     assert!(far(&spread_offsets(0.5)) < far(&one));
     assert!(far(&spread_offsets(2.0)) > far(&one));
 }
+// ---- Purple-lib ----
+use damage_numbers_core::purple_lib as purple;
+
+#[test]
+fn purple_lib_rows_map_to_the_settings_both_ways() {
+    let d = Settings::default();
+    // Defaults: On, Wilds, 100%, 0.9 s, 80%, Single, Off.
+    let expected = [1, 0, 5, 5, 8, 0, 0];
+    for (row, want) in expected.iter().enumerate() {
+        assert_eq!(purple::value(d, row as u32), *want, "row {row}");
+    }
+    for row in 0..purple::ROW_RESTORE {
+        for value in 0..purple::shape(row).count {
+            let s = purple::with_value(d, row, value).unwrap();
+            assert!(s.valid(), "row {row} value {value}");
+            assert_eq!(purple::value(s, row), value, "row {row} value {value}");
+        }
+        assert_eq!(purple::with_value(d, row, purple::shape(row).count), None);
+    }
+    assert_eq!(purple::with_value(d, purple::ROW_RESTORE, 0), None);
+    // A step value gives the decimal literal's f32, so defaults compare equal.
+    assert_eq!(purple::with_value(d, purple::ROW_DURATION, 5).unwrap(), d);
+    assert_eq!(purple::with_value(d, purple::ROW_SPREAD, 8).unwrap(), d);
+    assert_eq!(purple::with_value(d, purple::ROW_SIZE, 5).unwrap(), d);
+    // Style order is Wilds, Rise, Classic, as the labels say.
+    assert_eq!(purple::with_value(d, purple::ROW_STYLE, 1).unwrap().style, Style::Rise);
+    assert_eq!(purple::with_value(d, purple::ROW_STYLE, 2).unwrap().style, Style::Classic);
+    // Slider values between steps show the nearest step; out-of-range values clamp.
+    assert_eq!(purple::value(Settings { scale: 1.234, ..d }, purple::ROW_SIZE), 7);
+    assert_eq!(purple::value(Settings { lifetime: 1.96, ..d }, purple::ROW_DURATION), 16);
+    assert_eq!(purple::value(Settings { spread: 0.04, ..d }, purple::ROW_SPREAD), 0);
+}
+
+#[test]
+fn only_the_preview_rows_are_unsaved() {
+    let saved: Vec<u32> = (0..purple::ROWS).filter(|&r| purple::saved(r)).collect();
+    assert_eq!(saved, [0, 1, 2, 3, 4]);
+}
+
+#[test]
+fn purple_lib_labels_match_row_shapes_in_every_language() {
+    assert_eq!(purple::ROW_TEXT.len() as u32, purple::ROWS);
+    for language in 0..purple::LANGUAGES {
+        for row in 0..purple::ROWS {
+            let shape = purple::shape(row);
+            let labels = purple::labels(row, language);
+            match shape.kind {
+                purple::ROW_LABELS | purple::ROW_ACTION => assert_eq!(labels.len() as u32, shape.count, "row {row}"),
+                _ => assert!(labels.is_empty()),
+            }
+            for label in labels {
+                assert!(purple::columns(label.to_str().unwrap()) <= 11, "{label:?}");
+            }
+        }
+        for value in 0..17 {
+            let text = purple::duration_text(language, value).unwrap().to_str().unwrap();
+            assert!(purple::columns(text) <= 11, "{text}");
+        }
+        assert_eq!(purple::duration_text(language, 17), None);
+    }
+    assert_eq!(purple::duration_text(0, 5).unwrap(), c"0.9 s");
+    assert_eq!(purple::duration_text(1, 5).unwrap(), c"0,9 s");
+    assert_eq!(purple::duration_text(6, 5).unwrap(), c"0.9秒");
+}
+
+#[test]
+fn every_language_maps_from_the_game_byte_and_unknown_is_english() {
+    let expected = [(2, 1), (3, 2), (4, 3), (5, 4), (7, 5), (8, 6), (0, 0), (1, 0), (6, 0), (99, 0)];
+    for (byte, index) in expected {
+        assert_eq!(purple::language_index(byte), index, "{byte}");
+    }
+}
+
+#[test]
+fn purple_lib_text_fits_in_every_language() {
+    assert_eq!(purple::HELP_CATEGORY, 0, "the page's own help");
+    let fits = |text: &str, lines: usize| {
+        text.split("\r\n").count() <= lines && text.split("\r\n").all(|l| purple::columns(l) <= 40)
+    };
+    for (index, topic) in purple::HELP_TEXT.iter().enumerate() {
+        let pages = topic[0].len();
+        assert_eq!(purple::HELP_PAGES[index] as usize, pages);
+        assert!((1..=16).contains(&pages));
+        for language in 0..purple::LANGUAGES {
+            assert_eq!(topic[language].len(), pages, "every language has the same pages");
+            for page in topic[language] {
+                assert!(fits(page.to_str().unwrap(), 5), "{page:?}");
+            }
+        }
+    }
+    for row in &purple::ROW_TEXT {
+        for language in 0..purple::LANGUAGES {
+            assert!(fits(row.help[language].to_str().unwrap(), 2), "{:?}", row.help[language]);
+            assert!(purple::columns(row.name[language].to_str().unwrap()) <= 28, "{:?}", row.name[language]);
+        }
+    }
+}
