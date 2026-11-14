@@ -9,6 +9,7 @@ The Forge loader is supplied separately.
 
 - MHGU 1.4.0 for Nintendo Switch.
 - [Fexty's Forge 1.5.1](https://github.com/Fexty12573/forge/releases/tag/v1.5.1).
+- Optional: Purple-lib r17 or later, to change the settings in the game's Options.
 
 ## Installation
 
@@ -54,8 +55,18 @@ always grey, and blast and mount knockdown damage are always gold.
 
 ### Settings
 
-Open **Plugin UI > Damage Numbers** in Forge's overlay. Closing the settings
-row leaves numbers running.
+You can change the settings in two places. Both change the same settings and
+save them to the same file.
+
+With Purple-lib installed, open **Options > Mod Options** in the game and press
+L or R until the page shows **Damage Numbers**. A change applies at once and is
+saved when you close the window. The help button opens a topic for each
+setting.
+
+You can also open **Plugin UI > Damage Numbers** in Forge's overlay. Closing the
+settings row leaves numbers running. Use **Save settings** to keep your changes
+for the next session. **Restore defaults** resets the current session's
+settings, so press Save settings afterward to keep those defaults.
 
 Forge opens its overlay with the Insert key on a keyboard; `[menu] key` in Forge's
 `config.ini` changes the key. On Ryujinx, turn on Direct Keyboard Access in the input
@@ -66,13 +77,22 @@ Mods tab of its settings menu (F1, or Plus and Minus on a controller).
 | --- | --- | --- |
 | Show damage numbers | On | Turns the display on or off. |
 | Style | Wilds | Choose Wilds, Rise or Classic. |
-| Number size | 1.0x | Adjust from 0.5x to 3.0x. |
+| Number size | 100% | Adjust from 50% to 300%. The overlay slider shows 0.5 to 3.0. |
 | Duration | 0.9 seconds | Adjust from 0.4 to 2.0 seconds. |
-| Spread | 0.8 | How far apart numbers move when they would overlap, from 0 (stacked on the hit) to 2.0. |
+| Spread | 80% | How far apart numbers move when they would overlap, from 0% (stacked on the hit) to 200%. The overlay slider shows 0 to 2.0. |
+| Preview mode | Single | Mod Options only. Single shows one hit at each spot, Burst five hits 0.15 seconds apart, and Multi five hits at once. Not saved. |
+| Random hit types | Off | Mod Options only. On gives every preview hit a random type. Not saved. |
 
-Use **Save settings** to keep your changes for the next session.
-**Restore defaults** resets the current session's settings. Press Save settings
-afterward to keep those defaults.
+On the Mod Options page, Number size and Spread change in steps of 10% and
+Duration in steps of 0.1 seconds. The overlay sliders also allow the values in
+between.
+
+While the Mod Options page is open, a frame on the left of the screen repeats
+example hits at three spots with your current settings, even when Show damage
+numbers is off. The left spot shows a weak-point hit with a positive critical,
+the middle a normal hit with a negative critical, and the right a bounce. The
+spots stay where they are in the world, so they move like real hits when you
+turn the camera.
 
 Forge creates `damage_numbers.ini` with defaults once it can access MHGU's
 save folder. If saving fails, load a player save and retry.
@@ -93,7 +113,8 @@ spread = 0.8
 
 Set `enabled` to `true` or `false`, and `style` to lowercase
 `wilds`, `classic` or `rise`. Size, duration and spread use the ranges above. Missing or invalid settings
-use their individual defaults. Restart the game to load your edits.
+use their individual defaults. Preview mode and Random hit types are not in
+the file. Restart the game to load your edits.
 
 ## Update and removal
 
@@ -101,10 +122,8 @@ Close MHGU before updating or removing the mod. To update, replace
 its `damage-numbers` folder with the one from the new ZIP. To remove it,
 disable the package or delete its folder from the emulator's mod directory.
 This version uses the same settings file as earlier versions. Show other damage
-is gone, and its line in the file is ignored. Spread starts at 0.8, so numbers sit
-a little closer together than before; set it to 1.0 for the old spacing. If updating from r28, r29 or r30 with
-all accompanying files already present, you can replace only
-`romfs/nativeNX/plugins/damage_numbers.nro`.
+is gone, and its line in the file is ignored. Spread starts at 80%, so numbers sit
+a little closer together than before. Set it to 100% for the old spacing.
 
 On Switch, update the files under
 `sd:/atmosphere/contents/0100770008DD8000/romfs/nativeNX/plugins/`.

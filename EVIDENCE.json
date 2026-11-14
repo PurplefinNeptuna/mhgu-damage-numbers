@@ -2565,5 +2565,13 @@
       "romfs/nativeNX/plugins/damage_numbers.nro": "3f884e8be29e2fa6d8a5508d1f3756daeaba3fb01860c292cc7862eddb65524b"
     },
     "basis": "The user answered \"Both work\" when asked whether the 22:26 MHGURecomp run gave steady numbers and a full gauge with the dark part where it belongs."
+  },
+  "static_r43": {
+    "date": "2026-11-14",
+    "nro_sha256": "854f7fe6313892aa134040ad7110867a652aef08fb4168fb9d1503965700864b",
+    "archive_sha256": "4aa8bd13f9706a0b643e704c85a4578f5bad5ccd2ead95eced67e94ac9d7ad7b",
+    "runtime_test": "NOT RUN",
+    "change": "Show other damage removed; Spread setting (default 0.8); lock-free SharedSettings; Purple-lib Mod Options page (8 rows) with 7 help topics in seven languages; live preview while the page is shown",
+    "tests": "./build.sh test PASSED: 40 core behavior tests, 7 config-harness tests, r25 parity 243 scenarios, 2800 policy/projection cases, 24 r2 pixel scenes unchanged at spread 1.0, ARM gateways; verify: 74 resolved imports, purplelib_on_register exported; mod_distribution check compares the Purple-lib records"
   }
 }

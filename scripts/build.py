@@ -113,6 +113,8 @@ def build():
     hashes = asset_hashes()
     for name in hashes:
         shutil.copy2(MOD / 'assets' / name, assets / name)
+    # Mod managers read manifest.txt beside romfs/ for the name, version and authors.
+    shutil.copy2(MOD / 'manifest.txt', BUILD_ROOT / 'package/manifest.txt')
     record('build.json', {'status': 'BUILT', 'nro_sha256': digest(plugins / 'damage_numbers.nro'),
                          'asset_sha256': hashes,
                          'forge_rs_revision': 'd1865b68e9b194eb3eacc8bd71bbf601a5fac63e', 'runtime_test': 'NOT RUN'})

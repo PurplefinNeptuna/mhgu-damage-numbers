@@ -1,6 +1,6 @@
 # Damage Numbers: development and research
 
-**Current state.** r43 DEVELOPMENT, not built as a candidate and not run. It removes Show other damage, adds Spread, and puts the settings on a Purple-lib Mod Options page with help in seven languages and a live preview; packaging the candidate is the last phase of `work/damage-numbers/PLAN.md`. The last gameplay-accepted build is r42 (`build/damage-numbers/candidates/r42/`, release ZIP and SHA256SUMS there): the user reported steady numbers on MHGURecomp with FSR on. Eden, Ryubing and handheld were not run with r42; the last Eden-accepted build is `build/damage-numbers/candidates/r38-accepted/`. DISTRIBUTION.json is authoritative for status and hashes; EVIDENCE.json holds every version's runs.
+**Current state.** r43 DEVELOPMENT, candidate at `build/damage-numbers/candidates/r43/delivery/`, not run. It removes Show other damage, adds Spread, and puts the settings on a Purple-lib Mod Options page with help in seven languages and a live preview; TESTING.md lists the run that would accept it. The last gameplay-accepted build is r42 (`build/damage-numbers/candidates/r42/`, release ZIP and SHA256SUMS there): the user reported steady numbers on MHGURecomp with FSR on. Eden, Ryubing and handheld were not run with r42; the last Eden-accepted build is `build/damage-numbers/candidates/r38-accepted/`. DISTRIBUTION.json is authoritative for status and hashes; EVIDENCE.json holds every version's runs.
 
 What the current build does at its compatibility edges:
 

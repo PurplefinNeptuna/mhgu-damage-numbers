@@ -351,31 +351,31 @@ pub static HELP_TEXT: [[&[&CStr]; LANGUAGES]; TOPICS] = [
     [
         &[
             c"Shows a number for each hit at the spot\r\nit landed: your attacks, your Palico's,\r\nkinsect hits, poison, blast and mount\r\nknockdowns. Off hides them; the preview\r\nstill shows numbers.",
-            c"Yellow numbers hit a weak point. Gray\r\nnumbers bounced off or are poison.\r\nCritical hits get an extra marker, which\r\ndiffers for positive and negative\r\naffinity.",
+            c"Gold numbers hit a weak point. Grey\r\nnumbers bounced off or are poison.\r\nCritical hits get an extra marker, which\r\ndiffers for positive and negative\r\naffinity.",
         ],
         &[
             c"Affiche un chiffre pour chaque coup là\r\noù il a touché : vos attaques, votre\r\nPalico, le Kinsecte, poison, explosion\r\net chute de monture. Désactivé les\r\ncache ; l'aperçu les montre toujours.",
-            c"Jaune : point faible touché. Gris :\r\ncoup dévié ou poison. Les coups\r\ncritiques ont une marque en plus, qui\r\ndiffère pour l'affinité positive et\r\nnégative.",
+            c"Doré : point faible touché. Gris :\r\ncoup dévié ou poison. Les coups\r\ncritiques ont une marque en plus, qui\r\ndiffère pour l'affinité positive et\r\nnégative.",
         ],
         &[
             c"Muestra un número por cada golpe donde\r\nimpactó: tus ataques, tu Camarada, el\r\nKinsecto, veneno, nitro y la caída de\r\nmonta. Desactivado los oculta; la vista\r\nprevia los sigue mostrando.",
-            c"Amarillo: golpe en punto débil. Gris:\r\ngolpe rebotado o veneno. Los críticos\r\nllevan una marca extra, distinta para\r\nafinidad positiva y negativa.",
+            c"Dorado: golpe en punto débil. Gris:\r\ngolpe rebotado o veneno. Los críticos\r\nllevan una marca extra, distinta para\r\nafinidad positiva y negativa.",
         ],
         &[
             c"Zeigt für jeden Treffer eine Zahl, wo\r\ner traf: deine Angriffe, dein Kamerad,\r\nKinsekt, Gift, Explosion und Sturz beim\r\nReiten. Aus blendet sie aus; die\r\nVorschau zeigt sie weiter.",
-            c"Gelb: Treffer am Schwachpunkt. Grau:\r\nabgeprallt oder Gift. Kritische Treffer\r\nhaben eine zusätzliche Markierung, je\r\nnach positiver oder negativer Affinität.",
+            c"Gold: Treffer am Schwachpunkt. Grau:\r\nabgeprallt oder Gift. Kritische Treffer\r\nhaben eine zusätzliche Markierung, je\r\nnach positiver oder negativer Affinität.",
         ],
         &[
             c"Mostra un numero per ogni colpo dove\r\nha colpito: i tuoi attacchi, il tuo\r\nCompagno, il Kinsetto, veleno, esplosivo\r\ne caduta in monta. Disattivato li\r\nnasconde; l'anteprima li mostra sempre.",
-            c"Giallo: colpo su punto debole. Grigio:\r\ncolpo rimbalzato o veleno. I critici\r\nhanno un segno in più, diverso per\r\naffinità positiva e negativa.",
+            c"Oro: colpo su punto debole. Grigio:\r\ncolpo rimbalzato o veleno. I critici\r\nhanno un segno in più, diverso per\r\naffinità positiva e negativa.",
         ],
         &[
             c"在命中位置為每次攻擊顯示數字：\r\n自己的攻擊、隨從、獵蟲、\r\n毒、爆破與騎乘倒地。\r\n關閉時不顯示，但預覽仍會顯示。",
-            c"黃色表示命中弱點，\r\n灰色表示被彈開或毒傷害。\r\n會心攻擊另有標記，\r\n正負會心的標記不同。",
+            c"金色表示命中弱點，\r\n灰色表示被彈開或毒傷害。\r\n會心攻擊另有標記，\r\n正負會心的標記不同。",
         ],
         &[
             c"在命中位置为每次攻击显示数字：\r\n自己的攻击、随从、猎虫、\r\n毒、爆破与骑乘倒地。\r\n关闭时不显示，但预览仍会显示。",
-            c"黄色表示命中弱点，\r\n灰色表示被弹开或毒伤害。\r\n会心攻击另有标记，\r\n正负会心的标记不同。",
+            c"金色表示命中弱点，\r\n灰色表示被弹开或毒伤害。\r\n会心攻击另有标记，\r\n正负会心的标记不同。",
         ],
     ],
     [
