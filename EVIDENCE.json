@@ -2639,5 +2639,27 @@
     "runtime_test": "NOT RUN",
     "change": "camera capture accepts only uQuestCamera again; the village preview is flat on screen",
     "tests": "./build.sh test PASSED (41 core behavior tests, config, parity, 24 r2 scenes, ARM gateways); verify: 74 resolved imports"
+  },
+  "recomp_r47_2026_11_14": {
+    "emulator": "MHGURecomp, with Purple-lib r20",
+    "log": "/mnt/storage2/Programs/MHGURecomp/recomplog.txt",
+    "recomp_lines": [
+      "[forge] [INFO] [damage-numbers] r47 loaded: 11 Forge hooks",
+      "[forge] [INFO] [purple-lib] r20 loaded: 11 hooks; API version 4",
+      "[forge] [INFO] [damage-numbers] settings and help added to Purple-lib",
+      "[forge] [INFO] [damage-numbers] preview spots anchored on screen: no live camera",
+      "[forge] [INFO] [damage-numbers] settings saved"
+    ],
+    "installed_nro_matches": true,
+    "nro_sha256": "d6ec2465936bf15f79d93d72e31e48d2d7d6c88b405f9e9045613bb762f3f19e",
+    "user_report": "\"okay, it working at least, update the readme based on newest purple-lib info, and then promote\""
+  },
+  "static_r48": {
+    "date": "2026-11-14",
+    "nro_sha256": "b352c01651b72e81b6c762c85d18f91665a7c943703cdba69dc8e29205d4a9ac",
+    "archive_sha256": "fe49982209576eebfa1eb0918dcf72015b7718ef62143cde192bf28bb8e1ba39",
+    "runtime_test": "NOT RUN (r47 is the run)",
+    "change": "P7: the preview anchor diagnostic log removed; no other change",
+    "tests": "./build.sh test PASSED (41 core behavior tests, config, parity, 24 r2 scenes, ARM gateways); verify: 74 resolved imports"
   }
 }

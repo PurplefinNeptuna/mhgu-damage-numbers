@@ -1,4 +1,4 @@
-//! Damage Numbers r47: Spread setting, FSR jitter ignored, a letterboxed or stretched picture is projected in its own shape, Recomp overlay ignores the render-resolution crop, out-of-view hits stay hidden until seen, map-fired siege shells, kinsect, gray poison, weak-point-coloured blast and mount knockdown.
+//! Damage Numbers r48: Spread setting, FSR jitter ignored, a letterboxed or stretched picture is projected in its own shape, Recomp overlay ignores the render-resolution crop, out-of-view hits stay hidden until seen, map-fired siege shells, kinsect, gray poison, weak-point-coloured blast and mount knockdown.
 // The Switch plugin has no Rust standard library. alloc provides owned buffers
 // through Forge's allocator; portable logic lives in the separate core crate.
 #![no_std]
@@ -27,7 +27,7 @@ const _: () = assert!(core::mem::size_of::<PluginMetadata>() == 70);
 pub unsafe extern "C" fn forge_onLoad(params: *mut forge::PluginInitParams) {
     if params.is_null() { return; }
     let mut name = [0; 64];
-    let label = b"Damage Numbers r47";
+    let label = b"Damage Numbers r48";
     name[..label.len()].copy_from_slice(label);
     // SAFETY: Forge owns the writable native metadata record for this call.
     unsafe { params.cast::<PluginMetadata>().write(PluginMetadata {

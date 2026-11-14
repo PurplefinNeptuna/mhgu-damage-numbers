@@ -1,17 +1,17 @@
 {
   "schema_version": 1,
   "mod": "damage-numbers",
-  "status": "DEVELOPMENT",
-  "reason": "r44 removes Show other damage, adds a Spread setting (default 80%), and puts the settings on a Purple-lib Mod Options page with help in seven languages and a live preview, which keeps its spots in the world across loops and hides behind the page's help with Purple-lib r19 (API version 4).",
+  "status": "READY_TO_DISTRIBUTE",
+  "reason": "r48 approved for distribution. It removes Show other damage, adds a Spread setting (default 80%), and puts the settings on a Purple-lib Mod Options page with help in seven languages and a live preview: anchored in the world in quests, flat in the village, hidden while the page's help is open with Purple-lib r19 or later.",
   "publication": {
     "published": false,
     "url": null,
     "date": null
   },
-  "version": "r47",
+  "version": "r48",
   "package_name": "damage-numbers",
-  "archive": "damage-numbers-r47-candidate.zip",
-  "runtime_test": "r47 NOT RUN. r46 on MHGURecomp anchored the village preview with uVillageCamera, whose updates lagged the view (user report); r47 keeps the village preview flat. r42 is the last gameplay-accepted build.",
+  "archive": "damage-numbers-r48.zip",
+  "runtime_test": "The user ran r47 on MHGURecomp with Purple-lib r20 and reported \"okay, it working at least\" (installed NRO matches the r47 candidate). r48 is r47 with its preview diagnostic log line removed and was promoted on static validation; r48 itself has not run.",
   "gamebanana": {
     "ai_code": {
       "used": true,
@@ -63,9 +63,9 @@
   },
   "target": "MHGU Nintendo Switch 1.4.0; upstream Forge 1.5.1; Eden/Ryujinx.",
   "limitations": [
-    "r47 gameplay NOT RUN",
-    "r42 ran on MHGURecomp with FSR on and a player report of steady numbers; Eden, Ryubing and Switch hardware were not run with r42; on gu-native the picture's place comes from its source (device.c backend_present), not from a run",
-    "r40 ran on Eden and MHGURecomp 0.14.3 with a player report of correct placement",
+    "r48 was promoted on static validation; its runtime evidence is r47 on MHGURecomp with Purple-lib r20. Eden, Ryubing and Switch hardware were not run with r47 or r48",
+    "In the village the preview stays flat on screen: uVillageCamera samples lagged the view (r46)",
+    "Mod Options and help text other than English is agent-translated and not reviewed by native speakers",
     "Ryubing: r38 and earlier stop the game with an undefined QADD/QSUB once monster HP bookkeeping runs; r39 ran there, unitemized",
     "on MHGURecomp the Wilds text outline is missing, confirmed by the user: \"damage number recomp note is true, i played it\"; the mod's ini there has style = wilds, so the Rise effect rests on the source",
     "r38 ran on Eden master-07677aa500-master with a player report for damage numbers; loading beside a foreign hook on the same entry has not been exercised and rests on Forge's hook.c and host fixtures",
@@ -103,24 +103,24 @@
   ],
   "payloads": {
     "romfs/nativeNX/plugins/damage_numbers.nro": {
-      "source": "build/damage-numbers/candidates/r47/package/romfs/nativeNX/plugins/damage_numbers.nro",
-      "sha256": "d6ec2465936bf15f79d93d72e31e48d2d7d6c88b405f9e9045613bb762f3f19e"
+      "source": "build/damage-numbers/candidates/r48/package/romfs/nativeNX/plugins/damage_numbers.nro",
+      "sha256": "b352c01651b72e81b6c762c85d18f91665a7c943703cdba69dc8e29205d4a9ac"
     },
     "romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf": {
-      "source": "build/damage-numbers/candidates/r47/package/romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf",
+      "source": "build/damage-numbers/candidates/r48/package/romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf",
       "sha256": "10b26270e158e51b7f26327aff359a7f7170ccc5904c1c82523bf5e372d5f117"
     },
     "romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba": {
-      "source": "build/damage-numbers/candidates/r47/package/romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba",
+      "source": "build/damage-numbers/candidates/r48/package/romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba",
       "sha256": "d4724a2caff4c13e91a541f0e7d203c74e05c40dedd6f78c55426ccd3396230e"
     },
     "romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba": {
-      "source": "build/damage-numbers/candidates/r47/package/romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba",
+      "source": "build/damage-numbers/candidates/r48/package/romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba",
       "sha256": "fe15190c98259443a01add264777b2b4bee994bbd58f9c8f5f12338abb399f2b"
     },
     "manifest.txt": {
-      "source": "build/damage-numbers/candidates/r47/package/manifest.txt",
-      "sha256": "4f77f7e41911e95a9f148101c431357f703ace875f32503b1929ae62de095631"
+      "source": "build/damage-numbers/candidates/r48/package/manifest.txt",
+      "sha256": "6d8feb6d633b8392ece276e19fd625c70b519e4c42d3b797fb426b110dcdd53b"
     }
   },
   "evidence": {
@@ -130,11 +130,15 @@
     "manual": [
       "mods/damage-numbers/EVIDENCE.json"
     ],
-    "static_summary": "r47: pinned toolchain build; ./build.sh test passed (41 core behavior tests including the Purple-lib rows and text limits and the preview, its spots kept in the world across loops, 7 config tests including an r42 INI with other and no spread, r25 parity, 24 r2 pixel scenes unchanged at spread 1.0, ARM gateways); verify: \"PASS: ARM32 layouts, 74 resolved imports, callbacks, 15 game windows and twelve NZCVQ restores\" with purplelib_on_register exported. No emulator run.",
-    "manual_summary": "The user ran r42 on MHGURecomp (updater 0.16.0), 1920x1080, FSR 3.1 NativeAA on 2026-11-10 and answered \"Both work\" when asked whether the 22:26 MHGURecomp run gave steady numbers and a full gauge with the dark part where it belongs. recomplog.txt: \"[damage-numbers] r42 loaded: 11 Forge hooks\". Installed NROs in Eden and MHGURecomp match the payload hash. Eden, Ryubing and Switch hardware were not run with r42."
+    "static_summary": "r48: pinned toolchain build; ./build.sh test passed (41 core behavior tests including the Purple-lib rows and text limits and the preview, its spots kept in the world across loops, 7 config tests including an r42 INI with other and no spread, r25 parity, 24 r2 pixel scenes unchanged at spread 1.0, ARM gateways); verify: \"PASS: ARM32 layouts, 74 resolved imports, callbacks, 15 game windows and twelve NZCVQ restores\" with purplelib_on_register exported. No emulator run.",
+    "manual_summary": "The user ran r47 on MHGURecomp with Purple-lib r20 and reported \"okay, it working at least\"; recomplog.txt logs \"[damage-numbers] r47 loaded: 11 Forge hooks\", the Purple-lib registration and two settings saves, and the installed NRO matches the r47 candidate. r48 removes only the preview's diagnostic log line."
   },
   "support": {
     "DEVELOPMENT.md": "mods/damage-numbers/DEVELOPMENT.md",
     "EVIDENCE.json": "mods/damage-numbers/EVIDENCE.json"
+  },
+  "approval": {
+    "date": "2026-11-14",
+    "basis": "The user asked \"okay, it working at least, update the readme based on newest purple-lib info, and then promote\" after the r47 MHGURecomp run, and chose \"Clean to r48, then promote\" when asked how to promote. r48 removes only r47's preview diagnostic log line and is promoted on static validation; r47 on MHGURecomp with Purple-lib r20 is the runtime evidence. Not covered: Eden, Ryubing, Switch hardware, the Gathering Hub preview, and the non-English text."
   }
 }

@@ -57,8 +57,6 @@ struct Consumer {
     feedback: alloc::string::String,
     viewport_warning: bool,
     preview: preview::PreviewState,
-    preview_logged: Option<bool>,
-    preview_logs: u8,
 }
 // Call the closure while holding Forge's scoped mutex guard. Both the mutable
 // Consumer borrow and lock end when the closure returns, including early exits.
@@ -83,7 +81,7 @@ pub fn start() {
     let installed = if clock.is_some() {
         match Installed::install() {
             Ok(value) => {
-                log::info!("[damage-numbers] r47 loaded: {} Forge hooks", value.count());
+                log::info!("[damage-numbers] r48 loaded: {} Forge hooks", value.count());
                 Some(value)
             }
             Err(reason) => {
@@ -112,8 +110,6 @@ pub fn start() {
             feedback: alloc::string::String::new(),
             viewport_warning: false,
             preview: preview::PreviewState::default(),
-            preview_logged: None,
-            preview_logs: 0,
         }),
     });
 }
@@ -385,18 +381,6 @@ pub fn render() {
             return;
         }
         let preview_view = state.preview.update(time, SETTINGS.load(), &view);
-        // Diagnostic until the anchoring is accepted: whether the spots got a live camera while the
-        // Options window is open. Logged on change, at most four times a run.
-        let in_world = state.preview.in_world();
-        if in_world != state.preview_logged && state.preview_logs < 4 {
-            state.preview_logged = in_world;
-            state.preview_logs += 1;
-            match in_world {
-                Some(true) => log::info!("[damage-numbers] preview spots anchored in the world"),
-                Some(false) => log::info!("[damage-numbers] preview spots anchored on screen: no live camera"),
-                None => {}
-            }
-        }
         let dots = state
             .preview
             .anchors()

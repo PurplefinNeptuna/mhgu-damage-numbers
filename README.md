@@ -14,7 +14,7 @@ The Forge loader is supplied separately.
 ## Installation
 
 1. Close MHGU.
-2. Extract `damage-numbers-r47.zip`.
+2. Extract `damage-numbers-r48.zip`.
 3. Copy the whole `damage-numbers` folder into your emulator's MHGU mod directory:
    - Eden: `~/.local/share/eden/load/0100770008DD8000/`
    - Ryujinx: `mods/contents/0100770008dd8000/` inside its data directory.
@@ -58,9 +58,10 @@ always grey, and blast and mount knockdown damage are always gold.
 You can change the settings in two places. Both change the same settings and
 save them to the same file.
 
-With Purple-lib installed, open **Options > Mod Options** in the game and press
-L or R until the page shows **Damage Numbers**. A change applies at once and is
-saved when you close the window. The help button opens a topic for each
+With Purple-lib installed, open **Options > Mod Options** in the game and choose
+**Damage Numbers** from the list of mods (with Purple-lib r19 or older, press L
+or R until its page shows). A change applies at once and is saved when you close
+the window. The help button shown in the button guide opens a topic for each
 setting.
 
 You can also open **Plugin UI > Damage Numbers** in Forge's overlay. Closing the
@@ -90,9 +91,11 @@ between.
 While the Mod Options page is open, a frame on the left of the screen repeats
 example hits at three spots with your current settings, even when Show damage
 numbers is off. The left spot shows a weak-point hit with a positive critical,
-the middle a normal hit with a negative critical, and the right a bounce. The
-spots stay where they are in the world, so they move like real hits when you
-turn the camera.
+the middle a normal hit with a negative critical, and the right a bounce. In a
+quest the spots stay where they are in the world, so they move like real hits
+when you walk or turn the camera. In the village they stay at their places in
+the frame. With Purple-lib r19 or later the frame hides while the page's help is
+open.
 
 Forge creates `damage_numbers.ini` with defaults once it can access MHGU's
 save folder. If saving fails, load a player save and retry.
