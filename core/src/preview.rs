@@ -1,6 +1,6 @@
 //! The Mod Options preview: frame geometry, world anchors and the looping example hits. Pure; the
 //! plugin draws the frame and lays the hits out with the production `layout` and renderer.
-use crate::presentation::{Placement, Point, Rect, View};
+use crate::presentation::{Placement, Point, Rect, View, project};
 use crate::{Critical, Event, HitKey, Model, Owner, Preview as Mode, Settings, Source, Vec3};
 
 /// The frame as fractions of the visible view: anchored middle-left with a 2.5% margin, 57% wide
@@ -140,16 +140,24 @@ impl PreviewState {
             self.model.configure(s);
         }
         let camera = has_camera(view);
-        let restart = self.run.as_ref().is_none_or(|r| {
-            !(now >= r.start && now - r.start < r.length) || r.mode != s.preview || r.flat == camera
-        });
+        // Spots keep their world points across loops, like real hits, until one leaves the screen
+        // or the camera appears or vanishes; then they are anchored in the frame again.
+        let kept = self
+            .run
+            .as_ref()
+            .filter(|r| r.flat != camera && (r.flat || r.anchors.iter().all(|&a| project(a, view).is_some())))
+            .map(|r| (r.anchors, r.flat));
+        let restart = kept.is_none()
+            || self.run.as_ref().is_none_or(|r| !(now >= r.start && now - r.start < r.length) || r.mode != s.preview);
         if restart {
-            let points = spots(frame(view));
-            let world = camera.then(|| points.map(|p| unproject(p, view, DEPTH)));
-            let (anchors, flat) = match world {
-                Some([Some(a), Some(b), Some(c)]) => ([a, b, c], false),
-                _ => (points.map(|p| flat_anchor(p, view)), true),
-            };
+            let (anchors, flat) = kept.unwrap_or_else(|| {
+                let points = spots(frame(view));
+                let world = camera.then(|| points.map(|p| unproject(p, view, DEPTH)));
+                match world {
+                    Some([Some(a), Some(b), Some(c)]) => ([a, b, c], false),
+                    _ => (points.map(|p| flat_anchor(p, view)), true),
+                }
+            });
             self.random ^= now.to_bits() | 1;
             self.run = Some(Run { start: now, length: loop_length(s.preview, s.lifetime), mode: s.preview, spawned: 0, anchors, flat });
         }
@@ -193,5 +201,9 @@ impl PreviewState {
     /// Where the loop's spots are in the world (or flat space), for drawing their dots.
     pub fn anchors(&self) -> Option<[Vec3; 3]> {
         self.run.as_ref().map(|r| r.anchors)
+    }
+    /// Whether the spots are anchored in the world (true) or on screen for want of a camera (false).
+    pub fn in_world(&self) -> Option<bool> {
+        self.run.as_ref().map(|r| !r.flat)
     }
 }

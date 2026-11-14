@@ -1,4 +1,4 @@
-//! Damage Numbers r43: Spread setting, FSR jitter ignored, a letterboxed or stretched picture is projected in its own shape, Recomp overlay ignores the render-resolution crop, out-of-view hits stay hidden until seen, map-fired siege shells, kinsect, gray poison, weak-point-coloured blast and mount knockdown.
+//! Damage Numbers r45: Spread setting, FSR jitter ignored, a letterboxed or stretched picture is projected in its own shape, Recomp overlay ignores the render-resolution crop, out-of-view hits stay hidden until seen, map-fired siege shells, kinsect, gray poison, weak-point-coloured blast and mount knockdown.
 // The Switch plugin has no Rust standard library. alloc provides owned buffers
 // through Forge's allocator; portable logic lives in the separate core crate.
 #![no_std]
@@ -27,7 +27,7 @@ const _: () = assert!(core::mem::size_of::<PluginMetadata>() == 70);
 pub unsafe extern "C" fn forge_onLoad(params: *mut forge::PluginInitParams) {
     if params.is_null() { return; }
     let mut name = [0; 64];
-    let label = b"Damage Numbers r43";
+    let label = b"Damage Numbers r45";
     name[..label.len()].copy_from_slice(label);
     // SAFETY: Forge owns the writable native metadata record for this call.
     unsafe { params.cast::<PluginMetadata>().write(PluginMetadata {
@@ -49,9 +49,11 @@ pub extern "C" fn forge_onInit() {
 /// `api` is null or Purple-lib's table, which stays valid for the whole run.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn purplelib_on_register(api: *const damage_numbers_core::purple_lib::Api) {
-    // SAFETY: the caller's contract.
-    let Some(api) = (unsafe { api.as_ref() }) else { return };
-    match purple_lib::register(api) {
+    if api.is_null() {
+        return;
+    }
+    // SAFETY: the caller's contract; a version 3 table is shorter than `Api`, so it stays a raw pointer.
+    match unsafe { purple_lib::register(api) } {
         purple_lib::Registered::Done => log::info!("[damage-numbers] settings and help added to Purple-lib"),
         purple_lib::Registered::Repeated => {}
         purple_lib::Registered::OlderVersion(v) => log::warn!(

@@ -57,6 +57,8 @@ struct Consumer {
     feedback: alloc::string::String,
     viewport_warning: bool,
     preview: preview::PreviewState,
+    preview_logged: Option<bool>,
+    preview_logs: u8,
 }
 // Call the closure while holding Forge's scoped mutex guard. Both the mutable
 // Consumer borrow and lock end when the closure returns, including early exits.
@@ -81,7 +83,7 @@ pub fn start() {
     let installed = if clock.is_some() {
         match Installed::install() {
             Ok(value) => {
-                log::info!("[damage-numbers] r43 loaded: {} Forge hooks", value.count());
+                log::info!("[damage-numbers] r45 loaded: {} Forge hooks", value.count());
                 Some(value)
             }
             Err(reason) => {
@@ -110,6 +112,8 @@ pub fn start() {
             feedback: alloc::string::String::new(),
             viewport_warning: false,
             preview: preview::PreviewState::default(),
+            preview_logged: None,
+            preview_logs: 0,
         }),
     });
 }
@@ -380,7 +384,32 @@ pub fn render() {
             state.preview.stop();
             return;
         }
-        let preview_view = state.preview.update(time, SETTINGS.load(), &view);
+        // The preview takes this player's last camera sample at any age: with Options open the game
+        // can stop calling the camera function (hook 4), and the last sample is then still the view.
+        // Real numbers keep the 0.2 s limit above.
+        let camera_age = (state.player != 0 && state.camera.player == state.player && state.camera.tick != 0)
+            .then(|| seconds(now, state.camera.tick, frequency))
+            .flatten();
+        let camera_view = camera_age
+            .and_then(|_| {
+                presentation::native_camera(&state.camera.view, &state.camera.projection, state.camera.rect, size[0], size[1])
+            })
+            .unwrap_or(view);
+        let preview_view = state.preview.update(time, SETTINGS.load(), &camera_view);
+        // Diagnostic until the anchoring is accepted: which anchor the spots got and how old the
+        // camera sample was. Logged on change, at most four times a run.
+        let in_world = state.preview.in_world();
+        if in_world != state.preview_logged && state.preview_logs < 4 {
+            state.preview_logged = in_world;
+            state.preview_logs += 1;
+            match (in_world, camera_age) {
+                (Some(true), Some(age)) => {
+                    log::info!("[damage-numbers] preview spots anchored in the world; camera sample {age:.2} s old")
+                }
+                (Some(_), _) => log::info!("[damage-numbers] preview spots anchored on screen: no usable camera sample"),
+                (None, _) => {}
+            }
+        }
         let dots = state
             .preview
             .anchors()

@@ -1027,3 +1027,28 @@ fn stopping_clears_the_preview() {
     p.stop();
     assert_eq!((p.model.count, p.anchors()), (0, None));
 }
+#[test]
+fn spots_keep_their_world_points_across_loops_until_one_leaves_the_screen() {
+    let mut p = PreviewState::default();
+    let s = Settings::default();
+    let mut v = perspective();
+    p.update(1.0, s, &v);
+    let first = p.anchors().unwrap();
+    assert_eq!(p.in_world(), Some(true));
+    // A small camera move: the next loops keep the same world points.
+    v.world_to_clip[3] += 5.0;
+    for t in [1.5, 3.0, 4.5] {
+        p.update(t, s, &v);
+        assert_eq!(p.anchors().unwrap(), first, "t {t}");
+    }
+    // The camera moves far enough that a spot leaves the screen: new points inside the frame.
+    v.world_to_clip[3] += 5000.0;
+    p.update(5.0, s, &v);
+    let moved = p.anchors().unwrap();
+    assert_ne!(moved, first);
+    let spots = preview::spots(preview::frame(&v));
+    for (anchor, spot) in moved.iter().zip(spots) {
+        let at = project(*anchor, &v).unwrap();
+        assert!((at.x - spot.x).abs() < 0.05 && (at.y - spot.y).abs() < 0.05);
+    }
+}

@@ -14,7 +14,7 @@ The Forge loader is supplied separately.
 ## Installation
 
 1. Close MHGU.
-2. Extract `damage-numbers-r43.zip`.
+2. Extract `damage-numbers-r45.zip`.
 3. Copy the whole `damage-numbers` folder into your emulator's MHGU mod directory:
    - Eden: `~/.local/share/eden/load/0100770008DD8000/`
    - Ryujinx: `mods/contents/0100770008dd8000/` inside its data directory.

@@ -2,16 +2,16 @@
   "schema_version": 1,
   "mod": "damage-numbers",
   "status": "DEVELOPMENT",
-  "reason": "r43 removes Show other damage, adds a Spread setting (default 80%), and puts the settings on a Purple-lib Mod Options page with help in seven languages and a live preview of the numbers.",
+  "reason": "r44 removes Show other damage, adds a Spread setting (default 80%), and puts the settings on a Purple-lib Mod Options page with help in seven languages and a live preview, which keeps its spots in the world across loops and hides behind the page's help with Purple-lib r19 (API version 4).",
   "publication": {
     "published": false,
     "url": null,
     "date": null
   },
-  "version": "r43",
+  "version": "r45",
   "package_name": "damage-numbers",
-  "archive": "damage-numbers-r43-candidate.zip",
-  "runtime_test": "r43 NOT RUN. r42 is the last gameplay-accepted build: The user ran r42 on MHGURecomp (updater 0.16.0), 1920x1080, FSR 3.1 NativeAA on 2026-11-10 and answered \"Both work\" when asked whether the 22:26 MHGURecomp run gave steady numbers and a full gauge with the dark part where it belongs. recomplog.txt: \"[damage-numbers] r42 loaded: 11 Forge hooks\". Installed NROs in Eden and MHGURecomp match the payload hash. Eden, Ryubing and Switch hardware were not run with r42.",
+  "archive": "damage-numbers-r45-candidate.zip",
+  "runtime_test": "r45 NOT RUN. In the user's r44 run on MHGURecomp the village preview logged no live camera while Options was open. r42 is the last gameplay-accepted build.",
   "gamebanana": {
     "ai_code": {
       "used": true,
@@ -63,7 +63,7 @@
   },
   "target": "MHGU Nintendo Switch 1.4.0; upstream Forge 1.5.1; Eden/Ryujinx.",
   "limitations": [
-    "r43 gameplay NOT RUN",
+    "r45 gameplay NOT RUN",
     "r42 ran on MHGURecomp with FSR on and a player report of steady numbers; Eden, Ryubing and Switch hardware were not run with r42; on gu-native the picture's place comes from its source (device.c backend_present), not from a run",
     "r40 ran on Eden and MHGURecomp 0.14.3 with a player report of correct placement",
     "Ryubing: r38 and earlier stop the game with an undefined QADD/QSUB once monster HP bookkeeping runs; r39 ran there, unitemized",
@@ -103,24 +103,24 @@
   ],
   "payloads": {
     "romfs/nativeNX/plugins/damage_numbers.nro": {
-      "source": "build/damage-numbers/candidates/r43/package/romfs/nativeNX/plugins/damage_numbers.nro",
-      "sha256": "854f7fe6313892aa134040ad7110867a652aef08fb4168fb9d1503965700864b"
+      "source": "build/damage-numbers/candidates/r45/package/romfs/nativeNX/plugins/damage_numbers.nro",
+      "sha256": "4f6cb14b1fda013192da1e3928e2a76e7078699945ebff1c19201224edb168b4"
     },
     "romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf": {
-      "source": "build/damage-numbers/candidates/r43/package/romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf",
+      "source": "build/damage-numbers/candidates/r45/package/romfs/nativeNX/plugins/damage-numbers/OpenSans.ttf",
       "sha256": "10b26270e158e51b7f26327aff359a7f7170ccc5904c1c82523bf5e372d5f117"
     },
     "romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba": {
-      "source": "build/damage-numbers/candidates/r43/package/romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba",
+      "source": "build/damage-numbers/candidates/r45/package/romfs/nativeNX/plugins/damage-numbers/rise-slash.rgba",
       "sha256": "d4724a2caff4c13e91a541f0e7d203c74e05c40dedd6f78c55426ccd3396230e"
     },
     "romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba": {
-      "source": "build/damage-numbers/candidates/r43/package/romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba",
+      "source": "build/damage-numbers/candidates/r45/package/romfs/nativeNX/plugins/damage-numbers/wilds-effects.rgba",
       "sha256": "fe15190c98259443a01add264777b2b4bee994bbd58f9c8f5f12338abb399f2b"
     },
     "manifest.txt": {
-      "source": "build/damage-numbers/candidates/r43/package/manifest.txt",
-      "sha256": "5ea601e95e3497a9d8f32679702122944c5d2281ad6799bc5287e7626ebb4037"
+      "source": "build/damage-numbers/candidates/r45/package/manifest.txt",
+      "sha256": "51c913cf17e97ab5f0fb517239c279405d41118b73ea8b1c0581e0da8c7d5b36"
     }
   },
   "evidence": {
@@ -130,7 +130,7 @@
     "manual": [
       "mods/damage-numbers/EVIDENCE.json"
     ],
-    "static_summary": "r43: pinned toolchain build; ./build.sh test passed (40 core behavior tests including the Purple-lib rows and text limits and the preview, 7 config tests including an r42 INI with other and no spread, r25 parity, 24 r2 pixel scenes unchanged at spread 1.0, ARM gateways); verify: \"PASS: ARM32 layouts, 74 resolved imports, callbacks, 15 game windows and twelve NZCVQ restores\" with purplelib_on_register exported. No emulator run.",
+    "static_summary": "r45: pinned toolchain build; ./build.sh test passed (41 core behavior tests including the Purple-lib rows and text limits and the preview, its spots kept in the world across loops, 7 config tests including an r42 INI with other and no spread, r25 parity, 24 r2 pixel scenes unchanged at spread 1.0, ARM gateways); verify: \"PASS: ARM32 layouts, 74 resolved imports, callbacks, 15 game windows and twelve NZCVQ restores\" with purplelib_on_register exported. No emulator run.",
     "manual_summary": "The user ran r42 on MHGURecomp (updater 0.16.0), 1920x1080, FSR 3.1 NativeAA on 2026-11-10 and answered \"Both work\" when asked whether the 22:26 MHGURecomp run gave steady numbers and a full gauge with the dark part where it belongs. recomplog.txt: \"[damage-numbers] r42 loaded: 11 Forge hooks\". Installed NROs in Eden and MHGURecomp match the payload hash. Eden, Ryubing and Switch hardware were not run with r42."
   },
   "support": {

@@ -2573,5 +2573,42 @@
     "runtime_test": "NOT RUN",
     "change": "Show other damage removed; Spread setting (default 0.8); lock-free SharedSettings; Purple-lib Mod Options page (8 rows) with 7 help topics in seven languages; live preview while the page is shown",
     "tests": "./build.sh test PASSED: 40 core behavior tests, 7 config-harness tests, r25 parity 243 scenarios, 2800 policy/projection cases, 24 r2 pixel scenes unchanged at spread 1.0, ARM gateways; verify: 74 resolved imports, purplelib_on_register exported; mod_distribution check compares the Purple-lib records"
+  },
+  "runtime_r43_2026_11_14": {
+    "host": "not recorded; the user's screenshot of the Damage Numbers page help over the preview",
+    "user_report": [
+      "\"when in village, you actually can move but the camera angle is locked\"",
+      "\"look at the image, is there a way to know when help page is opened?\"",
+      "\"spot follow camera, not world\" (confirmed as a bug: the spots should stay in the world)"
+    ],
+    "log": "not provided"
+  },
+  "static_r44": {
+    "date": "2026-11-14",
+    "nro_sha256": "357cde8ce947d474638bc23eab346454d44f1671ce6cd09ac50cdb4838932703",
+    "archive_sha256": "16c1f9b2abfb0a9c30f3f640937dcf83332c5b1bda7fc02f377d46826bb2564c",
+    "runtime_test": "NOT RUN",
+    "change": "preview spots keep their world points across loops until one leaves the screen; preview hidden while the page help is open with Purple-lib API version 4 (help_shown, read only when version >= 4); diagnostic log of the anchor kind",
+    "tests": "./build.sh test PASSED: 41 core behavior tests (spots_keep_their_world_points_across_loops_until_one_leaves_the_screen), 7 config tests, r25 parity, 24 r2 scenes, ARM gateways; verify: 74 resolved imports"
+  },
+  "recomp_r44_2026_11_14": {
+    "emulator": "MHGURecomp",
+    "log": "/mnt/storage2/Programs/MHGURecomp/recomplog.txt",
+    "recomp_lines": [
+      "[forge] [INFO] [damage-numbers] r44 loaded: 11 Forge hooks",
+      "[forge] [INFO] [purple-lib] r19 loaded: 11 hooks; API version 4",
+      "[forge] [INFO] [damage-numbers] settings and help added to Purple-lib",
+      "[forge] [INFO] [purple-lib] Mod Options: 4 sets, 13 topics in their own help",
+      "[forge] [INFO] [damage-numbers] preview spots anchored on screen: no live camera"
+    ],
+    "user_report": "\"i test r44 in mhgurecomp and in village it says no camera found\""
+  },
+  "static_r45": {
+    "date": "2026-11-14",
+    "nro_sha256": "4f6cb14b1fda013192da1e3928e2a76e7078699945ebff1c19201224edb168b4",
+    "archive_sha256": "e3ce1c8c95e66d0fd71fcdb0f3e2a77b713345c144f99bdadddcd66099e18b32",
+    "runtime_test": "NOT RUN",
+    "change": "preview anchors with this player's last camera sample at any age (real numbers keep 0.2 s); diagnostic log adds the sample's age",
+    "tests": "./build.sh test PASSED (41 core behavior tests, config, parity, 24 r2 scenes, ARM gateways); verify: 74 resolved imports"
   }
 }

@@ -19,11 +19,17 @@ static DIRTY: AtomicBool = AtomicBool::new(false);
 /// Purple-lib's table, kept from a successful registration; it stays valid for the whole run.
 static API: AtomicPtr<Api> = AtomicPtr::new(core::ptr::null_mut());
 
-/// Whether the Options window shows this page now; false without Purple-lib. Any thread.
+/// Whether the Options window shows this page now and its own help is not covering it; false without
+/// Purple-lib. Before API version 4 the help cannot be told apart, so the page counts as shown. Any
+/// thread.
 pub fn shown() -> bool {
-    // SAFETY: only Purple-lib's process-lifetime table is ever stored.
-    let Some(api) = (unsafe { API.load(Ordering::Acquire).as_ref() }) else { return false };
-    (api.options_shown)(&OPTIONS.0)
+    let api = API.load(Ordering::Acquire);
+    if api.is_null() {
+        return false;
+    }
+    // SAFETY: only Purple-lib's process-lifetime table is stored; each field is read through the raw
+    // pointer, and `help_shown` only when the table is version 4 or later and so contains it.
+    unsafe { ((*api).options_shown)(&OPTIONS.0) && ((*api).version < api::HELP_SHOWN_VERSION || !((*api).help_shown)(&OPTIONS.0)) }
 }
 
 extern "C" fn title(_: *mut c_void, _: u32) -> *const c_char {
@@ -157,11 +163,16 @@ pub enum Registered {
 
 /// Register through Purple-lib's table, from `purplelib_on_register`: the one time Purple-lib
 /// accepts records, during its first update.
-pub fn register(purple: &Api) -> Registered {
+///
+/// # Safety
+/// `purple` is Purple-lib's non-null table, valid for the whole run; it may end before `help_shown`.
+pub unsafe fn register(purple: *const Api) -> Registered {
+    // SAFETY: the caller's contract; only fields every version 3 table has are read here.
+    let (version, add_options, add_set_help) = unsafe { ((*purple).version, (*purple).add_options, (*purple).add_set_help) };
     static CALLED: AtomicBool = AtomicBool::new(false);
     // A later Purple-lib still reads these records, by their `size`; an older one lacks the API.
-    if purple.version < api::API_VERSION {
-        return Registered::OlderVersion(purple.version);
+    if version < api::API_VERSION {
+        return Registered::OlderVersion(version);
     }
     // Purple-lib keeps the label pointers after the first call, so the table is filled only once.
     if CALLED.swap(true, Ordering::AcqRel) {
@@ -177,10 +188,10 @@ pub fn register(purple: &Api) -> Registered {
         }
     }
     // The page's help names the page, so it goes in after the page; topics show in this order.
-    let options = (purple.add_options)(&OPTIONS.0);
+    let options = add_options(&OPTIONS.0);
     if options {
-        API.store((purple as *const Api).cast_mut(), Ordering::Release);
+        API.store(purple.cast_mut(), Ordering::Release);
     }
-    let help = options && HELP.0.iter().all(|topic| (purple.add_set_help)(&OPTIONS.0, topic));
+    let help = options && HELP.0.iter().all(|topic| add_set_help(&OPTIONS.0, topic));
     if options && help { Registered::Done } else { Registered::Refused { options, help } }
 }

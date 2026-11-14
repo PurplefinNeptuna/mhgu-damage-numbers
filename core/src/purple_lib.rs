@@ -1,12 +1,14 @@
 //! Optional settings page and page help in Purple-lib (its `API.md`). Purple-lib calls the plugin's
 //! `purplelib_on_register` with its table of functions; without Purple-lib nothing here runs. The
-//! records and the table mirror Purple-lib's API version 3 (Purple-lib r17 and later); a later API
-//! version still reads them. Row texts and the mapping between row values and `Settings` live here
+//! records mirror Purple-lib's API version 3 (Purple-lib r17 and later) and the table version 4
+//! (r19 and later), whose last entry exists only when `version` is 4 or more. Row texts and the mapping between row values and `Settings` live here
 //! so the host tests can check them.
 use crate::{Preview, Settings, Style};
 use core::ffi::{CStr, c_char, c_void};
 
+/// Registration needs version 3; `help_shown` needs `HELP_SHOWN_VERSION`.
 pub const API_VERSION: u32 = 3;
+pub const HELP_SHOWN_VERSION: u32 = 4;
 
 pub const ROW_LABELS: u32 = 0;
 pub const ROW_NUMBERS: u32 = 1;
@@ -54,7 +56,9 @@ pub struct Help {
     pub open: Option<extern "C" fn(*mut c_void)>,
 }
 
-/// Purple-lib's functions, as it passes them to `purplelib_on_register`; valid for the whole run.
+/// Purple-lib's functions, as it passes them to `purplelib_on_register`; valid for the whole run. A
+/// version 3 table is 28 bytes and ends before `help_shown`: read it field by field through a raw
+/// pointer, never as a reference to the whole record.
 #[repr(C)]
 pub struct Api {
     pub version: u32,
@@ -64,6 +68,8 @@ pub struct Api {
     pub options_shown: extern "C" fn(*const Options) -> bool,
     pub options_row: extern "C" fn(*const Options) -> i32,
     pub add_set_help: extern "C" fn(*const Options, *const Help) -> bool,
+    /// Version 4: whether that page's own help screen is open now.
+    pub help_shown: extern "C" fn(*const Options) -> bool,
 }
 
 #[cfg(target_pointer_width = "32")]
@@ -71,7 +77,7 @@ const _: () = assert!(
     core::mem::size_of::<Options>() == 40
         && core::mem::size_of::<Help>() == 28
         && core::mem::size_of::<OptionRow>() == 40
-        && core::mem::size_of::<Api>() == 28
+        && core::mem::size_of::<Api>() == 32
 );
 
 pub const TITLE: &CStr = c"Damage Numbers";
