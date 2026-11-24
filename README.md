@@ -163,6 +163,6 @@ lose their outline and wider digits. Classic numbers are unaffected.
 
 ## License
 
-Copyright (c) 2026 PurplefinNeptuna. Damage Numbers is free software under the GNU
-General Public License, version 3 or (at your option) any later version. The source code
-and the license text are at https://github.com/PurplefinNeptuna/mhgu-damage-numbers.
+Copyright (c) 2026 PurplefinNeptuna. Damage Numbers is licensed under the GNU GPL, version 3 or
+later. The source code and the license text are at
+https://github.com/PurplefinNeptuna/mhgu-damage-numbers.
