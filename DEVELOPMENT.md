@@ -1,6 +1,6 @@
 # Damage Numbers: development and research
 
-**Current state.** r48 READY_TO_DISTRIBUTE (2026-11-14), unpublished, release at `build/damage-numbers/releases/r48/`. It removes Show other damage, adds Spread, and puts the settings on a Purple-lib Mod Options page with help in seven languages and a live preview, anchored in the world in quests and flat on screen in the village. r48 is r47 without the preview's diagnostic log; the user ran it on MHGURecomp with Purple-lib r20, so it is the last gameplay-accepted build. Eden, Ryubing and Switch hardware were not run with r47 or r48. DISTRIBUTION.json is authoritative for status and hashes; EVIDENCE.json holds every version's runs.
+**Current state.** r48 PUBLISHED (2026-11-24) as the GitHub release `r48`, release at `build/damage-numbers/releases/r48/`. It removes Show other damage, adds Spread, and puts the settings on a Purple-lib Mod Options page with help in seven languages and a live preview, anchored in the world in quests and flat on screen in the village. r48 is r47 without the preview's diagnostic log; the user ran it on MHGURecomp with Purple-lib r20, so it is the last gameplay-accepted build. Eden, Ryubing and Switch hardware were not run with r47 or r48. DISTRIBUTION.json is authoritative for status and hashes; EVIDENCE.json holds every version's runs.
 
 What the current build does at its compatibility edges:
 

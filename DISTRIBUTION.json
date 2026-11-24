@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
   "mod": "damage-numbers",
-  "status": "READY_TO_DISTRIBUTE",
+  "status": "PUBLISHED",
   "reason": "r48 approved for distribution. It removes Show other damage, adds a Spread setting (default 80%), and puts the settings on a Purple-lib Mod Options page with help in seven languages and a live preview: anchored in the world in quests, flat in the village, hidden while the page's help is open with Purple-lib r19 or later.",
   "publication": {
-    "published": false,
-    "url": null,
-    "date": null
+    "published": true,
+    "url": "https://github.com/PurplefinNeptuna/mhgu-damage-numbers/releases/tag/r48",
+    "date": "2026-11-24"
   },
   "version": "r48",
   "package_name": "damage-numbers",
