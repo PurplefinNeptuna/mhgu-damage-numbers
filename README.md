@@ -160,3 +160,9 @@ lose their outline and wider digits. Classic numbers are unaffected.
 - [forge-rs](https://github.com/Fexty12573/forge-rs) by Fexty.
 - [libnx](https://github.com/switchbrew/libnx) by Hydrosphere Developers.
 - [Open Sans](https://github.com/googlefonts/opensans) by The Open Sans Project Authors.
+
+## License
+
+Copyright (c) 2026 PurplefinNeptuna. Damage Numbers is free software under the GNU
+General Public License, version 3 or (at your option) any later version. The source code
+and the license text are at https://github.com/PurplefinNeptuna/mhgu-damage-numbers.

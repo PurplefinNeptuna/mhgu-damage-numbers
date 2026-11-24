@@ -1,5 +1,8 @@
 # Pinned development inputs
 
+Project-owned code in this folder is copyright PurplefinNeptuna (2026), under the GNU General
+Public License version 3 or (at your option) any later version; see `LICENSE`.
+
 forge-rs is fetched at `d1865b68e9b194eb3eacc8bd71bbf601a5fac63e` (MIT, Fexty), version 1.5.0, with one local patch, `patches/forge-rs-c-char.patch`: four `.cast()` calls in the ImGui DrawList text wrappers, which the x86_64 host render harness needs because C `char` is `i8` there and `u8` on the ARM target. The NRO is identical with or without it. The 1.4.1 converter is supplied separately and fingerprinted. Loader metadata and the zero-argument native init callback are declared in owned source; vendored lifecycle macros are upstream. The upstream 24-byte Hook binding is used unchanged. Config/TLS/singleton/Patch/font helpers retain upstream behavior. Native field offsets and imports are checked against the copied official 1.5.1 loader input.
 
 Cargo.lock pins runtime/procedural-macro dependencies. `./build.sh fetch` puts their source and license files in ignored vendor/crates. The additional sysroot packages supply this nightly's full resolver metadata; only core/alloc/compiler_builtins are built into the ARM runtime. `research/sysroot-Cargo.lock` pins that metadata. WASI libraries are not built for this ARM32 plugin. Runtime component notices are separate from these build-only dependencies.
