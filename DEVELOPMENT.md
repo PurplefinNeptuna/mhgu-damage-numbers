@@ -5,10 +5,10 @@
 What the current build does at its compatibility edges:
 
 - It zeroes the projection's m[8]/m[9] before projecting, where MHGURecomp's FSR writes its per-frame sub-pixel jitter (its `runtime/camera_jitter.c`: "zero as made").
-- When the picture's shape differs from Forge's display (gu-native draws the overlay over its whole window), the projection's shape places the picture, letterboxed or stretched, inside the display (see [Projection and centre fallback](../../.agents/skills/mhgu-forge-modding/references/worked/damage-view.md#projection-and-centre-fallback)).
-- When ImGui draws on a host surface (MHGURecomp), the visible crop is ignored (see [Visible crop](../../.agents/skills/mhgu-forge-modding/references/worked/damage-view.md#visible-crop)); otherwise a lowered render resolution draws numbers at about half size toward the top left.
+- When the picture's shape differs from Forge's display (gu-native draws the overlay over its whole window), the projection's shape places the picture, letterboxed or stretched, inside the display (see [Projection and centre fallback](docs/worked/damage-view.md#projection-and-centre-fallback)).
+- When ImGui draws on a host surface (MHGURecomp), the visible crop is ignored (see [Visible crop](docs/worked/damage-view.md#visible-crop)); otherwise a lowered render resolution draws numbers at about half size toward the top left.
 - No plugin code uses i32 saturating arithmetic, which emits QADD/QSUB that stop the game on Ryubing 1.3.3; `verify.py` rejects every saturating instruction Ryubing lacks.
-- Entry hooks accept another plugin's Forge hook on the same function (see [Hook sites](../../.agents/skills/mhgu-forge-modding/references/worked/damage-capture.md#hook-sites)).
+- Entry hooks accept another plugin's Forge hook on the same function (see [Hook sites](docs/worked/damage-capture.md#hook-sites)).
 - Hits outside a usable camera view stay hidden at their world position and appear if the camera turns to them before they expire.
 - Nothing logs at Forge's error level.
 
@@ -55,7 +55,7 @@ NRO hashes differ across build roots.
 
 ## How it works
 
-Design, hooks and native detail live in the skills: [Damage Numbers: capturing hits](../../.agents/skills/mhgu-forge-modding/references/worked/damage-capture.md), [Damage Numbers: crop, projection and assets](../../.agents/skills/mhgu-forge-modding/references/worked/damage-view.md), [GE and instruction-state audits](../../.agents/skills/mhgu-forge-modding/references/worked/ge-audits.md), [Mod Options clients: Damage Numbers and Please do Better](../../.agents/skills/mhgu-forge-modding/references/worked/mod-options-clients.md).
+Design, hooks and native detail are in `docs/worked/`: [Damage Numbers: capturing hits](docs/worked/damage-capture.md), [Damage Numbers: crop, projection and assets](docs/worked/damage-view.md), [Damage Numbers: GE preservation audit](docs/worked/ge-audit.md), [Damage Numbers: Mod Options and its preview](docs/worked/mod-options.md).
 
 ### Settings
 
