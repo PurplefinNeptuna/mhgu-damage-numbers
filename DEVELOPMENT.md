@@ -51,7 +51,7 @@ The owned `assets/` folder contains the exact prepared runtime files and their h
 
 `tests/r2-pixels/` holds 24 reference scenes captured from untouched r2 rendering, at 720p/1080p and the minimum/maximum scale. Atlas hashes and composited RGB pixels must match exactly. The frozen C++ oracle headers and decoder remain test-only under `tests/oracle/`; no reference artwork or decoder is linked into the production NRO.
 
-NRO hashes differ across build roots. The r3 standalone fingerprints are in EVIDENCE.json under `historical` → `docs/STANDALONE_RESULTS.json`.
+NRO hashes differ across build roots.
 
 ## How it works
 
