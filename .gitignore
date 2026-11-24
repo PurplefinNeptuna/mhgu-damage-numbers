@@ -23,3 +23,19 @@ __pycache__/
 /vendor/forge-rs/
 /vendor/cimgui/
 /vendor/fonts/Roboto-Medium.ttf
+
+# Standalone repo: what the workspace .gitignore covered, game assets included
+.venv/
+*.tex
+*.mod
+*.lmt
+*.gmd
+*.nsp
+*.xci
+*.nca
+*.7z
+*.exe
+*.dll
+*.gzf
+*.gpr
+*.rep/
